@@ -1,0 +1,8 @@
+I want to predict the number of houses	houses
+Please predict the number of apples	number of apples 
+Create model for price	price 
+I want to predict median price quickly	median price 
+Predict the weather	weather 
+Predict class times	class times
+Predict the prices of houses in California	prices of houses 
+I want to predict the price of houses	price of houses
