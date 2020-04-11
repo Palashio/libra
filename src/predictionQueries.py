@@ -9,11 +9,14 @@ from sklearn.preprocessing import OneHotEncoder, StandardScaler
 from tensorflow import keras
 from tensorflow.python.keras.layers import Dense, Input
 
+from predictionModelCreation import getKerasModel
 
-def SingleRegressionQuery(dataset_path, user_request):
+pd.set_option('display.max_columns', None)
+
+def SingleRegressionQuery(dataset_path, user_def_label):
         data = pd.read_csv(dataset_path)
+        data.fillna(0, inplace=True)
         
-        #Performing One Hot Encoding and Standard Scaler
         categorical_columns = data.select_dtypes(exclude=["number"]).columns
         numeric_columns = data.columns[data.dtypes.apply(lambda c: np.issubdtype(c, np.number))]
 
@@ -33,30 +36,27 @@ def SingleRegressionQuery(dataset_path, user_request):
 
             data = pd.concat([data, pd.DataFrame(onehotlabels, columns=new_columns)], axis='columns')
 
+            for x in categorical_cols: del data[x]
+
         if(len(numeric_columns) != 0):
             scaler = StandardScaler()
             data[numeric_columns] = scaler.fit_transform(data[numeric_columns])
 
-        label = getLabelForPrediction(data)
-        del data["median_house_value"]
+        y = data[user_def_label]
+        del data[user_def_label]
+
+        X_train, X_test, y_train, y_test = train_test_split(data, y, test_size=0.2, random_state=49)
+        model = getKerasModel(data)
         
-        X_train, X_test, y_train, y_test = train_test_split(data, label, test_size=0.2, random_state=49)
+        epochs = 10
+        history = model.fit(X_train, y_train, epochs=epochs)
 
-
+        while(all(x>y for x, y in zip(history.history['loss'], history.history['loss'][1:]))):
+            model = getKerasModel(data)
+            epochs += 5
+            model.fit(X_train, y_train, epochs=epochs)
+            
+        return model 
         
-        model = getKerasModel()
-        history = model.fit(X_train, y_train, epochs=30)
-
-def getKerasModel(): 
-    model = tf.keras.Sequential()
-    model.add(Dense(14, input_dim=14, kernel_initializer='normal', activation='relu'))
-    model.add(Dense(1, kernel_initializer="normal"))
-    model.compile(loss='mean_squared_error', optimizer='adam')
-    return model
-
-
-def getLabelForPrediction(dataset):
-    return dataset["median_house_value"]
-
-    
-SingleRegressionQuery("housing.csv", "print second value")
+ 
+SingleRegressionQuery("./data/housing.csv", "median_house_value")
