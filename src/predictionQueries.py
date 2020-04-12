@@ -8,6 +8,8 @@ from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import OneHotEncoder, StandardScaler
 from tensorflow import keras
 from tensorflow.python.keras.layers import Dense, Input
+from keras.callbacks import EarlyStopping
+from matplotlib import pyplot
 
 from predictionModelCreation import getKerasModel
 
@@ -46,17 +48,32 @@ def SingleRegressionQuery(dataset_path, user_def_label):
         del data[user_def_label]
 
         X_train, X_test, y_train, y_test = train_test_split(data, y, test_size=0.2, random_state=49)
-        model = getKerasModel(data)
-        
-        epochs = 10
-        history = model.fit(X_train, y_train, epochs=epochs)
 
-        while(all(x>y for x, y in zip(history.history['loss'], history.history['loss'][1:]))):
-            model = getKerasModel(data)
-            epochs += 5
-            model.fit(X_train, y_train, epochs=epochs)
-            
-        return model 
+        models=[]
+        losses = []
+        epochs = 5
+
+        es = EarlyStopping(monitor='val_loss', mode='min', verbose=1, patience=5)
+
+        i = 0
+        model = getKerasModel(data, i)
+
+        history = model.fit(X_train, y_train, epochs=epochs, validation_data=(X_test, y_test), callbacks=[es])
+        models.append(history)
+        losses.append(models[i].history['val_loss'][len(models[i].history['val_loss']) - 1])
+
+
+        while(all(x > y for x, y in zip(losses, losses[1:]))):
+             model = getKerasModel(data, i)
+             history = model.fit(X_train, y_train, epochs=epochs, validation_data=(X_test, y_test), callbacks=[es])
+
+             models.append(history)
+             losses.append(models[i].history['val_loss'][len(models[i].history['val_loss']) - 1])
+             print("The number of layers " + str(len(model.layers)))
+             i += 1
+
+
+        return models[i] 
         
  
 SingleRegressionQuery("./data/housing.csv", "median_house_value")

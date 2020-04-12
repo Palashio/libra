@@ -1,3 +1,5 @@
 I want to predict the number of houses.	houses. !	
 I want to predict the number of houses	houses. !	
-I want to predict the number of houses.	houses.	!
+I want to predict the median price	median price.	!
+I want to model the weather	weather.	!
+I want to estimate the image depth	image depth.	!
