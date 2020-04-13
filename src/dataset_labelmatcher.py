@@ -40,8 +40,7 @@ def levenshtein_distance(a,b):
             
     return current[n]
 
-def getFrequency(instruction_label, dataset):
-
+def getmostSimilarColumn(instruction_label, dataset):
     instruction = produceMask(instruction_label)
 
     data_column_masks = []
@@ -55,10 +54,10 @@ def getFrequency(instruction_label, dataset):
 
     val, idx = min((val, idx) for (idx, val) in enumerate(distances))
 
-    print(data.columns[idx])
+    return data.columns[idx]
 
 
-getFrequency("longitude value", data)
+getmostSimilarColumn("longitude value", data)
 
 
 

@@ -10,12 +10,14 @@ from tensorflow import keras
 from tensorflow.python.keras.layers import Dense, Input
 from keras.callbacks import EarlyStopping
 from matplotlib import pyplot
+from dataset_labelmatcher import getmostSimilarColumn
+from seq2seq_instructionIsolater import getLabelwithInstruction
 
 from predictionModelCreation import getKerasModel
 
 pd.set_option('display.max_columns', None)
 
-def SingleRegressionQuery(dataset_path, user_def_label):
+def SingleRegressionQuery(dataset_path, instruction):
         data = pd.read_csv(dataset_path)
         data.fillna(0, inplace=True)
         
@@ -44,8 +46,8 @@ def SingleRegressionQuery(dataset_path, user_def_label):
             scaler = StandardScaler()
             data[numeric_columns] = scaler.fit_transform(data[numeric_columns])
 
-        y = data[user_def_label]
-        del data[user_def_label]
+        y = getmostSimilarColumn(getLabelwithInstruction(instruction), data)
+        del data[y]
 
         X_train, X_test, y_train, y_test = train_test_split(data, y, test_size=0.2, random_state=49)
 
@@ -60,6 +62,7 @@ def SingleRegressionQuery(dataset_path, user_def_label):
 
         history = model.fit(X_train, y_train, epochs=epochs, validation_data=(X_test, y_test), callbacks=[es])
         models.append(history)
+
         losses.append(models[i].history['val_loss'][len(models[i].history['val_loss']) - 1])
 
 
