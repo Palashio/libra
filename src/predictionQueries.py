@@ -66,14 +66,13 @@ def SingleRegressionQuery(dataset_path, user_def_label):
         while(all(x > y for x, y in zip(losses, losses[1:]))):
              model = getKerasModel(data, i)
              history = model.fit(X_train, y_train, epochs=epochs, validation_data=(X_test, y_test), callbacks=[es])
-
              models.append(history)
              losses.append(models[i].history['val_loss'][len(models[i].history['val_loss']) - 1])
              print("The number of layers " + str(len(model.layers)))
              i += 1
 
 
-        return models[i] 
+        return models[len(models) - 1]
         
  
 SingleRegressionQuery("./data/housing.csv", "median_house_value")
