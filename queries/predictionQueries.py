@@ -2,6 +2,8 @@ import keras
 import numpy as np
 import pandas as pd
 import tensorflow as tf
+import sys
+from sklearn import preprocessing
 from sklearn.compose import ColumnTransformer
 from sklearn.model_selection import train_test_split
 from sklearn.pipeline import Pipeline
@@ -10,10 +12,9 @@ from tensorflow import keras
 from tensorflow.python.keras.layers import Dense, Input
 from keras.callbacks import EarlyStopping
 from matplotlib import pyplot
-from dataset_labelmatcher import getmostSimilarColumn
-from seq2seq_instructionIsolater import getLabelwithInstruction
-
-from predictionModelCreation import getKerasModel
+from data_preprocesser import singleRegDataPreprocesser
+from predictionModelCreation import getKerasModelRegression
+from predictionModelCreation import getKerasModelClassification
 
 pd.set_option('display.max_columns', None)
 
@@ -46,8 +47,8 @@ def SingleRegressionQuery(dataset_path, instruction):
             scaler = StandardScaler()
             data[numeric_columns] = scaler.fit_transform(data[numeric_columns])
 
-        y = getmostSimilarColumn(getLabelwithInstruction(instruction), data)
-        del data[y]
+        y = data[str(instruction)]
+        del data[str(instruction)]
 
         X_train, X_test, y_train, y_test = train_test_split(data, y, test_size=0.2, random_state=49)
 
@@ -79,3 +80,48 @@ def SingleRegressionQuery(dataset_path, instruction):
         
  
 SingleRegressionQuery("./data/housing.csv", "median_house_value")
+
+
+# def classificationQuery(dataset_path, instruction):
+#     data = pd.read_csv(dataset_path)
+#     data.fillna(0, inplace=True)
+
+#     #classification_column = getmostSimilarColumn(getLabelwithInstruction(instruction), data)
+
+#     y = data["ocean_proximity"]
+#     del data["ocean_proximity"]
+
+#     num_classes = len(np.unique(y))
+
+#     le = preprocessing.LabelEncoder()
+#     y = le.fit_transform(y)
+
+#     X_train, X_test, y_train, y_test = train_test_split(data, y, test_size=0.2, random_state=49)
+
+#     models=[]
+#     losses = []
+#     epochs = 5
+
+#     es = EarlyStopping(monitor='val_loss', mode='min', verbose=1, patience=5)
+
+#     i = 0
+#     model = getKerasModel(data, i)
+
+
+#     history = model.fit(X_train, y_train, epochs=epochs, validation_data=(X_test, y_test), callbacks=[es])
+#     models.append(history)
+
+#     losses.append(models[i].history['val_loss'][len(models[i].history['val_loss']) - 1])
+
+
+#     while(all(x > y for x, y in zip(losses, losses[1:]))):
+#         model = getKerasModelClassification(data, i)
+#         history = model.fit(X_train, y_train, epochs=epochs, validation_data=(X_test, y_test), callbacks=[es])
+#         models.append(history)
+#         losses.append(models[i].history['val_loss'][len(models[i].history['val_loss']) - 1])
+#         print("The number of layers " + str(len(model.layers)))
+#         i += 1
+    
+#     return model
+
+# classificationQuery("./data/housing.csv", "median_house_value")
