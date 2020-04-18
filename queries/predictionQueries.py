@@ -15,38 +15,22 @@ from matplotlib import pyplot
 from data_preprocesser import singleRegDataPreprocesser
 from predictionModelCreation import getKerasModelRegression
 from predictionModelCreation import getKerasModelClassification
+from keras.utils import to_categorical
+from keras.utils import np_utils
+from sklearn.cluster import KMeans
+import matplotlib.pyplot as plt
+from generatePlots import generateClusteringPlots
 
 pd.set_option('display.max_columns', None)
 
-def SingleRegressionQuery(dataset_path, instruction):
+def SingleRegressionQueryANN(dataset_path, instruction):
         data = pd.read_csv(dataset_path)
         data.fillna(0, inplace=True)
         
         categorical_columns = data.select_dtypes(exclude=["number"]).columns
         numeric_columns = data.columns[data.dtypes.apply(lambda c: np.issubdtype(c, np.number))]
 
-        if(len(categorical_columns) != 0):
-
-            categorical_feature_mask = data.dtypes==object
-            categorical_cols = data.columns[categorical_feature_mask].tolist()
-            labeled_df = data[categorical_cols]
-
-            enc = OneHotEncoder()
-            enc.fit(labeled_df)
-            onehotlabels = enc.transform(labeled_df).toarray()
-            
-            new_columns=list()
-            for col, values in zip(labeled_df.columns, enc.categories_):
-                new_columns.extend([col + '_' + str(value) for value in values])
-
-            data = pd.concat([data, pd.DataFrame(onehotlabels, columns=new_columns)], axis='columns')
-
-            for x in categorical_cols: del data[x]
-
-        if(len(numeric_columns) != 0):
-            scaler = StandardScaler()
-            data[numeric_columns] = scaler.fit_transform(data[numeric_columns])
-
+        data = singleRegDataPreprocesser(data)
         y = data[str(instruction)]
         del data[str(instruction)]
 
@@ -59,7 +43,7 @@ def SingleRegressionQuery(dataset_path, instruction):
         es = EarlyStopping(monitor='val_loss', mode='min', verbose=1, patience=5)
 
         i = 0
-        model = getKerasModel(data, i)
+        model = getKerasModelRegression(data, i)
 
         history = model.fit(X_train, y_train, epochs=epochs, validation_data=(X_test, y_test), callbacks=[es])
         models.append(history)
@@ -68,60 +52,69 @@ def SingleRegressionQuery(dataset_path, instruction):
 
 
         while(all(x > y for x, y in zip(losses, losses[1:]))):
-             model = getKerasModel(data, i)
+             model = getKerasModelRegression(data, i)
              history = model.fit(X_train, y_train, epochs=epochs, validation_data=(X_test, y_test), callbacks=[es])
              models.append(history)
              losses.append(models[i].history['val_loss'][len(models[i].history['val_loss']) - 1])
              print("The number of layers " + str(len(model.layers)))
              i += 1
 
+        print(data)
 
         return models[len(models) - 1]
-        
- 
-SingleRegressionQuery("./data/housing.csv", "median_house_value")
 
 
-# def classificationQuery(dataset_path, instruction):
-#     data = pd.read_csv(dataset_path)
-#     data.fillna(0, inplace=True)
+def classificationQueryANN(dataset_path, instruction):
+    data = pd.read_csv(dataset_path)
+    data.fillna(0, inplace=True)
 
-#     #classification_column = getmostSimilarColumn(getLabelwithInstruction(instruction), data)
+    y = data[str(instruction)]
+    del data[str(instruction)]
 
-#     y = data["ocean_proximity"]
-#     del data["ocean_proximity"]
+    data = singleRegDataPreprocesser(data)
+    #classification_column = getmostSimilarColumn(getLabelwithInstruction(instruction), data)
 
-#     num_classes = len(np.unique(y))
+    num_classes = len(np.unique(y))
 
-#     le = preprocessing.LabelEncoder()
-#     y = le.fit_transform(y)
+    le = preprocessing.LabelEncoder()
+    y = le.fit_transform(y)
+    y = np_utils.to_categorical(y)
 
-#     X_train, X_test, y_train, y_test = train_test_split(data, y, test_size=0.2, random_state=49)
+    X_train, X_test, y_train, y_test = train_test_split(data, y, test_size=0.2, random_state=49)
 
-#     models=[]
-#     losses = []
-#     epochs = 5
+    models=[]
+    losses = []
+    epochs = 5
+    es = EarlyStopping(monitor='val_loss', mode='min', verbose=1, patience=5)
 
-#     es = EarlyStopping(monitor='val_loss', mode='min', verbose=1, patience=5)
+    i = 0
+    model = getKerasModelClassification(data, i, num_classes)
 
-#     i = 0
-#     model = getKerasModel(data, i)
+    history = model.fit(data, y, epochs=epochs, validation_data=(X_test, y_test), callbacks=[es])
+    models.append(history)
 
-
-#     history = model.fit(X_train, y_train, epochs=epochs, validation_data=(X_test, y_test), callbacks=[es])
-#     models.append(history)
-
-#     losses.append(models[i].history['val_loss'][len(models[i].history['val_loss']) - 1])
+    losses.append(models[i].history['val_loss'][len(models[i].history['val_loss']) - 1])
 
 
-#     while(all(x > y for x, y in zip(losses, losses[1:]))):
-#         model = getKerasModelClassification(data, i)
-#         history = model.fit(X_train, y_train, epochs=epochs, validation_data=(X_test, y_test), callbacks=[es])
-#         models.append(history)
-#         losses.append(models[i].history['val_loss'][len(models[i].history['val_loss']) - 1])
-#         print("The number of layers " + str(len(model.layers)))
-#         i += 1
+    while(all(x > y for x, y in zip(losses, losses[1:]))):
+        model = getKerasModelClassification(data, i, num_classes)
+        history = model.fit(X_train, y_train, epochs=epochs, validation_data=(X_test, y_test), callbacks=[es])
+        models.append(history)
+        losses.append(models[i].history['val_loss'][len(models[i].history['val_loss']) - 1])
+        print("The number of layers " + str(len(model.layers)))
+        i += 1
     
-#     return model
+    return model
 
-# classificationQuery("./data/housing.csv", "median_house_value")
+def kMeansClusteringQuery(dataset_path, instruction):
+    data = pd.read_csv(dataset_path)
+    data.fillna(0, inplace=True)
+    data = np.asarray(singleRegDataPreprocesser(data))
+    kmeans = KMeans(n_clusters=2, random_state=0).fit(data)
+    generateClusteringPlots(kmeans, data)
+
+
+
+
+
+kMeansClusteringQuery("./data/housing.csv", "ocean_proximity")

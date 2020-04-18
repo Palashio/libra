@@ -19,7 +19,7 @@ def getKerasModelRegression(dataset, i):
     model.compile(loss='mean_squared_error', optimizer='adam')
     return model
 
-def getKerasModelClassification(dataset, i):
+def getKerasModelClassification(dataset, i, num_classes):
     size_max_network = 10
     model = tf.keras.Sequential()
     model.add(Dense(dataset.shape[1], input_dim=dataset.shape[1], kernel_initializer='normal', activation='relu'))
@@ -31,6 +31,6 @@ def getKerasModelClassification(dataset, i):
         else:
             model.add(Dense(i * 64, kernel_initializer="normal", activation="relu"))
             
-    model.add(Dense(5, kernel_initializer="normal", activation="softmax"))
+    model.add(Dense(num_classes, activation="softmax"))
     model.compile(loss='categorical_crossentropy', optimizer='adam')
     return model
