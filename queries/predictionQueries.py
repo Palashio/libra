@@ -29,6 +29,15 @@ class client:
         self.dataset = data
         self.models = {} 
 
+    def getModels(self): 
+        for x in self.models.keys():
+            print(x)
+
+    def getAttributes(self, model_name):
+        for x in self.models[model_name]:
+            print(x)
+
+
     def SingleRegressionQueryANN(self, instruction):
             data = pd.read_csv(self.dataset)
             data.fillna(0, inplace=True)
@@ -163,5 +172,6 @@ class client:
 
 newClient = client("./data/housing.csv")
 newClient.classificationQueryANN('ocean_proximity')
+newClient.getAttributes("classification_ANN")
 
 
