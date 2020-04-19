@@ -16,7 +16,7 @@ def getKerasModelRegression(dataset, i):
             model.add(Dense(i * 64, kernel_initializer="normal", activation="relu"))
             
     model.add(Dense(1, kernel_initializer="normal", activation="softmax"))
-    model.compile(loss='mean_squared_error', optimizer='adam')
+    model.compile(loss='mean_squared_error', optimizer='adam', metrics=['accuracy'])
     return model
 
 def getKerasModelClassification(dataset, i, num_classes):
@@ -32,5 +32,5 @@ def getKerasModelClassification(dataset, i, num_classes):
             model.add(Dense(i * 64, kernel_initializer="normal", activation="relu"))
             
     model.add(Dense(num_classes, activation="softmax"))
-    model.compile(loss='categorical_crossentropy', optimizer='adam')
+    model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
     return model
