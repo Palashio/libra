@@ -24,6 +24,7 @@ def generate_data(word):
         
     html = browser.page_source.split('["')
     imges = []
+    #browser.quit()
     for i in html:
         if i.startswith('http') and i.split('"')[0].split('.')[-1] in extensions:
             imges.append(i.split('"')[0])
@@ -31,10 +32,12 @@ def generate_data(word):
     i = 0
     for link in imges:
         filename = link.split('/')[-1]
-        r = requests.get(link, allow_redirects=True)
-        open(str(searchterm) + "/" + filename, 'wb').write(r.content)
-        i += 1
+        urllib.urlretrieve(link, searchterm + "/" + filename)
+        # filename = link.split('/')[-1]
+        # r = requests.get(link, allow_redirects=False)
+        # open(str(searchterm) + "/" + filename, 'wb').write(r.content)
+        # i += 1
 
-    preProcessImages(searchterm)
+    browser.quit()
 
-generate_data("cleaner")
+    return preProcessImages(searchterm)

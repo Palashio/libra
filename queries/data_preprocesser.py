@@ -58,8 +58,7 @@ def preProcessImages(data_path):
         except:
             continue
 
-    for value in loaded_shaped:
-        print(value.shape)
+    return loaded_shaped
 
 
 def processColorChanel(img):
