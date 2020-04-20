@@ -68,7 +68,6 @@ def generateClassificationPlots(history, data, label, model, X_test, y_test):
         plt.ylabel('loss')
         plt.xlabel('epoch')
         plt.legend(['train', 'test'], loc='upper left')
-        plt.show()
         
         plots.append(plt)
         plot_names.append('lossvsval_los')
@@ -79,7 +78,6 @@ def generateClassificationPlots(history, data, label, model, X_test, y_test):
         plt.ylabel('accuracy')
         plt.xlabel('epoch')
         plt.legend(['train', 'test'], loc='upper left')
-        plt.show()
         
         plots.append(plt)
         plot_names.append('accuracyvsval_accuracy')

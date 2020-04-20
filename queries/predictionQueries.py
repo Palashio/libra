@@ -12,7 +12,7 @@ from tensorflow import keras
 from tensorflow.python.keras.layers import Dense, Input
 from keras.callbacks import EarlyStopping
 from matplotlib import pyplot
-from data_preprocesser import singleRegDataPreprocesser
+from data_preprocesser import singleRegDataPreprocesser, preProcessImages
 from predictionModelCreation import getKerasModelRegression
 from predictionModelCreation import getKerasModelClassification
 from keras.utils import to_categorical
@@ -20,6 +20,13 @@ from keras.utils import np_utils
 from sklearn.cluster import KMeans
 import matplotlib.pyplot as plt
 from generatePlots import generateClusteringPlots, generateRegressionPlots, generateClassificationPlots
+from dataGen import generate_data
+from keras.models import Sequential
+from keras.layers import Dense, Conv2D, Flatten
+from keras.utils import to_categorical
+
+
+
 
 pd.set_option('display.max_columns', None)
 
@@ -29,13 +36,11 @@ class client:
         self.dataset = data
         self.models = {} 
 
-    def getModels(self): 
-        for x in self.models.keys():
-            print(x)
+    def getModels(self, model_needed): 
+        return self.models[str(model_needed)]
 
     def getAttributes(self, model_name):
-        for x in self.models[model_name]:
-            print(x)
+        print(model_name['plots'])
 
 
     def SingleRegressionQueryANN(self, instruction):
@@ -167,11 +172,45 @@ class client:
         self.models['kmeans_clustering'] = {"model" : modelStorage[len(modelStorage) - 1] ,"plots" : plots}
         #return modelStorage[len(modelStorage) - 1], inertiaStor[len(inertiaStor) - 1], i
 
+    def createCNNClassification(self, class1, class2):
+
+        firstNumpy = generate_data(class1)
+        secNumpy = generate_data(class2)
+
+        firstLabels = [0] * len(firstNumpy)
+        secLabels = [1] * len(secNumpy)
+        y = []
+        X = []
+
+        for x in range(len(firstLabels)):
+            y.append(firstLabels[x])
+            X.append(firstNumpy[x])
+
+        for x in range(len(secLabels)):
+            y.append(secLabels[x])
+            X.append(secNumpy[x])
+        
+        X_train, X_test, y_train, y_test = train_test_split(np.asarray(X), np.asarray(y), test_size=0.33, random_state=42)
+
+        print(X_train.shape)
+        print(y_train.shape)
+        y_train = to_categorical(y_train)
+        y_test = to_categorical(y_test)
+        model = Sequential()
+
+        model.add(Conv2D(64, kernel_size=3, activation="relu", input_shape=(224,224,3)))
+        model.add(Conv2D(32, kernel_size=3, activation="relu"))
+        model.add(Flatten())
+        model.add(Dense(2, activation="softmax"))
+        model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy'])
+        model.fit(X_train, y_train, validation_data=(X_test, y_test), epochs=3)
 
 
 
-newClient = client("./data/housing.csv")
-newClient.classificationQueryANN('ocean_proximity')
-newClient.getAttributes("classification_ANN")
+
+newClient = client('./data/housing.csv')
+newClient.createCNNClassification("apples", "oranges")
+
+
 
 
