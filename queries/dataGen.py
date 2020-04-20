@@ -4,8 +4,9 @@ import json
 import os
 import urllib
 import argparse
+import requests
 
-searchterm = 'Okocha'#input your search item here
+searchterm = 'SOCCER PLAYER'
 url = "https://www.google.co.in/search?q="+searchterm+"&source=lnms&tbm=isch"
 PROJECT_ROOT = os.path.abspath(os.path.dirname(__file__))
 DRIVER_BIN = os.path.join(PROJECT_ROOT, "chromedriver")
@@ -25,4 +26,12 @@ imges = []
 for i in html:
     if i.startswith('http') and i.split('"')[0].split('.')[-1] in extensions:
         imges.append(i.split('"')[0])
+
+i = 0
+for link in imges:
+    filename = link.split('/')[-1]
+    r = requests.get(link, allow_redirects=True)
+    open(filename, 'wb').write(r.content)
+    i += 1
 print(imges)
+
