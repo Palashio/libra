@@ -10,6 +10,9 @@ from tensorflow import keras
 from tensorflow.python.keras.layers import Dense, Input
 from keras.callbacks import EarlyStopping
 from matplotlib import pyplot
+from os import listdir
+from PIL import Image as PImage
+import cv2
 
 def singleRegDataPreprocesser(data):
     data.fillna(0, inplace=True)
@@ -40,3 +43,29 @@ def singleRegDataPreprocesser(data):
         data[numeric_columns] = scaler.fit_transform(data[numeric_columns])
 
     return data
+
+def preProcessImages(data_path):
+    image_dir = str(data_path)
+    loaded_shaped = []
+    imagesList = listdir(image_dir)
+
+    for image in imagesList:
+        try:
+            img = cv2.imread(image_dir + "/" + image)
+            res = processColorChanel(img)
+            loaded_shaped.append(res)
+            # print(res)
+        except:
+            continue
+
+    for value in loaded_shaped:
+        print(value.shape)
+
+
+def processColorChanel(img):
+    b, g, r = cv2.split(img)
+    b = cv2.resize(b, dsize=(224, 224), interpolation=cv2.INTER_CUBIC)
+    g = cv2.resize(g, dsize=(224, 224), interpolation=cv2.INTER_CUBIC)
+    r = cv2.resize(r, dsize=(224, 224), interpolation=cv2.INTER_CUBIC)
+    img = cv2.merge((b, g, r))
+    return img
