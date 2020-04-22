@@ -1,9 +1,18 @@
-#baseline import statements
+#Making functions in other directories accesible to this file by inserting into sis path
+import sys
+
+sys.path.insert(1, '/Users/palashshah/Desktop/Libra/preprocessing')
+sys.path.insert(1, '/Users/palashshah/Desktop/Libra/data generation')
+sys.path.insert(1, '/Users/palashshah/Desktop/Libra/modeling')
+sys.path.insert(1, '/Users/palashshah/Desktop/Libra/plotting')
+sys.path.insert(1, '/Users/palashshah/Desktop/Libra/plotting')
+
+#function imports from other files
 import keras
 import numpy as np
 import pandas as pd
 import tensorflow as tf
-import sys
+
 from sklearn import preprocessing
 from sklearn.compose import ColumnTransformer
 from sklearn.model_selection import train_test_split
@@ -11,17 +20,10 @@ from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import OneHotEncoder, StandardScaler
 from tensorflow import keras
 from tensorflow.python.keras.layers import Dense, Input
+from dataset_labelmatcher import getmostSimilarColumn
 from keras.callbacks import EarlyStopping
 from matplotlib import pyplot
-
-
-#Making functions in other directories accesible to this file by inserting into sis path
-sys.path.insert(1, '/Users/palashshah/Desktop/Libra/preprocessing')
-sys.path.insert(1, '/Users/palashshah/Desktop/Libra/data generation')
-sys.path.insert(1, '/Users/palashshah/Desktop/Libra/modeling')
-sys.path.insert(1, '/Users/palashshah/Desktop/Libra/plotting')
-
-#function imports from other files
+from grammartree import getValueFromInstruction
 from data_preprocesser import singleRegDataPreprocesser, preProcessImages
 from predictionModelCreation import getKerasModelRegression
 from predictionModelCreation import getKerasModelClassification
@@ -64,8 +66,9 @@ class client:
 
             #preprocesses data
             data = singleRegDataPreprocesser(data)
-            y = data[str(instruction)]
-            del data[str(instruction)]
+            remove = getmostSimilarColumn(getValueFromInstruction(instruction), data)
+            y = data[remove]
+            del data[remove]
 
             X_train, X_test, y_train, y_test = train_test_split(data, y, test_size=0.2, random_state=49)
 
@@ -116,8 +119,9 @@ class client:
         data = pd.read_csv(self.dataset)
         data.fillna(0, inplace=True)
 
-        y = data[str(instruction)]
-        del data[str(instruction)]
+        remove = getmostSimilarColumn(getValueFromInstruction(instruction), data)
+        y = data[remove]
+        del data[remove]
 
         #prepcoess the dataset
         data = singleRegDataPreprocesser(data)
@@ -250,8 +254,8 @@ class client:
 
 
 
-# newClient = client("housing.csv")
-# newClient.createCNNClassification("mac computer", "windows computer")
+newClient = client("./data/housing.csv")
+newClient.classificationQueryANN("Model ocean proximity")
 
 
 
