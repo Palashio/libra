@@ -1,2 +1,0 @@
-def thefunction():
-    print("hello")
