@@ -12,6 +12,13 @@ from tensorflow import keras
 from tensorflow.python.keras.layers import Dense, Input
 from keras.callbacks import EarlyStopping
 from matplotlib import pyplot
+
+sys.path.insert(1, '/Users/palashshah/Desktop/Libra/preprocessing')
+sys.path.insert(1, '/Users/palashshah/Desktop/Libra/data generation')
+sys.path.insert(1, '/Users/palashshah/Desktop/Libra/modeling')
+sys.path.insert(1, '/Users/palashshah/Desktop/Libra/plotting')
+
+
 from data_preprocesser import singleRegDataPreprocesser, preProcessImages
 from predictionModelCreation import getKerasModelRegression
 from predictionModelCreation import getKerasModelClassification
@@ -24,6 +31,9 @@ from dataGen import generate_data
 from keras.models import Sequential
 from keras.layers import Dense, Conv2D, Flatten
 from keras.utils import to_categorical
+from os import listdir
+
+
 
 
 
@@ -208,8 +218,8 @@ class client:
 
 
 
-newClient = client('./data/housing.csv')
-newClient.createCNNClassification("apples", "oranges")
+# newClient = client("housing.csv")
+# newClient.createCNNClassification("mac computer", "windows computer")
 
 
 
