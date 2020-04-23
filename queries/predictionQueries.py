@@ -12,6 +12,12 @@ import keras
 import numpy as np
 import pandas as pd
 import tensorflow as tf
+from tabulate import tabulate
+from scipy.spatial.distance import cosine
+from pandas import DataFrame
+from sklearn import preprocessing 
+from sklearn.preprocessing import LabelEncoder
+
 
 from sklearn import preprocessing
 from sklearn.compose import ColumnTransformer
@@ -40,7 +46,7 @@ from os import listdir
 from tuner import tuneReg, tuneClass
 
 #allows for all columns to be displayed when printing()
-pd.set_option('display.max_columns', None)
+pd.options.display.width=None
 
 #class to store all query information
 class client:
@@ -268,10 +274,68 @@ class client:
                 self.models['classification_ANN'] = {'model' : returned_model}
                 return returned_model
 
+    def stat_analysis(self, column_name = "none"):
+        data = pd.read_csv(self.dataset)
+        data.fillna(0, inplace=True)
+        pdtabulate=lambda df:tabulate(df,headers='keys',tablefmt='psql')
+        
+        categor = data.select_dtypes(exclude=['int', 'float'])
+        categor = categor.apply(LabelEncoder().fit_transform)
+        for value in categor.columns:
+            data[str(value)] = categor[str(value)]
+
+        if column_name == "none":
+            columns = []
+            sim = []
+            for first_val in data.columns:
+                for sec_val in data.columns:
+                    if first_val == sec_val:
+                        continue
+                    columns.append(str(first_val) + "_" + str(sec_val))
+                    sim.append(1 - cosine(data[first_val], data[sec_val]))
+                df = pd.DataFrame(columns = columns)
+                df.loc[len(df)] = sim
+
+            #print(np.argpartition(np.asarray(df.iloc[0]), -5)[-5:])
+            cols = []
+            vals = []
+            for val in np.argpartition(np.asarray(df.iloc[0]), -5)[-5:]:
+                cols.append(df.columns[val])
+                vals.append(df[df.columns[val]].iloc[0])
+                frame = pd.DataFrame(columns=cols)
+                frame.loc[len(df)] = vals
+            print(pdtabulate(frame))
+            print(pdtabulate(data.describe()))
+
+        else:
+            columns = []
+            sim = []
+            for val in data.columns:
+                    if val == column_name:
+                        continue
+                    columns.append(str(column_name) + "_" + str(val))
+                    sim.append(1 - cosine(data[column_name], data[val]))
+            df = pd.DataFrame(columns = columns)
+            df.loc[len(df)] = sim
+
+            cols = []
+            vals = []
+            for val in np.argpartition(np.asarray(df.iloc[0]), -5)[-5:]:
+                cols.append(df.columns[val])
+                vals.append(df[df.columns[val]].iloc[0])
+                frame = pd.DataFrame(columns=cols)
+                frame.loc[len(df)] = vals
+            
+            print(pdtabulate(frame))
+            print(pdtabulate(data[column_name]).describe())
+
+
+
+
 
 
 newClient = client("./data/housing.csv")
-newClient.createCNNClassification("apples", "oranges")
+newClient.stat_analysis()
 
 
 
