@@ -8,6 +8,7 @@ import libra
 
 newClient = client('dataset')
 newClient.SingleRegressionQuery('Model the median house value')
+newClient.tune()
 ```
 No preprocessing is neccesary. All plots, losses, and models are stored in the models field in the client class. Calling ```tune()``` tunes hyperparameters like number of layers, learning rate, and layer size. 
 
