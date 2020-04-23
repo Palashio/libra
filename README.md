@@ -11,3 +11,11 @@ newClient.SingleRegressionQuery('Model the median house value')
 newClient.tune('regression')
 ```
 No preprocessing is neccesary. All plots, losses, and models are stored in the models field in the client class. Calling ```tune()``` tunes hyperparameters like number of layers, learning rate, and layer size. 
+
+```python
+client.createCNNClassification("apples", "oranges):
+```
+
+This will generate a dataset by querying google images for both apples and oranges prepprocess it appropriately and then fit it to a Convoluational Neural Network. 
+ 
+
