@@ -1,5 +1,5 @@
 # Libra
-A high-level neural networks API that makes training deep neural networks as simple as a one-line function call. 
+A high-level machine learning API written in Python and Tensorflow that makes training deep neural networks as simple as a one-line function call. 
 
 ### Usage: the basics ###
 Fitting a model to a feed-forward neural network to any dataset is as simple as this:
