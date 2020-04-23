@@ -9,4 +9,4 @@ newClient = client("dataset")
 newClient.SingleRegressionQuery("Model the median house value")
 ```
 
-Everything else is taken care of for you!
+In progress.....
