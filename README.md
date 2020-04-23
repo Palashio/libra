@@ -1,4 +1,4 @@
-# Libra
+# Libra: Deep Learning in fluent one-liners
 A high-level machine learning API written in Python and Tensorflow that makes training deep neural networks as simple as a one-line function call. 
 
 ### Usage: the basics ###
