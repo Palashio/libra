@@ -4,6 +4,8 @@ A machine learning API that makes training deep neural networks as simple as a o
 ### Usage: the basics ###
 Fitting a model to a feed-forward neural network to any dataset is as simple as this:
 ```python
+import libra
+
 newClient = client('dataset')
 newClient.SingleRegressionQuery('Model the median house value')
 newClient.tune('regression')
