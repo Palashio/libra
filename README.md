@@ -16,6 +16,6 @@ No preprocessing is neccesary. All plots, losses, and models are stored in the m
 client.createCNNClassification("apples", "oranges):
 ```
 
-This will generate a dataset by querying google images for both apples and oranges prepprocess it appropriately and then fit it to a Convoluational Neural Network. 
+This will generate a dataset of apples and oranges by querying google images for both apples and oranges prepprocess it appropriately and then fit it to a Convoluational Neural Network. 
  
 
