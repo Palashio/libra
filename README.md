@@ -13,7 +13,7 @@ newClient.tune('regression')
 No preprocessing is neccesary. All plots, losses, and models are stored in the models field in the client class. Calling ```tune()``` tunes hyperparameters like number of layers, learning rate, and layer size. 
 
 ```python
-client.classGenQuery('apples', 'oranges')
+newClient.classGenQuery('apples', 'oranges')
 ```
 
 This will generate a dataset of apples and oranges by parsing google images, prepprocess the dataset appropriately and then fit it to a Convolutional Neural Network. 
