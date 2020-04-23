@@ -92,3 +92,30 @@ def generateClassificationPlots(history, data, label, model, X_test, y_test):
                 return_plots[str(plot_names[x])] = plots[x]
 
         return return_plots
+
+def generateClassificationTogether(history, data, label, model, X_test, y_test):
+        plots = []
+        plot_names = []
+
+        arrEpochs = []
+        for x in range(len(history.history['loss'])):
+                arrEpochs.append(x + 1)
+
+        plt.subplot(2, 1, 1)
+        plt.plot(history.history['loss'])
+        plt.plot(history.history['val_loss'])
+        plt.ylabel('loss')
+        plt.xlabel('epoch')
+        plt.legend(['train', 'test'], loc='upper left')
+
+
+        plt.subplot(2, 1, 2)
+        plt.plot(history.history['accuracy'])
+        plt.plot(history.history['val_accuracy'])
+        plt.title('model accuracy')
+        plt.ylabel('accuracy')
+        plt.xlabel('epoch')
+        plt.legend(['train', 'test'], loc='upper left')
+
+        plt.show()
+

@@ -31,12 +31,13 @@ from keras.utils import to_categorical
 from keras.utils import np_utils
 from sklearn.cluster import KMeans
 import matplotlib.pyplot as plt
-from generatePlots import generateClusteringPlots, generateRegressionPlots, generateClassificationPlots
+from generatePlots import generateClusteringPlots, generateRegressionPlots, generateClassificationPlots, generateClassificationTogether
 from dataGen import generate_data
 from keras.models import Sequential
 from keras.layers import Dense, Conv2D, Flatten
 from keras.utils import to_categorical
 from os import listdir
+from tuner import tuneReg, tuneClass
 
 #allows for all columns to be displayed when printing()
 pd.set_option('display.max_columns', None)
@@ -48,8 +49,8 @@ class client:
         self.models = {} 
 
     #returns models with a specific string 
-    def getModels(self, model_needed): 
-        return self.models[str(model_needed)]
+    def getModels(self): 
+        return self.models
 
     def getAttributes(self, model_name):
         print(model_name['plots'])
@@ -105,7 +106,7 @@ class client:
                 plots[str(plot_names[x])] = init_plots[x]
 
             #stores values in the client object models dictionary field 
-            self.models['regression_ANN'] = {'model' : model, "plots" : plots, 'losses' : {'training_loss' : history.history['loss'], 'val_loss' : history.history['val_loss']},
+            self.models['regression_ANN'] = {'model' : model, "target" : remove, "plots" : plots, 'losses' : {'training_loss' : history.history['loss'], 'val_loss' : history.history['val_loss']},
                         'accuracy' : {'training_accuracy' : history.history['accuracy'], 'validation_accuracy' : history.history['val_accuracy']}}
 
             #returns the best model
@@ -164,7 +165,7 @@ class client:
         plots = generateClassificationPlots(models[len(models) - 1], data, y, model, X_test, y_test)
 
         #stores the values and plots into the object dictionary
-        self.models["classification_ANN"] = {"model" : model, "plots" : plots, 'losses' : {'training_loss' : history.history['loss'], 'val_loss' : history.history['val_loss']},
+        self.models["classification_ANN"] = {"model" : model, 'num_classes' : num_classes, "plots" : plots, "target" : remove, 'losses' : {'training_loss' : history.history['loss'], 'val_loss' : history.history['val_loss']},
                         'accuracy' : {'training_accuracy' : history.history['accuracy'], 'validation_accuracy' : history.history['val_accuracy']}}
 
         #returns the last model 
@@ -249,14 +250,28 @@ class client:
         model.add(Flatten())
         model.add(Dense(2, activation="softmax"))
         model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy'])
-        model.fit(X_train, y_train, validation_data=(X_test, y_test), epochs=3)
+        history = model.fit(X_train, y_train, validation_data=(X_test, y_test), epochs=3)
 
+        plots = generateClassificationPlots(history, X, y, model, X_test, y_test)
+        generateClassificationTogether(history, X, y, model, X_test, y_test)
+        self.models["classification_CNN"] = {"model" : model, 'num_classes' : len(np.unique(y_test)), "plots" : plots, "target" : class1 + "_" + class2, 'losses' : {'training_loss' : history.history['loss'], 'val_loss' : history.history['val_loss']},
+                    'accuracy' : {'training_accuracy' : history.history['accuracy'], 'validation_accuracy' : history.history['val_accuracy']}}
+
+    def tune(self, model_to_tune):
+        for key in self.models:
+            if key == model_to_tune:
+                returned_model = tuneReg(self.dataset, self.models[key]["target"])
+                self.models['regression_ANN'] = {'model' : returned_model}
+                return returned_model
+            if key == model_to_tune:
+                returned_model = tuneClass(self.models[key]["target"], self.models[key]["num_classes"])
+                self.models['classification_ANN'] = {'model' : returned_model}
+                return returned_model
 
 
 
 newClient = client("./data/housing.csv")
-newClient.classificationQueryANN("Model ocean proximity")
-
+newClient.createCNNClassification("apples", "oranges")
 
 
 

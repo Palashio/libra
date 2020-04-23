@@ -18,9 +18,10 @@ sys.path.insert(1, '/Users/palashshah/Desktop/Libra/plotting')
 from data_preprocesser import singleRegDataPreprocesser
 
 
-data = pd.read_csv("./data/housing.csv")
-data = singleRegDataPreprocesser(data)
-def tuneReg(data):
+
+def tuneReg(data, target):
+    data = pd.read_csv(data)
+    data = singleRegDataPreprocesser(data)
 
     def build_model(hp):
         model = keras.Sequential()
@@ -43,13 +44,13 @@ def tuneReg(data):
         objective='loss',
         max_trials=5,
         executions_per_trial=3,
-        directory='my_dir',
-        project_name='helloworld')
+        directory='models',
+        project_name='reg_tuned')
 
     # tuner.search_space_summary()
 
-    y = data['median_house_value']
-    del data['median_house_value']
+    y = data[target]
+    del data[target]
 
     X_train, X_test, y_train, y_test = train_test_split(data, y, test_size=0.2, random_state=49)
 
@@ -82,8 +83,8 @@ def tuneClass(data, target_class, num_classes):
         objective='loss',
         max_trials=5,
         executions_per_trial=3,
-        directory='my_dir',
-        project_name='helloworld')
+        directory='models',
+        project_name='class_tuned')
 
     # tuner.search_space_summary()
 
@@ -99,4 +100,3 @@ def tuneClass(data, target_class, num_classes):
     return models[0]
 
 
-tuneReg(data)
