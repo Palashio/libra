@@ -1,7 +1,7 @@
 # Libra
 A machine learning API that makes training deep neural networks as simple as a one-line function call. 
 
-# Usage: the basics
+### Usage: the basics ###
 Fitting a model to a feed-forward neural network to any dataset is as simple as this:
 ```python
 newClient = client('dataset')
