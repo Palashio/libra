@@ -304,7 +304,10 @@ class client:
                 vals.append(df[df.columns[val]].iloc[0])
                 frame = pd.DataFrame(columns=cols)
                 frame.loc[len(df)] = vals
+            print("Similarity Spectrum")
             print(pdtabulate(frame))
+            print()
+            print("Dataset Description")
             print(pdtabulate(data.describe()))
 
         else:
@@ -326,7 +329,10 @@ class client:
                 frame = pd.DataFrame(columns=cols)
                 frame.loc[len(df)] = vals
             
+            print("Similarity Spectrum")
             print(pdtabulate(frame))
+            print()
+            print("Dataset Description")
             print(pdtabulate(data[column_name]).describe())
 
 
