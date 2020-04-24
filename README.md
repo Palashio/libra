@@ -16,7 +16,7 @@ No preprocessing is neccesary. All plots, losses, and models are stored in the m
 
 ***
 
-This will generate a dataset of apples and oranges by parsing google images, prepprocess the dataset appropriately and then fit it to a Convolutional Neural Network. 
+This will generate a dataset of apples and oranges by parsing google images, prepprocess the dataset appropriately and then fit it to a Convolutional Neural Network. All images are reduced to a standard (224, 224, 3) size using a traditional OpenCV resizing algorithm.
 
 ```python
 newClient.classGenQuery('apples', 'oranges')
