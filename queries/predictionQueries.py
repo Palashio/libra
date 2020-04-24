@@ -1,11 +1,10 @@
 #Making functions in other directories accesible to this file by inserting into sis path
 import sys
 
-sys.path.insert(1, '/Users/palashshah/Desktop/Libra/preprocessing')
-sys.path.insert(1, '/Users/palashshah/Desktop/Libra/data generation')
-sys.path.insert(1, '/Users/palashshah/Desktop/Libra/modeling')
-sys.path.insert(1, '/Users/palashshah/Desktop/Libra/plotting')
-sys.path.insert(1, '/Users/palashshah/Desktop/Libra/plotting')
+sys.path.insert(1, './preprocessing')
+sys.path.insert(1, './data generation')
+sys.path.insert(1, './modeling')
+sys.path.insert(1, './plotting')
 
 #function imports from other files
 import keras
@@ -15,11 +14,10 @@ import tensorflow as tf
 from tabulate import tabulate
 from scipy.spatial.distance import cosine
 from pandas import DataFrame
-from sklearn import preprocessing 
+from sklearn import preprocessing, tree 
 from sklearn.preprocessing import LabelEncoder
-
-
-from sklearn import preprocessing
+from sklearn.metrics import accuracy_score
+from sklearn import preprocessing, svm
 from sklearn.compose import ColumnTransformer
 from sklearn.model_selection import train_test_split
 from sklearn.pipeline import Pipeline
@@ -44,6 +42,7 @@ from keras.layers import Dense, Conv2D, Flatten
 from keras.utils import to_categorical
 from os import listdir
 from tuner import tuneReg, tuneClass
+from sklearn.neighbors import KNeighborsClassifier
 
 #allows for all columns to be displayed when printing()
 pd.options.display.width=None
@@ -262,6 +261,84 @@ class client:
         generateClassificationTogether(history, X, y, model, X_test, y_test)
         self.models["classification_CNN"] = {"model" : model, 'num_classes' : len(np.unique(y_test)), "plots" : plots, "target" : class1 + "_" + class2, 'losses' : {'training_loss' : history.history['loss'], 'val_loss' : history.history['val_loss']},
                     'accuracy' : {'training_accuracy' : history.history['accuracy'], 'validation_accuracy' : history.history['val_accuracy']}}
+    
+    def svmQuery(self, instruction):
+        #reads dataset and fills n/a values with zeroes
+        data = pd.read_csv(self.dataset)
+        data.fillna(0, inplace=True)
+
+        remove = getmostSimilarColumn(getValueFromInstruction(instruction), data)
+        y = data[remove]
+        del data[remove]
+
+        #prepcoess the dataset
+        data = singleRegDataPreprocesser(data)
+        #classification_column = getmostSimilarColumn(getLabelwithInstruction(instruction), data)
+
+        num_classes = len(np.unique(y))
+
+        #encodes the label dataset into 0's and 1's 
+        le = preprocessing.LabelEncoder()
+        y = le.fit_transform(y)
+
+        X_train, X_test, y_train, y_test = train_test_split(data, y, test_size=0.2, random_state=49)
+
+        clf = svm.SVC()
+        clf.fit(X_train, y_train)
+        self.models["svm"] = {"model" : clf, "accuracy_score" : accuracy_score(clf.predict(X_test), y_test), "target" : remove}
+    
+    def nearestNeighborQuery(self, instruction):
+        data = pd.read_csv(self.dataset)
+        data.fillna(0, inplace=True)
+
+        remove = getmostSimilarColumn(getValueFromInstruction(instruction), data)
+        y = data[remove]
+        del data[remove]
+
+        #prepcoess the dataset
+        data = singleRegDataPreprocesser(data)
+        #classification_column = getmostSimilarColumn(getLabelwithInstruction(instruction), data)
+
+        num_classes = len(np.unique(y))
+
+        #encodes the label dataset into 0's and 1's 
+        le = preprocessing.LabelEncoder()
+        y = le.fit_transform(y)
+
+        X_train, X_test, y_train, y_test = train_test_split(data, y, test_size=0.2, random_state=49)
+
+        models = []
+        scores = []
+        for x in range(3, 10):
+            knn = KNeighborsClassifier(n_neighbors=x)
+            knn.fit(X_train, y_train)
+            models.append(knn)
+            scores.append(accuracy_score(knn.predict(X_test), y_test))
+
+        knn = models[scores.index(min(scores))]
+        self.models["nearest_neighbors"] = {"model" : knn, "accuracy_score" : scores.index(min(scores)), "target" : remove}
+
+    def decisionTreeQuery(self, instruction):
+        data = pd.read_csv(self.dataset)
+        data.fillna(0, inplace=True)
+
+        remove = getmostSimilarColumn(getValueFromInstruction(instruction), data)
+        y = data[remove]
+        del data[remove]
+
+        #prepcoess the dataset
+        data = singleRegDataPreprocesser(data)
+        #classification_column = getmostSimilarColumn(getLabelwithInstruction(instruction), data)
+
+        num_classes = len(np.unique(y))
+
+        #encodes the label dataset into 0's and 1's 
+        le = preprocessing.LabelEncoder()
+        y = le.fit_transform(y)
+
+        X_train, X_test, y_train, y_test = train_test_split(data, y, test_size=0.2, random_state=49)
+        clf = tree.DecisionTreeClassifier()
+        clf = clf.fit(X_train, y_train)
 
     def tune(self, model_to_tune):
         for key in self.models:
@@ -341,7 +418,7 @@ class client:
 
 
 newClient = client("./data/housing.csv")
-newClient.stat_analysis()
+newClient.decisionTreeQuery("Estimate ocean proximity")
 
 
 
