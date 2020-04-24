@@ -35,7 +35,14 @@ In depth metrics about your dataset and similarity information can be generated 
 ```python
 newClient.stat_analysis() or newClient.stat_analysis(dataset[columname])
 ```
+A information graph as well as a similarity spectrum shown below will be generated:
 
+![Image description](similarity.png)
+
+This represents 5 of the top columns that are similar; these might need to be removed. To remove ```inplace = True``` can be specificed to remove them. If you want to compare just a single column with the dataset you can do:
+```python
+ newClient.stat_analysis(dataset[columnname]
+```
 
  
 ### In Progress..... ###
