@@ -18,12 +18,6 @@ newClient.classGenQuery('apples', 'oranges')
 
 This will generate a dataset of apples and oranges by parsing google images, prepprocess the dataset appropriately and then fit it to a Convolutional Neural Network. 
 
-```python
-newClient.singleRegressionQuery("I want to estimate the average housing price")
-```
-
-This query identifies the target of your instruction, preprocesses the dataset, and returns the best feed-forward neural network for your task. 
-
 All plots are stored during runtime. This function plots all generated graphs for your current client object on one pane. 
 
 ```python
