@@ -21,7 +21,9 @@ This will generate a dataset of apples and oranges by parsing google images, pre
 ```python
 newClient.classGenQuery('apples', 'oranges')
 ```
+Default size is 100 images for each. You can specify this size by adding ```class_size = number_in_each_class```
 
+***
 All plots are stored during runtime. This function plots all generated graphs for your current client object on one pane. 
 
 ```python
