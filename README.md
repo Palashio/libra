@@ -9,21 +9,21 @@ import libra
 newClient = client('dataset')
 newClient.SingleRegressionQuery('Model the median house value')
 newClient.tune()
+
+
 ```
-No preprocessing is neccesary. All plots, losses, and models are stored in the models field in the client class. Calling ```tune()``` tunes hyperparameters like number of layers, learning rate, and layer size. 
+No preprocessing is neccesary. All plots, losses, and models are stored in the models field in the client class. Calling ```tune()``` tunes hyperparameters like number of layers, learning rate, and layer size.
+
+***
+
+This will generate a dataset of apples and oranges by parsing google images, prepprocess the dataset appropriately and then fit it to a Convolutional Neural Network. All images are reduced to a standard (224, 224, 3) size using a traditional OpenCV resizing algorithm.
 
 ```python
 newClient.classGenQuery('apples', 'oranges')
 ```
+Default size is 100 images for each. You can specify this size by adding ```class_size = number_in_each_class```
 
-This will generate a dataset of apples and oranges by parsing google images, prepprocess the dataset appropriately and then fit it to a Convolutional Neural Network. 
-
-```python
-newClient.singleRegressionQuery("I want to estimate the average housing price")
-```
-
-This query identifies the target of your instruction, preprocesses the dataset, and returns the best feed-forward neural network for your task. 
-
+***
 All plots are stored during runtime. This function plots all generated graphs for your current client object on one pane. 
 
 ```python
@@ -39,9 +39,10 @@ A information graph as well as a similarity spectrum shown below will be generat
 
 ![Image description](similarity.png)
 
-This represents 5 of the top columns that are similar; these might need to be removed. To remove ```inplace = True``` can be specificed to remove them. If you want to compare just a single column with the dataset you can do:
+This represents 5 columns that have the smallest cosine distance: these might need to be removed to reduce noise. You can specify whether you want to remove with ```inplace = True```. If you want to compare just a single column with the dataset you can do:
+
 ```python
- newClient.stat_analysis(dataset[columnname]
+ newClient.stat_analysis(dataset[columnname])
 ```
 
  
