@@ -18,4 +18,4 @@ newClient.classGenQuery('apples', 'oranges')
 
 This will generate a dataset of apples and oranges by parsing google images, prepprocess the dataset appropriately and then fit it to a Convolutional Neural Network. 
  
-
+###In Progress.....###
