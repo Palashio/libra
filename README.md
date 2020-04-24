@@ -39,9 +39,10 @@ A information graph as well as a similarity spectrum shown below will be generat
 
 ![Image description](similarity.png)
 
-This represents 5 of the top columns that are similar; these might need to be removed. To remove ```inplace = True``` can be specificed to remove them. If you want to compare just a single column with the dataset you can do:
+This represents 5 columns that have the smallest cosine distance: these might need to be removed to reduce noise. You can specify whether you want to remove with ```inplace = True```. If you want to compare just a single column with the dataset you can do:
+
 ```python
- newClient.stat_analysis(dataset[columnname]
+ newClient.stat_analysis(dataset[columnname])
 ```
 
  
