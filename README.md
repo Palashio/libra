@@ -1,13 +1,8 @@
 # Libra: deep learning in fluent one-liners
 A high-level machine learning API written in Python and Tensorflow that makes training deep neural networks as simple as a one-line function call. 
 
-##### Table of Contents  
-[Usage: the basics](# Usage: the basics)  
-[Dataset Generation](# Dataset Generation)  
 
-
-
-### Usage: the basics###
+### Usage: the basics ###
 Fitting a model to a feed-forward neural network to any dataset is as simple as this:
 ```python
 import libra
@@ -22,7 +17,7 @@ No preprocessing is neccesary. All plots, losses, and models are stored in the m
 
 ***
 
-### Dataset Generation###
+### Dataset Generation ###
 This will generate a dataset of apples and oranges by parsing google images, prepprocess the dataset appropriately and then fit it to a Convolutional Neural Network. All images are reduced to a standard (224, 224, 3) size using a traditional OpenCV resizing algorithm.
 
 ```python
