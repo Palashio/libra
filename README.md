@@ -4,26 +4,90 @@ A high-level machine learning API written in Python and Tensorflow that makes tr
 Table of Contents
 =================
 
-* [Usage: the basics](#usage-the-basics)
+* [Queries: building blocks](#queries)
+   * [Regression Neural Network](#regression-neural-network-query)
+   * [Classification Neural Network](#classification-neural-network-query)
+   * [K-Means Clustering](#k-means-clustering)
+   * [Nearest Neighbors](#nearest-neighbors)
+   * [Support Vector Machines](#support-vector-machine)
+   * [Decision Tree](#decision-tree)
 * [Image Generation](#image-generation)
    * [Class Wise Image Generation](#class-wise-image-generation)
    * [Convolutional Neural Networks](#convolutional-neural-network)
 * [In Progress.....](#in-progress)
 
-## Usage: the basics ##
+## Queries ##
 
-Fitting a model to a feed-forward neural network to any dataset is as simple as this:
+### Regression Neural Network Query ###
+
+Let's start with the most basic query. This will build a feed-forward network for a class that you specify
 ```python
 import libra
 
 newClient = client('dataset')
 newClient.SingleRegressionQuery('Model the median house value')
-newClient.tune()
-
-
 ```
-No preprocessing is neccesary. All plots, losses, and models are stored in the models field in the client class. Calling ```tune()``` tunes hyperparameters like number of layers, learning rate, and layer size.
+No preprocessing is neccesary. All plots, losses, and models are stored in the models field in the client class. 
 
+Basic tuning with the number of layers is done when you call this query. If you'd like to automatically more in depth you can call: 
+
+```python
+newClient.tune('regression', inplace = False)
+```
+
+Calling this tunes hyperparameters like node count, layer count, learning rate, and other features. This will return the best network and if ```inplace = True``` it will replace it in the client class under ```regression_ANN```. 
+
+### Classification Neural Network Query ###
+
+```python
+newClient = client('dataset')
+newClient.classificationQuery('Predict building name')
+newClient.tune('classification')
+```
+This creates a neural network to predict building names given your dataset. Any number of classes will work for this query. Note that ```categorical_crossentropy``` and an `adam` optimizer is used as a default. This can be changed as well. 
+
+### K-means Clustering ###
+
+```python
+newClient = client('dataset')
+newClient.kMeansClusteringQuery()
+```
+### Nearest-neighbors ###
+
+```python
+newClient = client('dataset')
+newClient.nearestNeighborQuery()
+```
+
+This will use scikit's learns nearest neighbor function to return the best nearest neighbor model on the dataset. Values are stored under the ```nearest_neighbor``` field in the model dictionary. 
+
+### Support Vector Machine ###
+
+```python
+newClient = client('dataset')
+newClient.svmQuery('Model the value of houses')
+```
+
+This will use scikit's learns SVM function to return the best support vector machine on the dataset. Values are stored under the ```svm``` field in the model dictionary. 
+
+NOTE: A linear kernel is used as the default, this can be modified by specifying:
+
+```newClient.svmQuery('rbf_kernel')```
+
+### Decision Tree ###
+
+```python
+newClient = client('dataset')
+newClient.svmQuery()
+```
+
+This will use scikit's learns Decision Tree function to return the best decision tree on the dataset. Values are stored under the ```decision_tree``` field in the model dictionary. 
+
+```newClient.decisionTreeQuery('Model the type of cars')```
+
+If you'd like to modify hyperparameters feed them this is the order in which you should provide the parameters:
+
+```decisionTreeQuery(instruction, max_depth, min_samples_split, max_samples_split, min_samples_leaf, max_samples_leaf)```
 ***
 
 ## Image Generation ##
