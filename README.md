@@ -10,7 +10,7 @@ Table of Contents
    * [Convolutional Neural Networks](#convolutional-neural-network)
 * [In Progress.....](#in-progress)
 
-### Usage: the basics ###
+## Usage: the basics ##
 
 Fitting a model to a feed-forward neural network to any dataset is as simple as this:
 ```python
@@ -26,9 +26,9 @@ No preprocessing is neccesary. All plots, losses, and models are stored in the m
 
 ***
 
-### Image Generation ###
+## Image Generation ##
 
-## Class wise image generation ## 
+### Class wise image generation ### 
 If you want to generate an image dataset to use in one of your models you can do:
 
 ```python
@@ -37,7 +37,7 @@ generateSet('apples', 'oranges', 'bananas', 'pineapples')
 
 This will create seperate folders in your directory with each of these names with around ~100 images for each class. An updated version of Google Chrome is required for this feature. If you'd like to use it with an older version of Chrome please install the appropriate chromedriver. 
 
-## Convolutional Neural Network ##
+### Convolutional Neural Network ###
 If you'd like to generate images and fit it automatically to a CNN you can use this command:
 
 ```python
