@@ -50,7 +50,7 @@ This represents 5 columns that have the smallest cosine distance: these might ne
 Performing dimensionality reduction is as simple as calling:
 
 ```python
-dimensionalityRedQuery("Perform reduction to model median house value, model_to_fit):
+dimensionalityRedQuery('Perform reduction to model median house value', model_to_fit, depth_of_search):
 ```
 
 This uses a variety of different reduction techniques and outputs the best pipeline to modify your data. If you want to replace the dataset with the new modified one, you can specify ```inplace = True```.
