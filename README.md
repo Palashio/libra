@@ -1,11 +1,10 @@
 # Libra: deep learning in fluent one-liners
 A high-level machine learning API written in Python and Tensorflow that makes training deep neural networks as simple as a one-line function call. 
-
-## Table of Contents ##
- * [Usage: the basics](#usage-the-basics)
- * [Dataset Generation](#dataset-generation)
-  * [Convolutional Neural Network](#convolutional-neural-network)
- * [In Progress.....](#in-progress)
+* [Usage: the basics](#usage-the-basics)
+* [Image Generation](#image-generation)
+   * [Class Wise Image Generation](#class-wise-image-generation)
+   * [Convolutional Neural Networks](#convolutional-neural-network)
+* [In Progress.....](#in-progress)
 
 ### Usage: the basics ###
 
@@ -23,15 +22,24 @@ No preprocessing is neccesary. All plots, losses, and models are stored in the m
 
 ***
 
-### Dataset Generation ###
+### Image Generation ###
+
+## Class wise image generation ## 
+If you want to generate an image dataset to use in one of your models you can do:
+
+```python
+generateSet('apples', 'oranges', 'bananas', 'pineapples')
+```
+
+This will create seperate folders in your directory with each of these names with around ~100 images for each class. An updated version of Google Chrome is required for this feature. If you'd like to use it with an older version of Chrome please install the appropriate chromedriver. 
 
 ## Convolutional Neural Network ##
-This will generate a dataset of apples and oranges by parsing google images, prepprocess the dataset appropriately and then fit it to a Convolutional Neural Network. All images are reduced to a standard (224, 224, 3) size using a traditional OpenCV resizing algorithm.
+If you'd like to generate images and fit it automatically to a CNN you can use this command:
 
 ```python
 newClient.classGenQuery('apples', 'oranges')
 ```
-Default size is 100 images for each. You can specify this size by adding ```class_size = number_in_each_class```
+This will generate a dataset of apples and oranges by parsing google images, prepprocess the dataset appropriately and then fit it to a Convolutional Neural Network. All images are reduced to a standard (224, 224, 3) size using a traditional OpenCV resizing algorithm. Default size is 100 images for each. You can specify this size by adding ```class_size = number_in_each_class```
 
 ***
 All plots are stored during runtime. This function plots all generated graphs for your current client object on one pane. 
