@@ -45,6 +45,17 @@ newClient.classGenQuery('apples', 'oranges')
 ```
 This will generate a dataset of apples and oranges by parsing google images, prepprocess the dataset appropriately and then fit it to a Convolutional Neural Network. All images are reduced to a standard (224, 224, 3) size using a traditional OpenCV resizing algorithm. Default size is 100 images for each. You can specify this size by adding ```class_size = number_in_each_class```
 
+Note: all images will be resized to (224, 224, 3). Properties are maintained by using a geometric image transformation explained here: 
+
+[OpenCV Transformation](https://docs.opencv.org/2.4/modules/imgproc/doc/geometric_transformations.html)
+
+If you'd like to perform tuning on the CNN you can do this: 
+
+```python
+newClient.tuneCNN()
+```
+Unlike other functions, tuning on the CNN is not done automatically because of how computationally intensive it is. 
+
 ***
 All plots are stored during runtime. This function plots all generated graphs for your current client object on one pane. 
 
