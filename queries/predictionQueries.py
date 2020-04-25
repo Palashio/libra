@@ -43,6 +43,8 @@ from keras.utils import to_categorical
 from os import listdir
 from tuner import tuneReg, tuneClass
 from sklearn.neighbors import KNeighborsClassifier
+from sklearn.ensemble import RandomForestRegressor
+from sklearn.feature_selection import SelectFromModel
 
 #allows for all columns to be displayed when printing()
 pd.options.display.width=None
@@ -286,6 +288,8 @@ class client:
         clf = svm.SVC()
         clf.fit(X_train, y_train)
         self.models["svm"] = {"model" : clf, "accuracy_score" : accuracy_score(clf.predict(X_test), y_test), "target" : remove}
+
+        return svm
     
     def nearestNeighborQuery(self, instruction):
         data = pd.read_csv(self.dataset)
@@ -318,6 +322,8 @@ class client:
         knn = models[scores.index(min(scores))]
         self.models["nearest_neighbors"] = {"model" : knn, "accuracy_score" : scores.index(min(scores)), "target" : remove}
 
+        return knn
+
     def decisionTreeQuery(self, instruction):
         data = pd.read_csv(self.dataset)
         data.fillna(0, inplace=True)
@@ -339,6 +345,43 @@ class client:
         X_train, X_test, y_train, y_test = train_test_split(data, y, test_size=0.2, random_state=49)
         clf = tree.DecisionTreeClassifier()
         clf = clf.fit(X_train, y_train)
+
+        self.models["decision_tree"] = {"model" : clf, "target" : remove}
+
+        return clf
+    
+    def allClassQuery(self, instruction):
+        data = pd.read_csv(self.dataset)
+        data.fillna(0, inplace=True)
+
+        remove = getmostSimilarColumn(getValueFromInstruction(instruction), data)
+        y = data[remove]
+        del data[remove]
+
+        #prepcoess the dataset
+        data = singleRegDataPreprocesser(data)
+        #classification_column = getmostSimilarColumn(getLabelwithInstruction(instruction), data)
+
+        num_classes = len(np.unique(y))
+
+        #encodes the label dataset into 0's and 1's 
+        le = preprocessing.LabelEncoder()
+        y = le.fit_transform(y)
+
+        X_train, X_test, y_train, y_test = train_test_split(data, y, test_size=0.2, random_state=49)
+        scores = []
+        models = []
+
+        models.append(self.decisionTreeQuery(instruction))
+        models.append(self.nearestNeighborQuery(instruction))
+        models.append(self.svmQuery(instruction))
+
+        for model in models:
+            scores.append(accuracy_score(model.predict(X_test), y_test))
+
+        
+        return models[scores.index(max(scores))]
+
 
     def tune(self, model_to_tune):
         for key in self.models:
@@ -407,18 +450,25 @@ class client:
                 frame.loc[len(df)] = vals
             
             print("Similarity Spectrum")
+            print("-------------------------")
             print(pdtabulate(frame))
             print()
             print("Dataset Description")
+            print("-------------------------")
             print(pdtabulate(data[column_name]).describe())
 
 
 
+        
+        #print("Most important features: " + str(data.columns[indices]))
 
 
 
-newClient = client("./data/housing.csv")
-newClient.decisionTreeQuery("Estimate ocean proximity")
+
+
+
+# newClient = client("./data/housing.csv")
+# newClient.dimensionalityRedQuery("Predict median house value")
 
 
 
