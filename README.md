@@ -4,7 +4,7 @@ A high-level machine learning API written in Python and Tensorflow that makes tr
 Table of Contents
 =================
 
-* [Queries: building blocks](#queries)
+* [Prediction Queries: building blocks](#queries)
    * [Regression Neural Network](#regression-neural-network-query)
    * [Classification Neural Network](#classification-neural-network-query)
    * [K-Means Clustering](#k-means-clustering)
@@ -14,6 +14,7 @@ Table of Contents
 * [Image Generation](#image-generation)
    * [Class Wise Image Generation](#class-wise-image-generation)
    * [Convolutional Neural Networks](#convolutional-neural-network)
+* [Plotting](#plotting)
 * [Providing Instructions](#instructions)
 
 ## Queries ##
@@ -121,6 +122,8 @@ newClient.tuneCNN()
 Unlike other functions, tuning on the CNN is not done automatically because of how computationally intensive it is. 
 
 ***
+
+## Plotting ##
 All plots are stored during runtime. This function plots all generated graphs for your current client object on one pane. 
 
 ```python
@@ -156,8 +159,8 @@ This uses a variety of different reduction techniques and outputs the best pipel
 ### Instructions ###
 
 Libra uses intelligent part of speech recognition to analyze user instructions and match it with a column in user datasets. 
-  1. Textblob, a part of speech recognition algorithm, is used to identify parts of speech
-  2. Self-created part of speech algorithm is used to extract relevant parts of a sentence
-  3. Levenshentein distances are used to match relevant parts of the sentence to a column name
-  4. That column name is run through an LSTM Recurrent Neural Network to obtain latent representation
+  1. [Textblob](https://textblob.readthedocs.io/en/dev/), a part of speech recognition algorithm, is used to identify parts of speech.
+  2. Self-developed part of speech deciphering algorithm is used to extract relevant parts of a sentence.
+  3. Levenshentein distances are used to match relevant parts of the sentence to a column name.
+  4. That column name is run through an LSTM Recurrent Neural Network to obtain latent representation.
   5. Both instruction and column latent representation is compared to verify. 
