@@ -14,7 +14,7 @@ Table of Contents
 * [Image Generation](#image-generation)
    * [Class Wise Image Generation](#class-wise-image-generation)
    * [Convolutional Neural Networks](#convolutional-neural-network)
-* [In Progress.....](#in-progress)
+* [Providing Instructions](#instructions)
 
 ## Queries ##
 
@@ -153,4 +153,11 @@ dimensionalityRedQuery('Perform reduction to model median house value', model_to
 This uses a variety of different reduction techniques and outputs the best pipeline to modify your data. If you want to replace the dataset with the new modified one, you can specify ```inplace = True```.
 
  
-### In Progress..... ###
+### Instructions ###
+
+Libra uses intelligent part of speech recognition to analyze user instructions and match it with a column in user datasets. 
+  1. Textblob, a part of speech recognition algorithm, is used to identify parts of speech
+  2. Self-created part of speech algorithm is used to extract relevant parts of a sentence
+  3. Levenshentein distances are used to match relevant parts of the sentence to a column name
+  4. That column name is run through an LSTM Recurrent Neural Network to obtain latent representation
+  5. Both instruction and column latent representation is compared to verify. 
