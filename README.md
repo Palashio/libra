@@ -57,6 +57,10 @@ This creates a neural network to predict building names given your dataset. Any 
 newClient = client('dataset')
 newClient.kMeansClusteringQuery()
 ```
+
+This will create a k-means clustering algorithm trained on your processed dataset. It continues to grow the number of clusters until the ``inertia`` value stops decreasing by atleast 1000 units. If you'd like to specify the number of clusters you'd like it to use you can do ``clusters = number_of_clusters``. 
+
+
 ### Nearest-neighbors ###
 
 ```python
