@@ -10,6 +10,7 @@ import keras
 import numpy as np
 import pandas as pd
 import tensorflow as tf
+from sklearn.decomposition import PCA
 from tabulate import tabulate
 from scipy.spatial.distance import cosine
 from pandas import DataFrame
@@ -45,7 +46,7 @@ from sklearn.neighbors import KNeighborsClassifier
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.feature_selection import SelectFromModel    
     
-def dimensionalityRedQuery(instruction, clf, dataset, depth_search = 5, inplace = False):
+def dimensionalityRF(instruction, clf, dataset, depth_search = 5, inplace = False):
     data = pd.read_csv(dataset)
     data.fillna(0, inplace=True)
 
@@ -95,4 +96,49 @@ def dimensionalityRedQuery(instruction, clf, dataset, depth_search = 5, inplace 
     #accuracy_scores.index(max(accuracy_scores))
     #print(columns)
 
-dimensionalityRedQuery("Predict ocean_proximity", "./data/housing.csv")
+
+
+def dimensionalityPCA(instruction, dataset):
+    data = pd.read_csv(dataset)
+    data.fillna(0, inplace=True)
+
+    remove = getmostSimilarColumn(getValueFromInstruction(instruction), data)
+    y = data[remove]
+    del data[remove]
+    le = preprocessing.LabelEncoder()
+    y = le.fit_transform(y)
+
+    data = singleRegDataPreprocesser(data)
+
+
+    pca = PCA(n_components='mle')
+    data_modified = pca.fit_transform(data)
+
+    X_train, X_test, y_train, y_test = train_test_split(data, y, test_size=0.2, random_state=49)
+    X_train_mod, none, y_train_mod, none1 = train_test_split(data_modified, y, test_size=0.2, random_state=49)
+
+    print(y_train_mod.shape)
+    print(X_train_mod.shape)
+
+    clf = tree.DecisionTreeClassifier()
+    clf.fit(X_train, y_train)
+
+    clf_mod = tree.DecisionTreeClassifier()
+    clf_mod.fit(X_train_mod, y_train_mod)
+
+    accuracies = [accuracy_score(clf.predict(X_test), y_test), accuracy_score(clf_mod.predict(none), none1)]
+    if accuracies.index(max(accuracies)) == 0:
+        print("Principle Component Analysis should be not be used for this dataset")
+        print()
+        print(" -------------------------------------------------------------")
+        print("| Running Feature Importance Random Forest Regressor........  |")
+        print("---------------------------------------------------------------")
+        dimensionalityRF(instruction, clf, dataset)
+
+    else:
+        print("Principle Component Analysis improves performance by" + str(accuracies[0] - accuracies[1]))
+    
+
+
+dimensionalityPCA("Predict median house value", "./data/housing.csv")
+#dimensionalityRedQuery("Predict ocean_proximity", "./data/housing.csv")
