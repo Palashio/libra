@@ -182,7 +182,9 @@ dimensionalityRF('Perform reduction to model median house value', model_to_fit, 
 ```
 
 This will use a ```Random Forest Regressor``` to identify feature importances, and remove those features and run the new dataset against your model. It will return the best model; if you'd like it to replace your current dataset you can specify ```inplace = True```. 
- 
+
+***
+
 ### Instructions ###
 
 Libra uses intelligent part of speech recognition to analyze user instructions and match it with a column in user datasets. 
