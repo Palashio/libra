@@ -46,15 +46,37 @@ from sklearn.neighbors import KNeighborsClassifier
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.feature_selection import SelectFromModel
 
+currLog = ""
+
 #allows for all columns to be displayed when printing()
 pd.options.display.width=None
+
+def logger(instruction, space_multiplier):
+    string = " "
+    if space_multiplier == 0:
+        print((" " * 3 * space_multiplier) + instruction)
+        
+    else:
+        print((" " * 3 * space_multiplier) + "|")
+        print((" " * 3 * space_multiplier) + "|- " + instruction)
+
+        if instruction == "done...":
+            print("")
+            print("")
+        #print((" " * 3 * space_multiplier) + instruction)
+    
+
+
 
 #class to store all query information
 class client:
     def __init__(self, data):
+        logger("creating object...", 0)
         self.dataset = data
+        logger("loading dataset...", 1)
         self.models = {} 
-
+        logger("done...", 2)
+        
     #returns models with a specific string 
     def getModels(self): 
         return self.models
@@ -65,15 +87,21 @@ class client:
     # single regression query using a feed-forward neural network
     # instruction should be the value of a column
     def SingleRegressionQueryANN(self, instruction):
+            logger("reading in dataset...", 0)
             data = pd.read_csv(self.dataset)
+            logger("filling n/a values...", 1)
             data.fillna(0, inplace=True)
             
             #identifies the categorical and numerical columns
+            logger("identifying column types...", 2)
             categorical_columns = data.select_dtypes(exclude=["number"]).columns
             numeric_columns = data.columns[data.dtypes.apply(lambda c: np.issubdtype(c, np.number))]
 
             #preprocesses data
+
+            logger("hot encoding values and preprocessing...", 3)
             data = singleRegDataPreprocesser(data)
+            logger("identifying target from instruction...", 4)
             remove = getmostSimilarColumn(getValueFromInstruction(instruction), data)
             y = data[remove]
             del data[remove]
@@ -467,8 +495,8 @@ class client:
 
 
 
-# newClient = client("./data/housing.csv")
-# newClient.dimensionalityRedQuery("Predict median house value")
+newClient = client("./data/housing.csv")
+newClient.SingleRegressionQueryANN("Predict median house value")
 
 
 

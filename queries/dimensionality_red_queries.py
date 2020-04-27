@@ -45,7 +45,36 @@ from tuner import tuneReg, tuneClass
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.feature_selection import SelectFromModel    
-    
+import os
+
+def test_clf():
+    data = pd.read_csv("./data/housing.csv")
+    data.fillna(0, inplace=True)
+
+
+    y = data['ocean_proximity']
+    del data['ocean_proximity']
+    le = preprocessing.LabelEncoder()
+    y = le.fit_transform(y)
+
+    data = singleRegDataPreprocesser(data)
+    X_train, X_test, y_train, y_test = train_test_split(data, y, test_size=0.2, random_state=49)
+
+    vr = svm.SVC()
+    return vr.fit(X_train, y_train)
+
+def dimensionalityReduc(instruction, clf, dataset):
+    beg_acc_RF, final_acc_RF, col_removed_RF =  dimensionalityRF(instruction, clf, dataset)
+    beg_acc_PCA, final_acc_PCA, col_removed_PCA = dimensionalityPCA(instruction, dataset)
+
+    results = []
+    results.append(["RF", beg_acc_RF, final_acc_RF, col_removed_RF])
+    results.append(["PCA", beg_acc_PCA, final_acc_PCA, col_removed_PCA])
+
+    for value in results:
+        print(value)
+        
+
 def dimensionalityRF(instruction, clf, dataset, depth_search = 5, inplace = False):
     data = pd.read_csv(dataset)
     data.fillna(0, inplace=True)
@@ -87,18 +116,10 @@ def dimensionalityRF(instruction, clf, dataset, depth_search = 5, inplace = Fals
     
     the_index = accuracy_scores.index(max(accuracy_scores))
 
-    print("Accuracy before RF Regressor: " + str(accuracy_scores[0]))
-    print("----------------------------------------")
-    print("Best accuracy " + str(accuracy_scores[the_index]) + " by removing columns: ")
-    print(list(columns[the_index]))
 
+    return accuracy_scores[0], max(accuracy_scores), list(columns[the_index])
 
-    #accuracy_scores.index(max(accuracy_scores))
-    #print(columns)
-
-
-
-def dimensionalityPCA(instruction, dataset):
+def dimensionalityPCA(instruction, dataset, inplace = False):
     data = pd.read_csv(dataset)
     data.fillna(0, inplace=True)
 
@@ -117,9 +138,6 @@ def dimensionalityPCA(instruction, dataset):
     X_train, X_test, y_train, y_test = train_test_split(data, y, test_size=0.2, random_state=49)
     X_train_mod, none, y_train_mod, none1 = train_test_split(data_modified, y, test_size=0.2, random_state=49)
 
-    print(y_train_mod.shape)
-    print(X_train_mod.shape)
-
     clf = tree.DecisionTreeClassifier()
     clf.fit(X_train, y_train)
 
@@ -127,18 +145,23 @@ def dimensionalityPCA(instruction, dataset):
     clf_mod.fit(X_train_mod, y_train_mod)
 
     accuracies = [accuracy_score(clf.predict(X_test), y_test), accuracy_score(clf_mod.predict(none), none1)]
-    if accuracies.index(max(accuracies)) == 0:
-        print("Principle Component Analysis should be not be used for this dataset")
-        print()
-        print(" -------------------------------------------------------------")
-        print("| Running Feature Importance Random Forest Regressor........  |")
-        print("---------------------------------------------------------------")
-        dimensionalityRF(instruction, clf, dataset)
-
-    else:
-        print("Principle Component Analysis improves performance by" + str(accuracies[0] - accuracies[1]))
+    data_modified = pd.DataFrame(data_modified)
     
+    return accuracies[0], accuracies[1], (len(data.columns) - len(data_modified.columns))
 
+    
+def get_last_file():
+    max_mtime = 0
+    for dirname,subdirs,files in os.walk("./data"):
+        for fname in files:
+            full_path = os.path.join(dirname, fname)
+            mtime = os.stat(full_path).st_mtime
+            if mtime > max_mtime:
+                max_mtime = mtime
+                max_dir = dirname
+                max_file = fname
+    return max_file
 
-dimensionalityPCA("Predict median house value", "./data/housing.csv")
-#dimensionalityRedQuery("Predict ocean_proximity", "./data/housing.csv")
+clf = test_clf()
+#dimensionalityPCA("Predict median house value", "./data/housing.csv")
+dimensionalityReduc("Predict ocean_proximity", clf, "./data/housing.csv")
