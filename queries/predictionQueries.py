@@ -9,6 +9,7 @@ sys.path.insert(1, './plotting')
 #function imports from other files
 import keras
 import numpy as np
+from colorama import Fore, Style
 import pandas as pd
 import tensorflow as tf
 from tabulate import tabulate
@@ -51,18 +52,19 @@ currLog = ""
 #allows for all columns to be displayed when printing()
 pd.options.display.width=None
 
-def logger(instruction, space_multiplier):
-    string = " "
+def logger(instruction, space_multiplier, found = ""):
+    global currLog 
     if space_multiplier == 0:
-        print((" " * 3 * space_multiplier) + instruction)
-        
+        currLog += (" " * 2 * space_multiplier) + instruction + found 
+        currLog += "\n"        
     else:
-        print((" " * 3 * space_multiplier) + "|")
-        print((" " * 3 * space_multiplier) + "|- " + instruction)
-
+        currLog += (" " * 2 * space_multiplier) + "|" 
+        currLog += "\n"
+        currLog += (" " * 2 * space_multiplier) + "|- " + instruction + Fore.RED + found 
+        currLog += "\n"
         if instruction == "done...":
-            print("")
-            print("")
+            currLog +="\n"
+            currLog += "\n"
         #print((" " * 3 * space_multiplier) + instruction)
     
 
@@ -76,6 +78,7 @@ class client:
         logger("loading dataset...", 1)
         self.models = {} 
         logger("done...", 2)
+
         
     #returns models with a specific string 
     def getModels(self): 
@@ -102,6 +105,7 @@ class client:
             logger("hot encoding values and preprocessing...", 3)
             data = singleRegDataPreprocesser(data)
             logger("identifying target from instruction...", 4)
+            logger("establishing callback function...", 5)
             remove = getmostSimilarColumn(getValueFromInstruction(instruction), data)
             y = data[remove]
             del data[remove]
@@ -113,6 +117,7 @@ class client:
             epochs = 5
 
             #callback function to store lowest loss value
+            
             es = EarlyStopping(monitor='val_loss', mode='min', verbose=1, patience=5)
 
             i = 0
@@ -120,18 +125,22 @@ class client:
             #get the first 3 layer model
             model = getKerasModelRegression(data, i)
 
+            logger("training initial model...", 6)
             history = model.fit(X_train, y_train, epochs=epochs, validation_data=(X_test, y_test), callbacks=[es])
             models.append(history)
+            logger("", 6, "initial model accuracy: " + str(history.history['val_loss'][0]))
+            print(currLog)
 
             losses.append(models[i].history['val_loss'][len(models[i].history['val_loss']) - 1])
 
             #keeps running model and fit functions until the validation loss stops decreasing
+            logger("testing number of layers...", 7)
+            print(currLog)
             while(all(x > y for x, y in zip(losses, losses[1:]))):
                 model = getKerasModelRegression(data, i)
                 history = model.fit(X_train, y_train, epochs=epochs, validation_data=(X_test, y_test), callbacks=[es])
                 models.append(history)
                 losses.append(models[i].history['val_loss'][len(models[i].history['val_loss']) - 1])
-                print("The number of layers " + str(len(model.layers)))
                 i += 1
 
             #calls function to generate plots in plot generation
@@ -140,6 +149,8 @@ class client:
             for x in range(len(plot_names)):
                 plots[str(plot_names[x])] = init_plots[x]
 
+            logger("", 7, "number of layers found: " + str(len(model.layers)))
+            print(currLog)
             #stores values in the client object models dictionary field 
             self.models['regression_ANN'] = {'model' : model, "target" : remove, "plots" : plots, 'losses' : {'training_loss' : history.history['loss'], 'val_loss' : history.history['val_loss']},
                         'accuracy' : {'training_accuracy' : history.history['accuracy'], 'validation_accuracy' : history.history['val_accuracy']}}
