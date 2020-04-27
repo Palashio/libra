@@ -6,9 +6,6 @@ import pandas as pd
 import string 
 from sklearn.metrics.pairwise import cosine_similarity
 from grammartree import getValueFromInstruction
-
-data = pd.read_csv("./data/housing.csv")
-
 #generates mask for sequence to sequence processing
 def produceMask(instruction_label):
     tokenized_string = [char for char in instruction_label]
@@ -55,13 +52,8 @@ def getmostSimilarColumn(instruction_label, dataset):
 
     val, idx = min((val, idx) for (idx, val) in enumerate(distances))
 
-    return data.columns[idx]
+    return dataset.columns[idx]
 
-
-
-
-print(getmostSimilarColumn(getValueFromInstruction("Predict median house value"), data))
-#getmostSimilarColumn(, data)
 
 
 
