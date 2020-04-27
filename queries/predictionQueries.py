@@ -68,8 +68,6 @@ def logger(instruction, space_multiplier, found = ""):
         #print((" " * 3 * space_multiplier) + instruction)
     
 
-
-
 #class to store all query information
 class client:
     def __init__(self, data):
