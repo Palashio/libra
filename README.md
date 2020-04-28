@@ -15,10 +15,15 @@ Table of Contents
    * [Class Wise Image Generation](#class-wise-image-generation)
    * [Convolutional Neural Networks](#convolutional-neural-network)
 * [Model Information](#model-information)
+   * [Model Tuning](#model-tuning)
    * [Plotting](#plotting)
    * [Dataset Information](dataset-information)
 * [Dimensionality Reduction](#dimensionality-reduction)
-   * [Feature Importance Identifier](feature-importance-identifier)
+   * [Reduction Pipeliner](#reduction-pipeliner)
+   * [Principle Component Analysis](#principle-component-analysis)
+   * [Feature Importances via Random Forest Regressor](feature-importances-via-random-forest-regressor)
+   * [Independent Component Analysis](#indepedent-component-analysis)
+* [Process Logger](#process-logger)
 * [Providing Instructions](#instructions)
 
 ## Queries ##
@@ -133,6 +138,21 @@ Unlike other functions, tuning on the CNN is not done automatically because of h
 
 ## Model Information ## 
 
+### Model Tuning ###
+
+In order to further tune your model (this might take a while), you can call: 
+
+```python
+newClient.tune('regression')
+```
+This will tune:
+  1. Number of Layers
+  2. Number of Nodes in every layer
+  3. Learning Rate
+  4. Activation Functions
+  
+In order to ensure that the tuned models accuracy is robust, every model is ran multiple times and the accuracy is averaged. This ensures that the model configuration is truly the best. 
+
 ### Plotting ###
 All plots are stored during runtime. This function plots all generated graphs for your current client object on one pane. 
 
@@ -174,16 +194,93 @@ If you'd like information on just one column you can do:
 
 ## Dimensionality Reduction ##
 
-### Feature Importance Identifer ###
-Performing dimensionality reduction is as simple as calling:
+### Reduction Pipeliner ###
+
+If you'd like to get the best pipeline for dimensionality reduction you call can call:
 
 ```python
-dimensionalityRF('Perform reduction to model median house value', model_to_fit, depth_of_search):
+ dimensionalityReduc("I want to estimate number of crime", path_to_dataset) 
 ```
 
-This will use a ```Random Forest Regressor``` to identify feature importances, and remove those features and run the new dataset against your model. It will return the best model; if you'd like it to replace your current dataset you can specify ```inplace = True```. 
+Libra current supports feature importance identifier using random forest regressor, indepedent component analysis, and principle component analysis. The output of this function should look something like this: 
+
+```
+Baseline Accuracy: 0.9752906976744186
+----------------------------
+Permutation --> ('RF',) | Final Accuracy --> 0.9791666666666666
+Permutation --> ('PCA',) | Final Accuracy --> 0.8015988372093024
+Permutation --> ('ICA',) | Final Accuracy --> 0.8827519379844961
+Permutation --> ('RF', 'PCA') | Final Accuracy --> 0.3316375968992248
+Permutation --> ('RF', 'ICA') | Final Accuracy --> 0.31419573643410853
+Permutation --> ('PCA', 'RF') | Final Accuracy --> 0.7996608527131783
+Permutation --> ('PCA', 'ICA') | Final Accuracy --> 0.8832364341085271
+Permutation --> ('ICA', 'RF') | Final Accuracy --> 0.8873546511627907
+Permutation --> ('ICA', 'PCA') | Final Accuracy --> 0.7737403100775194
+Permutation --> ('RF', 'PCA', 'ICA') | Final Accuracy --> 0.32630813953488375
+Permutation --> ('RF', 'ICA', 'PCA') | Final Accuracy --> 0.30886627906976744
+Permutation --> ('PCA', 'RF', 'ICA') | Final Accuracy --> 0.311531007751938
+Permutation --> ('PCA', 'ICA', 'RF') | Final Accuracy --> 0.8924418604651163
+Permutation --> ('ICA', 'RF', 'PCA') | Final Accuracy --> 0.34205426356589147
+Permutation --> ('ICA', 'PCA', 'RF') | Final Accuracy --> 0.9970639534883721
+
+Best Accuracies
+----------------------------
+["Permutation --> ('ICA', 'PCA', 'RF) | Final Accuracy --> 0.9970639534883721"]
+
+```
+The baseline accuracy represents the accuracy acheived without any dimensionality reduction techniques. Then, each possible permutation of reduction technique is displayed with its respective accuracy. At the bottom is the best pipeline which resulted in the highest accuracy.
+
+If you'd like to replace the dataset with one that replaces it with the best reduced one, you can just specify ```inplace=True```.
+
+### Principle Component Analysis ###
+
+Performing Principle Component is as simple as: 
+
+```python 
+dimensionalityPCA("Estimating median house value", path_to_dataset)
+```
+
+NOTE: this will select the optimal number of principal components to keep. If you'd like to specify the number of components you can just do ```n_components = number_of_components```. 
+
+### Feature Importances via Random Forest Regressor ###
+Using the random forest regressor to identify feature importances is as easy as calling: 
+
+```python
+dimensionalityRF("Estimating median house value", path_to_dataset)
+```
+This will find the optimal number of features to use and will return the dataset with the best accuracy. If you'd like to manually set the number of feature you can do ```n_features = number of features```. 
+
+### Indepedent Component Analysis ###
+
+Performing Indepedent Component Analysis is as simple as: 
+
+```python 
+dimensionalityICA("Estimating median house value", path_to_dataset)
+```
+
+If this does not converge a message will be displayed for users to warn them. 
 
 ***
+
+## Process Logger ##
+
+Libra will automatically output the current process running in a hierarchial format like this:
+
+```
+loading dataset...
+  |
+  |- getting most similar column from instruction...
+    |
+    |- generating dimensionality permutations...
+      |
+      |- running each possible permutation...
+        |
+        |- realigning tensors...
+          |
+          |- getting best accuracies...
+ ```
+
+A quiet mode feature will be implemented after package conversion is completed.
 
 ### Instructions ###
 
