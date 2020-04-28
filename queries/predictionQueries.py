@@ -97,7 +97,7 @@ class client:
 
     # single regression query using a feed-forward neural network
     # instruction should be the value of a column
-    def SingleRegressionQueryANN(self, instruction):
+    def SingleRegressionQueryANN(self, instruction, preprocess=True, test_size=0.2, epochs=5, generate_plots=True, maximizer = "val_loss"):
             global currLog
             logger("reading in dataset...")
             data = pd.read_csv(self.dataset)
@@ -110,24 +110,24 @@ class client:
             numeric_columns = data.columns[data.dtypes.apply(lambda c: np.issubdtype(c, np.number))]
 
             #preprocesses data
-
-            logger("hot encoding values and preprocessing...")
-            data = singleRegDataPreprocesser(data)
+            if preprocess:
+                logger("hot encoding values and preprocessing...")
+                data = singleRegDataPreprocesser(data)
+            
             logger("identifying target from instruction...")
             logger("establishing callback function...")
             remove = getmostSimilarColumn(getValueFromInstruction(instruction), data)
             y = data[remove]
             del data[remove]
 
-            X_train, X_test, y_train, y_test = train_test_split(data, y, test_size=0.2, random_state=49)
+            X_train, X_test, y_train, y_test = train_test_split(data, y, test_size=test_size, random_state=49)
 
             models=[]
             losses = []
-            epochs = 5
 
             #callback function to store lowest loss value
             
-            es = EarlyStopping(monitor='val_loss', mode='min', verbose=1, patience=5)
+            es = EarlyStopping(monitor=maximizer, mode='min', verbose=1, patience=5)
 
             i = 0
 
@@ -139,7 +139,7 @@ class client:
             models.append(history)
             print(currLog)
 
-            losses.append(models[i].history['val_loss'][len(models[i].history['val_loss']) - 1])
+            losses.append(models[i].history[maximizer][len(models[i].history[maximizer]) - 1])
 
             #keeps running model and fit functions until the validation loss stops decreasing
             logger("testing number of layers...")
@@ -148,14 +148,15 @@ class client:
                 model = getKerasModelRegression(data, i)
                 history = model.fit(X_train, y_train, epochs=epochs, validation_data=(X_test, y_test), callbacks=[es])
                 models.append(history)
-                losses.append(models[i].history['val_loss'][len(models[i].history['val_loss']) - 1])
+                losses.append(models[i].history[maximizer][len(models[i].history[maximizer]) - 1])
                 i += 1
 
             #calls function to generate plots in plot generation
-            init_plots, plot_names = generateRegressionPlots(models[len(models) - 1], data, y)
-            plots = {}
-            for x in range(len(plot_names)):
-                plots[str(plot_names[x])] = init_plots[x]
+            if generate_plots:
+                init_plots, plot_names = generateRegressionPlots(models[len(models) - 1], data, y)
+                plots = {}
+                for x in range(len(plot_names)):
+                    plots[str(plot_names[x])] = init_plots[x]
 
             print(currLog)
             #stores values in the client object models dictionary field 
@@ -168,7 +169,7 @@ class client:
 
 
     #query for multilabel classification query, does not work for binaryclassification, fits to feed-forward neural network
-    def classificationQueryANN(self, instruction):
+    def classificationQueryANN(self, instruction, preprocess=True, test_size=0.2, epochs=5, generate_plots=True, maximizer = "val_loss"):
 
         #reads dataset and fills n/a values with zeroes
         data = pd.read_csv(self.dataset)
@@ -179,24 +180,24 @@ class client:
         del data[remove]
 
         #prepcoess the dataset
-        data = singleRegDataPreprocesser(data)
-        #classification_column = getmostSimilarColumn(getLabelwithInstruction(instruction), data)
+        if preprocess:
+            data = singleRegDataPreprocesser(data)
+            #classification_column = getmostSimilarColumn(getLabelwithInstruction(instruction), data)
 
-        num_classes = len(np.unique(y))
+            num_classes = len(np.unique(y))
 
-        #encodes the label dataset into 0's and 1's 
-        le = preprocessing.LabelEncoder()
-        y = le.fit_transform(y)
-        y = np_utils.to_categorical(y)
+            #encodes the label dataset into 0's and 1's 
+            le = preprocessing.LabelEncoder()
+            y = le.fit_transform(y)
+            y = np_utils.to_categorical(y)
 
-        X_train, X_test, y_train, y_test = train_test_split(data, y, test_size=0.2, random_state=49)
+        X_train, X_test, y_train, y_test = train_test_split(data, y, test_size=test_size, random_state=49)
 
         models=[]
         losses = []
-        epochs = 5
         
         #early stopping callback
-        es = EarlyStopping(monitor='val_loss', mode='min', verbose=1, patience=5)
+        es = EarlyStopping(monitor=maximizer, mode='min', verbose=1, patience=5)
 
         i = 0
         model = getKerasModelClassification(data, i, num_classes)
@@ -204,14 +205,14 @@ class client:
         history = model.fit(data, y, epochs=epochs, validation_data=(X_test, y_test), callbacks=[es])
         models.append(history)
 
-        losses.append(models[i].history['val_loss'][len(models[i].history['val_loss']) - 1])
+        losses.append(models[i].history[maximizer][len(models[i].history[maximizer]) - 1])
 
         #keeps running model and fit functions until the validation loss stops decreasing
         while(all(x > y for x, y in zip(losses, losses[1:]))):
             model = getKerasModelClassification(data, i, num_classes)
             history = model.fit(X_train, y_train, epochs=epochs, validation_data=(X_test, y_test), callbacks=[es])
             models.append(history)
-            losses.append(models[i].history['val_loss'][len(models[i].history['val_loss']) - 1])
+            losses.append(models[i].history[maximizer][len(models[i].history[maximizer]) - 1])
             print("The number of layers " + str(len(model.layers)))
             i += 1
 
@@ -225,15 +226,16 @@ class client:
         #returns the last model 
         return model
 
-    def kMeansClusteringQuery(self):
+    def kMeansClusteringQuery(self, preprocess=True, generate_plots = True):
         logger("Reading dataset...")
         #loads dataset and replaces n/a with zero
         data = pd.read_csv(self.dataset)
         data.fillna(0, inplace=True)
         dataPandas = data.copy()
 
-        logger("Preprocessing datase...")
-        data = np.asarray(singleRegDataPreprocesser(data))
+        if preprocess:
+            logger("Preprocessing data...")
+            data = np.asarray(singleRegDataPreprocesser(data))
         modelStorage = []
         inertiaStor = []
 
@@ -261,29 +263,32 @@ class client:
                 break
 
         #generates the clustering plots approiately
-        logger("Generating plots and storing in model")
-        init_plots, plot_names = generateClusteringPlots(modelStorage[len(modelStorage) - 1], dataPandas, data)
+        if generate_plots:
+            logger("Generating plots and storing in model")
+            init_plots, plot_names = generateClusteringPlots(modelStorage[len(modelStorage) - 1], dataPandas, data)
         
-        plots = {}
+            plots = {}
 
-        for x in range(len(plot_names)):
-            plots[str(plot_names[x])] = init_plots[x]
+            for x in range(len(plot_names)):
+                plots[str(plot_names[x])] = init_plots[x]
 
         #stores plots and information in the dictionary client model
         self.models['kmeans_clustering'] = {"model" : modelStorage[len(modelStorage) - 1] ,"plots" : plots}
         clearLog()
         #return modelStorage[len(modelStorage) - 1], inertiaStor[len(inertiaStor) - 1], i
 
-    def createCNNClassification(self, class1, class2):
+    def createCNNClassification(self, class1, class2, activation = "softmax", gen_classes = True, generate_plots = True, input_shape = (224,224,3)):
         logger("Creating CNN generation query")
         #generates the dataset based on instructions using a selenium query on google chrome
         logger("Generating datasets for classes...")
-        firstNumpy = generate_data(class1)
-        secNumpy = generate_data(class2)
+        if gen_classes:
+            firstNumpy = generate_data(class1)
+            secNumpy = generate_data(class2)
 
-        #creates the appropriate dataset 
-        firstLabels = [0] * len(firstNumpy)
-        secLabels = [1] * len(secNumpy)
+            #creates the appropriate dataset 
+            firstLabels = [0] * len(firstNumpy)
+            secLabels = [1] * len(secNumpy)
+
         y = []
         X = []
 
@@ -309,22 +314,25 @@ class client:
 
         logger("Creating convolutional neural network dynamically...")
         #Convolutional Neural Network
-        model.add(Conv2D(64, kernel_size=3, activation="relu", input_shape=(224,224,3)))
+        model.add(Conv2D(64, kernel_size=3, activation="relu", input_shape=input_shape))
         model.add(Conv2D(32, kernel_size=3, activation="relu"))
         model.add(Flatten())
-        model.add(Dense(2, activation="softmax"))
+        model.add(Dense(2, activation=activation))
         model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy'])
         history = model.fit(X_train, y_train, validation_data=(X_test, y_test), epochs=3)
 
         logger("Finishing task and storing information in model...")
-        plots = generateClassificationPlots(history, X, y, model, X_test, y_test)
-        generateClassificationTogether(history, X, y, model, X_test, y_test)
+
+        if generate_plots:
+            plots = generateClassificationPlots(history, X, y, model, X_test, y_test)
+            generateClassificationTogether(history, X, y, model, X_test, y_test)
+
         self.models["classification_CNN"] = {"model" : model, 'num_classes' : len(np.unique(y_test)), "plots" : plots, "target" : class1 + "_" + class2, 'losses' : {'training_loss' : history.history['loss'], 'val_loss' : history.history['val_loss']},
                     'accuracy' : {'training_accuracy' : history.history['accuracy'], 'validation_accuracy' : history.history['val_accuracy']}}
         
         clearLog()
     
-    def svmQuery(self, instruction):
+    def svmQuery(self, instruction, test_size = 0.2, kernel='linear'):
         logger("Reading in dataset....")
         #reads dataset and fills n/a values with zeroes
         data = pd.read_csv(self.dataset)
@@ -346,17 +354,17 @@ class client:
         le = preprocessing.LabelEncoder()
         y = le.fit_transform(y)
 
-        X_train, X_test, y_train, y_test = train_test_split(data, y, test_size=0.2, random_state=49)
+        X_train, X_test, y_train, y_test = train_test_split(data, y, test_size=test_size, random_state=49)
 
         logger("Fitting Support Vector Machine")
-        clf = svm.SVC()
+        clf = svm.SVC('linear')
         clf.fit(X_train, y_train)
         logger("Storing information in client object...")
         self.models["svm"] = {"model" : clf, "accuracy_score" : accuracy_score(clf.predict(X_test), y_test), "target" : remove}
         clearLog()
         return svm
     
-    def nearestNeighborQuery(self, instruction):
+    def nearestNeighborQuery(self, instruction, preprocess = True, min_neighbors = 3, max_neighbors = 10):
         logger("Reading in dataset....")
         data = pd.read_csv(self.dataset)
         data.fillna(0, inplace=True)
@@ -367,8 +375,9 @@ class client:
         del data[remove]
 
         #prepcoess the dataset
-        logger("Preprocessing dataset...")
-        data = singleRegDataPreprocesser(data)
+        if preprocess:
+            logger("Preprocessing dataset...")
+            data = singleRegDataPreprocesser(data)
         #classification_column = getmostSimilarColumn(getLabelwithInstruction(instruction), data)
 
         num_classes = len(np.unique(y))
@@ -383,7 +392,7 @@ class client:
         scores = []
         logger("Fitting Nearest Neighbor...")
         logger("Identifying optimal number of neighbors...")
-        for x in range(3, 10):
+        for x in range(min_neighbors, max_neighbors):
             knn = KNeighborsClassifier(n_neighbors=x)
             knn.fit(X_train, y_train)
             models.append(knn)
@@ -396,7 +405,7 @@ class client:
         clearLog()
         return knn
 
-    def decisionTreeQuery(self, instruction):
+    def decisionTreeQuery(self, instruction, preprocess = True, test_size=0.2):
         logger("Reading in dataset....")
         data = pd.read_csv(self.dataset)
         data.fillna(0, inplace=True)
@@ -407,8 +416,9 @@ class client:
         del data[remove]
 
         #prepcoess the dataset
-        logger("Preprocessing dataset...")
-        data = singleRegDataPreprocesser(data)
+        if preprocess:
+            logger("Preprocessing dataset...")
+            data = singleRegDataPreprocesser(data)
         #classification_column = getmostSimilarColumn(getLabelwithInstruction(instruction), data)
 
         num_classes = len(np.unique(y))
@@ -418,7 +428,7 @@ class client:
         y = le.fit_transform(y)
 
         logger("Fitting Decision Tree...")
-        X_train, X_test, y_train, y_test = train_test_split(data, y, test_size=0.2, random_state=49)
+        X_train, X_test, y_train, y_test = train_test_split(data, y, test_size=test_size, random_state=49)
         clf = tree.DecisionTreeClassifier()
         clf = clf.fit(X_train, y_train)
 
@@ -428,7 +438,7 @@ class client:
         clearLog()
         return clf
     
-    def allClassQuery(self, instruction):
+    def allClassQuery(self, instruction, preprocess=True, test_size=0.2):
         logger("Reading in dataset....")
         data = pd.read_csv(self.dataset)
         data.fillna(0, inplace=True)
@@ -439,8 +449,9 @@ class client:
         del data[remove]
 
         #prepcoess the dataset
-        logger("Preprocessing dataset...")
-        data = singleRegDataPreprocesser(data)
+        if preprocess:
+            logger("Preprocessing dataset...")
+            data = singleRegDataPreprocesser(data)
         #classification_column = getmostSimilarColumn(getLabelwithInstruction(instruction), data)
 
         num_classes = len(np.unique(y))
@@ -449,7 +460,7 @@ class client:
         le = preprocessing.LabelEncoder()
         y = le.fit_transform(y)
 
-        X_train, X_test, y_train, y_test = train_test_split(data, y, test_size=0.2, random_state=49)
+        X_train, X_test, y_train, y_test = train_test_split(data, y, test_size=test_size, random_state=49)
         scores = []
         models = []
 
