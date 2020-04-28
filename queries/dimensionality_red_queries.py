@@ -200,7 +200,7 @@ def dimensionalityRF(instruction, dataset, target="", y = ""):
 
     return datas[the_index], accuracy_scores[0], max(accuracy_scores), list(columns[the_index])
 
-def dimensionalityPCA(instruction, dataset, target="", y = ""):
+def dimensionalityPCA(instruction, dataset, target="", y = "", n_components = 10):
     global currLog 
     global counter
 
