@@ -48,34 +48,44 @@ from sklearn.ensemble import RandomForestRegressor
 from sklearn.feature_selection import SelectFromModel
 
 currLog = ""
+counter = 0
 
 #allows for all columns to be displayed when printing()
 pd.options.display.width=None
 
-def logger(instruction, space_multiplier, found = ""):
+def clearLog():
+    global currLog
+    currLog = ""
+
+def logger(instruction, found = ""):
     global currLog 
-    if space_multiplier == 0:
-        currLog += (" " * 2 * space_multiplier) + instruction + found 
+    global counter 
+
+    if counter == 0:
+        currLog += (" " * 2 * counter) + instruction + found 
         currLog += "\n"        
     else:
-        currLog += (" " * 2 * space_multiplier) + "|" 
+        currLog += (" " * 2 * counter) + "|" 
         currLog += "\n"
-        currLog += (" " * 2 * space_multiplier) + "|- " + instruction + Fore.RED + found 
+        currLog += (" " * 2 * counter) + "|- " + instruction + found 
         currLog += "\n"
         if instruction == "done...":
             currLog +="\n"
             currLog += "\n"
-        #print((" " * 3 * space_multiplier) + instruction)
-    
+
+    counter += 1
+    print(currLog)
 
 #class to store all query information
 class client:
     def __init__(self, data):
-        logger("creating object...", 0)
+        logger("creating object...")
         self.dataset = data
-        logger("loading dataset...", 1)
+        logger("loading dataset...")
         self.models = {} 
-        logger("done...", 2)
+        logger("done...")
+        clearLog()
+
 
         
     #returns models with a specific string 
@@ -88,22 +98,23 @@ class client:
     # single regression query using a feed-forward neural network
     # instruction should be the value of a column
     def SingleRegressionQueryANN(self, instruction):
-            logger("reading in dataset...", 0)
+            global currLog
+            logger("reading in dataset...")
             data = pd.read_csv(self.dataset)
-            logger("filling n/a values...", 1)
+            logger("filling n/a values...")
             data.fillna(0, inplace=True)
             
             #identifies the categorical and numerical columns
-            logger("identifying column types...", 2)
+            logger("identifying column types...")
             categorical_columns = data.select_dtypes(exclude=["number"]).columns
             numeric_columns = data.columns[data.dtypes.apply(lambda c: np.issubdtype(c, np.number))]
 
             #preprocesses data
 
-            logger("hot encoding values and preprocessing...", 3)
+            logger("hot encoding values and preprocessing...")
             data = singleRegDataPreprocesser(data)
-            logger("identifying target from instruction...", 4)
-            logger("establishing callback function...", 5)
+            logger("identifying target from instruction...")
+            logger("establishing callback function...")
             remove = getmostSimilarColumn(getValueFromInstruction(instruction), data)
             y = data[remove]
             del data[remove]
@@ -123,16 +134,15 @@ class client:
             #get the first 3 layer model
             model = getKerasModelRegression(data, i)
 
-            logger("training initial model...", 6)
+            logger("training initial model...")
             history = model.fit(X_train, y_train, epochs=epochs, validation_data=(X_test, y_test), callbacks=[es])
             models.append(history)
-            logger("", 6, "initial model accuracy: " + str(history.history['val_loss'][0]))
             print(currLog)
 
             losses.append(models[i].history['val_loss'][len(models[i].history['val_loss']) - 1])
 
             #keeps running model and fit functions until the validation loss stops decreasing
-            logger("testing number of layers...", 7)
+            logger("testing number of layers...")
             print(currLog)
             while(all(x > y for x, y in zip(losses, losses[1:]))):
                 model = getKerasModelRegression(data, i)
@@ -147,13 +157,13 @@ class client:
             for x in range(len(plot_names)):
                 plots[str(plot_names[x])] = init_plots[x]
 
-            logger("", 7, "number of layers found: " + str(len(model.layers)))
             print(currLog)
             #stores values in the client object models dictionary field 
             self.models['regression_ANN'] = {'model' : model, "target" : remove, "plots" : plots, 'losses' : {'training_loss' : history.history['loss'], 'val_loss' : history.history['val_loss']},
                         'accuracy' : {'training_accuracy' : history.history['accuracy'], 'validation_accuracy' : history.history['val_accuracy']}}
 
             #returns the best model
+            clearLog()
             return models[len(models) - 1]
 
 
@@ -216,16 +226,20 @@ class client:
         return model
 
     def kMeansClusteringQuery(self):
+        logger("Reading dataset...")
         #loads dataset and replaces n/a with zero
         data = pd.read_csv(self.dataset)
         data.fillna(0, inplace=True)
         dataPandas = data.copy()
+
+        logger("Preprocessing datase...")
         data = np.asarray(singleRegDataPreprocesser(data))
         modelStorage = []
         inertiaStor = []
 
         #processes dataset and runs KMeans algorithm on one cluster as baseline
         i = 1
+        logger("Creating unsupervised clustering task...")
         kmeans = KMeans(n_clusters=i, random_state=0).fit(data)
         modelStorage.append(kmeans)
 
@@ -233,6 +247,7 @@ class client:
         inertiaStor.append(kmeans.inertia_)
         i += 1
 
+        logger("Identifying best centroid count and optimizing accuracy")
         #continues to increase cluster size until SSE values don't decrease by 1000 - this value was decided based on precedence
         while(all(earlier >= later for earlier, later in zip(inertiaStor, inertiaStor[1:]))):
             kmeans = KMeans(n_clusters=i, random_state=0).fit(data)
@@ -246,6 +261,7 @@ class client:
                 break
 
         #generates the clustering plots approiately
+        logger("Generating plots and storing in model")
         init_plots, plot_names = generateClusteringPlots(modelStorage[len(modelStorage) - 1], dataPandas, data)
         
         plots = {}
@@ -255,11 +271,13 @@ class client:
 
         #stores plots and information in the dictionary client model
         self.models['kmeans_clustering'] = {"model" : modelStorage[len(modelStorage) - 1] ,"plots" : plots}
+        clearLog()
         #return modelStorage[len(modelStorage) - 1], inertiaStor[len(inertiaStor) - 1], i
 
     def createCNNClassification(self, class1, class2):
-
+        logger("Creating CNN generation query")
         #generates the dataset based on instructions using a selenium query on google chrome
+        logger("Generating datasets for classes...")
         firstNumpy = generate_data(class1)
         secNumpy = generate_data(class2)
 
@@ -269,6 +287,7 @@ class client:
         y = []
         X = []
 
+        logger("Applying resizing transformation algorithms...")
         #processes dataset and stores them in the data and label variables
         for x in range(len(firstLabels)):
             y.append(firstLabels[x])
@@ -288,6 +307,7 @@ class client:
         y_test = to_categorical(y_test)
         model = Sequential()
 
+        logger("Creating convolutional neural network dynamically...")
         #Convolutional Neural Network
         model.add(Conv2D(64, kernel_size=3, activation="relu", input_shape=(224,224,3)))
         model.add(Conv2D(32, kernel_size=3, activation="relu"))
@@ -296,21 +316,27 @@ class client:
         model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy'])
         history = model.fit(X_train, y_train, validation_data=(X_test, y_test), epochs=3)
 
+        logger("Finishing task and storing information in model...")
         plots = generateClassificationPlots(history, X, y, model, X_test, y_test)
         generateClassificationTogether(history, X, y, model, X_test, y_test)
         self.models["classification_CNN"] = {"model" : model, 'num_classes' : len(np.unique(y_test)), "plots" : plots, "target" : class1 + "_" + class2, 'losses' : {'training_loss' : history.history['loss'], 'val_loss' : history.history['val_loss']},
                     'accuracy' : {'training_accuracy' : history.history['accuracy'], 'validation_accuracy' : history.history['val_accuracy']}}
+        
+        clearLog()
     
     def svmQuery(self, instruction):
+        logger("Reading in dataset....")
         #reads dataset and fills n/a values with zeroes
         data = pd.read_csv(self.dataset)
         data.fillna(0, inplace=True)
 
+        logger("Identifying target columns...")
         remove = getmostSimilarColumn(getValueFromInstruction(instruction), data)
         y = data[remove]
         del data[remove]
 
         #prepcoess the dataset
+        logger("Preprocessing dataset")
         data = singleRegDataPreprocesser(data)
         #classification_column = getmostSimilarColumn(getLabelwithInstruction(instruction), data)
 
@@ -322,21 +348,26 @@ class client:
 
         X_train, X_test, y_train, y_test = train_test_split(data, y, test_size=0.2, random_state=49)
 
+        logger("Fitting Support Vector Machine")
         clf = svm.SVC()
         clf.fit(X_train, y_train)
+        logger("Storing information in client object...")
         self.models["svm"] = {"model" : clf, "accuracy_score" : accuracy_score(clf.predict(X_test), y_test), "target" : remove}
-
+        clearLog()
         return svm
     
     def nearestNeighborQuery(self, instruction):
+        logger("Reading in dataset....")
         data = pd.read_csv(self.dataset)
         data.fillna(0, inplace=True)
 
+        logger("Identifying target columns...")
         remove = getmostSimilarColumn(getValueFromInstruction(instruction), data)
         y = data[remove]
         del data[remove]
 
         #prepcoess the dataset
+        logger("Preprocessing dataset...")
         data = singleRegDataPreprocesser(data)
         #classification_column = getmostSimilarColumn(getLabelwithInstruction(instruction), data)
 
@@ -350,26 +381,33 @@ class client:
 
         models = []
         scores = []
+        logger("Fitting Nearest Neighbor...")
+        logger("Identifying optimal number of neighbors...")
         for x in range(3, 10):
             knn = KNeighborsClassifier(n_neighbors=x)
             knn.fit(X_train, y_train)
             models.append(knn)
             scores.append(accuracy_score(knn.predict(X_test), y_test))
 
+        logger("Storing information in client object...")
         knn = models[scores.index(min(scores))]
         self.models["nearest_neighbors"] = {"model" : knn, "accuracy_score" : scores.index(min(scores)), "target" : remove}
 
+        clearLog()
         return knn
 
     def decisionTreeQuery(self, instruction):
+        logger("Reading in dataset....")
         data = pd.read_csv(self.dataset)
         data.fillna(0, inplace=True)
 
+        logger("Identifying target columns...")
         remove = getmostSimilarColumn(getValueFromInstruction(instruction), data)
         y = data[remove]
         del data[remove]
 
         #prepcoess the dataset
+        logger("Preprocessing dataset...")
         data = singleRegDataPreprocesser(data)
         #classification_column = getmostSimilarColumn(getLabelwithInstruction(instruction), data)
 
@@ -379,23 +417,29 @@ class client:
         le = preprocessing.LabelEncoder()
         y = le.fit_transform(y)
 
+        logger("Fitting Decision Tree...")
         X_train, X_test, y_train, y_test = train_test_split(data, y, test_size=0.2, random_state=49)
         clf = tree.DecisionTreeClassifier()
         clf = clf.fit(X_train, y_train)
 
+        logger("Storing information in client object...")
         self.models["decision_tree"] = {"model" : clf, "target" : remove}
 
+        clearLog()
         return clf
     
     def allClassQuery(self, instruction):
+        logger("Reading in dataset....")
         data = pd.read_csv(self.dataset)
         data.fillna(0, inplace=True)
 
+        logger("Identifying target columns...")
         remove = getmostSimilarColumn(getValueFromInstruction(instruction), data)
         y = data[remove]
         del data[remove]
 
         #prepcoess the dataset
+        logger("Preprocessing dataset...")
         data = singleRegDataPreprocesser(data)
         #classification_column = getmostSimilarColumn(getLabelwithInstruction(instruction), data)
 
@@ -409,33 +453,41 @@ class client:
         scores = []
         models = []
 
+        logger("Testing various classification models....")
         models.append(self.decisionTreeQuery(instruction))
         models.append(self.nearestNeighborQuery(instruction))
         models.append(self.svmQuery(instruction))
 
+        logger("Identifying top scores...")
         for model in models:
             scores.append(accuracy_score(model.predict(X_test), y_test))
 
-        
+        clearLog()
         return models[scores.index(max(scores))]
 
 
     def tune(self, model_to_tune):
+        logger("Getting target model for tuning...")
         for key in self.models:
             if key == model_to_tune:
+                logger("Tuning model hyperparameters")
                 returned_model = tuneReg(self.dataset, self.models[key]["target"])
                 self.models['regression_ANN'] = {'model' : returned_model}
                 return returned_model
             if key == model_to_tune:
+                logger("Tuning model hyperparameters")
                 returned_model = tuneClass(self.models[key]["target"], self.models[key]["num_classes"])
                 self.models['classification_ANN'] = {'model' : returned_model}
                 return returned_model
 
     def stat_analysis(self, column_name = "none"):
+        logger("Reading in dataset....")
         data = pd.read_csv(self.dataset)
         data.fillna(0, inplace=True)
+        logger("Creating lambda object to format...")
         pdtabulate=lambda df:tabulate(df,headers='keys',tablefmt='psql')
         
+        logger("Identifying columns to transform....")
         categor = data.select_dtypes(exclude=['int', 'float'])
         categor = categor.apply(LabelEncoder().fit_transform)
         for value in categor.columns:
@@ -456,6 +508,7 @@ class client:
             #print(np.argpartition(np.asarray(df.iloc[0]), -5)[-5:])
             cols = []
             vals = []
+            logger("Restructuring dataset for similarity...")
             for val in np.argpartition(np.asarray(df.iloc[0]), -5)[-5:]:
                 cols.append(df.columns[val])
                 vals.append(df[df.columns[val]].iloc[0])
@@ -468,6 +521,7 @@ class client:
             print(pdtabulate(data.describe()))
 
         else:
+            logger("Performing similarity calculations....")
             columns = []
             sim = []
             for val in data.columns:

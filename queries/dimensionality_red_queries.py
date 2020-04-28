@@ -48,10 +48,42 @@ from sklearn.ensemble import RandomForestRegressor
 from sklearn.feature_selection import SelectFromModel    
 import os
 
-def dimensionalityReduc(instruction, dataset):
+currLog = ""
+counter = 0
 
+#allows for all columns to be displayed when printing()
+pd.options.display.width=None
+
+def logger(instruction, found = ""):
+    global currLog 
+    global counter 
+
+    if counter == 0:
+        currLog += (" " * 2 * counter) + instruction + found 
+        currLog += "\n"        
+    else:
+        currLog += (" " * 2 * counter) + "|" 
+        currLog += "\n"
+        currLog += (" " * 2 * counter) + "|- " + instruction + found 
+        currLog += "\n"
+        if instruction == "done...":
+            currLog +="\n"
+            currLog += "\n"
+
+    counter += 1
+    print(currLog)
+
+
+def dimensionalityReduc(instruction, dataset):
+    global currLog 
+    global counter
+
+
+    logger("loading dataset...")
     data = pd.read_csv(dataset)
     data.fillna(0, inplace=True)
+
+    logger("getting most similar column from instruction...")
     target = getmostSimilarColumn(getValueFromInstruction(instruction), data)
 
     y = data[target]
@@ -66,11 +98,13 @@ def dimensionalityReduc(instruction, dataset):
     finals = []
     arr = ["RF", "PCA", "ICA"]
 
+    logger("generating dimensionality permutations...")
     for i in range(1, len(arr) + 1):
         for elem in list(itertools.permutations(arr, i)):
             perms.append(elem)
 
-
+    logger("running each possible permutation...")
+    logger("realigning tensors...")
     for path in perms:
         storage = []
         storage.append(data)
@@ -93,6 +127,7 @@ def dimensionalityReduc(instruction, dataset):
             if path.index(element) == len(path) - 1:
                 finals.append(overall_storage[len(overall_storage) - 1])
 
+    logger("getting best accuracies...")
     accs = []
     i = 0
     print("")
@@ -109,13 +144,12 @@ def dimensionalityReduc(instruction, dataset):
     for element in accs:
         print(element)
 
-
     
 
-
-
 def dimensionalityRF(instruction, dataset, target="", y = ""):
-    print("Initial shape: " + str(dataset.shape))
+    global currLog 
+    global counter
+
     if target == "":
         data = pd.read_csv("./data/" + get_last_file()[0])
         data.fillna(0, inplace=True)
@@ -167,6 +201,9 @@ def dimensionalityRF(instruction, dataset, target="", y = ""):
     return datas[the_index], accuracy_scores[0], max(accuracy_scores), list(columns[the_index])
 
 def dimensionalityPCA(instruction, dataset, target="", y = ""):
+    global currLog 
+    global counter
+
     if target == "":
         data = pd.read_csv("./data/" + get_last_file()[0])
         data.fillna(0, inplace=True)
@@ -200,7 +237,9 @@ def dimensionalityPCA(instruction, dataset, target="", y = ""):
     return data_modified, accuracies[0], accuracies[1], (len(dataset.columns) - len(data_modified.columns))
 
 def dimensionalityICA(instruction, dataset, target="", y = ""):
-    print(dataset.shape)
+    global currLog 
+    global counter
+
     if target == "":
         data = pd.read_csv("./data/" + get_last_file()[0])
         data.fillna(0, inplace=True)
@@ -231,7 +270,6 @@ def dimensionalityICA(instruction, dataset, target="", y = ""):
     data_modified[target] = y_combined
     #data_modified.to_csv("./data/housingPCA.csv")
     
-    print(data_modified.shape)
     return data_modified, accuracies[0], accuracies[1], (len(dataset.columns) - len(data_modified.columns))
 
     
