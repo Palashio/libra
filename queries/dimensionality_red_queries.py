@@ -11,7 +11,7 @@ import numpy as np
 import itertools 
 import pandas as pd
 import tensorflow as tf
-from sklearn.decomposition import PCA
+from sklearn.decomposition import PCA, FastICA
 from tabulate import tabulate
 from scipy.spatial.distance import cosine
 from pandas import DataFrame
@@ -48,31 +48,23 @@ from sklearn.ensemble import RandomForestRegressor
 from sklearn.feature_selection import SelectFromModel    
 import os
 
-def test_clf():
-    data = pd.read_csv("./data/housing.csv")
-    data.fillna(0, inplace=True)
-
-    y = data['ocean_proximity']
-    del data['ocean_proximity']
-    le = preprocessing.LabelEncoder()
-    y = le.fit_transform(y)
-
-    data = singleRegDataPreprocesser(data)
-    X_train, X_test, y_train, y_test = train_test_split(data, y, test_size=0.2, random_state=49)
-
-    vr = svm.SVC()
-    return vr.fit(X_train, y_train)
-
 def dimensionalityReduc(instruction, dataset):
 
     data = pd.read_csv(dataset)
     data.fillna(0, inplace=True)
     target = getmostSimilarColumn(getValueFromInstruction(instruction), data)
 
+    y = data[target]
+    del data[target]
+    le = preprocessing.LabelEncoder()
+    y = le.fit_transform(y)
+
+    data = singleRegDataPreprocesser(data)
+
     perms = []
     overall_storage = []
     finals = []
-    arr = ["RF", "PCA"]
+    arr = ["RF", "PCA", "ICA"]
 
     for i in range(1, len(arr) + 1):
         for elem in list(itertools.permutations(arr, i)):
@@ -85,51 +77,58 @@ def dimensionalityReduc(instruction, dataset):
         for element in path:
             if element == "RF":
                 currSet = storage[len(storage) - 1]
-                data_mod, beg_acc_RF, final_acc_RF, col_removed_RF = dimensionalityRF(instruction, currSet, target)
+                data_mod, beg_acc_RF, final_acc_RF, col_removed_RF = dimensionalityRF(instruction, currSet, target, y)
                 storage.append(data_mod)
                 overall_storage.append(list([data_mod, beg_acc_RF,final_acc_RF, col_removed_RF]))
-                
             if element == "PCA":
                 currSet = storage[len(storage) - 1] 
-                data_mod, beg_acc_PCA, final_acc_PCA, col_removed_PCA = dimensionalityPCA(instruction, currSet, target)
+                data_mod, beg_acc_PCA, final_acc_PCA, col_removed_PCA = dimensionalityPCA(instruction, currSet, target, y)
                 storage.append(data_mod)
                 overall_storage.append(list([data_mod, beg_acc_PCA, final_acc_PCA, col_removed_PCA]))
+            if element == "ICA":
+                currSet = storage[len(storage) - 1] 
+                data_mod, beg_acc_ICA, final_acc_ICA, col_removed_ICA = dimensionalityICA(instruction, currSet, target, y)
+                storage.append(data_mod)
+                overall_storage.append(list([data_mod, beg_acc_ICA, final_acc_ICA, col_removed_ICA]))
             if path.index(element) == len(path) - 1:
                 finals.append(overall_storage[len(overall_storage) - 1])
 
+    accs = []
     i = 0
     print("")
     print("Baseline Accuracy: " + str(finals[0][1]))
     print("----------------------------")
     for element in finals:
         print("Permutation --> " + str(perms[i]) + " | Final Accuracy --> " + str(element[2]))
-        i+= 1
+        if finals[0][1] < element[2]:
+            accs.append(list(["Permutation --> " + str(perms[i]) + " | Final Accuracy --> " + str(element[2])]))
+        i += 1
+    print("")
+    print("Best Accuracies")
+    print("----------------------------")
+    for element in accs:
+        print(element)
 
 
-def dimensionalityRF(instruction, dataset, target=""):
+    
+
+
+
+def dimensionalityRF(instruction, dataset, target="", y = ""):
+    print("Initial shape: " + str(dataset.shape))
     if target == "":
         data = pd.read_csv("./data/" + get_last_file()[0])
         data.fillna(0, inplace=True)
         remove = getmostSimilarColumn(getValueFromInstruction(instruction), data)
-    else:
-        data = dataset
-        data.fillna(0, inplace=True)
-        remove = getmostSimilarColumn(getValueFromInstruction(instruction), data)
+        data = singleRegDataPreprocesser(data)
 
-    if target == "":
-        y = data[remove]
-        del data[remove]
-        le = preprocessing.LabelEncoder()
-        y = le.fit_transform(y)
-    else:
         y = data[remove]
         del data[remove]
         le = preprocessing.LabelEncoder()
         y = le.fit_transform(y)
 
-    data = singleRegDataPreprocesser(data)
 
-    X_train, X_test, y_train, y_test = train_test_split(data, y, test_size=0.2, random_state=49)
+    X_train, X_test, y_train, y_test = train_test_split(dataset, y, test_size=0.2, random_state=49)
     first_classifier = tree.DecisionTreeClassifier()
     first_classifier.fit(X_train, y_train)
 
@@ -138,19 +137,19 @@ def dimensionalityRF(instruction, dataset, target=""):
     accuracy_scores = [first_classifier_acc]
     columns = []
     datas = []
-    datas.append(data)
+    datas.append(dataset)
     columns.append([])
 
-    for x in range(1, 5):
+    for x in range(4, len(dataset.columns)):
         feature_model = RandomForestRegressor(random_state=1, max_depth=10)
         feature_model.fit(X_train, y_train)
 
         importances = feature_model.feature_importances_
         indices = np.argsort(importances)[-x:]
-        columns.append(data.columns[indices])
+        columns.append(dataset.columns[indices])
 
-        X_temp_train = X_train[data.columns[indices]]
-        X_temp_test = X_test[data.columns[indices]]
+        X_temp_train = X_train[dataset.columns[indices]]
+        X_temp_test = X_test[dataset.columns[indices]]
 
         X_combined = np.r_[X_temp_train, X_temp_test]
         y_combined = np.r_[y_train, y_test]
@@ -167,35 +166,22 @@ def dimensionalityRF(instruction, dataset, target=""):
 
     return datas[the_index], accuracy_scores[0], max(accuracy_scores), list(columns[the_index])
 
-def dimensionalityPCA(instruction, dataset, target=""):
+def dimensionalityPCA(instruction, dataset, target="", y = ""):
     if target == "":
         data = pd.read_csv("./data/" + get_last_file()[0])
         data.fillna(0, inplace=True)
         remove = getmostSimilarColumn(getValueFromInstruction(instruction), data)
-    else:
-        data = dataset
-        data.fillna(0, inplace=True)
-        remove = getmostSimilarColumn(getValueFromInstruction(instruction), data)
 
-    
-    if target == "":
-        y = data[remove]
-        del data[remove]
-        le = preprocessing.LabelEncoder()
-        y = le.fit_transform(y)
-    else: 
         y = data[remove]
         del data[remove]
         le = preprocessing.LabelEncoder()
         y = le.fit_transform(y)
 
-    data = singleRegDataPreprocesser(data)
 
+    pca = PCA(n_components = len(dataset.columns))
+    data_modified = pca.fit_transform(dataset)
 
-    pca = PCA(n_components=(int(np.floor(len(data.columns) * 0.75))))
-    data_modified = pca.fit_transform(data)
-
-    X_train, X_test, y_train, y_test = train_test_split(data, y, test_size=0.2, random_state=49)
+    X_train, X_test, y_train, y_test = train_test_split(dataset, y, test_size=0.2, random_state=49)
     X_train_mod, none, y_train_mod, none1 = train_test_split(data_modified, y, test_size=0.2, random_state=49)
 
     clf = tree.DecisionTreeClassifier()
@@ -208,10 +194,45 @@ def dimensionalityPCA(instruction, dataset, target=""):
     data_modified = pd.DataFrame(data_modified)
     
     y_combined = np.r_[y_train, y_test]
-    data_modified[remove] = y_combined
+    data_modified[target] = y_combined
     #data_modified.to_csv("./data/housingPCA.csv")
     
-    return data_modified, accuracies[0], accuracies[1], (len(data.columns) - len(data_modified.columns))
+    return data_modified, accuracies[0], accuracies[1], (len(dataset.columns) - len(data_modified.columns))
+
+def dimensionalityICA(instruction, dataset, target="", y = ""):
+    print(dataset.shape)
+    if target == "":
+        data = pd.read_csv("./data/" + get_last_file()[0])
+        data.fillna(0, inplace=True)
+        remove = getmostSimilarColumn(getValueFromInstruction(instruction), data)
+
+        y = data[remove]
+        del data[remove]
+        le = preprocessing.LabelEncoder()
+        y = le.fit_transform(y)
+
+
+    pca = FastICA(n_components = len(dataset.columns))
+    data_modified = pca.fit_transform(dataset)
+
+    X_train, X_test, y_train, y_test = train_test_split(dataset, y, test_size=0.2, random_state=49)
+    X_train_mod, none, y_train_mod, none1 = train_test_split(data_modified, y, test_size=0.2, random_state=49)
+
+    clf = tree.DecisionTreeClassifier()
+    clf.fit(X_train, y_train)
+
+    clf_mod = tree.DecisionTreeClassifier()
+    clf_mod.fit(X_train_mod, y_train_mod)
+
+    accuracies = [accuracy_score(clf.predict(X_test), y_test), accuracy_score(clf_mod.predict(none), none1)]
+    data_modified = pd.DataFrame(data_modified)
+    
+    y_combined = np.r_[y_train, y_test]
+    data_modified[target] = y_combined
+    #data_modified.to_csv("./data/housingPCA.csv")
+    
+    print(data_modified.shape)
+    return data_modified, accuracies[0], accuracies[1], (len(dataset.columns) - len(data_modified.columns))
 
     
 def get_last_file():
@@ -230,5 +251,18 @@ def get_last_file():
 
 #dimensionalityPCA("Predict median house value", "./data/housing.csv")
 
-dimensionalityReduc("Predict ocean_proximity", "./data/housing.csv")
+#dimensionalityReduc("Predict ocean_proximity", "./data/housing.csv")
 
+# data = pd.read_csv("./data/housing.csv")
+# data.fillna(0, inplace=True)
+# target = getmostSimilarColumn(getValueFromInstruction("Predict ocean proximity"), data)
+
+# y = data[target]
+# del data[target]
+# le = preprocessing.LabelEncoder()
+# y = le.fit_transform(y)
+
+# data = singleRegDataPreprocesser(data)
+
+dimensionalityReduc("Predict ocean proximity", "./data/housing.csv")
+#dimensionalityICA("Predict ocean proximity", data, "ocean_proximity", y)
