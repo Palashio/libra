@@ -138,6 +138,8 @@ def dimensionalityRF(instruction, dataset, target=""):
     accuracy_scores = [first_classifier_acc]
     columns = []
     datas = []
+    datas.append(data)
+    columns.append([])
 
     for x in range(1, 5):
         feature_model = RandomForestRegressor(random_state=1, max_depth=10)
