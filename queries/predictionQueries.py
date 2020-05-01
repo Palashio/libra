@@ -162,7 +162,7 @@ class client:
 
             print(currLog)
             #stores values in the client object models dictionary field 
-            self.models['regression_ANN'] = {'model' : model, "target" : remove, "plots" : plots, 'losses' : {'training_loss' : history.history['loss'], 'val_loss' : history.history['val_loss']},
+            self.models['regression_ANN'] = {'model' : model, "X": data, "y": y, "target" : remove, "plots" : plots, 'losses' : {'training_loss' : history.history['loss'], 'val_loss' : history.history['val_loss']},
                         'accuracy' : {'training_accuracy' : history.history['accuracy'], 'validation_accuracy' : history.history['val_accuracy']}}
 
             #returns the best model
@@ -222,7 +222,7 @@ class client:
         plots = generateClassificationPlots(models[len(models) - 1], data, y, model, X_test, y_test)
 
         #stores the values and plots into the object dictionary
-        self.models["classification_ANN"] = {"model" : model, 'num_classes' : num_classes, "plots" : plots, "target" : remove, 'losses' : {'training_loss' : history.history['loss'], 'val_loss' : history.history['val_loss']},
+        self.models["classification_ANN"] = {"model" : model, "X" : data, "y" : y, 'num_classes' : num_classes, "plots" : plots, "target" : remove, 'losses' : {'training_loss' : history.history['loss'], 'val_loss' : history.history['val_loss']},
                         'accuracy' : {'training_accuracy' : history.history['accuracy'], 'validation_accuracy' : history.history['val_accuracy']}}
 
         #returns the last model 
@@ -442,7 +442,7 @@ class client:
                 logger("Tuning model hyperparameters")
                 X = self.models['convolutional_NN']["X"]
                 y = self.models['convolutional_NN']["y"]
-                model = tuneCNN(np.asarray(X), np.asarray(y), 2)
+                model = tuneCNN(np.asarray(X), np.asarray(y), self.models["convolutional_NN"]["num_classes"])
                 self.models["convolutional_NN"]["model"] = model
 
 
@@ -528,7 +528,6 @@ class client:
  
         X_train, X_test, y_train, y_test = train_test_split(np.asarray(X), np.asarray(y), test_size=0.33, random_state=42)
 
-      
         y_train = to_categorical(y_train)
         y_test = to_categorical(y_test)
         y = to_categorical(y)
@@ -545,7 +544,7 @@ class client:
         model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy'])
         history = model.fit(X_train, y_train, validation_data=(X_test, y_test), epochs=3)
 
-        self.models["convolutional_NN"] = {"model" : model, "X" : X, "y" : y, 'num_classes' : len(np.unique(y_test)), 'losses' : {'training_loss' : history.history['loss'], 'val_loss' : history.history['val_loss']},
+        self.models["convolutional_NN"] = {"model" : model, "X" : X, "y" : y, 'num_classes' : len(*argv), 'losses' : {'training_loss' : history.history['loss'], 'val_loss' : history.history['val_loss']},
                 'accuracy' : {'training_accuracy' : history.history['accuracy'], 'validation_accuracy' : history.history['val_accuracy']}}
         
         
@@ -572,9 +571,7 @@ class client:
         #creates the appropriate dataset 
 
         logger("Applying resizing transformation algorithms...")
-        #processes dataset and stores them in the data and label variables
 
-        
         X_train, X_test, y_train, y_test = train_test_split(np.asarray(X), np.asarray(y), test_size=0.33, random_state=42)
 
         #categorically encodes them for CNN processing
@@ -595,28 +592,15 @@ class client:
 
        
         plots = generateClassificationPlots(history, X, y, model, X_test, y_test)
-        generateClassificationTogether(history, X, y, model, X_test, y_test)
+        all_plot = generateClassificationTogether(history, X, y, model, X_test, y_test)
 
-        self.models["classification_CNN"] = {"model" : model, 'num_classes' : len(np.unique(y_test)), "plots" : plots, 'losses' : {'training_loss' : history.history['loss'], 'val_loss' : history.history['val_loss']},
+        self.models["classification_CNN"] = {"model" : model, 'num_classes' : len(np.unique(y_test)), "plots" : plots, "all_plots" : all_plot, 'losses' : {'training_loss' : history.history['loss'], 'val_loss' : history.history['val_loss']},
                     'accuracy' : {'training_accuracy' : history.history['accuracy'], 'validation_accuracy' : history.history['val_accuracy']}}
         
         clearLog()
             
 
             
-
-        #class_one_data = preProcessImages(fir_class_loc)
-
-
-
-
-
-        
-
-
-
-        
-        #print("Most important features: " + str(data.columns[indices]))
 
 
 
@@ -625,9 +609,10 @@ class client:
 
 newClient = client("./data/housing.csv")
 #newClient.createCNNClassification("apples", "oranges")
-newClient.convolutionalNNQuery("./apples", "./oranges")
-newClient.tune("convolutional_NN")
-# newClient.SingleRegressionQueryANN("Predict median house value")
+#newClient.convolutionalNNQuery("./apples", "./oranges")
+#newClient.tune("convolutional_NN")
+newClient.SingleRegressionQueryANN("Predict median house value")
+newClient.tune("regression_ANN")
 # newClient.getModels('regression')
 
 

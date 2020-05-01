@@ -54,6 +54,7 @@ counter = 0
 #allows for all columns to be displayed when printing()
 pd.options.display.width=None
 
+#same logger as predictionQueries
 def logger(instruction, found = ""):
     global currLog 
     global counter 
@@ -74,18 +75,21 @@ def logger(instruction, found = ""):
     print(currLog)
 
 
+#this is the pipeliner for dimensionalityReduc()
 def dimensionalityReduc(instruction, dataset):
     global currLog 
     global counter
 
-
+    #loads dataset and preprocesses it initially to smooth out pipelining 
     logger("loading dataset...")
     data = pd.read_csv(dataset)
     data.fillna(0, inplace=True)
 
+    #get most similar column by using the instruction
     logger("getting most similar column from instruction...")
     target = getmostSimilarColumn(getValueFromInstruction(instruction), data)
 
+    #encodes dataset into labels for preprocessing and isolates it (this isn't modified in the pipeline)
     y = data[target]
     del data[target]
     le = preprocessing.LabelEncoder()
@@ -93,11 +97,13 @@ def dimensionalityReduc(instruction, dataset):
 
     data = singleRegDataPreprocesser(data)
 
+    #different dimensionality reduction techniques it supports
     perms = []
     overall_storage = []
     finals = []
     arr = ["RF", "PCA", "ICA"]
 
+    #generating all possible permutations for dimensionality reduction techniques
     logger("generating dimensionality permutations...")
     for i in range(1, len(arr) + 1):
         for elem in list(itertools.permutations(arr, i)):
@@ -105,10 +111,14 @@ def dimensionalityReduc(instruction, dataset):
 
     logger("running each possible permutation...")
     logger("realigning tensors...")
+
+    #identifies every possible path and returns the accuracy for each permutation/path
     for path in perms:
         storage = []
         storage.append(data)
         for element in path:
+            # Each of these if blocks are for a different pipeline, it's run and stored in the storage [] array. Each one takes the last dataset in storage and runs it through 
+            # the reduction pipeline. 
             if element == "RF":
                 currSet = storage[len(storage) - 1]
                 data_mod, beg_acc_RF, final_acc_RF, col_removed_RF = dimensionalityRF(instruction, currSet, target, y)
@@ -124,10 +134,13 @@ def dimensionalityReduc(instruction, dataset):
                 data_mod, beg_acc_ICA, final_acc_ICA, col_removed_ICA = dimensionalityICA(instruction, currSet, target, y)
                 storage.append(data_mod)
                 overall_storage.append(list([data_mod, beg_acc_ICA, final_acc_ICA, col_removed_ICA]))
+            #If we're at the end of that specific pipeline permutations we want to move onto the next one
             if path.index(element) == len(path) - 1:
                 finals.append(overall_storage[len(overall_storage) - 1])
 
     logger("getting best accuracies...")
+    
+    #printing out all of the accuracies appropriately 
     accs = []
     i = 0
     print("")
@@ -150,6 +163,7 @@ def dimensionalityRF(instruction, dataset, target="", y = ""):
     global currLog 
     global counter
 
+    #identifies where the user called this specific reduciton technique or it was accessed through the whole pipeline
     if target == "":
         data = pd.read_csv("./data/" + get_last_file()[0])
         data.fillna(0, inplace=True)
@@ -161,19 +175,22 @@ def dimensionalityRF(instruction, dataset, target="", y = ""):
         le = preprocessing.LabelEncoder()
         y = le.fit_transform(y)
 
-
+    #if pipelined then we want to skip over processing and go directly into splitting for training/testing
     X_train, X_test, y_train, y_test = train_test_split(dataset, y, test_size=0.2, random_state=49)
     first_classifier = tree.DecisionTreeClassifier()
     first_classifier.fit(X_train, y_train)
 
+    #base accuracy we want to compare to
     first_classifier_acc = accuracy_score(first_classifier.predict(X_test), y_test)
     
+    #storages, and all initial appending for run
     accuracy_scores = [first_classifier_acc]
     columns = []
     datas = []
     datas.append(dataset)
     columns.append([])
 
+    #Iterates through all possible Random Forest selectors (either 4-len(columns) of features that you want to keep and stores them)
     for x in range(4, len(dataset.columns)):
         feature_model = RandomForestRegressor(random_state=1, max_depth=10)
         feature_model.fit(X_train, y_train)
@@ -185,6 +202,7 @@ def dimensionalityRF(instruction, dataset, target="", y = ""):
         X_temp_train = X_train[dataset.columns[indices]]
         X_temp_test = X_test[dataset.columns[indices]]
 
+        #re-indexes and stores into dataset using np indexing 
         X_combined = np.r_[X_temp_train, X_temp_test]
         y_combined = np.r_[y_train, y_test]
         val = pd.DataFrame(X_combined)
@@ -198,12 +216,14 @@ def dimensionalityRF(instruction, dataset, target="", y = ""):
     
     the_index = accuracy_scores.index(max(accuracy_scores))
 
+    #returns best dataset, the beginning accuracy, the final accuracy, and the columns removed 
     return datas[the_index], accuracy_scores[0], max(accuracy_scores), list(columns[the_index])
 
 def dimensionalityPCA(instruction, dataset, target="", y = "", n_components = 10):
     global currLog 
     global counter
 
+    #identifies where the user called this specific reduciton technique or it was accessed through the whole pipeline
     if target == "":
         data = pd.read_csv("./data/" + get_last_file()[0])
         data.fillna(0, inplace=True)
@@ -214,13 +234,15 @@ def dimensionalityPCA(instruction, dataset, target="", y = "", n_components = 10
         le = preprocessing.LabelEncoder()
         y = le.fit_transform(y)
 
-
+    #principle component analysis 
     pca = PCA(n_components = len(dataset.columns))
     data_modified = pca.fit_transform(dataset)
 
+    #splitting of sets
     X_train, X_test, y_train, y_test = train_test_split(dataset, y, test_size=0.2, random_state=49)
     X_train_mod, none, y_train_mod, none1 = train_test_split(data_modified, y, test_size=0.2, random_state=49)
 
+    #creating both initial decision tree and final decision tree
     clf = tree.DecisionTreeClassifier()
     clf.fit(X_train, y_train)
 
@@ -230,16 +252,19 @@ def dimensionalityPCA(instruction, dataset, target="", y = "", n_components = 10
     accuracies = [accuracy_score(clf.predict(X_test), y_test), accuracy_score(clf_mod.predict(none), none1)]
     data_modified = pd.DataFrame(data_modified)
     
+    #re-combines into dataset and adds back to data_modified
     y_combined = np.r_[y_train, y_test]
     data_modified[target] = y_combined
     #data_modified.to_csv("./data/housingPCA.csv")
     
+    #returns best dataset, the beginning accuracy, the final accuracy, and the columns removed 
     return data_modified, accuracies[0], accuracies[1], (len(dataset.columns) - len(data_modified.columns))
 
 def dimensionalityICA(instruction, dataset, target="", y = ""):
     global currLog 
     global counter
 
+    #identifies where the user called this specific reduciton technique or it was accessed through the whole pipeline
     if target == "":
         data = pd.read_csv("./data/" + get_last_file()[0])
         data.fillna(0, inplace=True)
@@ -251,12 +276,15 @@ def dimensionalityICA(instruction, dataset, target="", y = ""):
         y = le.fit_transform(y)
 
 
+    #independent component analysis identification
     pca = FastICA(n_components = len(dataset.columns))
     data_modified = pca.fit_transform(dataset)
 
+    #splitting both the original and modified sets into their appropriate dataset sizes
     X_train, X_test, y_train, y_test = train_test_split(dataset, y, test_size=0.2, random_state=49)
     X_train_mod, none, y_train_mod, none1 = train_test_split(data_modified, y, test_size=0.2, random_state=49)
 
+    #classifier to test each individual accuracy difference
     clf = tree.DecisionTreeClassifier()
     clf.fit(X_train, y_train)
 
@@ -270,9 +298,11 @@ def dimensionalityICA(instruction, dataset, target="", y = ""):
     data_modified[target] = y_combined
     #data_modified.to_csv("./data/housingPCA.csv")
     
+    #returns best dataset, the beginning accuracy, the final accuracy, and the number of columns that were removed 
     return data_modified, accuracies[0], accuracies[1], (len(dataset.columns) - len(data_modified.columns))
 
-    
+
+#gets the newest file in the ./data directory. This isn't used but is a helper function previously written before functionality changes. 
 def get_last_file():
     max_mtime = 0
     for dirname,subdirs,files in os.walk("./data"):
@@ -287,20 +317,3 @@ def get_last_file():
                 max_file = fname
     return max_file, max_dir, max_mtime
 
-#dimensionalityPCA("Predict median house value", "./data/housing.csv")
-
-#dimensionalityReduc("Predict ocean_proximity", "./data/housing.csv")
-
-# data = pd.read_csv("./data/housing.csv")
-# data.fillna(0, inplace=True)
-# target = getmostSimilarColumn(getValueFromInstruction("Predict ocean proximity"), data)
-
-# y = data[target]
-# del data[target]
-# le = preprocessing.LabelEncoder()
-# y = le.fit_transform(y)
-
-# data = singleRegDataPreprocesser(data)
-
-dimensionalityReduc("Predict ocean proximity", "./data/housing.csv")
-#dimensionalityICA("Predict ocean proximity", data, "ocean_proximity", y)

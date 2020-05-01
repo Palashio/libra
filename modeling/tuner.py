@@ -23,11 +23,13 @@ sys.path.insert(1, '/Users/palashshah/Desktop/Libra/plotting')
 
 from data_preprocesser import singleRegDataPreprocesser
 
+#creates hypermodel class for CNN tuning
 class CNNHyperModel(HyperModel):
     def __init__(self, input_shape, num_classes):
         self.input_shape = input_shape
         self.num_classes = num_classes
 
+    #model builder: creates different layers with a selection of parameters that during runtime it selects to use 
     def build(self, hp):
         model = keras.Sequential()
         model.add(
@@ -131,9 +133,11 @@ class CNNHyperModel(HyperModel):
 
 
 def tuneReg(data, target):
+    #reads in dataset and processes it 
     data = pd.read_csv(data)
     data = singleRegDataPreprocesser(data)
 
+    #function build model using hyperparameter 
     def build_model(hp):
         model = keras.Sequential()
         for i in range(hp.Int('num_layers', 2, 10)):
@@ -149,14 +153,12 @@ def tuneReg(data, target):
             loss='mean_squared_error',
             metrics=['accuracy'])
         return model
-
+    #random search for the model 
     tuner = RandomSearch(
         build_model,
         objective='loss',
-        max_trials=5,
-        executions_per_trial=3,
-        directory='models',
-        project_name='reg_tuned')
+        max_trials=1,
+        executions_per_trial=3,)
 
     # tuner.search_space_summary()
 
@@ -165,14 +167,17 @@ def tuneReg(data, target):
 
     X_train, X_test, y_train, y_test = train_test_split(data, y, test_size=0.2, random_state=49)
 
+    #searches the tuner space defined by hyperparameters (hp) and returns the best model 
     tuner.search(X_train.values, y_train.values,
                 epochs=5,
-                validation_data=(X_test.values, y_test.values))
+                validation_data=(X_test.values, y_test.values),
+                callbacks=[tf.keras.callbacks.TensorBoard('my_dir')])
 
     models = tuner.get_best_models(num_models=1)
     return models[0]
 
 def tuneClass(X, y, num_classes):
+    #function build model using hyperparameter 
     def build_model(hp):
         model = keras.Sequential()
         for i in range(hp.Int('num_layers', 2, 10)):
@@ -189,6 +194,7 @@ def tuneClass(X, y, num_classes):
             metrics=['accuracy'])
         return model
 
+    #tuners, establish the object to look through the tuner search space 
     tuner = RandomSearch(
         build_model,
         objective='loss',
@@ -204,6 +210,7 @@ def tuneClass(X, y, num_classes):
 
     X_train, X_test, y_train, y_test = train_test_split(data, y, test_size=0.2, random_state=49)
 
+    #searches the tuner space defined by hyperparameters (hp) and returns the best model 
     tuner.search(X_train.values, y_train.values,
                 epochs=5,
                 validation_data=(X_test.values, y_test.values))
@@ -213,8 +220,10 @@ def tuneClass(X, y, num_classes):
 
 def tuneCNN(X, y, num_classes):
 
-    hypermodel = CNNHyperModel(input_shape=(224,224,3), num_classes=2)
+    #creates hypermodel object based on the num_classes and the input shape
+    hypermodel = CNNHyperModel(input_shape=(224,224,3), num_classes=num_classes)
 
+    #tuners, establish the object to look through the tuner search space 
     tuner = RandomSearch(
         hypermodel,
         objective='val_accuracy',
@@ -226,10 +235,12 @@ def tuneCNN(X, y, num_classes):
     
     X_train, X_test, y_train, y_test = train_test_split(np.asarray(X), np.asarray(y), test_size=0.33, random_state=42)
 
+    #searches the tuner space defined by hyperparameters (hp) and returns the best model
     tuner.search(X_train, y_train,
                  validation_data=(X_test, y_test),
                 callbacks=[tf.keras.callbacks.EarlyStopping(patience=1)])
 
+    #returns the best model
     return tuner.get_best_models(1)[0]
 
 
