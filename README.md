@@ -303,7 +303,7 @@ loading dataset...
  ```
 
 A quiet mode feature will be implemented after package conversion is completed.
-
+***
 ### Instructions ###
 
 Libra uses intelligent part of speech recognition to analyze user instructions and match it with a column in user datasets. 
