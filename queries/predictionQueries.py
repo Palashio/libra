@@ -14,6 +14,7 @@ import pandas as pd
 import tensorflow as tf
 from tabulate import tabulate
 from scipy.spatial.distance import cosine
+from sklearn.model_selection import cross_val_score
 from pandas import DataFrame
 from sklearn import preprocessing, tree 
 from sklearn.preprocessing import LabelEncoder
@@ -25,7 +26,7 @@ from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import OneHotEncoder, StandardScaler
 from tensorflow import keras
 from tensorflow.python.keras.layers import Dense, Input
-from dataset_labelmatcher import getmostSimilarColumn
+from dataset_labelmatcher import getmostSimilarColumn, getmostSimilarModel
 from keras.callbacks import EarlyStopping
 from matplotlib import pyplot
 from grammartree import getValueFromInstruction
@@ -42,7 +43,7 @@ from keras.models import Sequential
 from keras.layers import Dense, Conv2D, Flatten
 from keras.utils import to_categorical
 from os import listdir
-from tuner import tuneReg, tuneClass
+from tuner import tuneReg, tuneClass, tuneCNN
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.feature_selection import SelectFromModel
@@ -55,7 +56,10 @@ pd.options.display.width=None
 
 def clearLog():
     global currLog
+    global counter 
+
     currLog = ""
+    counter = 0 
 
 def logger(instruction, found = ""):
     global currLog 
@@ -83,17 +87,15 @@ class client:
         self.dataset = data
         logger("loading dataset...")
         self.models = {} 
+        self.old_models = {}
         logger("done...")
         clearLog()
 
-
-        
     #returns models with a specific string 
-    def getModels(self): 
-        return self.models
-
-    def getAttributes(self, model_name):
-        print(model_name['plots'])
+    def getModels(self, model_requested): 
+        logger("Getting model...")
+        return getmostSimilarModel(model_requested, self.models.keys())
+        clearLog()
 
     # single regression query using a feed-forward neural network
     # instruction should be the value of a column
@@ -236,6 +238,7 @@ class client:
         if preprocess:
             logger("Preprocessing data...")
             data = np.asarray(singleRegDataPreprocesser(data))
+
         modelStorage = []
         inertiaStor = []
 
@@ -276,61 +279,6 @@ class client:
         self.models['kmeans_clustering'] = {"model" : modelStorage[len(modelStorage) - 1] ,"plots" : plots}
         clearLog()
         #return modelStorage[len(modelStorage) - 1], inertiaStor[len(inertiaStor) - 1], i
-
-    def createCNNClassification(self, class1, class2, activation = "softmax", gen_classes = True, generate_plots = True, input_shape = (224,224,3)):
-        logger("Creating CNN generation query")
-        #generates the dataset based on instructions using a selenium query on google chrome
-        logger("Generating datasets for classes...")
-        if gen_classes:
-            firstNumpy = generate_data(class1)
-            secNumpy = generate_data(class2)
-
-            #creates the appropriate dataset 
-            firstLabels = [0] * len(firstNumpy)
-            secLabels = [1] * len(secNumpy)
-
-        y = []
-        X = []
-
-        logger("Applying resizing transformation algorithms...")
-        #processes dataset and stores them in the data and label variables
-        for x in range(len(firstLabels)):
-            y.append(firstLabels[x])
-            X.append(firstNumpy[x])
-
-        for x in range(len(secLabels)):
-            y.append(secLabels[x])
-            X.append(secNumpy[x])
-        
-        X_train, X_test, y_train, y_test = train_test_split(np.asarray(X), np.asarray(y), test_size=0.33, random_state=42)
-
-        print(X_train.shape)
-        print(y_train.shape)
-
-        #categorically encodes them for CNN processing
-        y_train = to_categorical(y_train)
-        y_test = to_categorical(y_test)
-        model = Sequential()
-
-        logger("Creating convolutional neural network dynamically...")
-        #Convolutional Neural Network
-        model.add(Conv2D(64, kernel_size=3, activation="relu", input_shape=input_shape))
-        model.add(Conv2D(32, kernel_size=3, activation="relu"))
-        model.add(Flatten())
-        model.add(Dense(2, activation=activation))
-        model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy'])
-        history = model.fit(X_train, y_train, validation_data=(X_test, y_test), epochs=3)
-
-        logger("Finishing task and storing information in model...")
-
-        if generate_plots:
-            plots = generateClassificationPlots(history, X, y, model, X_test, y_test)
-            generateClassificationTogether(history, X, y, model, X_test, y_test)
-
-        self.models["classification_CNN"] = {"model" : model, 'num_classes' : len(np.unique(y_test)), "plots" : plots, "target" : class1 + "_" + class2, 'losses' : {'training_loss' : history.history['loss'], 'val_loss' : history.history['val_loss']},
-                    'accuracy' : {'training_accuracy' : history.history['accuracy'], 'validation_accuracy' : history.history['val_accuracy']}}
-        
-        clearLog()
     
     def svmQuery(self, instruction, test_size = 0.2, kernel='linear'):
         logger("Reading in dataset....")
@@ -360,7 +308,7 @@ class client:
         clf = svm.SVC('linear')
         clf.fit(X_train, y_train)
         logger("Storing information in client object...")
-        self.models["svm"] = {"model" : clf, "accuracy_score" : accuracy_score(clf.predict(X_test), y_test), "target" : remove}
+        self.models["svm"] = {"model" : clf, "accuracy_score" : accuracy_score(clf.predict(X_test), y_test), "target" : remove, "cross_val_score" : cross_val_score(clf, data, y, cv=3)}
         clearLog()
         return svm
     
@@ -400,7 +348,7 @@ class client:
 
         logger("Storing information in client object...")
         knn = models[scores.index(min(scores))]
-        self.models["nearest_neighbors"] = {"model" : knn, "accuracy_score" : scores.index(min(scores)), "target" : remove}
+        self.models["nearest_neighbors"] = {"model" : knn, "accuracy_score" : scores.index(min(scores)), "target" : remove, "cross_val_score" : cross_val_score(knn, data, y, cv=3) }
 
         clearLog()
         return knn
@@ -433,7 +381,7 @@ class client:
         clf = clf.fit(X_train, y_train)
 
         logger("Storing information in client object...")
-        self.models["decision_tree"] = {"model" : clf, "target" : remove}
+        self.models["decision_tree"] = {"model" : clf, "target" : remove, "cross_val_score" : cross_val_score(clf, data, y, cv=3)}
 
         clearLog()
         return clf
@@ -480,16 +428,23 @@ class client:
     def tune(self, model_to_tune):
         logger("Getting target model for tuning...")
         for key in self.models:
-            if key == model_to_tune:
+            if key == model_to_tune and key == "regression_ANN":
                 logger("Tuning model hyperparameters")
                 returned_model = tuneReg(self.dataset, self.models[key]["target"])
                 self.models['regression_ANN'] = {'model' : returned_model}
                 return returned_model
-            if key == model_to_tune:
+            if key == model_to_tune and key == "classification_ANN":
                 logger("Tuning model hyperparameters")
                 returned_model = tuneClass(self.models[key]["target"], self.models[key]["num_classes"])
                 self.models['classification_ANN'] = {'model' : returned_model}
                 return returned_model
+            if key == model_to_tune and key == "convolutional_NN":
+                logger("Tuning model hyperparameters")
+                X = self.models['convolutional_NN']["X"]
+                y = self.models['convolutional_NN']["y"]
+                model = tuneCNN(np.asarray(X), np.asarray(y), 2)
+                self.models["convolutional_NN"]["model"] = model
+
 
     def stat_analysis(self, column_name = "none"):
         logger("Reading in dataset....")
@@ -559,6 +514,105 @@ class client:
             print("-------------------------")
             print(pdtabulate(data[column_name]).describe())
 
+    def convolutionalNNQuery(self, *argv):
+        X = []
+        y = []
+        i = 0
+
+        for location in argv:
+            data = preProcessImages(location)
+            for image in data:
+                X.append(image)
+                y.append(i)
+            i += 1
+ 
+        X_train, X_test, y_train, y_test = train_test_split(np.asarray(X), np.asarray(y), test_size=0.33, random_state=42)
+
+      
+        y_train = to_categorical(y_train)
+        y_test = to_categorical(y_test)
+        y = to_categorical(y)
+
+        print(X_train.shape)
+        model = Sequential()
+
+        logger("Creating convolutional neural network dynamically...")
+        #Convolutional Neural Network
+        model.add(Conv2D(64, kernel_size=3, activation="relu", input_shape=(224, 224, 3)))
+        model.add(Conv2D(32, kernel_size=3, activation="relu"))
+        model.add(Flatten())
+        model.add(Dense(2, activation="softmax"))
+        model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy'])
+        history = model.fit(X_train, y_train, validation_data=(X_test, y_test), epochs=3)
+
+        self.models["convolutional_NN"] = {"model" : model, "X" : X, "y" : y, 'num_classes' : len(np.unique(y_test)), 'losses' : {'training_loss' : history.history['loss'], 'val_loss' : history.history['val_loss']},
+                'accuracy' : {'training_accuracy' : history.history['accuracy'], 'validation_accuracy' : history.history['val_accuracy']}}
+        
+        
+
+    def generateSetFitCNN(self, *argv):
+        logger("Creating CNN generation query")
+        #generates the dataset based on instructions using a selenium query on google chrome
+        logger("Generating datasets for classes...")
+        input_shape = (224,224,3)
+        y = []
+        X = []
+        q = 0
+
+        num_classes = len(argv)
+        for a_class in argv: 
+            a_numpy = generate_data(a_class)
+            a_label = [q] * len(a_numpy)
+            q += 1
+
+            for i in range(len(a_numpy)):
+                X.append(a_numpy[i])
+                y.append(a_label[i])
+
+        #creates the appropriate dataset 
+
+        logger("Applying resizing transformation algorithms...")
+        #processes dataset and stores them in the data and label variables
+
+        
+        X_train, X_test, y_train, y_test = train_test_split(np.asarray(X), np.asarray(y), test_size=0.33, random_state=42)
+
+        #categorically encodes them for CNN processing
+        y_train = to_categorical(y_train)
+        y_test = to_categorical(y_test)
+        model = Sequential()
+
+        logger("Creating convolutional neural network dynamically...")
+        #Convolutional Neural Network
+        model.add(Conv2D(64, kernel_size=3, activation="relu", input_shape=input_shape))
+        model.add(Conv2D(32, kernel_size=3, activation="relu"))
+        model.add(Flatten())
+        model.add(Dense(num_classes, activation="softmax"))
+        model.compile(optimizer='adam', loss='categorical_crossentropy', metrics=['accuracy'])
+        history = model.fit(X_train, y_train, validation_data=(X_test, y_test), epochs=3)
+
+        logger("Finishing task and storing information in model...")
+
+       
+        plots = generateClassificationPlots(history, X, y, model, X_test, y_test)
+        generateClassificationTogether(history, X, y, model, X_test, y_test)
+
+        self.models["classification_CNN"] = {"model" : model, 'num_classes' : len(np.unique(y_test)), "plots" : plots, 'losses' : {'training_loss' : history.history['loss'], 'val_loss' : history.history['val_loss']},
+                    'accuracy' : {'training_accuracy' : history.history['accuracy'], 'validation_accuracy' : history.history['val_accuracy']}}
+        
+        clearLog()
+            
+
+            
+
+        #class_one_data = preProcessImages(fir_class_loc)
+
+
+
+
+
+        
+
 
 
         
@@ -570,7 +624,11 @@ class client:
 
 
 newClient = client("./data/housing.csv")
-newClient.SingleRegressionQueryANN("Predict median house value")
+#newClient.createCNNClassification("apples", "oranges")
+newClient.convolutionalNNQuery("./apples", "./oranges")
+newClient.tune("convolutional_NN")
+# newClient.SingleRegressionQueryANN("Predict median house value")
+# newClient.getModels('regression')
 
 
 

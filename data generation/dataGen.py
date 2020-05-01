@@ -6,6 +6,7 @@ import urllib
 import argparse
 import requests
 from data_preprocesser import preProcessImages
+
 def generate_data(word):
     searchterm = word
     url = "https://www.google.co.in/search?q="+searchterm+"&source=lnms&tbm=isch"

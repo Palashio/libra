@@ -60,4 +60,3 @@ def getValueFromInstruction(sent):
 
     
     return decoded
-

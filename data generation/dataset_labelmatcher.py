@@ -55,5 +55,19 @@ def getmostSimilarColumn(instruction_label, dataset):
     return dataset.columns[idx]
 
 
+def getmostSimilarModel(model_requested, model_keys):
+    masked = produceMask(model_requested)
 
+    data_column_masks = []
+    distances = []
+
+    for element in model_keys:
+        data_column_masks.append(produceMask(str(element)))
+        
+    for element in model_keys:
+        distances.append(levenshtein_distance(masked, element))
+    
+    val, idx = min((val, idx) for (idx, val) in enumerate(distances))
+
+    return model_keys[idx]
 

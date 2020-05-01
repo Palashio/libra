@@ -19,7 +19,7 @@ from keras.utils import to_categorical
 from keras.utils import np_utils
 from sklearn.cluster import KMeans
 import matplotlib.pyplot as plt
-from sklearn.metrics import confusion_matrix
+from sklearn.metrics import confusion_matrix, roc_curve
 
 
 def generateClusteringPlots(kmeans, dataPandas, dataset):

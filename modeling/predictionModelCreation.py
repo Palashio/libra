@@ -41,4 +41,9 @@ def getKerasModelClassification(dataset, i, num_classes):
             
     model.add(Dense(num_classes, activation="softmax"))
     model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
+
     return model
+
+
+def getKerasConvolutional():
+    print("entered")
