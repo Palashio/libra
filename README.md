@@ -2,7 +2,20 @@
 
 # Libra: Deep Learning in fluent one-liners
 
-Libra is a deep learning API that allows users to use machine learning in their workflows in fluent one-liners. It is written in Python and TensorFlow and makes training neural networks as simple as a one line function call.
+Libra is a deep learning API that allows users to use machine learning in their workflows in fluent one-liners. It is written in Python and TensorFlow and makes training neural networks as simple as a one line function call. It was written to make deep learning as simple as possible to every user. 
+
+*** 
+
+## Guiding Principles ## 
+  * **Beginner Focused.** Libra is an API designed to be used by users with no deep learning experience whatsoever. It is           built so that users with no experience in preprocessing, modeling, and tuning can build modular architectures with ease       and don't have to worry about educating themselves about how implementation works.  
+  
+  * **Quick integration into workflow.** With the recent rise of machine learning in the cloud; the developer community has         lacked a focus in making ML easier to do locally, integrated directly into workflows. Libra allows users to develop           models directly in programs with hundreds of API endpoints without having to worry about the transition to cloud.  
+  
+  * **Automation.** End-to-end pipelines containing hundreds of processes are run in the background so the user doesn't have         to worry about anything to create their models. They only have to worry about what they want to accomplish and where           there initial dataset is located. 
+  
+  * **Easy extensibility.** Every function, preprocessers, tuners, classification architectures, and even instruction               identification steps, are all implemented as standalone function. This makes it fairly trivial for contributors to add         their own modules. Code is also written in the most simple way possible, and documented exntensively. 
+
+***
 
 Table of Contents
 =================
@@ -10,13 +23,14 @@ Table of Contents
 * [Prediction Queries: building blocks](#queries)
    * [Regression Neural Network](#regression-neural-network-query)
    * [Classification Neural Network](#classification-neural-network-query)
+   * [Convolutional Neural Network](#convolutional-neural-network-query)
    * [K-Means Clustering](#k-means-clustering)
    * [Nearest Neighbors](#nearest-neighbors)
    * [Support Vector Machines](#support-vector-machine)
    * [Decision Tree](#decision-tree)
 * [Image Generation](#image-generation)
    * [Class Wise Image Generation](#class-wise-image-generation)
-   * [Convolutional Neural Networks](#convolutional-neural-network)
+   * [Generate Dataset & Convolutional Neural Network](#generate-dataset-and-convolutional-neural-network)
 * [Model Information](#model-information)
    * [Model Tuning](#model-tuning)
    * [Plotting](#plotting)
@@ -58,6 +72,15 @@ newClient.classificationQuery('Predict building name')
 newClient.tune('classification')
 ```
 This creates a neural network to predict building names given your dataset. Any number of classes will work for this query. Note that ```categorical_crossentropy``` and an `adam` optimizer is used as a default. This can be changed as well. 
+
+### Convolutional Neural Network Query ###
+Creating a convolutional neural network for a dataset you already have created is as simple as: 
+
+```python
+newClient = client()
+newClient.convolutionalNNQuery('path_to_class1', 'path_to_class2', 'path_to_class3')
+```
+For this query, no tuning is done because of how memory intensive CNN's can be. If you'd like to tune refer to [CNN hypermodel tuning](#model-tuning)
 
 ### K-means Clustering ###
 
@@ -118,7 +141,7 @@ generateSet('apples', 'oranges', 'bananas', 'pineapples')
 
 This will create seperate folders in your directory with each of these names with around ~100 images for each class. An updated version of Google Chrome is required for this feature. If you'd like to use it with an older version of Chrome please install the appropriate chromedriver. 
 
-### Convolutional Neural Network ###
+### Generate Dataset and Convolutional Neural Network ###
 If you'd like to generate images and fit it automatically to a CNN you can use this command:
 
 ```python
@@ -130,12 +153,6 @@ Note: all images will be resized to (224, 224, 3). Properties are maintained by 
 
 [OpenCV Transformation](https://docs.opencv.org/2.4/modules/imgproc/doc/geometric_transformations.html)
 
-If you'd like to perform tuning on the CNN you can do this: 
-
-```python
-newClient.tuneCNN()
-```
-Unlike other functions, tuning on the CNN is not done automatically because of how computationally intensive it is. 
 
 ***
 
@@ -153,8 +170,10 @@ This will tune:
   2. Number of Nodes in every layer
   3. Learning Rate
   4. Activation Functions
-  
+    
 In order to ensure that the tuned models accuracy is robust, every model is ran multiple times and the accuracy is averaged. This ensures that the model configuration is truly the best. 
+
+**NOTE: Tuning for CNN's is very memory intensive, and should not be done frequently.**
 
 ### Plotting ###
 All plots are stored during runtime. This function plots all generated graphs for your current client object on one pane. 
@@ -284,7 +303,7 @@ loading dataset...
  ```
 
 A quiet mode feature will be implemented after package conversion is completed.
-
+***
 ### Instructions ###
 
 Libra uses intelligent part of speech recognition to analyze user instructions and match it with a column in user datasets. 
