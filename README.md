@@ -41,6 +41,7 @@ Table of Contents
    * [Feature Importances via Random Forest Regressor](feature-importances-via-random-forest-regressor)
    * [Independent Component Analysis](#indepedent-component-analysis)
 * [Process Logger](#process-logger)
+* [Pipelining for Contributors](#pipelining-for-contributors)
 * [Providing Instructions](#instructions)
 
 ## Queries ##
@@ -118,7 +119,7 @@ NOTE: A linear kernel is used as the default, this can be modified by specifying
 
 ```python
 newClient = client('dataset')
-newClient.svmQuery()
+newClient.decisionTreeQuery()
 ```
 
 This will use scikit's learns Decision Tree function to return the best decision tree on the dataset. Values are stored under the ```decision_tree``` field in the model dictionary. 
@@ -304,11 +305,49 @@ loading dataset...
 
 A quiet mode feature will be implemented after package conversion is completed.
 ***
-### Instructions ###
+
+## Pipelining for Contributors ##
+
+In order to help contributors to Libra easily test their own developed modules before fully integrating into the workflow, a process-pipeliner has been implemented. 
+
+Let's say you've developed a different preprocesser for data that you want to test before pull-requesting to the master branch. This is the process to test it out:
+
+First, you want to initialize your base parameters which are your instructions, the path to your dataset and any other information you want it to hold.
+
+```
+init_params = {
+    'instruction': "Predict median house value",
+    'path_to_set': './data/housing.csv',
+}
+```
+
+You can then modify the main pipeline: 
+
+<pre>
+single_regression_pipeline = [initializer,
+                <b>your_own_preprocessor</b>, #is originally just preprocessor
+                instruction_identifier,
+                set_splitter,
+                modeler,
+                plotter]
+</pre>
+
+These pipelines can be found under the ``json-pipeliner`` folder. Currently, this format is supported for the single regression pipeline. Complete integration of pipelining into the main framework is being developed. 
+
+Finally, you can run your pipeline by:
+
+```
+[func(init_params) for func in reg_pipeline] #list comprehension format
+```
+
+Now, all model information should be stored in ```init_params```.
+
+***
+## Instructions ##
 
 Libra uses intelligent part of speech recognition to analyze user instructions and match it with a column in user datasets. 
   1. [Textblob](https://textblob.readthedocs.io/en/dev/), a part of speech recognition algorithm, is used to identify parts of speech.
   2. Self-developed part of speech deciphering algorithm is used to extract relevant parts of a sentence.
-  3. Levenshentein distances are used to match relevant parts of the sentence to a column name.
-  4. That column name is run through an LSTM Recurrent Neural Network to obtain latent representation.
-  5. Both instruction and column latent representation is compared to verify. 
+  3. Masks are generated to represent all words as tensors in order for easy comparison
+  4. Levenshentein distances are used to match relevant parts of the sentence to a column name.
+  5. Target column selected based on lowest levenshentein distance and is returned.
