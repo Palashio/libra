@@ -1,4 +1,4 @@
-![Image description](libra.png)
+![Image description](data/libra.png)
 
 # Libra: Deep Learning in fluent one-liners
 
@@ -202,7 +202,7 @@ newClient.stat_analysis()
 ```
 A information graph as well as a similarity spectrum shown below will be generated:
 
-![Image description](similarity.png)
+![Image description](data/similarity.png)
 
 This represents 5 columns that have the smallest cosine distance: these might need to be removed to reduce noise. You can specify whether you want to remove with ```inplace = True```. 
 
