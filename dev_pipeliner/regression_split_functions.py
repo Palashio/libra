@@ -51,7 +51,7 @@ import keras
 
 
 def initializer(params):
-    data = pd.read_csv(params['dataset'])
+    data = pd.read_csv(params['path_to_set'])
     data.fillna(0, inplace=True)
     params['data'] = data
     return params 
@@ -118,5 +118,12 @@ def modeler(params):
 
         params['models'] = models 
         params['losses'] = losses
+
+def plotter(params):
+    init_plots, plot_names = generateRegressionPlots(params['models'][len(params['models']) - 1], params['data'], params['y'])
+    plots = {}
+    for x in range(len(plot_names)):
+        plots[str(plot_names[x])] = init_plots[x]
+    params['plots'] = plots 
     
 

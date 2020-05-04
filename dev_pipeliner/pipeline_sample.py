@@ -3,21 +3,24 @@ from regression_split_functions import (
     preprocesser,
     instruction_identifier,
     set_splitter,
-    modeler)
+    modeler,
+    plotter)
 
+#to initialize a testing pipeline, just create a dictionary with both the instruction you want to test and the path to the dataset.
 init_params = {
-    # instruction you want to test
     'instruction': "Predict median house value",
-    # dataset you want to test on
-    'dataset': './data/housing.csv',
+    'path_to_set': './data/housing.csv',
 }
 
-reg_pipeline = [(initializer, (init_params,)),
-                (preprocesser, (init_params,)),
-                (instruction_identifier, (init_params,)),
-                (set_splitter, (init_params,)),
-                (modeler, (init_params,))]
+reg_pipeline = [initializer,
+                preprocesser,
+                instruction_identifier,
+                set_splitter,
+                modeler,
+                plotter]
 
 
-for func, args in reg_pipeline:
-    func(*args)
+for func in reg_pipeline:
+    func(init_params)
+
+print(init_params.keys())
