@@ -332,7 +332,7 @@ single_regression_pipeline = [initializer,
                 plotter]
 </pre>
 
-These pipelines can be found under the ``json-pipeliner`` folder. Currently, this format is supported for the single regression pipeline. Complete integration of pipelining into the main framework is being developed. 
+These pipelines can be found under the ``dev-pipeliner`` folder. Currently, this format is supported for the single regression pipeline. Complete integration of pipelining into the main framework is being developed. 
 
 Finally, you can run your pipeline by:
 
