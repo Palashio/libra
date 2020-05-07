@@ -3,17 +3,16 @@
 # Libra: Deep Learning in fluent one-liners
 
 Libra is a deep learning API that allows users to use machine learning in their workflows in fluent one-liners. It is written in Python and TensorFlow and makes training neural networks as simple as a one line function call. It was written to make deep learning as simple as possible to every user. 
-
 *** 
 
 ## Guiding Principles ## 
-  * **Beginner Focused.** Libra is an API designed to be used by developers with no deep learning experience whatsoever. It is           built so that users with no knowledge in preprocessing, modeling, and tuning can build high-performance models with           ease and can ignore the details of implementation.
+  * **Beginner Friendly.** Libra is an API designed to be used by developers with no deep learning experience whatsoever. It is built so that users with no knowledge in preprocessing, modeling, or tuning can build high-performance models with ease without worrying about the details of implementation.
   
-  * **Quick integration into workflow.** With the recent rise of machine learning on the cloud, the developer community has         failed to make easy-to-use platforms that exist locally, integrated directly into workflows. Libra allows users               to develop models directly in programs with hundreds of API endpoints without having to worry about the transition to         cloud.  
+  * **Quick Integration.** With the recent rise of machine learning on the cloud, the developer community has failed to make easy-to-use platforms that exist locally and integrate directly into workflows. Libra allows users to develop models directly in programs with hundreds of API endpoints without having to worry about the transition to the cloud.
   
-  * **Automation.** End-to-end pipelines containing hundreds of processes are automatically run for the user. The developer         only has to consider what they want to accomplish from the task and the location of their initial dataset.
+  * **Automation.** End-to-end pipelines containing hundreds of processes are automatically run for the user. The developer only has to consider what they want to accomplish from the task and the location of their initial dataset.
   
-  * **Easy extensibility.** Queries are also split up into standalone modules. Under the dev-pipeline module you can pipeline   different and/or new modules and integrate them into the workflow directly. This allows newly developed features to be         easily tested before integrating them into the main program. 
+  * **Easy Extensibility.** Queries are split into standalone modules. Under the dev-pipeline module you can pipeline both different and  new modules and integrate them into the workflow directly. This allows newly developed features to be easily tested before integrating them into the main program. 
 
 ***
 
@@ -21,9 +20,9 @@ Table of Contents
 =================
 
 * [Prediction Queries: building blocks](#queries)
-   * [Regression Neural Network](#regression-neural-network-query)
-   * [Classification Neural Network](#classification-neural-network-query)
-   * [Convolutional Neural Network](#convolutional-neural-network-query)
+   * [Regression Neural Network](#regression-neural-network)
+   * [Classification Neural Network](#classification-neural-network)
+   * [Convolutional Neural Network](#convolutional-neural-network)
    * [K-Means Clustering](#k-means-clustering)
    * [Nearest Neighbors](#nearest-neighbors)
    * [Support Vector Machines](#support-vector-machine)
@@ -46,11 +45,11 @@ Table of Contents
 
 ## Queries ##
 
-Generally, all queries have the same structure. You should always be passing an english instruction to the query. The information that you generate from the query will always be stored in the client class in the models dictionary. When you call a query on the client object, an instruction should be passed. Any format will be decoded but avoiding more complex sentence structures will yield better results. If you already know the exact target class label name, you can also provide it. 
+Generally, all queries have the same structure. You should always be passing an English instruction to the query. The information that you generate from the query will always be stored in the `client`class in the model's dictionary. When you call a query on the `client` object, an instruction will be passed. Any format will be decoded, but avoiding more complex sentence structures will yield better results. If you already know the exact target class label name, you can also provide it. 
 
-### Regression Neural Network Query ###
+### Regression Neural Network ###
 
-Let's start with the most basic query. This will build a feed-forward network for a continuous label that you specify
+Let's start with the most basic query. This will build a feed-forward network for a continuous label that you specify.
 
 ```python
 import libra
@@ -65,63 +64,69 @@ Basic tuning with the number of layers is done when you call this query. If you'
 ```python
 newClient.tune('regression', inplace = False)
 ```
+To specify which model to tune, you must pass the type of model that you'd like to perform tuning on. 
 
-This function tunes hyperparameters like node count, layer count, learning rate, and other features. This will return the best network and if ```inplace = True``` it will replace it in the client class under ```regression_ANN```. 
+This function tunes hyperparameters like node count, layer count, learning rate, and other features. This will return the best network and if ```inplace = True``` it will replace the old model it in the client class under ```regression_ANN```. 
 
-### Classification Neural Network Query ###
+### Classification Neural Network ###
 
-This query will build a feedforward neural network for a classification task. This means your label is a discrete variable. 
+This query will build a feed-forward neural network for a classification task. As such, your label must be a discrete variable. 
 
 ```python
 newClient = client('dataset')
 newClient.classificationQuery('Predict building name')
-newClient.tune('classification')
 ```
-This creates a neural network to predict building names given your dataset. Any number of classes will work for this query. Note that ```categorical_crossentropy``` and an `adam` optimizer is used as a default. This can be changed as well. Calling ```tune()``` will not loss calculation metric.  
+This creates a neural network to predict building names given your dataset. Any number of classes will work for this query. By default, ```categorical_crossentropy``` and an `adam` optimizer are used. 
 
-### Convolutional Neural Network Query ###
+### Convolutional Neural Network ###
 Creating a convolutional neural network for a dataset you already have created is as simple as: 
 
 ```python
 newClient = client()
 newClient.convolutionalNNQuery('path_to_class1', 'path_to_class2', 'path_to_class3')
 ```
-For this query, no tuning is done because of how memory intensive CNN's can be. Convolutional Neural Network tuning is fairly complex, and uses a hypermodel mechanic. Only run CNN tuning if your machine can handle it. 
+For this query, no initial shallow tuning is performed is done because of how memory intensive CNN's can be. User specified parameters for this query are currently being implemented. The defaults can be found in the `predictionQueries.py` file.
 
 ### K-means Clustering ###
 
-Creating a clustering algorithm is as easy as:
+This query will create a k-means clustering algorithm trained on your processed dataset. 
 
 ```python
 newClient = client('dataset')
 newClient.kMeansClusteringQuery()
 ```
 
-This will create a k-means clustering algorithm trained on your processed dataset. It continues to grow the number of clusters until the ``inertia`` value stops decreasing by atleast 1000 units. This is a threshold determined based on several papers, and extensive testing. This can also be changed by specifying ```threshold = new_threshold_num```. If you'd like to specify the number of clusters you'd like it to use you can do ``clusters = number_of_clusters``. 
+It continues to grow the number of clusters until the value of ``inertia`` stops decreasing by at least 1000 units. This is a threshold determined based on several papers, and extensive testing. This can also be changed by specifying ```threshold = new_threshold_num```. If you'd like to specify the number of clusters you'd like it to use you can do ``clusters = number_of_clusters``. 
 
 
 ### Nearest-neighbors ###
+
+This query will use scikit-learn's nearest-neighbor function to return the best nearest neighbor model on the dataset.
 
 ```python
 newClient = client('dataset')
 newClient.nearestNeighborQuery()
 ```
 
-This will use scikit's learns nearest neighbor function to return the best nearest neighbor model on the dataset. You can specify the ```min_neighbors, max_neighbors``` as keyword arguments to the function. Values are stored under the ```nearest_neighbor``` field in the model dictionary. 
+You can specify the ```min_neighbors, max_neighbors``` as keyword arguments to the function. Values are stored under the ```nearest_neighbor``` field in the model dictionary. 
 
 ### Support Vector Machine ###
+
+This will use scikit-learn's SVM function to return the best support vector machine on the dataset.
 
 ```python
 newClient = client('dataset')
 newClient.svmQuery('Model the value of houses')
 ```
 
-This will use scikit's learns SVM function to return the best support vector machine on the dataset. Values are stored under the ```svm``` field in the model dictionary. 
+Values are stored under the ```svm``` field in the model dictionary. 
 
 NOTE: A linear kernel is used as the default, this can be modified by specifying your new kernel name as a keyword argument: ```kernel = 'rbf_kernel'```. 
 
 
 ### Decision Tree ###
+
+This will use scikit's learns decision tree function to return the best decision tree on the dataset.
 
 ```python
 newClient = client('dataset')
@@ -130,12 +135,7 @@ newClient.decisionTreeQuery()
 
 This will use scikit's learns Decision Tree function to return the best decision tree on the dataset. Values are stored under the ```decision_tree``` field in the model dictionary. 
 
-```newClient.decisionTreeQuery('Model the type of cars')```
-
-You can modify a variety of different hyperparameters by passing them to the query as keyword arguments:
-
-
-```max_depth = num, min_samples_split = num, max_samples_split = num, min_samples_leaf = num, max_samples_leaf= num)```
+You can specify these hyperparameters by passing them as keyword arguments to the query: ```max_depth = num, min_samples_split = num, max_samples_split = num, min_samples_leaf = num, max_samples_leaf= num)```
 ***
 
 ## Image Generation ##
@@ -147,7 +147,7 @@ If you want to generate an image dataset to use in one of your models you can do
 generateSetFit('apples', 'oranges', 'bananas', 'pineapples')
 ```
 
-This will create seperate folders in your directory with each of these names with around ~100 images for each class. An updated version of Google Chrome is required for this feature. If you'd like to use it with an older version of Chrome please install the appropriate chromedriver. 
+This will create separate folders in your directory with each of these names with ~100 images for each class. An updated version of Google Chrome is required for this feature; if you'd like to use it with an older version of Chrome please install the appropriate chromedriver. 
 
 ### Generate Dataset and Convolutional Neural Network ###
 If you'd like to generate images and fit it automatically to a Convolutional Neural Network you can use this command:
@@ -155,7 +155,7 @@ If you'd like to generate images and fit it automatically to a Convolutional Neu
 ```python
 newClient.generateSetFinCNN('apples', 'oranges')
 ```
-This will generate a dataset of apples and oranges by parsing google images, prepprocess the dataset appropriately and then fit it to a Convolutional Neural Network. All images are reduced to a standard (224, 224, 3) size using a traditional OpenCV resizing algorithm. Default size is the number of images in one google images page, before having to hit more images. This is generally around 80-100 images. 
+This particular will generate a dataset of apples and oranges by parsing Google Images, preprocess the dataset appropriately and then fit it to a convolutional neural network. All images are reduced to a standard (224, 224, 3) size using a traditional OpenCV resizing algorithm. Default size is the number of images in one Google Images page *before* having to hit more images, which is generally around 80-100 images. 
 
 The infrastructure to generate more images is currently being worked on. 
 
@@ -178,11 +178,11 @@ This will tune:
   3. Learning Rate
   4. Activation Functions
     
-In order to ensure that the tuned models accuracy is robust, every model is ran multiple times and the accuracy is averaged. This ensures that the model configuration is truly the best. 
+In order to ensure that the tuned models accuracy is robust, every model is run multiple times and the accuracies are averaged. This ensures that the model configuration is optimal.
 
-You can just specify what type of network you want to tune. It will identify your target model from the models dictionary using another instruction algorithm. 
+You can just specify what type of network you want to tune — it will identify your target model from the `models` dictionary using another instruction algorithm. 
 
-**NOTE: Tuning for CNN's is very memory intensive, and should not be done frequently. **
+NOTE: Tuning for CNN's is **very** memory intensive, and should not be done frequently. 
 
 ### Plotting ###
 All plots are stored during runtime. This function plots all generated graphs for your current client object on one pane. 
@@ -202,8 +202,7 @@ and then
 ```python
 newClient.getModels()['regression']['plots']['trainlossvstestloss']
 ```
-
-No other plot retrieval technique is currently implemented. While indexing nested dictionaries might seem tedious, this was allowed for API fluency.
+No other plot retrieval technique is currently implemented. While indexing nested dictionaries might seem tedious, this was allowed for fluency. 
 
 ### Dataset Information ###
 In depth metrics about your dataset and similarity information can be generated by calling:
@@ -215,7 +214,7 @@ A information graph as well as a similarity spectrum shown below will be generat
 
 ![Image description](data/similarity.png)
 
-This represents 5 columns that have the smallest cosine distance: these might need to be removed to reduce noise. You can specify whether you want to remove with ```inplace = True```. Information on cosine similarity can be found [here](https://www.sciencedirect.com/topics/computer-science/cosine-similarity)
+This represents 5 columns that have the smallest cosine distance; you might need to remove these columns because they're too similar to each other and will just act as noise. You can specify whether you want to remove them with ```inplace = True```. Information on cosine similarity can be found [here](https://www.sciencedirect.com/topics/computer-science/cosine-similarity).
 
 If you'd like information on just one column you can do: 
 
@@ -234,9 +233,9 @@ If you'd like to get the best pipeline for dimensionality reduction you can call
  dimensionalityReduc("I want to estimate number of crime", path_to_dataset) 
  
 ```
-Instructions are provided in the dimensionality reduction pipeline because it identifies which objective you would like to maximize the accuracy for. It helps with providing users with the best modification pipeline. 
+Instructions like "I want to model x" are provided in the dimensionality reduction pipeline because it identifies which prediction objective you would like to maximize the accuracy for. Providing this instruction helps Libra provide users with the best modification pipeline. 
 
-Libra current supports feature importance identifier using random forest regressor, indepedent component analysis, and principle component analysis. The output of this function should look something like this: 
+Libra current supports feature importance identification using random forest regressor, indepedent component analysis, and principle component analysis. The output of the dimensionalityReduc() function should look something like this: 
 
 ```
 Baseline Accuracy: 0.9752906976744186
@@ -262,7 +261,7 @@ Best Accuracies
 ["Permutation --> ('ICA', 'PCA', 'RF) | Final Accuracy --> 0.9970639534883721"]
 
 ```
-The baseline accuracy represents the accuracy acheived without any dimensionality reduction techniques. Then, each possible permutation of reduction technique is displayed with its respective accuracy. At the bottom is the best pipeline which resulted in the highest accuracy. You can also specify which of the reduction techniques you'd like to try by passing ```reducers= 'ICA', 'RF']``` to the function.
+The baseline accuracy represents the accuracy acheived without any dimensionality reduction techniques. Then, each possible reduction technique permutation is displayed with its respective accuracy. At the bottom is the pipeline which resulted in the highest accuracy. You can also specify which of the reduction techniques you'd like to try by passing ```reducers= ['ICA', 'RF']``` to the function.
 
 If you'd like to replace the dataset with one that replaces it with the best reduced one, you can just specify ```inplace=True```.
 
@@ -274,7 +273,7 @@ Performing Principle Component is as simple as:
 dimensionalityPCA("Estimating median house value", path_to_dataset)
 ```
 
-NOTE: this will select the optimal number of principal components to keep. The default search space is up to the number of columns in your dataset. If you'd like to specify the number of components you can just do ```n_components = number_of_components```. 
+NOTE: this will select the optimal number of principal components to keep. The default search space is up to the number of columns in your dataset. If you'd like to specify the number of components you can just do ```n_components = number_of_components```.  
 
 ### Feature Importances via Random Forest Regressor ###
 Using the random forest regressor to identify feature importances is as easy as calling: 
@@ -320,11 +319,11 @@ A quiet mode feature is currently being implemented.
 
 ## Pipelining for Contributors ##
 
-In order to help make Libra extensible, a process-pipeliner has been implemented to help contributors easily test their newly-developed modules. 
+In order to help make Libra extensible, a process pipeliner has been implemented to help contributors easily test their newly-developed modules. 
 
 Let's say you've developed a different preprocesser for data that you want to test before integrating it into Libra's primary workflow. This is the process to test it out:
 
-First, you want to initialize your base parameters which are your instructions, the path to your dataset and any other information your new function might require.
+First, you want to initialize your base parameters, which are your instructions, the path to your dataset, and any other information your new function might require.
 
 ```
 init_params = {
@@ -344,23 +343,24 @@ single_regression_pipeline = [initializer,
                 plotter]
 </pre>
 
-These pipelines can be found under the ``dev-pipeliner`` folder. Currently, this format is supported for the single regression pipeline. Complete integration of pipelining into the main framework is currently being implemented. 
+These pipelines can be found under the ``dev-pipeliner`` folder. Currently, this format is only supported for the single regression pipeline. Complete integration of pipelining into the main framework is currently being implemented. 
 
-Finally, you can run your pipeline by:
+Finally, you can run your pipeline by using: 
 
 ```
 [func(init_params) for func in reg_pipeline] 
 
 ```
 
-Now, all model information should be stored in ```init_params```. If you'd like to modify smaller details, you can copy over the module and modify the smaller detail: this split was not done to maintain ease of use of the pipeline. 
+All model information should be stored in ```init_params```. If you'd like to modify smaller details, you can copy over the module and modify the smaller detail; this split was not done to maintain ease of use of the pipeline. 
 
 ***
 ## Instructions ##
 
-Libra uses intelligent part of speech recognition to analyze user instructions and match it with a column in user datasets. 
+Libra uses intelligent natural language processing to analyze user instructions and match it with a column in user datasets. 
   1. [Textblob](https://textblob.readthedocs.io/en/dev/), a part of speech recognition algorithm, is used to identify parts of speech.
-  2. Self-developed part of speech deciphering algorithm is used to extract relevant parts of a sentence.
+  2. A self-developed part-of-speech deciphering algorithm is used to extract relevant parts of a sentence. 
   3. Masks are generated to represent all words as tensors in order for easy comparison
   4. Levenshentein distances are used to match relevant parts of the sentence to a column name.
   5. Target column selected based on lowest levenshentein distance and is returned.
+
