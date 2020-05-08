@@ -24,7 +24,7 @@ from sklearn.metrics import confusion_matrix, roc_curve
 # generates all of the plots in clustering
 
 
-def generateClusteringPlots(kmeans, dataPandas, dataset):
+def generate_clustering_plots(kmeans, dataPandas, dataset):
     plots = []
     plot_names = []
     # for all of the columns that're present in clustering it plots the
@@ -45,7 +45,7 @@ def generateClusteringPlots(kmeans, dataPandas, dataset):
 # generates all of the plots for regression
 
 
-def generateRegressionPlots(history, data, label):
+def generate_regression_plots(history, data, label):
     plots = []
     plot_names = []
     # generating plots for loss
@@ -62,7 +62,7 @@ def generateRegressionPlots(history, data, label):
     return plots, plot_names
 
 
-def generateClassificationPlots(history, data, label, model, X_test, y_test):
+def generate_classification_plots(history, data, label, model, X_test, y_test):
     plots = []
     plot_names = []
 
@@ -98,7 +98,7 @@ def generateClassificationPlots(history, data, label, model, X_test, y_test):
 # function to return both val and accuracy plots on one pane
 
 
-def generateClassificationTogether(history, data, model, X_test, y_test):
+def generate_classification_together(history, data, model, X_test, y_test):
     plots = []
     plot_names = []
 

@@ -1,0 +1,10 @@
+tensorflow
+keras
+numpy
+pandas
+sklearn
+selenium
+pprint
+matplotlib
+os
+itertools

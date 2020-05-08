@@ -30,11 +30,11 @@ from keras.utils import to_categorical
 from keras.utils import np_utils
 from sklearn.cluster import KMeans
 import matplotlib.pyplot as plt
-from generatePlots import generateClusteringPlots, generateRegressionPlots, generateClassificationPlots, generateClassificationTogether
+from generatePlots import generate_clustering_plots, generate_regression_plots, generate_classification_plots, generate_classification_together
 from dataGen import generate_data
 from keras.models import Sequential
 from keras.layers import Dense, Conv2D, Flatten
-from dimensionality_red_queries import dimensionalityReduc
+from dimensionality_red_queries import dimensionality_reduc
 from os import listdir
 from tuner import tuneReg, tuneClass, tuneCNN
 from sklearn.neighbors import KNeighborsClassifier
@@ -200,7 +200,7 @@ class client:
 
         # calls function to generate plots in plot generation
         if generate_plots:
-            init_plots, plot_names = generateRegressionPlots(
+            init_plots, plot_names = generate_regression_plots(
                 models[len(models) - 1], data, y)
             plots = {}
             for x in range(len(plot_names)):
@@ -295,7 +295,7 @@ class client:
             i += 1
 
         # genreates appropriate classification plots by feeding all information
-        plots = generateClassificationPlots(
+        plots = generate_classification_plots(
             models[len(models) - 1], data, y, model, X_test, y_test)
 
         # stores the values and plots into the object dictionary
@@ -364,7 +364,7 @@ class client:
         # generates the clustering plots approiately
         if generate_plots:
             logger("Generating plots and storing in model")
-            init_plots, plot_names = generateClusteringPlots(
+            init_plots, plot_names = generate_clustering_plots(
                 modelStorage[len(modelStorage) - 1], dataPandas, data)
 
             plots = {}
@@ -803,9 +803,9 @@ class client:
         logger("Finishing task and storing information in model...")
 
        # generating both individual plots and a pane to display all subplots
-        plots = generateClassificationPlots(
+        plots = generate_classification_plots(
             history, X, y, model, X_test, y_test)
-        all_plot = generateClassificationTogether(
+        all_plot = generate_classification_together(
             history, X, y, model, X_test, y_test)
 
         # storing all information in the model dictionary
