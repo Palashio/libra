@@ -55,7 +55,7 @@ Let's start with the most basic query. This will build a feed-forward network fo
 import libra
 
 newClient = client('dataset')
-newClient.SingleRegressionQuery('Model the median house value')
+newClient.regression_query_ann('Model the median house value')
 ```
 No preprocessing is neccesary. All plots, losses, and models are stored in the models field in the client class.
 
@@ -74,7 +74,7 @@ This query will build a feed-forward neural network for a classification task. A
 
 ```python
 newClient = client('dataset')
-newClient.classificationQuery('Predict building name')
+newClient.classification_query_ann('Predict building name')
 ```
 This creates a neural network to predict building names given your dataset. Any number of classes will work for this query. By default, ```categorical_crossentropy``` and an `adam` optimizer are used. 
 
@@ -83,7 +83,7 @@ Creating a convolutional neural network for a dataset you already have created i
 
 ```python
 newClient = client()
-newClient.convolutionalNNQuery('path_to_class1', 'path_to_class2', 'path_to_class3')
+newClient.convolutional_query('path_to_class1', 'path_to_class2', 'path_to_class3')
 ```
 For this query, no initial shallow tuning is performed is done because of how memory intensive CNN's can be. User specified parameters for this query are currently being implemented. The defaults can be found in the `predictionQueries.py` file.
 
@@ -93,7 +93,7 @@ This query will create a k-means clustering algorithm trained on your processed 
 
 ```python
 newClient = client('dataset')
-newClient.kMeansClusteringQuery()
+newClient.kmeans_clustering_query()
 ```
 
 It continues to grow the number of clusters until the value of ``inertia`` stops decreasing by at least 1000 units. This is a threshold determined based on several papers, and extensive testing. This can also be changed by specifying ```threshold = new_threshold_num```. If you'd like to specify the number of clusters you'd like it to use you can do ``clusters = number_of_clusters``. 
@@ -105,7 +105,7 @@ This query will use scikit-learn's nearest-neighbor function to return the best 
 
 ```python
 newClient = client('dataset')
-newClient.nearestNeighborQuery()
+newClient.nearest_neighbor_query()
 ```
 
 You can specify the ```min_neighbors, max_neighbors``` as keyword arguments to the function. Values are stored under the ```nearest_neighbor``` field in the model dictionary. 
@@ -116,7 +116,7 @@ This will use scikit-learn's SVM function to return the best support vector mach
 
 ```python
 newClient = client('dataset')
-newClient.svmQuery('Model the value of houses')
+newClient.svm_query('Model the value of houses')
 ```
 
 Values are stored under the ```svm``` field in the model dictionary. 
@@ -130,7 +130,7 @@ This will use scikit's learns decision tree function to return the best decision
 
 ```python
 newClient = client('dataset')
-newClient.decisionTreeQuery()
+newClient.decision_tree_query()
 ```
 
 This will use scikit's learns Decision Tree function to return the best decision tree on the dataset. Values are stored under the ```decision_tree``` field in the model dictionary. 
@@ -144,7 +144,7 @@ You can specify these hyperparameters by passing them as keyword arguments to th
 If you want to generate an image dataset to use in one of your models you can do:
 
 ```python
-generateSetFit('apples', 'oranges', 'bananas', 'pineapples')
+generate_set('apples', 'oranges', 'bananas', 'pineapples')
 ```
 
 This will create separate folders in your directory with each of these names with ~100 images for each class. An updated version of Google Chrome is required for this feature; if you'd like to use it with an older version of Chrome please install the appropriate chromedriver. 
@@ -153,7 +153,7 @@ This will create separate folders in your directory with each of these names wit
 If you'd like to generate images and fit it automatically to a Convolutional Neural Network you can use this command:
 
 ```python
-newClient.generateSetFinCNN('apples', 'oranges')
+newClient.generate_fit_cnn('apples', 'oranges')
 ```
 This particular will generate a dataset of apples and oranges by parsing Google Images, preprocess the dataset appropriately and then fit it to a convolutional neural network. All images are reduced to a standard (224, 224, 3) size using a traditional OpenCV resizing algorithm. Default size is the number of images in one Google Images page *before* having to hit more images, which is generally around 80-100 images. 
 
@@ -188,7 +188,7 @@ NOTE: Tuning for CNN's is **very** memory intensive, and should not be done freq
 All plots are stored during runtime. This function plots all generated graphs for your current client object on one pane. 
 
 ```python
-newClient.plotAll('regression')
+newClient.plot_all('regression')
 ```
 
 If you'd like to extract a single plot, you can do:
@@ -230,7 +230,7 @@ If you'd like information on just one column you can do:
 If you'd like to get the best pipeline for dimensionality reduction you can call:
 
 ```python
- dimensionalityReduc("I want to estimate number of crime", path_to_dataset) 
+ dimensionality_reduc("I want to estimate number of crime", path_to_dataset) 
  
 ```
 Instructions like "I want to model x" are provided in the dimensionality reduction pipeline because it identifies which prediction objective you would like to maximize the accuracy for. Providing this instruction helps Libra provide users with the best modification pipeline. 
@@ -270,7 +270,7 @@ If you'd like to replace the dataset with one that replaces it with the best red
 Performing Principle Component is as simple as: 
 
 ```python 
-dimensionalityPCA("Estimating median house value", path_to_dataset)
+dimensionality_PCA("Estimating median house value", path_to_dataset)
 ```
 
 NOTE: this will select the optimal number of principal components to keep. The default search space is up to the number of columns in your dataset. If you'd like to specify the number of components you can just do ```n_components = number_of_components```.  
@@ -279,7 +279,7 @@ NOTE: this will select the optimal number of principal components to keep. The d
 Using the random forest regressor to identify feature importances is as easy as calling: 
 
 ```python
-dimensionalityRF("Estimating median house value", path_to_dataset)
+dimensionality_RF("Estimating median house value", path_to_dataset)
 ```
 This will find the optimal number of features to use and will return the dataset with the best accuracy. If you'd like to manually set the number of feature you can do ```n_features = number of features```. 
 
@@ -288,7 +288,7 @@ This will find the optimal number of features to use and will return the dataset
 Performing Indepedent Component Analysis can be done by calling:
 
 ```python 
-dimensionalityICA("Estimating median house value", path_to_dataset)
+dimensionality_ICA("Estimating median house value", path_to_dataset)
 ```
 
 If this does not converge a message will be displayed for users to warn them by default.  
