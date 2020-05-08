@@ -3,7 +3,7 @@ from textblob import TextBlob
 import pandas as pd
 
 
-def getValueFromInstruction(sent):
+def get_value_instruction(sent):
 
     # Textblob part of speech identification algorithm
     blob = TextBlob(sent)

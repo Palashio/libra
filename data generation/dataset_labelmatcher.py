@@ -5,7 +5,7 @@ import numpy as np
 import pandas as pd
 import string 
 from sklearn.metrics.pairwise import cosine_similarity
-from grammartree import getValueFromInstruction
+from grammartree import get_value_instruction
 #generates mask for sequence to sequence processing
 def produceMask(instruction_label):
     #creates a mask for a string with representation [1, 0, 2] based on character frequencies
@@ -42,7 +42,7 @@ def levenshtein_distance(a,b):
     return current[n]
 
 #Takes in a dataset and compares the returned instruction identifer based on the part-of-speech identifier and selects the column with the most similar column. 
-def getmostSimilarColumn(instruction_label, dataset):
+def get_similar_column(instruction_label, dataset):
     instruction = produceMask(instruction_label)
 
     data_column_masks = []
@@ -61,8 +61,8 @@ def getmostSimilarColumn(instruction_label, dataset):
     return dataset.columns[idx]
 
 
-#exact exame to getmostSimilarColumn(). Adapted to allow for small changes for model similarity identification 
-def getmostSimilarModel(model_requested, model_keys):
+#exact exame to get_similar_column(). Adapted to allow for small changes for model similarity identification 
+def get_similar_model(model_requested, model_keys):
     masked = produceMask(model_requested)
 
     data_column_masks = []

@@ -19,13 +19,13 @@ from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import OneHotEncoder, StandardScaler
 from tensorflow import keras
 from tensorflow.python.keras.layers import Dense, Input
-from dataset_labelmatcher import getmostSimilarColumn, getmostSimilarModel
+from dataset_labelmatcher import get_similar_column, get_similar_model
 from keras.callbacks import EarlyStopping
 from matplotlib import pyplot
-from grammartree import getValueFromInstruction
-from data_preprocesser import singleRegDataPreprocesser, preProcessImages
-from predictionModelCreation import getKerasModelRegression
-from predictionModelCreation import getKerasModelClassification
+from grammartree import get_value_instruction
+from data_preprocesser import single_reg_preprocesser, image_preprocess
+from predictionModelCreation import get_keras_model_reg
+from predictionModelCreation import get_keras_model_class
 from keras.utils import to_categorical
 from keras.utils import np_utils
 from sklearn.cluster import KMeans
@@ -104,9 +104,9 @@ class client:
         clearLog()
 
     # returns models with a specific string
-    def getModels(self, model_requested):
+    def get_models(self, model_requested):
         logger("Getting model...")
-        return getmostSimilarModel(model_requested, self.models.keys())
+        return get_similar_model(model_requested, self.models.keys())
         clearLog()
 
     # single regression query using a feed-forward neural network
@@ -136,13 +136,13 @@ class client:
         # preprocesses data
         if preprocess:
             logger("hot encoding values and preprocessing...")
-            data = singleRegDataPreprocesser(data)
+            data = single_reg_preprocesser(data)
 
         # identifies the most similar column and creates dataset appropriately.
         logger("identifying target from instruction...")
         logger("establishing callback function...")
-        remove = getmostSimilarColumn(
-            getValueFromInstruction(instruction), data)
+        remove = get_similar_column(
+            get_value_instruction(instruction), data)
         y = data[remove]
         del data[remove]
 
@@ -162,7 +162,7 @@ class client:
         i = 0
 
         # get the first 3 layer model
-        model = getKerasModelRegression(data, i)
+        model = get_keras_model_reg(data, i)
 
         logger("training initial model...")
         history = model.fit(
@@ -184,7 +184,7 @@ class client:
         logger("testing number of layers...")
         print(currLog)
         while(all(x > y for x, y in zip(losses, losses[1:]))):
-            model = getKerasModelRegression(data, i)
+            model = get_keras_model_reg(data, i)
             history = model.fit(
                 X_train,
                 y_train,
@@ -237,14 +237,14 @@ class client:
         data = pd.read_csv(self.dataset)
         data.fillna(0, inplace=True)
 
-        remove = getmostSimilarColumn(
-            getValueFromInstruction(instruction), data)
+        remove = get_similar_column(
+            get_value_instruction(instruction), data)
         y = data[remove]
         del data[remove]
 
         # prepcoess the dataset
         if preprocess:
-            data = singleRegDataPreprocesser(data)
+            data = single_reg_preprocesser(data)
             num_classes = len(np.unique(y))
 
             # encodes the label dataset into 0's and 1's
@@ -266,7 +266,7 @@ class client:
             patience=5)
 
         i = 0
-        model = getKerasModelClassification(data, i, num_classes)
+        model = get_keras_model_class(data, i, num_classes)
 
         history = model.fit(
             data, y, epochs=epochs, validation_data=(
@@ -279,7 +279,7 @@ class client:
         # keeps running model and fit functions until the validation loss stops
         # decreasing
         while(all(x > y for x, y in zip(losses, losses[1:]))):
-            model = getKerasModelClassification(data, i, num_classes)
+            model = get_keras_model_class(data, i, num_classes)
             history = model.fit(
                 X_train,
                 y_train,
@@ -329,7 +329,7 @@ class client:
 
         if preprocess:
             logger("Preprocessing data...")
-            data = np.asarray(singleRegDataPreprocesser(data))
+            data = np.asarray(single_reg_preprocesser(data))
 
         modelStorage = []
         inertiaStor = []
@@ -391,15 +391,15 @@ class client:
         data.fillna(0, inplace=True)
 
         logger("Identifying target columns...")
-        remove = getmostSimilarColumn(
-            getValueFromInstruction(instruction), data)
+        remove = get_similar_column(
+            get_value_instruction(instruction), data)
         y = data[remove]
         del data[remove]
 
         # prepcoess the dataset
         logger("Preprocessing dataset")
-        data = singleRegDataPreprocesser(data)
-        #classification_column = getmostSimilarColumn(getLabelwithInstruction(instruction), data)
+        data = single_reg_preprocesser(data)
+        #classification_column = get_similar_column(getLabelwithInstruction(instruction), data)
 
         num_classes = len(np.unique(y))
 
@@ -441,16 +441,16 @@ class client:
         data.fillna(0, inplace=True)
 
         logger("Identifying target columns...")
-        remove = getmostSimilarColumn(
-            getValueFromInstruction(instruction), data)
+        remove = get_similar_column(
+            get_value_instruction(instruction), data)
         y = data[remove]
         del data[remove]
 
         # prepcoess the dataset
         if preprocess:
             logger("Preprocessing dataset...")
-            data = singleRegDataPreprocesser(data)
-        #classification_column = getmostSimilarColumn(getLabelwithInstruction(instruction), data)
+            data = single_reg_preprocesser(data)
+        #classification_column = get_similar_column(getLabelwithInstruction(instruction), data)
 
         num_classes = len(np.unique(y))
 
@@ -489,16 +489,16 @@ class client:
         data.fillna(0, inplace=True)
 
         logger("Identifying target columns...")
-        remove = getmostSimilarColumn(
-            getValueFromInstruction(instruction), data)
+        remove = get_similar_column(
+            get_value_instruction(instruction), data)
         y = data[remove]
         del data[remove]
 
         # prepcoess the dataset
         if preprocess:
             logger("Preprocessing dataset...")
-            data = singleRegDataPreprocesser(data)
-        #classification_column = getmostSimilarColumn(getLabelwithInstruction(instruction), data)
+            data = single_reg_preprocesser(data)
+        #classification_column = get_similar_column(getLabelwithInstruction(instruction), data)
 
         num_classes = len(np.unique(y))
 
@@ -537,16 +537,16 @@ class client:
         data.fillna(0, inplace=True)
 
         logger("Identifying target columns...")
-        remove = getmostSimilarColumn(
-            getValueFromInstruction(instruction), data)
+        remove = get_similar_column(
+            get_value_instruction(instruction), data)
         y = data[remove]
         del data[remove]
 
         # prepcoess the dataset
         if preprocess:
             logger("Preprocessing dataset...")
-            data = singleRegDataPreprocesser(data)
-        #classification_column = getmostSimilarColumn(getLabelwithInstruction(instruction), data)
+            data = single_reg_preprocesser(data)
+        #classification_column = get_similar_column(getLabelwithInstruction(instruction), data)
 
         num_classes = len(np.unique(y))
 
@@ -699,7 +699,7 @@ class client:
         # accepting in a variable number of parameters and preprocessing the
         # information
         for location in argv:
-            data = preProcessImages(location)
+            data = image_preprocess(location)
             for image in data:
                 X.append(image)
                 y.append(i)

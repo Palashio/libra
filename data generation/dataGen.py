@@ -5,7 +5,7 @@ import os
 import urllib
 import argparse
 import requests
-from data_preprocesser import preProcessImages
+from data_preprocesser import image_preprocess
 
 
 def generate_data(word):
@@ -51,4 +51,4 @@ def generate_data(word):
 
     browser.quit()
 
-    return preProcessImages(searchterm)
+    return image_preprocess(searchterm)

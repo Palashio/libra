@@ -16,7 +16,7 @@ import cv2
 
 
 # Preprocesses the data appropriately for single reg data
-def singleRegDataPreprocesser(data):
+def single_reg_preprocesser(data):
     data.fillna(0, inplace=True)
 
     # identifies the categorical and numerical columns
@@ -59,7 +59,7 @@ def singleRegDataPreprocesser(data):
 # Preprocesses images queried from images to (224, 224, 3)
 
 
-def preProcessImages(data_path):
+def image_preprocess(data_path):
     image_dir = str(data_path)
     loaded_shaped = []
     imagesList = listdir(image_dir)

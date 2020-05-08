@@ -12,9 +12,9 @@ from tensorflow import keras
 from tensorflow.python.keras.layers import Dense, Input
 from keras.callbacks import EarlyStopping
 from matplotlib import pyplot
-from data_preprocesser import singleRegDataPreprocesser
-from predictionModelCreation import getKerasModelRegression
-from predictionModelCreation import getKerasModelClassification
+from data_preprocesser import single_reg_preprocesser
+from predictionModelCreation import get_keras_model_reg
+from predictionModelCreation import get_keras_model_class
 from keras.utils import to_categorical
 from keras.utils import np_utils
 from sklearn.cluster import KMeans

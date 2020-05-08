@@ -25,13 +25,13 @@ import matplotlib.pyplot as plt
 from sklearn.cluster import KMeans
 from keras.utils import np_utils
 from keras.utils import to_categorical
-from predictionModelCreation import getKerasModelClassification
-from predictionModelCreation import getKerasModelRegression
-from data_preprocesser import singleRegDataPreprocesser, preProcessImages
-from grammartree import getValueFromInstruction
+from predictionModelCreation import get_keras_model_class
+from predictionModelCreation import get_keras_model_reg
+from data_preprocesser import single_reg_preprocesser, image_preprocess
+from grammartree import get_value_instruction
 from matplotlib import pyplot
 from keras.callbacks import EarlyStopping
-from dataset_labelmatcher import getmostSimilarColumn, getmostSimilarModel
+from dataset_labelmatcher import get_similar_column, get_similar_model
 from tensorflow.python.keras.layers import Dense, Input
 from tensorflow import keras
 from sklearn.preprocessing import OneHotEncoder, StandardScaler
@@ -60,11 +60,11 @@ def initializer(params):
     return params 
 
 def preprocesser(params):
-    data = singleRegDataPreprocesser(params['data'])
+    data = single_reg_preprocesser(params['data'])
     params['data'] = data
 
 def instruction_identifier(params):
-    remove = getmostSimilarColumn(getValueFromInstruction(params['instruction']), params['data'])
+    remove = get_similar_column(get_value_instruction(params['instruction']), params['data'])
     params['y'] = params['data'][remove]
     del params['data'][remove]
 
@@ -86,7 +86,7 @@ def modeler(params):
         i = 0
 
         # get the first 3 layer model
-        model = getKerasModelRegression(params['data'], i)
+        model = get_keras_model_reg(params['data'], i)
         history = model.fit(
             params['X_train'],
             params['y_train'],
@@ -105,7 +105,7 @@ def modeler(params):
         # decreasing
 
         while(all(x > y for x, y in zip(losses, losses[1:]))):
-            model = getKerasModelRegression(params['data'], i)
+            model = get_keras_model_reg(params['data'], i)
             history = model.fit(
                 params['X_train'],
                 params['y_train'],

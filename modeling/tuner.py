@@ -1,4 +1,4 @@
-from data_preprocesser import singleRegDataPreprocesser
+from data_preprocesser import single_reg_preprocesser
 import tensorflow as tf
 import keras
 from tensorflow.python.keras.layers import Dense, Input
@@ -136,7 +136,7 @@ class CNNHyperModel(HyperModel):
 def tuneReg(data, target):
     # reads in dataset and processes it
     data = pd.read_csv(data)
-    data = singleRegDataPreprocesser(data)
+    data = single_reg_preprocesser(data)
     print("entered1")
     # function build model using hyperparameter
 

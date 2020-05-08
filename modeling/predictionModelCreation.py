@@ -5,7 +5,7 @@ import numpy as np
 
 
 # Creates a regression neural network
-def getKerasModelRegression(dataset, i):
+def get_keras_model_reg(dataset, i):
     size_max_network = 10
     # base model
     model = tf.keras.Sequential()
@@ -39,7 +39,7 @@ def getKerasModelRegression(dataset, i):
 # Creates a classification neural network
 
 
-def getKerasModelClassification(dataset, i, num_classes):
+def get_keras_model_class(dataset, i, num_classes):
     size_max_network = 10
 
     # base model
