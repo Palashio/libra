@@ -12,10 +12,15 @@ from sklearn.ensemble import RandomForestRegressor
 from sklearn.neighbors import KNeighborsClassifier
 from tuner import tuneReg, tuneClass, tuneCNN
 from os import listdir
-from keras.layers import Dense, Conv2D, Flatten
+from keras.layers import (Dense, Conv2D, Flatten)
 from keras.models import Sequential
 from dataGen import generate_data
-from generatePlots import generateClusteringPlots, generateRegressionPlots, generateClassificationPlots, generateClassificationTogether
+from generatePlots import (
+    generateClusteringPlots, 
+    generateRegressionPlots, 
+    generateClassificationPlots, 
+    generateClassificationTogether)
+
 import matplotlib.pyplot as plt
 from sklearn.cluster import KMeans
 from keras.utils import np_utils
@@ -46,8 +51,6 @@ import pprint
 from colorama import Fore, Style
 import numpy as np
 import keras
-
-
 
 
 def initializer(params):

@@ -13,14 +13,17 @@ init_params = {
 }
 
 reg_pipeline = [initializer,
-                preprocesser,
+                mypreprocessor,
                 instruction_identifier,
                 set_splitter,
                 modeler,
                 plotter]
 
 
-for func in reg_pipeline:
-    func(init_params)
 
-print(init_params.keys())
+
+[func(init_params) for func in reg_pipeline]
+
+
+def mypreprocessor():
+    return

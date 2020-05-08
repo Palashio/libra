@@ -1,51 +1,52 @@
 # Making functions in other directories accesible to this file by
 # inserting into sis path
-from sklearn import preprocessing, tree
-from sklearn.feature_selection import SelectFromModel
-from sklearn.ensemble import RandomForestRegressor
-from sklearn.neighbors import KNeighborsClassifier
-from tuner import tuneReg, tuneClass, tuneCNN
-from os import listdir
-from keras.layers import Dense, Conv2D, Flatten
-from keras.models import Sequential
-from dataGen import generate_data
-from generatePlots import generateClusteringPlots, generateRegressionPlots, generateClassificationPlots, generateClassificationTogether
-import matplotlib.pyplot as plt
-from sklearn.cluster import KMeans
-from keras.utils import np_utils
-from keras.utils import to_categorical
-from predictionModelCreation import getKerasModelClassification
-from predictionModelCreation import getKerasModelRegression
-from data_preprocesser import singleRegDataPreprocesser, preProcessImages
-from grammartree import getValueFromInstruction
-from matplotlib import pyplot
-from keras.callbacks import EarlyStopping
-from dataset_labelmatcher import getmostSimilarColumn, getmostSimilarModel
-from tensorflow.python.keras.layers import Dense, Input
-from tensorflow import keras
-from sklearn.preprocessing import OneHotEncoder, StandardScaler
-from sklearn.pipeline import Pipeline
-from sklearn.model_selection import train_test_split
-from sklearn.compose import ColumnTransformer
-from sklearn import preprocessing, svm
-from sklearn.metrics import accuracy_score
-from sklearn.preprocessing import LabelEncoder
-from pandas import DataFrame
-from sklearn.model_selection import cross_val_score
-from scipy.spatial.distance import cosine
-from tabulate import tabulate
-import tensorflow as tf
-import pandas as pd
-import pprint
-from colorama import Fore, Style
-import numpy as np
 import keras
+import numpy as np
+from colorama import Fore, Style
+import pprint
+import pandas as pd
+import tensorflow as tf
+from tabulate import tabulate
+from scipy.spatial.distance import cosine
+from sklearn.model_selection import cross_val_score
+from pandas import DataFrame
+from sklearn.preprocessing import LabelEncoder
+from sklearn.metrics import accuracy_score
+from sklearn import preprocessing, svm
+from sklearn.compose import ColumnTransformer
+from sklearn.model_selection import train_test_split
+from sklearn.pipeline import Pipeline
+from sklearn.preprocessing import OneHotEncoder, StandardScaler
+from tensorflow import keras
+from tensorflow.python.keras.layers import Dense, Input
+from dataset_labelmatcher import getmostSimilarColumn, getmostSimilarModel
+from keras.callbacks import EarlyStopping
+from matplotlib import pyplot
+from grammartree import getValueFromInstruction
+from data_preprocesser import singleRegDataPreprocesser, preProcessImages
+from predictionModelCreation import getKerasModelRegression
+from predictionModelCreation import getKerasModelClassification
+from keras.utils import to_categorical
+from keras.utils import np_utils
+from sklearn.cluster import KMeans
+import matplotlib.pyplot as plt
+from generatePlots import generateClusteringPlots, generateRegressionPlots, generateClassificationPlots, generateClassificationTogether
+from dataGen import generate_data
+from keras.models import Sequential
+from keras.layers import Dense, Conv2D, Flatten
+from dimensionality_red_queries import dimensionalityReduc
+from os import listdir
+from tuner import tuneReg, tuneClass, tuneCNN
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.ensemble import RandomForestRegressor
+from sklearn.feature_selection import SelectFromModel
+from sklearn import preprocessing, tree
 import sys
-
 sys.path.insert(1, './preprocessing')
 sys.path.insert(1, './data generation')
 sys.path.insert(1, './modeling')
 sys.path.insert(1, './plotting')
+
 
 # function imports from other files
 
@@ -110,13 +111,15 @@ class client:
 
     # single regression query using a feed-forward neural network
     # instruction should be the value of a column
-    def SingleRegressionQueryANN(
+    def regression_query_ann(
             self,
             instruction,
             preprocess=True,
             test_size=0.2,
+            random_state=49,
             epochs=50,
             generate_plots=True,
+            callback_mode='min',
             maximizer="val_loss"):
         global currLog
         logger("reading in dataset...")
@@ -144,7 +147,7 @@ class client:
         del data[remove]
 
         X_train, X_test, y_train, y_test = train_test_split(
-            data, y, test_size=test_size, random_state=49)
+            data, y, test_size=test_size, random_state=random_state)
 
         models = []
         losses = []
@@ -152,7 +155,7 @@ class client:
         # callback function to store lowest loss value
         es = EarlyStopping(
             monitor=maximizer,
-            mode='min',
+            mode=callback_mode,
             verbose=1,
             patience=5)
 
@@ -219,10 +222,12 @@ class client:
 
     # query for multilabel classification query, does not work for
     # binaryclassification, fits to feed-forward neural network
-    def classificationQueryANN(
+    def classification_query_ann(
             self,
             instruction,
             preprocess=True,
+            callback_mode='min',
+            random_state=49,
             test_size=0.2,
             epochs=5,
             generate_plots=True,
@@ -248,7 +253,7 @@ class client:
             y = np_utils.to_categorical(y)
 
         X_train, X_test, y_train, y_test = train_test_split(
-            data, y, test_size=test_size, random_state=49)
+            data, y, test_size=test_size, random_state=random_state)
 
         models = []
         losses = []
@@ -311,7 +316,11 @@ class client:
         # returns the last model
         return model
 
-    def kMeansClusteringQuery(self, preprocess=True, generate_plots=True):
+    def kmeans_clustering_query(
+            self,
+            preprocess=True,
+            generate_plots=True,
+            base_clusters=1):
         logger("Reading dataset...")
         # loads dataset and replaces n/a with zero
         data = pd.read_csv(self.dataset)
@@ -327,7 +336,7 @@ class client:
 
         # processes dataset and runs KMeans algorithm on one cluster as
         # baseline
-        i = 1
+        i = base_clusters
         logger("Creating unsupervised clustering task...")
         kmeans = KMeans(n_clusters=i, random_state=0).fit(data)
         modelStorage.append(kmeans)
@@ -370,7 +379,12 @@ class client:
         # return modelStorage[len(modelStorage) - 1],
         # inertiaStor[len(inertiaStor) - 1], i
 
-    def svmQuery(self, instruction, test_size=0.2, kernel='linear'):
+    def svm_query(
+            self,
+            instruction,
+            test_size=0.2,
+            kernel='linear',
+            cross_val_size=0.3):
         logger("Reading in dataset....")
         # reads dataset and fills n/a values with zeroes
         data = pd.read_csv(self.dataset)
@@ -398,7 +412,7 @@ class client:
 
         # Fitting to SVM and storing in the model dictionary
         logger("Fitting Support Vector Machine")
-        clf = svm.SVC('linear')
+        clf = svm.SVC(kernel=kernel)
         clf.fit(X_train, y_train)
         logger("Storing information in client object...")
         self.models["svm"] = {
@@ -411,11 +425,11 @@ class client:
                 clf,
                 data,
                 y,
-                cv=3)}
+                cv=cross_val_size)}
         clearLog()
         return svm
 
-    def nearestNeighborQuery(
+    def nearest_neighbor_query(
             self,
             instruction,
             preprocess=True,
@@ -469,7 +483,7 @@ class client:
         clearLog()
         return knn
 
-    def decisionTreeQuery(self, instruction, preprocess=True, test_size=0.2):
+    def decision_tree_query(self, instruction, preprocess=True, test_size=0.2):
         logger("Reading in dataset....")
         data = pd.read_csv(self.dataset)
         data.fillna(0, inplace=True)
@@ -512,7 +526,12 @@ class client:
         clearLog()
         return clf
 
-    def allClassQuery(self, instruction, preprocess=True, test_size=0.2):
+    def allClassQuery(
+            self,
+            instruction,
+            preprocess=True,
+            test_size=0.2,
+            random_state=49):
         logger("Reading in dataset....")
         data = pd.read_csv(self.dataset)
         data.fillna(0, inplace=True)
@@ -536,7 +555,7 @@ class client:
         y = le.fit_transform(y)
 
         X_train, X_test, y_train, y_test = train_test_split(
-            data, y, test_size=test_size, random_state=49)
+            data, y, test_size=test_size, random_state=random_state)
         scores = []
         models = []
 
@@ -669,11 +688,14 @@ class client:
             print("-------------------------")
             print(pdtabulate(data[column_name]).describe())
 
-    def convolutionalNNQuery(self, *argv):
+    def convolutional_query(self, *argv):
         X = []
         y = []
         i = 0
 
+        input_shape = (224, 224, 3)
+        loss = "binary_crossentropy"
+        optimizer = "adam"
         # accepting in a variable number of parameters and preprocessing the
         # information
         for location in argv:
@@ -701,16 +723,13 @@ class client:
                 64,
                 kernel_size=3,
                 activation="relu",
-                input_shape=(
-                    224,
-                    224,
-                    3)))
+                input_shape=(input_shape))),
         model.add(Conv2D(32, kernel_size=3, activation="relu"))
         model.add(Flatten())
         model.add(Dense(len(argv), activation="softmax"))
         model.compile(
-            optimizer='adam',
-            loss='binary_crossentropy',
+            optimizer=optimizer,
+            loss=loss,
             metrics=['accuracy'])
         history = model.fit(
             X_train, y_train, validation_data=(
@@ -730,7 +749,7 @@ class client:
                 'training_accuracy': history.history['accuracy'],
                 'validation_accuracy': history.history['val_accuracy']}}
 
-    def generateSetFitCNN(self, *argv):
+    def generate_fit_cnn(self, *argv):
         logger("Creating CNN generation query")
         # generates the dataset based on instructions using a selenium query on
         # google chrome
@@ -805,7 +824,12 @@ class client:
         # clearing logger appropriately
         clearLog()
 
+    def dimensionality_reducer(self, instruction):
+        dimensionalityReduc(instruction, self.dataset)
+
+    def show_plots(self, model):
+        print(self.models[model]['plots'].keys())
+
 
 newClient = client("./data/housing.csv")
-newClient.SingleRegressionQueryANN("Predict median house value")
-pprint.pprint(newClient.models)
+newClient.dimensionalityReducer("Predict median house value")
