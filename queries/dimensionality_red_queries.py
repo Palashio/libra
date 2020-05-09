@@ -74,7 +74,7 @@ def logger(instruction, found = ""):
     print(currLog)
 
 
-def dimensionality_reduc(instruction, dataset, arr=[["RF", "PCA", "ICA"]]):
+def dimensionality_reduc(instruction, dataset, arr=["RF", "PCA", "ICA"], inplace = False):
     global currLog 
     global counter
 
@@ -110,17 +110,17 @@ def dimensionality_reduc(instruction, dataset, arr=[["RF", "PCA", "ICA"]]):
         for element in path:
             if element == "RF":
                 currSet = storage[len(storage) - 1]
-                data_mod, beg_acc_RF, final_acc_RF, col_removed_RF = dimensionalityRF(instruction, currSet, target, y)
+                data_mod, beg_acc_RF, final_acc_RF, col_removed_RF = dimensionality_RF(instruction, currSet, target, y)
                 storage.append(data_mod)
                 overall_storage.append(list([data_mod, beg_acc_RF,final_acc_RF, col_removed_RF]))
             if element == "PCA":
                 currSet = storage[len(storage) - 1] 
-                data_mod, beg_acc_PCA, final_acc_PCA, col_removed_PCA = dimensionalityPCA(instruction, currSet, target, y)
+                data_mod, beg_acc_PCA, final_acc_PCA, col_removed_PCA = dimensionality_PCA(instruction, currSet, target, y)
                 storage.append(data_mod)
                 overall_storage.append(list([data_mod, beg_acc_PCA, final_acc_PCA, col_removed_PCA]))
             if element == "ICA":
                 currSet = storage[len(storage) - 1] 
-                data_mod, beg_acc_ICA, final_acc_ICA, col_removed_ICA = dimensionalityICA(instruction, currSet, target, y)
+                data_mod, beg_acc_ICA, final_acc_ICA, col_removed_ICA = dimensionality_ICA(instruction, currSet, target, y)
                 storage.append(data_mod)
                 overall_storage.append(list([data_mod, beg_acc_ICA, final_acc_ICA, col_removed_ICA]))
             if path.index(element) == len(path) - 1:
@@ -142,6 +142,10 @@ def dimensionality_reduc(instruction, dataset, arr=[["RF", "PCA", "ICA"]]):
     print("----------------------------")
     for element in accs:
         print(element)
+    
+    if inplace:
+        data.to_csv(dataset)
+
 
     
 
