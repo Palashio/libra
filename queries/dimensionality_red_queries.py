@@ -36,7 +36,7 @@ from keras.utils import to_categorical
 from keras.utils import np_utils
 from sklearn.cluster import KMeans
 import matplotlib.pyplot as plt
-from generatePlots import generate_clustering_plots, generate_regression_plots, generateClassificationPlots, generateClassificationTogether
+from generatePlots import generate_clustering_plots, generate_regression_plots, generate_classification_plots, generate_classification_together
 from dataGen import generate_data
 from keras.models import Sequential
 from keras.layers import Dense, Conv2D, Flatten

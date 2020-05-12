@@ -1,5 +1,11 @@
 # Making functions in other directories accesible to this file by
 # inserting into sis path
+import sys
+sys.path.insert(1, './preprocessing')
+sys.path.insert(1, './data generation')
+sys.path.insert(1, './modeling')
+sys.path.insert(1, './plotting')
+
 import keras
 import numpy as np
 from colorama import Fore, Style
@@ -41,11 +47,7 @@ from sklearn.neighbors import KNeighborsClassifier
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.feature_selection import SelectFromModel
 from sklearn import preprocessing, tree
-import sys
-sys.path.insert(1, './preprocessing')
-sys.path.insert(1, './data generation')
-sys.path.insert(1, './modeling')
-sys.path.insert(1, './plotting')
+
 
 
 # function imports from other files
@@ -191,8 +193,7 @@ class client:
                 epochs=epochs,
                 validation_data=(
                     X_test,
-                    y_test),
-                callbacks=[es])
+                    y_test))
             models.append(history)
             losses.append(models[i].history[maximizer]
                           [len(models[i].history[maximizer]) - 1])
@@ -301,8 +302,6 @@ class client:
         # stores the values and plots into the object dictionary
         self.models["classification_ANN"] = {
             "model": model,
-            "X": data,
-            "y": y,
             'num_classes': num_classes,
             "plots": plots,
             "target": remove,
@@ -805,8 +804,8 @@ class client:
        # generating both individual plots and a pane to display all subplots
         plots = generate_classification_plots(
             history, X, y, model, X_test, y_test)
-        all_plot = generate_classification_together(
-            history, X, y, model, X_test, y_test)
+        # all_plot = generate_classification_together(
+        #     history, X, y, model, X_test, y_test)
 
         # storing all information in the model dictionary
         self.models["genfit_CNN"] = {
@@ -814,7 +813,6 @@ class client:
             'num_classes': len(
                 np.unique(y_test)),
             "plots": plots,
-            "all_plots": all_plot,
             'losses': {
                 'training_loss': history.history['loss'],
                 'val_loss': history.history['val_loss']},
@@ -825,11 +823,13 @@ class client:
         clearLog()
 
     def dimensionality_reducer(self, instruction):
-        dimensionalityReduc(instruction, self.dataset)
+        dimensionality_reduc(instruction, self.dataset)
 
     def show_plots(self, model):
         print(self.models[model]['plots'].keys())
 
 
-newClient = client("./data/housing.csv")
-newClient.dimensionalityReducer("Predict median house value")
+newClient = client('./data/housing.csv').generate_fit_cnn('apples', 'oranges', 'bananas')
+newClient.tune('genfit_CNN')
+
+

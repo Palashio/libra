@@ -3,6 +3,12 @@ import numpy as np
 import pandas as pd
 import tensorflow as tf
 import sys
+
+sys.path.insert(1, './preprocessing')
+sys.path.insert(1, './data generation')
+sys.path.insert(1, './modeling')
+sys.path.insert(1, './plotting')
+
 from sklearn import preprocessing
 from sklearn.compose import ColumnTransformer
 from sklearn.model_selection import train_test_split
@@ -12,6 +18,7 @@ from tensorflow import keras
 from tensorflow.python.keras.layers import Dense, Input
 from keras.callbacks import EarlyStopping
 from matplotlib import pyplot
+from matplotlib import pyplot as PLT
 from data_preprocesser import single_reg_preprocesser
 from predictionModelCreation import get_keras_model_reg
 from predictionModelCreation import get_keras_model_class
@@ -35,10 +42,11 @@ def generate_clustering_plots(kmeans, dataPandas, dataset):
                         c=kmeans.labels_, cmap='rainbow')
             plt.xlabel(str(dataPandas.columns[x]))
             plt.ylabel(str(dataPandas.columns[y]))
+            plt.show()
             plots.append(plt)
             plot_names.append(
                 dataPandas.columns[x] +
-                "vs" +
+                "_vs_" +
                 dataPandas.columns[y])
     return plots, plot_names
 
@@ -66,6 +74,17 @@ def generate_classification_plots(history, data, label, model, X_test, y_test):
     plots = []
     plot_names = []
 
+    # generating plots for accuracy
+    plt.plot(history.history['accuracy'])
+    plt.plot(history.history['val_accuracy'])
+    plt.title('model accuracy')
+    plt.ylabel('accuracy')
+    plt.xlabel('epoch')
+    plt.legend(['train', 'test'], loc='upper left')
+
+    plots.append(plt)
+    plot_names.append('accuracyvsval_accuracy')
+
     # generating plots for loss
     plt.plot(history.history['loss'])
     plt.plot(history.history['val_loss'])
@@ -77,16 +96,6 @@ def generate_classification_plots(history, data, label, model, X_test, y_test):
     plots.append(plt)
     plot_names.append('lossvsval_los')
 
-    # generating plots for accuracy
-    plt.plot(history.history['accuracy'])
-    plt.plot(history.history['val_accuracy'])
-    plt.title('model accuracy')
-    plt.ylabel('accuracy')
-    plt.xlabel('epoch')
-    plt.legend(['train', 'test'], loc='upper left')
-
-    plots.append(plt)
-    plot_names.append('accuracyvsval_accuracy')
 
     # dynamic way to return all possible plots in case it expands together
     return_plots = {}

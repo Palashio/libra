@@ -68,11 +68,7 @@ class CNNHyperModel(HyperModel):
         )
         model.add(
             Conv2D(
-                filters=hp.Choice(
-                    'num_filters',
-                    values=[32, 64],
-                    default=64,
-                ),
+                filters=16,
                 activation='relu',
                 kernel_size=3
             )
