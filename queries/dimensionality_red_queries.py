@@ -149,7 +149,7 @@ def dimensionality_reduc(instruction, dataset, arr=["RF", "PCA", "ICA"], inplace
 
     
 
-def dimensionality_RF(instruction, dataset, target="", y = ""):
+def dimensionality_RF(instruction, dataset, target="", y = "", n_features = 10):
     global currLog 
     global counter
 
@@ -203,7 +203,7 @@ def dimensionality_RF(instruction, dataset, target="", y = ""):
 
     return datas[the_index], accuracy_scores[0], max(accuracy_scores), list(columns[the_index])
 
-def dimensionality_PCA(instruction, dataset, target="", y = ""):
+def dimensionality_PCA(instruction, dataset, target="", y = "", n_components = 10):
     global currLog 
     global counter
 
