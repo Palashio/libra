@@ -1,4 +1,4 @@
-![Image description](data/libra.png)
+![Image description](data/libra-logo.png)
 
 # Libra: Deep Learning fluent in one-liners
 
