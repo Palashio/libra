@@ -16,7 +16,7 @@ import cv2
 
 
 # Preprocesses the data appropriately for single reg data
-def single_reg_preprocesser(data):
+def structured_preprocesser(data):
     data.fillna(0, inplace=True)
 
     # identifies the categorical and numerical columns

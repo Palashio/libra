@@ -29,7 +29,7 @@ from dataset_labelmatcher import get_similar_column, get_similar_model
 from keras.callbacks import EarlyStopping
 from matplotlib import pyplot
 from grammartree import get_value_instruction
-from data_preprocesser import single_reg_preprocesser, image_preprocess
+from data_preprocesser import structured_preprocesser, image_preprocess
 from predictionModelCreation import get_keras_model_reg
 from predictionModelCreation import get_keras_model_class
 from keras.utils import to_categorical
@@ -138,7 +138,7 @@ class client:
         # preprocesses data
         if preprocess:
             logger("hot encoding values and preprocessing...")
-            data = single_reg_preprocesser(data)
+            data = structured_preprocesser(data)
 
         # identifies the most similar column and creates dataset appropriately.
         logger("identifying target from instruction...")
@@ -245,7 +245,7 @@ class client:
 
         # prepcoess the dataset
         if preprocess:
-            data = single_reg_preprocesser(data)
+            data = structured_preprocesser(data)
             num_classes = len(np.unique(y))
 
             # encodes the label dataset into 0's and 1's
@@ -328,7 +328,7 @@ class client:
 
         if preprocess:
             logger("Preprocessing data...")
-            data = np.asarray(single_reg_preprocesser(data))
+            data = np.asarray(structured_preprocesser(data))
 
         modelStorage = []
         inertiaStor = []
@@ -397,7 +397,7 @@ class client:
 
         # prepcoess the dataset
         logger("Preprocessing dataset")
-        data = single_reg_preprocesser(data)
+        data = structured_preprocesser(data)
         #classification_column = get_similar_column(getLabelwithInstruction(instruction), data)
 
         num_classes = len(np.unique(y))
@@ -448,7 +448,7 @@ class client:
         # prepcoess the dataset
         if preprocess:
             logger("Preprocessing dataset...")
-            data = single_reg_preprocesser(data)
+            data = structured_preprocesser(data)
         #classification_column = get_similar_column(getLabelwithInstruction(instruction), data)
 
         num_classes = len(np.unique(y))
@@ -496,7 +496,7 @@ class client:
         # prepcoess the dataset
         if preprocess:
             logger("Preprocessing dataset...")
-            data = single_reg_preprocesser(data)
+            data = structured_preprocesser(data)
         #classification_column = get_similar_column(getLabelwithInstruction(instruction), data)
 
         num_classes = len(np.unique(y))
@@ -544,7 +544,7 @@ class client:
         # prepcoess the dataset
         if preprocess:
             logger("Preprocessing dataset...")
-            data = single_reg_preprocesser(data)
+            data = structured_preprocesser(data)
         #classification_column = get_similar_column(getLabelwithInstruction(instruction), data)
 
         num_classes = len(np.unique(y))

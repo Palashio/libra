@@ -19,7 +19,7 @@ from tensorflow.python.keras.layers import Dense, Input
 from keras.callbacks import EarlyStopping
 from matplotlib import pyplot
 from matplotlib import pyplot as PLT
-from data_preprocesser import single_reg_preprocesser
+from data_preprocesser import structured_preprocesser
 from predictionModelCreation import get_keras_model_reg
 from predictionModelCreation import get_keras_model_class
 from keras.utils import to_categorical

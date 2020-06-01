@@ -29,7 +29,7 @@ from dataset_labelmatcher import get_similar_column
 from keras.callbacks import EarlyStopping
 from matplotlib import pyplot
 from grammartree import get_value_instruction
-from data_preprocesser import single_reg_preprocesser, image_preprocess
+from data_preprocesser import structured_preprocesser, image_preprocess
 from predictionModelCreation import get_keras_model_reg
 from predictionModelCreation import get_keras_model_class
 from keras.utils import to_categorical
@@ -91,7 +91,7 @@ def dimensionality_reduc(instruction, dataset, arr=["RF", "PCA", "ICA"], inplace
     le = preprocessing.LabelEncoder()
     y = le.fit_transform(y)
 
-    data = single_reg_preprocesser(data)
+    data = structured_preprocesser(data)
 
     perms = []
     overall_storage = []
@@ -157,7 +157,7 @@ def dimensionality_RF(instruction, dataset, target="", y = "", n_features = 10):
         data = pd.read_csv("./data/" + get_last_file()[0])
         data.fillna(0, inplace=True)
         remove = get_similar_column(get_value_instruction(instruction), data)
-        data = single_reg_preprocesser(data)
+        data = structured_preprocesser(data)
 
         y = data[remove]
         del data[remove]
@@ -303,6 +303,6 @@ def get_last_file():
 # le = preprocessing.LabelEncoder()
 # y = le.fit_transform(y)
 
-# data = single_reg_preprocesser(data)
+# data = structured_preprocesser(data)
 
 #dimensionalityICA("Predict ocean proximity", data, "ocean_proximity", y)
