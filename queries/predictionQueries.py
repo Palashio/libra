@@ -123,6 +123,7 @@ class client:
             generate_plots=True,
             callback_mode='min',
             maximizer="val_loss"):
+
         global currLog
         logger("reading in dataset...")
         data = pd.read_csv(self.dataset)
@@ -829,7 +830,7 @@ class client:
         print(self.models[model]['plots'].keys())
 
 
-newClient = client('./data/housing.csv').generate_fit_cnn('apples', 'oranges', 'bananas')
-newClient.tune('genfit_CNN')
+newClient = client('./data/housing.csv').regression_query_ann("Model median house value")
+
 
 
