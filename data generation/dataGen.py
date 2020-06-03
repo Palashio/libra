@@ -1,12 +1,7 @@
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
-import json
 import os
 import urllib
-import argparse
-import requests
-from data_preprocesser import image_preprocess
-
 
 def generate_data(word):
     # identifies the search term and the base google address
@@ -22,11 +17,19 @@ def generate_data(word):
     browser = webdriver.Chrome(executable_path=DRIVER_BIN)
     browser.get(url)
     img_count = 0
-
+    #adding the training and test folders with subdirectories
+    #for the searchterm
+    sets=['training_set','test_test']
+    for i in sets:
+        if not os.path.exists(i):
+            if not os.path.exists(i+'/'+searchterm):
+                os.makedirs(i+'/'+searchterm)
+        else:
+            if not os.path.exists(i+'/'+searchterm):
+                os.makedirs(i+'/'+searchterm)
+    
     # extensions for images that're accepted
     extensions = {"jpg", "jpeg", "png", "gif"}
-    if not os.path.exists(searchterm):
-        os.mkdir(searchterm)
 
     # continues to scroll down the page when it reaches the bottom
     for _ in range(500):
@@ -42,13 +45,14 @@ def generate_data(word):
                 '"')[0].split('.')[-1] in extensions:
             imges.append(i.split('"')[0])
 
-    i = 0
-
     # splits into only neccesary part to identify image and download
     for link in imges:
         filename = link.split('/')[-1]
-        urllib.urlretrieve(link, searchterm + "/" + filename)
-
+        ++img_count
+        if img_count>(10000*0.2):
+            urllib.urlretrieve(link, 'test_set/'+searchterm + "/" + filename)
+        else:
+            urllib.urlretrieve(link, 'training_set/'+searchterm + "/" + filename)
     browser.quit()
 
 
