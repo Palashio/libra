@@ -51,8 +51,6 @@ def generate_data(word):
 
     browser.quit()
 
-    return image_preprocess(searchterm)
-
 
 def generate_set(class1, class2, class3):
     return generate_set(class1), generate_set(class2), generate_set(class3)
