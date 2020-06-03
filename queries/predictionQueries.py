@@ -167,7 +167,6 @@ class client:
 
         #get the first 3 layer model
         model = get_keras_model_reg(data, i)
-        print(len(model.layers))
 
         logger("training initial model...")
         history = model.fit(
