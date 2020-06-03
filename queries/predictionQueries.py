@@ -160,11 +160,12 @@ class client:
             monitor=maximizer,
             mode=callback_mode,
             verbose=1,
-            patience=5)
+            patience=8)
+
 
         i = 0
 
-        # get the first 3 layer model
+        #get the first 3 layer model
         model = get_keras_model_reg(data, i)
 
         logger("training initial model...")
@@ -175,7 +176,8 @@ class client:
             validation_data=(
                 X_test,
                 y_test),
-            callbacks=[es])
+                callbacks=[es])
+            
         models.append(history)
         print(currLog)
 
@@ -194,13 +196,14 @@ class client:
                 epochs=epochs,
                 validation_data=(
                     X_test,
-                    y_test))
+                    y_test),
+                    callbacks=[es])
             models.append(history)
             losses.append(models[i].history[maximizer]
                           [len(models[i].history[maximizer]) - 1])
             i += 1
 
-        # calls function to generate plots in plot generation
+        #calls function to generate plots in plot generation
         if generate_plots:
             init_plots, plot_names = generate_regression_plots(
                 models[len(models) - 1], data, y)
@@ -263,7 +266,7 @@ class client:
         # early stopping callback
         es = EarlyStopping(
             monitor=maximizer,
-            mode='min',
+            mode=callback_mode,
             verbose=1,
             patience=5)
 
