@@ -8,7 +8,10 @@ sys.path.insert(1, './plotting')
 
 import keras
 import numpy as np
+from colorama import Fore, Style
+import pprint
 import pandas as pd
+import tensorflow as tf
 from tabulate import tabulate
 from scipy.spatial.distance import cosine
 from sklearn.model_selection import cross_val_score
@@ -20,6 +23,8 @@ from sklearn.compose import ColumnTransformer
 from sklearn.model_selection import train_test_split
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import OneHotEncoder, StandardScaler
+from tensorflow import keras
+from tensorflow.python.keras.layers import Dense, Input
 from dataset_labelmatcher import get_similar_column, get_similar_model
 from keras.callbacks import EarlyStopping
 from matplotlib import pyplot
@@ -34,7 +39,7 @@ import matplotlib.pyplot as plt
 from generatePlots import generate_clustering_plots, generate_regression_plots, generate_classification_plots, generate_classification_together
 from dataGen import generate_data
 from keras.models import Sequential
-from keras.layers import Dense, Conv2D, Flatten, Input
+from keras.layers import Dense, Conv2D, Flatten
 from dimensionality_red_queries import dimensionality_reduc
 from os import listdir
 from tuner import tuneReg, tuneClass, tuneCNN
@@ -42,8 +47,6 @@ from sklearn.neighbors import KNeighborsClassifier
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.feature_selection import SelectFromModel
 from sklearn import preprocessing, tree
-from keras.preprocessing.image import ImageDataGenerator
-import os
 
 
 
@@ -689,19 +692,35 @@ class client:
             print(pdtabulate(data[column_name]).describe())
 
     def convolutional_query(self, *argv):
-        logger("Creating CNN generation query")
-        # generates the dataset based on instructions using a selenium query on
-        # google chrome
-        logger("Generating datasets for classes...")
+        X = []
+        y = []
+        i = 0
+
         input_shape = (224, 224, 3)
-        #Assuming Downloaded Images in current Directory
-        data_path=os.getcwd()
-        for a_class in argv:
-            generate_data(a_class)
+        loss = "binary_crossentropy"
+        optimizer = "adam"
+        # accepting in a variable number of parameters and preprocessing the
+        # information
+        for location in argv:
+            data = image_preprocess(location)
+            for image in data:
+                X.append(image)
+                y.append(i)
+            i += 1
+
+        X_train, X_test, y_train, y_test = train_test_split(
+            np.asarray(X), np.asarray(y), test_size=0.33, random_state=42)
+
+        # encoding into one hot vector for softmax to predict probabilities
+        y_train = to_categorical(y_train)
+        y_test = to_categorical(y_test)
+        y = to_categorical(y)
+
+        print(X_train.shape)
+        model = Sequential()
 
         logger("Creating convolutional neural network dynamically...")
         # Convolutional Neural Network
-        model = Sequential()
         model.add(
             Conv2D(
                 64,
@@ -712,33 +731,20 @@ class client:
         model.add(Flatten())
         model.add(Dense(len(argv), activation="softmax"))
         model.compile(
-            optimizer="adam",
-            loss="binary_crossentropy",
+            optimizer=optimizer,
+            loss=loss,
             metrics=['accuracy'])
-        
-        train_data = ImageDataGenerator(shear_range = 0.2,
-                                   zoom_range = 0.2,
-                                   horizontal_flip = True)
-        X_train = train_data.flow_from_directory(data_path+'/training_set',
-                                                 target_size = (224, 224),
-                                                 batch_size = 32,
-                                                 class_mode = 'binary')
-        test_data=ImageDataGenerator()
-        X_test = test_data.flow_from_directory(data_path+'/test_set',
-                                            target_size = (224, 224),
-                                            batch_size = 32,
-                                            class_mode = 'binary')
-		#Fitting/Training the model
-        history=model.fit_generator(generator=X_train,
-                    steps_per_epoch=X_train.n//X_train.batch_size,
-                    validation_data=X_test,
-                    validation_steps=X_test.n//X_test.batch_size,
-                    epochs=10
-        )
+        history = model.fit(
+            X_train, y_train, validation_data=(
+                X_test, y_test), epochs=3)
+
         # storing values the model dictionary
         self.models["convolutional_NN"] = {
             "model": model,
-            'num_classes': len(*argv),
+            "X": X,
+            "y": y,
+            'num_classes': len(
+                *argv),
             'losses': {
                 'training_loss': history.history['loss'],
                 'val_loss': history.history['val_loss']},
@@ -752,16 +758,34 @@ class client:
         # google chrome
         logger("Generating datasets for classes...")
         input_shape = (224, 224, 3)
-        #Assuming Downloaded Images in current Directory
-        data_path=os.getcwd()
-        
-        # creates the appropriate dataset
+        y = []
+        X = []
+        q = 0
+
+        num_classes = len(argv)
         for a_class in argv:
-            generate_data(a_class)
-        
+            a_numpy = generate_data(a_class)
+            a_label = [q] * len(a_numpy)
+            q += 1
+
+            for i in range(len(a_numpy)):
+                X.append(a_numpy[i])
+                y.append(a_label[i])
+
+        # creates the appropriate dataset
+
+        logger("Applying resizing transformation algorithms...")
+
+        X_train, X_test, y_train, y_test = train_test_split(
+            np.asarray(X), np.asarray(y), test_size=0.33, random_state=42)
+
+        # categorically encodes them for CNN processing
+        y_train = to_categorical(y_train)
+        y_test = to_categorical(y_test)
+        model = Sequential()
+
         logger("Creating convolutional neural network dynamically...")
         # Convolutional Neural Network
-        model = Sequential()
         model.add(
             Conv2D(
                 64,
@@ -770,41 +794,28 @@ class client:
                 input_shape=input_shape))
         model.add(Conv2D(32, kernel_size=3, activation="relu"))
         model.add(Flatten())
-        model.add(Dense(len(*argv), activation="softmax"))
+        model.add(Dense(num_classes, activation="softmax"))
         model.compile(
             optimizer='adam',
             loss='categorical_crossentropy',
             metrics=['accuracy'])
-        train_data = ImageDataGenerator(shear_range = 0.2,
-                                   zoom_range = 0.2,
-                                   horizontal_flip = True)
-        X_train = train_data.flow_from_directory(data_path+'/training_set',
-                                                 target_size = (224, 224),
-                                                 batch_size = 32,
-                                                 class_mode = 'categorical')
-        test_data=ImageDataGenerator()
-        X_test = test_data.flow_from_directory(data_path+'/test_set',
-                                            target_size = (224, 224),
-                                            batch_size = 32,
-                                            class_mode = 'categorical')
-		#Fitting/Training the model
-        history=model.fit_generator(generator=X_train,
-                    steps_per_epoch=X_train.n//X_train.batch_size,
-                    validation_data=X_test,
-                    validation_steps=X_test.n//X_test.batch_size,
-                    epochs=10
-        )
+        history = model.fit(
+            X_train, y_train, validation_data=(
+                X_test, y_test), epochs=3)
+
         logger("Finishing task and storing information in model...")
 
        # generating both individual plots and a pane to display all subplots
-        plots = generate_classification_plots(history)
+        plots = generate_classification_plots(
+            history, X, y, model, X_test, y_test)
         # all_plot = generate_classification_together(
         #     history, X, y, model, X_test, y_test)
 
         # storing all information in the model dictionary
         self.models["genfit_CNN"] = {
             "model": model,
-            'num_classes': X_test.n,
+            'num_classes': len(
+                np.unique(y_test)),
             "plots": plots,
             'losses': {
                 'training_loss': history.history['loss'],

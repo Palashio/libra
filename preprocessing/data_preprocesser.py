@@ -55,3 +55,36 @@ def structured_preprocesser(data):
         data[numeric_columns] = scaler.fit_transform(data[numeric_columns])
 
     return data
+
+# Preprocesses images queried from images to (224, 224, 3)
+
+
+def image_preprocess(data_path):
+    image_dir = str(data_path)
+    loaded_shaped = []
+    imagesList = listdir(image_dir)
+
+    for image in imagesList:
+        try:
+            img = cv2.imread(image_dir + "/" + image)
+            res = processColorChanel(img)
+            loaded_shaped.append(res)
+            # print(res)
+        except BaseException:
+            continue
+
+    return loaded_shaped
+
+
+# Seperates the color channels and then reshapes each of the channels to
+# (224, 224)
+def processColorChanel(img):
+    b, g, r = cv2.split(img)
+    # seperating each value into a color channel and resizing to a standard
+    # size of 224, 224, 3 <- because of RGB color channels. If it's not 3
+    # color channels it'll pad with zeroes
+    b = cv2.resize(b, dsize=(224, 224), interpolation=cv2.INTER_CUBIC)
+    g = cv2.resize(g, dsize=(224, 224), interpolation=cv2.INTER_CUBIC)
+    r = cv2.resize(r, dsize=(224, 224), interpolation=cv2.INTER_CUBIC)
+    img = cv2.merge((b, g, r))
+    return img
