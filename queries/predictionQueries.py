@@ -691,6 +691,7 @@ class client:
         # google chrome
         logger("Generating datasets for classes...")
         input_shape = (224, 224, 3)
+        #Assuming Downloaded Images in current Directory
         data_path=os.getcwd()
         for a_class in argv:
             generate_data(a_class)
@@ -712,22 +713,23 @@ class client:
             loss="binary_crossentropy",
             metrics=['accuracy'])
         
-        train_datagen = ImageDataGenerator(shear_range = 0.2,
+        train_data = ImageDataGenerator(shear_range = 0.2,
                                    zoom_range = 0.2,
                                    horizontal_flip = True)
-        X_train = train_datagen.flow_from_directory(data_path+'/training_set',
+        X_train = train_data.flow_from_directory(data_path+'/training_set',
                                                  target_size = (224, 224),
                                                  batch_size = 32,
                                                  class_mode = 'binary')
-        X_test = ImageDataGenerator.flow_from_directory(data_path+'/test_set',
+        test_data=ImageDataGenerator()
+        X_test = test_data.flow_from_directory(data_path+'/test_set',
                                             target_size = (224, 224),
                                             batch_size = 32,
                                             class_mode = 'binary')
 		#Fitting/Training the model
         history=model.fit_generator(generator=X_train,
-                    steps_per_epoch=X_train.n,
+                    steps_per_epoch=X_train.n//X_train.batch_size,
                     validation_data=X_test,
-                    validation_steps=X_test.n,
+                    validation_steps=X_test.n//X_test.batch_size,
                     epochs=10
         )
         # storing values the model dictionary
@@ -747,6 +749,7 @@ class client:
         # google chrome
         logger("Generating datasets for classes...")
         input_shape = (224, 224, 3)
+        #Assuming Downloaded Images in current Directory
         data_path=os.getcwd()
         
         # creates the appropriate dataset
@@ -769,22 +772,23 @@ class client:
             optimizer='adam',
             loss='categorical_crossentropy',
             metrics=['accuracy'])
-        train_datagen = ImageDataGenerator(shear_range = 0.2,
+        train_data = ImageDataGenerator(shear_range = 0.2,
                                    zoom_range = 0.2,
                                    horizontal_flip = True)
-        X_train = train_datagen.flow_from_directory(data_path+'/training_set',
+        X_train = train_data.flow_from_directory(data_path+'/training_set',
                                                  target_size = (224, 224),
                                                  batch_size = 32,
                                                  class_mode = 'categorical')
-        X_test = ImageDataGenerator.flow_from_directory(data_path+'/test_set',
+        test_data=ImageDataGenerator()
+        X_test = test_data.flow_from_directory(data_path+'/test_set',
                                             target_size = (224, 224),
                                             batch_size = 32,
                                             class_mode = 'categorical')
 		#Fitting/Training the model
         history=model.fit_generator(generator=X_train,
-                    steps_per_epoch=X_train.n,
+                    steps_per_epoch=X_train.n//X_train.batch_size,
                     validation_data=X_test,
-                    validation_steps=X_test.n,
+                    validation_steps=X_test.n//X_test.batch_size,
                     epochs=10
         )
         logger("Finishing task and storing information in model...")
