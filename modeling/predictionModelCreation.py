@@ -32,7 +32,7 @@ def get_keras_model_reg(dataset, i):
                     kernel_initializer="normal",
                     activation="relu"))
 
-    model.add(Dense(1, kernel_initializer="normal"))
+    model.add(Dense(1, kernel_initializer="normal", activation="softmax"))
     model.compile(loss='mean_squared_error', optimizer='adam')
     return model
 
