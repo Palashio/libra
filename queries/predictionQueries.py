@@ -36,7 +36,10 @@ from keras.utils import to_categorical
 from keras.utils import np_utils
 from sklearn.cluster import KMeans
 import matplotlib.pyplot as plt
-from generatePlots import generate_clustering_plots, generate_regression_plots, generate_classification_plots, generate_classification_together
+from generatePlots import (generate_clustering_plots, 
+     generate_regression_plots, 
+     generate_classification_plots, 
+     generate_classification_together, plot_corr)
 from dataGen import generate_data
 from keras.models import Sequential
 from keras.layers import Dense, Conv2D, Flatten
@@ -162,7 +165,6 @@ class client:
             verbose=1,
             patience=8)
 
-
         i = 0
 
         #get the first 3 layer model
@@ -205,9 +207,12 @@ class client:
 
         #calls function to generate plots in plot generation
         if generate_plots:
+            #Plotting correlation between data variables
+            corr=plot_corr(data)
             init_plots, plot_names = generate_regression_plots(
                 models[len(models) - 1], data, y)
             plots = {}
+            plots['data_correlation']=corr
             for x in range(len(plot_names)):
                 plots[str(plot_names[x])] = init_plots[x]
 

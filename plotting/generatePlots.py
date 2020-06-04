@@ -35,12 +35,13 @@ def generate_clustering_plots(kmeans, dataPandas, dataset):
     # columns with each other based on the cluster they're in
     for x in range(len(dataPandas.columns) - 1):
         for y in range(len(dataPandas.columns) - 1):
+            img=plt.figure()
             plt.scatter(dataset[:, x], dataset[:, y],
                         c=kmeans.labels_, cmap='rainbow')
             plt.xlabel(str(dataPandas.columns[x]))
             plt.ylabel(str(dataPandas.columns[y]))
             plt.show()
-            plots.append(plt)
+            plots.append(img)
             plot_names.append(
                 dataPandas.columns[x] +
                 "_vs_" +
@@ -95,31 +96,35 @@ def generate_classification_together(history, data, model, X_test, y_test):
     plt.show()
 
 def plot_acc(history):
+    img=plt.figure()
     plt.plot(history.history['accuracy'])
     plt.plot(history.history['val_accuracy'])
     plt.title('model accuracy')
     plt.ylabel('accuracy')
     plt.xlabel('epoch')
     plt.legend(['train', 'test'], loc='upper left')
-	return plt
+	return img
 
 def plot_loss(history):
+    img=plt.figure()
     plt.plot(history.history['loss'])
     plt.plot(history.history['val_loss'])
     plt.title('model loss')
     plt.ylabel('loss')
     plt.xlabel('epoch')
     plt.legend(['train', 'test'], loc='upper left')
-    return plt
+    return img
 
 def plot_corr(data,col=[]):
     #Here, col is a string list which indicates the columns between 
     #which the correlation is required. if left empty it shows the  
     #correlation heatmap for all the variables.
-    if not col:
+    img=plt.figure()
+    if col:
         data = data.loc[:, data.columns.intersection(['a','b'])]
-        corr = data.corr()
-        sns.heatmap(
+    corr = data.corr()
+    sns.heatmap(
            corr, 
            vmin=-1, vmax=1, center=0,
            square=True)
+    return img
