@@ -3,6 +3,7 @@ import numpy as np
 import pandas as pd
 import tensorflow as tf
 from sklearn.compose import ColumnTransformer
+from sklearn.impute import SimpleImputer
 from sklearn.model_selection import train_test_split
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import OneHotEncoder, StandardScaler
@@ -17,8 +18,6 @@ import cv2
 
 # Preprocesses the data appropriately for single reg data
 def structured_preprocesser(data):
-    data.fillna(0, inplace=True)
-
     # identifies the categorical and numerical columns
     categorical_columns = data.select_dtypes(exclude=["number"]).columns
     numeric_columns = data.columns[data.dtypes.apply(
@@ -33,6 +32,7 @@ def structured_preprocesser(data):
         categorical_cols = data.columns[categorical_feature_mask].tolist()
         labeled_df = data[categorical_cols]
 
+        labeled_df.fillna("", inplace=True)
         enc = OneHotEncoder()
         enc.fit(labeled_df)
         onehotlabels = enc.transform(labeled_df).toarray()
@@ -51,6 +51,10 @@ def structured_preprocesser(data):
             del data[x]
 
     if(len(numeric_columns) != 0):
+        # Imputes numeric columns with median
+        imputer = SimpleImputer(strategy="median")
+        data[numeric_columns] = imputer.fit_transform(data[numeric_columns])
+        # Scales numeric data
         scaler = StandardScaler()
         data[numeric_columns] = scaler.fit_transform(data[numeric_columns])
 
