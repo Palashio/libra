@@ -6,7 +6,6 @@ sys.path.insert(1, './data generation')
 sys.path.insert(1, './modeling')
 sys.path.insert(1, './plotting')
 
-import keras
 import numpy as np
 import pandas as pd
 from tabulate import tabulate
@@ -24,17 +23,20 @@ from dataset_labelmatcher import get_similar_column, get_similar_model
 from keras.callbacks import EarlyStopping
 from matplotlib import pyplot
 from grammartree import get_value_instruction
-from data_preprocesser import structured_preprocesser, image_preprocess
+from data_preprocesser import structured_preprocesser
 from predictionModelCreation import get_keras_model_reg
 from predictionModelCreation import get_keras_model_class
 from keras.utils import to_categorical
 from keras.utils import np_utils
 from sklearn.cluster import KMeans
 import matplotlib.pyplot as plt
-from generatePlots import generate_clustering_plots, generate_regression_plots, generate_classification_plots, generate_classification_together
+from generatePlots import (generate_clustering_plots, 
+generate_regression_plots, 
+generate_classification_plots, 
+generate_classification_together)
 from dataGen import generate_data
 from keras.models import Sequential
-from keras.layers import Dense, Conv2D, Flatten, Input
+from keras.layers import (Dense, Conv2D, Flatten, Input,MaxPooling2D,)
 from dimensionality_red_queries import dimensionality_reduc
 from os import listdir
 from tuner import tuneReg, tuneClass, tuneCNN
@@ -693,9 +695,16 @@ class client:
         input_shape = (224, 224, 3)
         #Assuming Downloaded Images in current Directory
         data_path=os.getcwd()
+        num_classes=0
+        loss_func=""
         for a_class in argv:
             generate_data(a_class)
-
+            ++num_classes
+        if num_classes>2:
+            loss_func="categorical_crossentropy"
+        elif num_classes==2:
+            num_classes=1
+            loss_func="binary_crossentropy"
         logger("Creating convolutional neural network dynamically...")
         # Convolutional Neural Network
         model = Sequential()
@@ -704,23 +713,27 @@ class client:
                 64,
                 kernel_size=3,
                 activation="relu",
-                input_shape=(input_shape))),
-        model.add(Conv2D(32, kernel_size=3, activation="relu"))
+                input_shape=(input_shape)))
+        model.add(MaxPooling2D(pool_size = (2, 2)))
+        model.add(Conv2D(64, kernel_size=3, activation="relu"))
+        model.add(MaxPooling2D(pool_size = (2, 2)))
         model.add(Flatten())
-        model.add(Dense(len(argv), activation="softmax"))
+        model.add(Dense(128, activation="relu"))
+        model.add(Dense(num_classes, activation="softmax"))
         model.compile(
             optimizer="adam",
-            loss="binary_crossentropy",
+            loss=loss_func,
             metrics=['accuracy'])
         
-        train_data = ImageDataGenerator(shear_range = 0.2,
+        train_data = ImageDataGenerator(rescale = 1./255,
+                                   shear_range = 0.2,
                                    zoom_range = 0.2,
                                    horizontal_flip = True)
         X_train = train_data.flow_from_directory(data_path+'/training_set',
                                                  target_size = (224, 224),
                                                  batch_size = 32,
                                                  class_mode = 'binary')
-        test_data=ImageDataGenerator()
+        test_data=ImageDataGenerator(rescale = 1./255)
         X_test = test_data.flow_from_directory(data_path+'/test_set',
                                             target_size = (224, 224),
                                             batch_size = 32,
@@ -735,82 +748,13 @@ class client:
         # storing values the model dictionary
         self.models["convolutional_NN"] = {
             "model": model,
-            'num_classes': len(*argv),
+            'num_classes': (2 if num_classes==1 else num_classes),
             'losses': {
                 'training_loss': history.history['loss'],
                 'val_loss': history.history['val_loss']},
             'accuracy': {
                 'training_accuracy': history.history['accuracy'],
                 'validation_accuracy': history.history['val_accuracy']}}
-
-    def generate_fit_cnn(self, *argv):
-        logger("Creating CNN generation query")
-        # generates the dataset based on instructions using a selenium query on
-        # google chrome
-        logger("Generating datasets for classes...")
-        input_shape = (224, 224, 3)
-        #Assuming Downloaded Images in current Directory
-        data_path=os.getcwd()
-        
-        # creates the appropriate dataset
-        for a_class in argv:
-            generate_data(a_class)
-        
-        logger("Creating convolutional neural network dynamically...")
-        # Convolutional Neural Network
-        model = Sequential()
-        model.add(
-            Conv2D(
-                64,
-                kernel_size=3,
-                activation="relu",
-                input_shape=input_shape))
-        model.add(Conv2D(32, kernel_size=3, activation="relu"))
-        model.add(Flatten())
-        model.add(Dense(len(*argv), activation="softmax"))
-        model.compile(
-            optimizer='adam',
-            loss='categorical_crossentropy',
-            metrics=['accuracy'])
-        train_data = ImageDataGenerator(shear_range = 0.2,
-                                   zoom_range = 0.2,
-                                   horizontal_flip = True)
-        X_train = train_data.flow_from_directory(data_path+'/training_set',
-                                                 target_size = (224, 224),
-                                                 batch_size = 32,
-                                                 class_mode = 'categorical')
-        test_data=ImageDataGenerator()
-        X_test = test_data.flow_from_directory(data_path+'/test_set',
-                                            target_size = (224, 224),
-                                            batch_size = 32,
-                                            class_mode = 'categorical')
-		#Fitting/Training the model
-        history=model.fit_generator(generator=X_train,
-                    steps_per_epoch=X_train.n//X_train.batch_size,
-                    validation_data=X_test,
-                    validation_steps=X_test.n//X_test.batch_size,
-                    epochs=10
-        )
-        logger("Finishing task and storing information in model...")
-
-       # generating both individual plots and a pane to display all subplots
-        plots = generate_classification_plots(history)
-        # all_plot = generate_classification_together(
-        #     history, X, y, model, X_test, y_test)
-
-        # storing all information in the model dictionary
-        self.models["genfit_CNN"] = {
-            "model": model,
-            'num_classes': X_test.n,
-            "plots": plots,
-            'losses': {
-                'training_loss': history.history['loss'],
-                'val_loss': history.history['val_loss']},
-            'accuracy': {
-                'training_accuracy': history.history['accuracy'],
-                'validation_accuracy': history.history['val_accuracy']}}
-        # clearing logger appropriately
-        clearLog()
 
     def dimensionality_reducer(self, instruction):
         dimensionality_reduc(instruction, self.dataset)
