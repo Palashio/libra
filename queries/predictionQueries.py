@@ -305,8 +305,11 @@ class client:
             i += 1
 
         # genreates appropriate classification plots by feeding all information
-        plots = generate_classification_plots(
-            models[len(models) - 1], data, y, model, X_test, y_test)
+        if generate_plots: 
+            plots = generate_classification_plots(
+                models[len(models) - 1], data, y, model, X_test, y_test)
+
+        
 
         # stores the values and plots into the object dictionary
         self.models["classification_ANN"] = {

@@ -95,16 +95,6 @@ def generate_classification_together(history, data, model, X_test, y_test):
     plot_acc(history)
     plt.show()
 
-def plot_acc(history):
-    img=plt.figure()
-    plt.plot(history.history['accuracy'])
-    plt.plot(history.history['val_accuracy'])
-    plt.title('model accuracy')
-    plt.ylabel('accuracy')
-    plt.xlabel('epoch')
-    plt.legend(['train', 'test'], loc='upper left')
-	return img
-
 def plot_loss(history):
     img=plt.figure()
     plt.plot(history.history['loss'])
@@ -128,3 +118,13 @@ def plot_corr(data,col=[]):
            vmin=-1, vmax=1, center=0,
            square=True)
     return img
+
+def plot_acc(history):
+    img = plt.figure()
+    plt.plot(history.history['accuracy'])
+    plt.plot(history.history['val_accuracy'])
+    plt.title('model accuracy')
+    plt.ylabel('accuracy')
+    plt.xlabel('epoch')
+    plt.legend(['train', 'test'], loc='upper left')
+    return img 
