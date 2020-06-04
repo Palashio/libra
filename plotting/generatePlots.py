@@ -112,8 +112,8 @@ def plot_loss(history):
     plt.legend(['train', 'test'], loc='upper left')
     return plt
 
-def plot_corr(data,col):
-    #Here, col is a string array whichindicates the columns between 
+def plot_corr(data,col=[]):
+    #Here, col is a string list which indicates the columns between 
     #which the correlation is required. if left empty it shows the  
     #correlation heatmap for all the variables.
     if not col:
