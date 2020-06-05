@@ -698,15 +698,14 @@ class client:
         num_classes=0
         loss_func=""
         for a_class in argv:
-            generate_data(a_class)
-            ++num_classes
+            num_classes = num_classes + 1
         if num_classes>2:
             loss_func="categorical_crossentropy"
         elif num_classes==2:
-            num_classes=1
             loss_func="binary_crossentropy"
+        
         logger("Creating convolutional neural network dynamically...")
-        # Convolutional Neural Network
+        #Convolutional Neural Network
         model = Sequential()
         model.add(
             Conv2D(
@@ -718,7 +717,6 @@ class client:
         model.add(Conv2D(64, kernel_size=3, activation="relu"))
         model.add(MaxPooling2D(pool_size = (2, 2)))
         model.add(Flatten())
-        model.add(Dense(128, activation="relu"))
         model.add(Dense(num_classes, activation="softmax"))
         model.compile(
             optimizer="adam",
@@ -729,22 +727,24 @@ class client:
                                    shear_range = 0.2,
                                    zoom_range = 0.2,
                                    horizontal_flip = True)
+                                   
         X_train = train_data.flow_from_directory(data_path+'/training_set',
                                                  target_size = (224, 224),
-                                                 batch_size = 32,
-                                                 class_mode = 'binary')
+                                                 batch_size = 1,
+                                                 class_mode = 'categorical')
         test_data=ImageDataGenerator(rescale = 1./255)
         X_test = test_data.flow_from_directory(data_path+'/test_set',
                                             target_size = (224, 224),
-                                            batch_size = 32,
-                                            class_mode = 'binary')
+                                            batch_size = 1,
+                                            class_mode = 'categorical')
 		#Fitting/Training the model
+        print(X_train)
         history=model.fit_generator(generator=X_train,
                     steps_per_epoch=X_train.n//X_train.batch_size,
                     validation_data=X_test,
                     validation_steps=X_test.n//X_test.batch_size,
                     epochs=10
-        )
+         )
         # storing values the model dictionary
         self.models["convolutional_NN"] = {
             "model": model,
@@ -763,7 +763,7 @@ class client:
         print(self.models[model]['plots'].keys())
 
 
-newClient = client('./data/housing.csv').regression_query_ann("Model median house value")
+newClient = client('./data/housing.csv').convolutional_query('./first', './second')
 
 
 
