@@ -71,7 +71,7 @@ def logger(instruction, found = ""):
 
     counter += 1
     print(currLog)
-
+    currLog=""
 
 def dimensionality_reduc(instruction, dataset, arr=["RF", "PCA", "ICA"], inplace = False):
     global currLog 
