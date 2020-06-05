@@ -730,12 +730,12 @@ class client:
                                    
         X_train = train_data.flow_from_directory(data_path+'/training_set',
                                                  target_size = (224, 224),
-                                                 batch_size = 1,
+                                                 batch_size = 32,
                                                  class_mode = 'categorical')
         test_data=ImageDataGenerator(rescale = 1./255)
         X_test = test_data.flow_from_directory(data_path+'/test_set',
                                             target_size = (224, 224),
-                                            batch_size = 1,
+                                            batch_size = 32,
                                             class_mode = 'categorical')
 		#Fitting/Training the model
         print(X_train)
