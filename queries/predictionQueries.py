@@ -23,7 +23,7 @@ from dataset_labelmatcher import get_similar_column, get_similar_model
 from keras.callbacks import EarlyStopping
 from matplotlib import pyplot
 from grammartree import get_value_instruction
-from data_preprocesser import structured_preprocesser
+from data_preprocesser import structured_preprocesser, image_preprocess
 from predictionModelCreation import get_keras_model_reg
 from predictionModelCreation import get_keras_model_class
 from keras.utils import to_categorical
