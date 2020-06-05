@@ -27,7 +27,7 @@ from keras.utils import np_utils
 from keras.utils import to_categorical
 from predictionModelCreation import get_keras_model_class
 from predictionModelCreation import get_keras_model_reg
-from data_preprocesser import structured_preprocesser, image_preprocess
+from data_preprocesser import structured_preprocesser
 from grammartree import get_value_instruction
 from matplotlib import pyplot
 from keras.callbacks import EarlyStopping

@@ -6,12 +6,8 @@ sys.path.insert(1, './data generation')
 sys.path.insert(1, './modeling')
 sys.path.insert(1, './plotting')
 
-import keras
 import numpy as np
-from colorama import Fore, Style
-import pprint
 import pandas as pd
-import tensorflow as tf
 from tabulate import tabulate
 from scipy.spatial.distance import cosine
 from sklearn.model_selection import cross_val_score
@@ -23,8 +19,6 @@ from sklearn.compose import ColumnTransformer
 from sklearn.model_selection import train_test_split
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import OneHotEncoder, StandardScaler
-from tensorflow import keras
-from tensorflow.python.keras.layers import Dense, Input
 from dataset_labelmatcher import get_similar_column, get_similar_model
 from keras.callbacks import EarlyStopping
 from matplotlib import pyplot
@@ -37,12 +31,12 @@ from keras.utils import np_utils
 from sklearn.cluster import KMeans
 import matplotlib.pyplot as plt
 from generatePlots import (generate_clustering_plots, 
-     generate_regression_plots, 
-     generate_classification_plots, 
-     generate_classification_together, plot_corr)
+generate_regression_plots, 
+generate_classification_plots, 
+generate_classification_together)
 from dataGen import generate_data
 from keras.models import Sequential
-from keras.layers import Dense, Conv2D, Flatten
+from keras.layers import (Dense, Conv2D, Flatten, Input,MaxPooling2D,)
 from dimensionality_red_queries import dimensionality_reduc
 from os import listdir
 from tuner import tuneReg, tuneClass, tuneCNN
@@ -50,6 +44,8 @@ from sklearn.neighbors import KNeighborsClassifier
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.feature_selection import SelectFromModel
 from sklearn import preprocessing, tree
+from keras.preprocessing.image import ImageDataGenerator
+import os
 
 
 
@@ -131,9 +127,13 @@ class client:
         logger("reading in dataset...")
         data = pd.read_csv(self.dataset)
         logger("filling n/a values...")
+        data.fillna(0, inplace=True)
 
         # identifies the categorical and numerical columns
         logger("identifying column types...")
+        categorical_columns = data.select_dtypes(exclude=["number"]).columns
+        numeric_columns = data.columns[data.dtypes.apply(
+            lambda c: np.issubdtype(c, np.number))]
 
         # preprocesses data
         if preprocess:
@@ -159,11 +159,11 @@ class client:
             monitor=maximizer,
             mode=callback_mode,
             verbose=1,
-            patience=8)
+            patience=5)
 
         i = 0
 
-        #get the first 3 layer model
+        # get the first 3 layer model
         model = get_keras_model_reg(data, i)
 
         logger("training initial model...")
@@ -174,8 +174,7 @@ class client:
             validation_data=(
                 X_test,
                 y_test),
-                callbacks=[es])
-            
+            callbacks=[es])
         models.append(history)
         print(currLog)
 
@@ -194,21 +193,17 @@ class client:
                 epochs=epochs,
                 validation_data=(
                     X_test,
-                    y_test),
-                    callbacks=[es])
+                    y_test))
             models.append(history)
             losses.append(models[i].history[maximizer]
                           [len(models[i].history[maximizer]) - 1])
             i += 1
 
-        #calls function to generate plots in plot generation
+        # calls function to generate plots in plot generation
         if generate_plots:
-            #Plotting correlation between data variables
-            corr=plot_corr(data)
             init_plots, plot_names = generate_regression_plots(
                 models[len(models) - 1], data, y)
             plots = {}
-            plots['data_correlation']=corr
             for x in range(len(plot_names)):
                 plots[str(plot_names[x])] = init_plots[x]
 
@@ -241,6 +236,7 @@ class client:
 
         # reads dataset and fills n/a values with zeroes
         data = pd.read_csv(self.dataset)
+        data.fillna(0, inplace=True)
 
         remove = get_similar_column(
             get_value_instruction(instruction), data)
@@ -266,7 +262,7 @@ class client:
         # early stopping callback
         es = EarlyStopping(
             monitor=maximizer,
-            mode=callback_mode,
+            mode='min',
             verbose=1,
             patience=5)
 
@@ -300,11 +296,8 @@ class client:
             i += 1
 
         # genreates appropriate classification plots by feeding all information
-        if generate_plots: 
-            plots = generate_classification_plots(
-                models[len(models) - 1], data, y, model, X_test, y_test)
-
-        
+        plots = generate_classification_plots(
+            models[len(models) - 1], data, y, model, X_test, y_test)
 
         # stores the values and plots into the object dictionary
         self.models["classification_ANN"] = {
@@ -330,6 +323,7 @@ class client:
         logger("Reading dataset...")
         # loads dataset and replaces n/a with zero
         data = pd.read_csv(self.dataset)
+        data.fillna(0, inplace=True)
         dataPandas = data.copy()
 
         if preprocess:
@@ -393,6 +387,7 @@ class client:
         logger("Reading in dataset....")
         # reads dataset and fills n/a values with zeroes
         data = pd.read_csv(self.dataset)
+        data.fillna(0, inplace=True)
 
         logger("Identifying target columns...")
         remove = get_similar_column(
@@ -442,6 +437,7 @@ class client:
         logger("Reading in dataset....")
         #Reads in dataset
         data = pd.read_csv(self.dataset)
+        data.fillna(0, inplace=True)
 
         logger("Identifying target columns...")
         remove = get_similar_column(
@@ -489,6 +485,7 @@ class client:
     def decision_tree_query(self, instruction, preprocess=True, test_size=0.2):
         logger("Reading in dataset....")
         data = pd.read_csv(self.dataset)
+        data.fillna(0, inplace=True)
 
         logger("Identifying target columns...")
         remove = get_similar_column(
@@ -536,6 +533,7 @@ class client:
             random_state=49):
         logger("Reading in dataset....")
         data = pd.read_csv(self.dataset)
+        data.fillna(0, inplace=True)
 
         logger("Identifying target columns...")
         remove = get_similar_column(
@@ -690,139 +688,73 @@ class client:
             print(pdtabulate(data[column_name]).describe())
 
     def convolutional_query(self, *argv):
-        X = []
-        y = []
-        i = 0
-
-        input_shape = (224, 224, 3)
-        loss = "binary_crossentropy"
-        optimizer = "adam"
-        # accepting in a variable number of parameters and preprocessing the
-        # information
-        for location in argv:
-            data = image_preprocess(location)
-            for image in data:
-                X.append(image)
-                y.append(i)
-            i += 1
-
-        X_train, X_test, y_train, y_test = train_test_split(
-            np.asarray(X), np.asarray(y), test_size=0.33, random_state=42)
-
-        # encoding into one hot vector for softmax to predict probabilities
-        y_train = to_categorical(y_train)
-        y_test = to_categorical(y_test)
-        y = to_categorical(y)
-
-        print(X_train.shape)
-        model = Sequential()
-
-        logger("Creating convolutional neural network dynamically...")
-        # Convolutional Neural Network
-        model.add(
-            Conv2D(
-                64,
-                kernel_size=3,
-                activation="relu",
-                input_shape=(input_shape))),
-        model.add(Conv2D(32, kernel_size=3, activation="relu"))
-        model.add(Flatten())
-        model.add(Dense(len(argv), activation="softmax"))
-        model.compile(
-            optimizer=optimizer,
-            loss=loss,
-            metrics=['accuracy'])
-        history = model.fit(
-            X_train, y_train, validation_data=(
-                X_test, y_test), epochs=3)
-
-        # storing values the model dictionary
-        self.models["convolutional_NN"] = {
-            "model": model,
-            "X": X,
-            "y": y,
-            'num_classes': len(
-                *argv),
-            'losses': {
-                'training_loss': history.history['loss'],
-                'val_loss': history.history['val_loss']},
-            'accuracy': {
-                'training_accuracy': history.history['accuracy'],
-                'validation_accuracy': history.history['val_accuracy']}}
-
-    def generate_fit_cnn(self, *argv):
         logger("Creating CNN generation query")
         # generates the dataset based on instructions using a selenium query on
         # google chrome
         logger("Generating datasets for classes...")
         input_shape = (224, 224, 3)
-        y = []
-        X = []
-        q = 0
-
-        num_classes = len(argv)
+        #Assuming Downloaded Images in current Directory
+        data_path=os.getcwd()
+        num_classes=0
+        loss_func=""
         for a_class in argv:
-            a_numpy = generate_data(a_class)
-            a_label = [q] * len(a_numpy)
-            q += 1
-
-            for i in range(len(a_numpy)):
-                X.append(a_numpy[i])
-                y.append(a_label[i])
-
-        # creates the appropriate dataset
-
-        logger("Applying resizing transformation algorithms...")
-
-        X_train, X_test, y_train, y_test = train_test_split(
-            np.asarray(X), np.asarray(y), test_size=0.33, random_state=42)
-
-        # categorically encodes them for CNN processing
-        y_train = to_categorical(y_train)
-        y_test = to_categorical(y_test)
-        model = Sequential()
-
+            num_classes = num_classes + 1
+        if num_classes>2:
+            loss_func="categorical_crossentropy"
+        elif num_classes==2:
+            loss_func="binary_crossentropy"
+        
         logger("Creating convolutional neural network dynamically...")
-        # Convolutional Neural Network
+        #Convolutional Neural Network
+        model = Sequential()
         model.add(
             Conv2D(
                 64,
                 kernel_size=3,
                 activation="relu",
-                input_shape=input_shape))
-        model.add(Conv2D(32, kernel_size=3, activation="relu"))
+                input_shape=(input_shape)))
+        model.add(MaxPooling2D(pool_size = (2, 2)))
+        model.add(Conv2D(64, kernel_size=3, activation="relu"))
+        model.add(MaxPooling2D(pool_size = (2, 2)))
         model.add(Flatten())
         model.add(Dense(num_classes, activation="softmax"))
         model.compile(
-            optimizer='adam',
-            loss='categorical_crossentropy',
+            optimizer="adam",
+            loss=loss_func,
             metrics=['accuracy'])
-        history = model.fit(
-            X_train, y_train, validation_data=(
-                X_test, y_test), epochs=3)
-
-        logger("Finishing task and storing information in model...")
-
-       # generating both individual plots and a pane to display all subplots
-        plots = generate_classification_plots(
-            history, X, y, model, X_test, y_test)
-        # all_plot = generate_classification_together(
-        #     history, X, y, model, X_test, y_test)
-
-        # storing all information in the model dictionary
-        self.models["genfit_CNN"] = {
+        
+        train_data = ImageDataGenerator(rescale = 1./255,
+                                   shear_range = 0.2,
+                                   zoom_range = 0.2,
+                                   horizontal_flip = True)
+                                   
+        X_train = train_data.flow_from_directory(data_path+'/training_set',
+                                                 target_size = (224, 224),
+                                                 batch_size = 1,
+                                                 class_mode = 'categorical')
+        test_data=ImageDataGenerator(rescale = 1./255)
+        X_test = test_data.flow_from_directory(data_path+'/test_set',
+                                            target_size = (224, 224),
+                                            batch_size = 1,
+                                            class_mode = 'categorical')
+		#Fitting/Training the model
+        print(X_train)
+        history=model.fit_generator(generator=X_train,
+                    steps_per_epoch=X_train.n//X_train.batch_size,
+                    validation_data=X_test,
+                    validation_steps=X_test.n//X_test.batch_size,
+                    epochs=10
+         )
+        # storing values the model dictionary
+        self.models["convolutional_NN"] = {
             "model": model,
-            'num_classes': len(
-                np.unique(y_test)),
-            "plots": plots,
+            'num_classes': (2 if num_classes==1 else num_classes),
             'losses': {
                 'training_loss': history.history['loss'],
                 'val_loss': history.history['val_loss']},
             'accuracy': {
                 'training_accuracy': history.history['accuracy'],
                 'validation_accuracy': history.history['val_accuracy']}}
-        # clearing logger appropriately
-        clearLog()
 
     def dimensionality_reducer(self, instruction):
         dimensionality_reduc(instruction, self.dataset)
@@ -831,7 +763,7 @@ class client:
         print(self.models[model]['plots'].keys())
 
 
-newClient = client('./data/housing.csv').regression_query_ann("Model median house value")
+newClient = client('./data/housing.csv').convolutional_query('./first', './second')
 
 
 
