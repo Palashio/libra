@@ -90,9 +90,9 @@ def logger(instruction, found=""):
 
     counter += 1
     print(currLog)
+    currLog=""
 
 # class to store all query information
-
 
 class client:
     def __init__(self, data):
