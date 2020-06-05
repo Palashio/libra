@@ -23,7 +23,7 @@ from dataset_labelmatcher import get_similar_column, get_similar_model
 from keras.callbacks import EarlyStopping
 from matplotlib import pyplot
 from grammartree import get_value_instruction
-from data_preprocesser import structured_preprocesser, image_preprocess
+from data_preprocesser import structured_preprocesser
 from predictionModelCreation import get_keras_model_reg
 from predictionModelCreation import get_keras_model_class
 from keras.utils import to_categorical
@@ -34,7 +34,7 @@ from generatePlots import (generate_clustering_plots,
 generate_regression_plots, 
 generate_classification_plots, 
 generate_classification_together)
-from dataGen import generate_data
+
 from keras.models import Sequential
 from keras.layers import (Dense, Conv2D, Flatten, Input,MaxPooling2D,)
 from dimensionality_red_queries import dimensionality_reduc
@@ -763,7 +763,7 @@ class client:
         print(self.models[model]['plots'].keys())
 
 
-newClient = client('./data/housing.csv').convolutional_query('./first', './second')
+newClient = client('./data/housing.csv').regression_query_ann('Model median house value')
 
 
 
