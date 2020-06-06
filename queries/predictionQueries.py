@@ -130,8 +130,6 @@ class client:
         global currLog
         logger("reading in dataset...")
         data = pd.read_csv(self.dataset)
-        logger("filling n/a values...")
-        data.fillna(0, inplace=True)
 
         # identifies the categorical and numerical columns
         logger("identifying column types...")
@@ -241,7 +239,6 @@ class client:
 
         # reads dataset and fills n/a values with zeroes
         data = pd.read_csv(self.dataset)
-        data.fillna(0, inplace=True)
 
         remove = get_similar_column(
             get_value_instruction(instruction), data)
@@ -328,7 +325,6 @@ class client:
         logger("Reading dataset...")
         # loads dataset and replaces n/a with zero
         data = pd.read_csv(self.dataset)
-        data.fillna(0, inplace=True)
         dataPandas = data.copy()
 
         if preprocess:
@@ -392,7 +388,6 @@ class client:
         logger("Reading in dataset....")
         # reads dataset and fills n/a values with zeroes
         data = pd.read_csv(self.dataset)
-        data.fillna(0, inplace=True)
 
         logger("Identifying target columns...")
         remove = get_similar_column(
@@ -442,7 +437,6 @@ class client:
         logger("Reading in dataset....")
         #Reads in dataset
         data = pd.read_csv(self.dataset)
-        data.fillna(0, inplace=True)
 
         logger("Identifying target columns...")
         remove = get_similar_column(
@@ -490,7 +484,6 @@ class client:
     def decision_tree_query(self, instruction, preprocess=True, test_size=0.2):
         logger("Reading in dataset....")
         data = pd.read_csv(self.dataset)
-        data.fillna(0, inplace=True)
 
         logger("Identifying target columns...")
         remove = get_similar_column(
@@ -538,7 +531,6 @@ class client:
             random_state=49):
         logger("Reading in dataset....")
         data = pd.read_csv(self.dataset)
-        data.fillna(0, inplace=True)
 
         logger("Identifying target columns...")
         remove = get_similar_column(
