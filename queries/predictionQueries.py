@@ -114,7 +114,7 @@ class client:
         return get_similar_model(model_requested, self.models.keys())
         clearLog()
 
-    def neural_network(self,
+    def neural_network_query(self,
             instruction,
             preprocess=True,
             test_size=0.2,
@@ -124,18 +124,18 @@ class client:
             callback_mode='min',
             maximizer="val_loss"):
 
-        data2 = pd.read_csv(self.dataset)
+        data = pd.read_csv(self.dataset)
        
         if preprocess:
             
-            remove = get_similar_column(get_value_instruction(instruction), data2)
-            if(data2[remove].dtype.name == 'object'):
+            remove = get_similar_column(get_value_instruction(instruction), data)
+            if(data[remove].dtype.name == 'object'):
                 callback_mode = 'max'
                 maximizer= "val_accuracy"
                 self.classification_query_ann(instruction, preprocess=preprocess, test_size=test_size, random_state=random_state, epochs=epochs, generate_plots = generate_plots, callback_mode = callback_mode, maximizer= maximizer)
             else:
-                print(data2[remove].dtype.name)
                 self.regression_query_ann(instruction, preprocess=preprocess, test_size=test_size, random_state=random_state, epochs=epochs, generate_plots = generate_plots, callback_mode = callback_mode, maximizer= maximizer)
+
     # single regression query using a feed-forward neural network
     # instruction should be the value of a column
     def regression_query_ann(
@@ -790,7 +790,7 @@ class client:
         print(self.models[model]['plots'].keys())
 
 
-newClient = client('./data/housing.csv').neural_network('Model ocean proximity')
+newClient = client('./data/housing.csv').neural_network_query('Model median house value')
 
 
 
