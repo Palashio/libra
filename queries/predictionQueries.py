@@ -108,6 +108,11 @@ def initial_preprocesser(data, instruction, preprocess):
     data = data[y.notna()]
     del data[remove]
 
+    #identification of id columns: if they're an unique and non-numerical we have to remove
+    for column in data.columns:
+        if len(np.unique(data[column])) == len(data) and data[column].dtype.name == 'object':
+            del data[column]
+
     # preprocess the dataset
     if preprocess:
         logger("preprocessing data...")
