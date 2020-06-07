@@ -153,6 +153,7 @@ class client:
 
         models = []
         losses = []
+        accuracies=[]
 
         # callback function to store lowest loss value
         es = EarlyStopping(
@@ -181,7 +182,8 @@ class client:
 
         losses.append(models[i].history[maximizer]
                       [len(models[i].history[maximizer]) - 1])
-
+        accuracies.append(models[i].history['val_accuracy']
+                      [len(models[i].history['val_accuracy']) - 1])
         # keeps running model and fit functions until the validation loss stops
         # decreasing
         logger("testing number of layers...")
@@ -199,6 +201,8 @@ class client:
             models.append(history)
             losses.append(models[i].history[maximizer]
                           [len(models[i].history[maximizer]) - 1])
+            accuracies.append(models[i].history['val_accuracy']
+                      [len(models[i].history['val_accuracy']) - 1])
             i += 1
 
         # calls function to generate plots in plot generation
@@ -217,7 +221,9 @@ class client:
             "plots": plots,
             'losses': {
                 'training_loss': history.history['loss'],
-                'val_loss': history.history['val_loss']}}
+                'val_loss': history.history['val_loss']},
+            'accuracies':{'training_accuracy': history.history['accuracy'],
+                'val_accuracy': history.history['val_accuracy']}}
 
         # returns the best model
         clearLog()
@@ -260,6 +266,7 @@ class client:
 
         models = []
         losses = []
+        accuracies=[]
 
         # early stopping callback
         es = EarlyStopping(
@@ -278,7 +285,8 @@ class client:
 
         losses.append(models[i].history[maximizer]
                       [len(models[i].history[maximizer]) - 1])
-
+        accuracies.append(models[i].history['val_accuracy']
+                      [len(models[i].history['val_accuracy']) - 1])
         # keeps running model and fit functions until the validation loss stops
         # decreasing
         while(all(x > y for x, y in zip(losses, losses[1:]))):
@@ -295,6 +303,8 @@ class client:
             models.append(history)
             losses.append(models[i].history[maximizer]
                           [len(models[i].history[maximizer]) - 1])
+            accuracies.append(models[i].history['val_accuracy']
+                      [len(models[i].history['val_accuracy']) - 1])
             print("The number of layers " + str(len(model.layers)))
             i += 1
 
