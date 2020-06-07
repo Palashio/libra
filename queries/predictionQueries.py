@@ -158,7 +158,7 @@ class client:
         es = EarlyStopping(
             monitor=maximizer,
             mode=callback_mode,
-            verbose=1,
+            verbose=0,
             patience=5)
 
         i = 0
@@ -174,6 +174,7 @@ class client:
             validation_data=(
                 X_test,
                 y_test),
+            verbose=0,
             callbacks=[es])
         models.append(history)
         print(currLog)
@@ -193,7 +194,8 @@ class client:
                 epochs=epochs,
                 validation_data=(
                     X_test,
-                    y_test))
+                    y_test),
+                verbose=0)
             models.append(history)
             losses.append(models[i].history[maximizer]
                           [len(models[i].history[maximizer]) - 1])
@@ -263,7 +265,7 @@ class client:
         es = EarlyStopping(
             monitor=maximizer,
             mode='min',
-            verbose=1,
+            verbose=0,
             patience=5)
 
         i = 0
@@ -271,7 +273,7 @@ class client:
 
         history = model.fit(
             data, y, epochs=epochs, validation_data=(
-                X_test, y_test), callbacks=[es])
+                X_test, y_test), verbose=0, callbacks=[es])
         models.append(history)
 
         losses.append(models[i].history[maximizer]
@@ -288,6 +290,7 @@ class client:
                 validation_data=(
                     X_test,
                     y_test),
+                verbose=0,
                 callbacks=[es])
             models.append(history)
             losses.append(models[i].history[maximizer]
@@ -743,7 +746,8 @@ class client:
                     steps_per_epoch=X_train.n//X_train.batch_size,
                     validation_data=X_test,
                     validation_steps=X_test.n//X_test.batch_size,
-                    epochs=10
+                    epochs=10,
+                    verbose=0
          )
         # storing values the model dictionary
         self.models["convolutional_NN"] = {
@@ -764,6 +768,4 @@ class client:
 
 
 newClient = client('./data/housing.csv').regression_query_ann('Model median house value')
-
-
 
