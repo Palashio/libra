@@ -44,7 +44,7 @@ def get_value_instruction(sent):
                             break
 
         except BaseException:
-            print("")
+            pass
 
     # if there's no adjective present you want to run this pipeline
     if not truth:

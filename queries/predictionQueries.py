@@ -5,7 +5,9 @@ sys.path.insert(1, './preprocessing')
 sys.path.insert(1, './data generation')
 sys.path.insert(1, './modeling')
 sys.path.insert(1, './plotting')
-
+import os 
+import warnings
+from pandas.core.common import SettingWithCopyWarning
 import numpy as np
 import pandas as pd
 from tabulate import tabulate
@@ -45,9 +47,11 @@ from sklearn.ensemble import RandomForestRegressor
 from sklearn.feature_selection import SelectFromModel
 from sklearn import preprocessing, tree
 from keras.preprocessing.image import ImageDataGenerator
-import os
 
 
+warnings.simplefilter(action='error', category=FutureWarning)
+warnings.simplefilter(action="ignore", category=SettingWithCopyWarning)
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3' 
 
 # function imports from other files
 
@@ -78,12 +82,12 @@ def logger(instruction, found=""):
 
     if counter == 0:
         currLog += (" " * 2 * counter) + instruction + found
-        currLog += "\n"
+        #currLog += "\n"
     else:
         currLog += (" " * 2 * counter) + "|"
         currLog += "\n"
         currLog += (" " * 2 * counter) + "|- " + instruction + found
-        currLog += "\n"
+        #currLog += "\n"
         if instruction == "done...":
             currLog += "\n"
             currLog += "\n"
@@ -91,6 +95,28 @@ def logger(instruction, found=""):
     counter += 1
     print(currLog)
     currLog=""
+
+
+def initial_preprocesser(data, instruction, preprocess):
+    # get target column
+    logger("identifying target from instruction...")
+    remove = get_similar_column(
+            get_value_instruction(instruction), data)
+    y = data[remove]
+
+    # remove rows where target is NaN
+    data = data[y.notna()]
+    del data[remove]
+
+    # preprocess the dataset
+    if preprocess:
+        logger("preprocessing data...")
+        data = structured_preprocesser(data)
+    else:
+        data.fillna(0, inplace=True)
+
+    return data, y, remove
+
 
 # class to store all query information
 
@@ -110,6 +136,28 @@ class client:
         return get_similar_model(model_requested, self.models.keys())
         clearLog()
 
+    def neural_network_query(self,
+            instruction,
+            preprocess=True,
+            test_size=0.2,
+            random_state=49,
+            epochs=50,
+            generate_plots=True,
+            callback_mode='min',
+            maximizer="val_loss"):
+
+        data = pd.read_csv(self.dataset)
+       
+        if preprocess:
+            
+            remove = get_similar_column(get_value_instruction(instruction), data)
+            if(data[remove].dtype.name == 'object'):
+                callback_mode = 'max'
+                maximizer= "val_accuracy"
+                self.classification_query_ann(instruction, preprocess=preprocess, test_size=test_size, random_state=random_state, epochs=epochs, generate_plots = generate_plots, callback_mode = callback_mode, maximizer= maximizer)
+            else:
+                self.regression_query_ann(instruction, preprocess=preprocess, test_size=test_size, random_state=random_state, epochs=epochs, generate_plots = generate_plots, callback_mode = callback_mode, maximizer= maximizer)
+  
     # single regression query using a feed-forward neural network
     # instruction should be the value of a column
     def regression_query_ann(
@@ -126,28 +174,20 @@ class client:
         global currLog
         logger("reading in dataset...")
         data = pd.read_csv(self.dataset)
-        logger("filling n/a values...")
-        data.fillna(0, inplace=True)
 
-        # identifies the categorical and numerical columns
-        logger("identifying column types...")
-        categorical_columns = data.select_dtypes(exclude=["number"]).columns
-        numeric_columns = data.columns[data.dtypes.apply(
-            lambda c: np.issubdtype(c, np.number))]
+        data, y, remove = initial_preprocesser(data, instruction, preprocess)
 
-        # preprocesses data
-        if preprocess:
-            logger("hot encoding values and preprocessing...")
-            data = structured_preprocesser(data)
+        target_scaler = StandardScaler()
+        y = target_scaler.fit_transform(np.array(y).reshape(-1,1))
 
-        # identifies the most similar column and creates dataset appropriately.
-        logger("identifying target from instruction...")
-        logger("establishing callback function...")
+        
         remove = get_similar_column(
             get_value_instruction(instruction), data)
+        logger("hot encoding values and preprocessing...")
         y = data[remove]
         del data[remove]
-
+        logger("identifying target from instruction...")
+        logger("establishing callback function...")
         X_train, X_test, y_train, y_test = train_test_split(
             data, y, test_size=test_size, random_state=random_state)
 
@@ -244,22 +284,15 @@ class client:
 
         # reads dataset and fills n/a values with zeroes
         data = pd.read_csv(self.dataset)
-        data.fillna(0, inplace=True)
 
-        remove = get_similar_column(
-            get_value_instruction(instruction), data)
-        y = data[remove]
-        del data[remove]
+        data, y, remove = initial_preprocesser(data, instruction, preprocess)
 
-        # prepcoess the dataset
-        if preprocess:
-            data = structured_preprocesser(data)
-            num_classes = len(np.unique(y))
+        num_classes = len(np.unique(y))
 
-            # encodes the label dataset into 0's and 1's
-            le = preprocessing.LabelEncoder()
-            y = le.fit_transform(y)
-            y = np_utils.to_categorical(y)
+        # encodes the label dataset into 0's and 1's
+        le = preprocessing.LabelEncoder()
+        y = le.fit_transform(y)
+        y = np_utils.to_categorical(y)
 
         X_train, X_test, y_train, y_test = train_test_split(
             data, y, test_size=test_size, random_state=random_state)
@@ -336,7 +369,6 @@ class client:
         logger("Reading dataset...")
         # loads dataset and replaces n/a with zero
         data = pd.read_csv(self.dataset)
-        data.fillna(0, inplace=True)
         dataPandas = data.copy()
 
         if preprocess:
@@ -396,21 +428,13 @@ class client:
             instruction,
             test_size=0.2,
             kernel='linear',
+            preprocess=True,
             cross_val_size=0.3):
         logger("Reading in dataset....")
         # reads dataset and fills n/a values with zeroes
         data = pd.read_csv(self.dataset)
-        data.fillna(0, inplace=True)
 
-        logger("Identifying target columns...")
-        remove = get_similar_column(
-            get_value_instruction(instruction), data)
-        y = data[remove]
-        del data[remove]
-
-        # prepcoess the dataset
-        logger("Preprocessing dataset")
-        data = structured_preprocesser(data)
+        data, y, remove = initial_preprocesser(data, instruction, preprocess)
         #classification_column = get_similar_column(getLabelwithInstruction(instruction), data)
 
         num_classes = len(np.unique(y))
@@ -450,18 +474,9 @@ class client:
         logger("Reading in dataset....")
         #Reads in dataset
         data = pd.read_csv(self.dataset)
-        data.fillna(0, inplace=True)
 
-        logger("Identifying target columns...")
-        remove = get_similar_column(
-            get_value_instruction(instruction), data)
-        y = data[remove]
-        del data[remove]
+        data, y, remove = initial_preprocesser(data, instruction, preprocess)
 
-        # prepcoess the dataset
-        if preprocess:
-            logger("Preprocessing dataset...")
-            data = structured_preprocesser(data)
         #classification_column = get_similar_column(getLabelwithInstruction(instruction), data)
 
         num_classes = len(np.unique(y))
@@ -498,18 +513,9 @@ class client:
     def decision_tree_query(self, instruction, preprocess=True, test_size=0.2):
         logger("Reading in dataset....")
         data = pd.read_csv(self.dataset)
-        data.fillna(0, inplace=True)
 
-        logger("Identifying target columns...")
-        remove = get_similar_column(
-            get_value_instruction(instruction), data)
-        y = data[remove]
-        del data[remove]
+        data, y, remove = initial_preprocesser(data, instruction, preprocess)
 
-        # prepcoess the dataset
-        if preprocess:
-            logger("Preprocessing dataset...")
-            data = structured_preprocesser(data)
         #classification_column = get_similar_column(getLabelwithInstruction(instruction), data)
 
         num_classes = len(np.unique(y))
@@ -546,18 +552,9 @@ class client:
             random_state=49):
         logger("Reading in dataset....")
         data = pd.read_csv(self.dataset)
-        data.fillna(0, inplace=True)
 
-        logger("Identifying target columns...")
-        remove = get_similar_column(
-            get_value_instruction(instruction), data)
-        y = data[remove]
-        del data[remove]
+        data, y, remove = initial_preprocesser(data, instruction, preprocess)
 
-        # prepcoess the dataset
-        if preprocess:
-            logger("Preprocessing dataset...")
-            data = structured_preprocesser(data)
         #classification_column = get_similar_column(getLabelwithInstruction(instruction), data)
 
         num_classes = len(np.unique(y))
@@ -777,5 +774,5 @@ class client:
         print(self.models[model]['plots'].keys())
 
 
-newClient = client('./data/housing.csv').regression_query_ann('Model median house value')
+newClient = client('./data/housing.csv').neural_network_query('Model median house value')
 
