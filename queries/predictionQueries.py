@@ -176,6 +176,7 @@ class client:
         data = pd.read_csv(self.dataset)
 
         data, y, remove = initial_preprocesser(data, instruction, preprocess)
+
         target_scaler = StandardScaler()
         y = target_scaler.fit_transform(np.array(y).reshape(-1,1))
 
@@ -214,7 +215,7 @@ class client:
                 X_test,
                 y_test),
             callbacks=[es],
-            verbose = 1)
+            verbose = 0)
         models.append(history)
         print(currLog)
 
@@ -233,7 +234,7 @@ class client:
                 epochs=epochs,
                 validation_data=(
                     X_test,
-                    y_test), verbose=1)
+                    y_test), verbose=0)
             models.append(history)
             losses.append(models[i].history[maximizer]
                           [len(models[i].history[maximizer]) - 1])
@@ -420,6 +421,7 @@ class client:
         logger("Reading in dataset....")
         # reads dataset and fills n/a values with zeroes
         data = pd.read_csv(self.dataset)
+
         data, y, remove = initial_preprocesser(data, instruction, preprocess)
         #classification_column = get_similar_column(getLabelwithInstruction(instruction), data)
 
@@ -462,6 +464,7 @@ class client:
         data = pd.read_csv(self.dataset)
 
         data, y, remove = initial_preprocesser(data, instruction, preprocess)
+
         #classification_column = get_similar_column(getLabelwithInstruction(instruction), data)
 
         num_classes = len(np.unique(y))
@@ -500,6 +503,7 @@ class client:
         data = pd.read_csv(self.dataset)
 
         data, y, remove = initial_preprocesser(data, instruction, preprocess)
+
         #classification_column = get_similar_column(getLabelwithInstruction(instruction), data)
 
         num_classes = len(np.unique(y))
@@ -538,6 +542,7 @@ class client:
         data = pd.read_csv(self.dataset)
 
         data, y, remove = initial_preprocesser(data, instruction, preprocess)
+
         #classification_column = get_similar_column(getLabelwithInstruction(instruction), data)
 
         num_classes = len(np.unique(y))
