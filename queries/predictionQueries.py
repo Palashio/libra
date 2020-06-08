@@ -119,7 +119,7 @@ def initial_preprocesser(data, instruction, preprocess):
     full_pipeline = None
     if preprocess:
         logger("Preprocessing data...")
-        data = structured_preprocesser(data)
+        full_pipeline = structured_preprocesser(data)
     else:
         data.fillna(0, inplace=True)
 
