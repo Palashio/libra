@@ -786,5 +786,5 @@ class client:
         print(self.models[model]['plots'].keys())
 
 
-newClient = client('./data/housing.csv').newClient.neural_network_query('Model median house value')
+newClient = client('./data/housing.csv').neural_network_query('Model median house value')
 
