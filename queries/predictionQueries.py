@@ -70,7 +70,7 @@ def clearLog():
 # global variable parallels
 
 
-def logger(instruction, found=""):
+def logger(instruction, found="",end=''):
     global currLog
     global counter
 
@@ -78,7 +78,11 @@ def logger(instruction, found=""):
         currLog += (" " * 2 * counter) + str(instruction) + str(found)
     elif instruction=="->":
             counter=counter-1
-            currLog += (" " * 2 * counter) + " " + str(instruction) + str(found)
+            if end=='|':
+                currLog += (" " * 2 * counter) + " " +end + str(found)
+            else:
+                currLog += (" " * 2 * counter) + str(instruction) + str(found)   
+
     else:
         currLog += (" " * 2 * counter) + "|"
         currLog += "\n"
@@ -86,9 +90,12 @@ def logger(instruction, found=""):
         if instruction == "done...":
             currLog += "\n"
             currLog += "\n"
-
+        
     counter += 1
-    print(currLog)
+    if instruction=="->":
+        print(currLog,end="")
+    else:
+        print(currLog)
     currLog=""
 
 
@@ -229,13 +236,12 @@ class client:
         models.append(history)
         print(currLog)
 
-        '''
         logger("->","Initial number of layers "+ str(len(model.layers)))
         logger("->","Training Loss: "+str(history.history['loss']
-                     [len(history.history['val_loss']) - 1]))
+                     [len(history.history['val_loss']) - 1]),'|')
         logger("->","Test Loss: "+ str(history.history['val_loss']
-                     [len(history.history['val_loss']) - 1]))
-        '''
+                     [len(history.history['val_loss']) - 1]),'|')
+        print("")
         losses.append(history.history['val_loss']
                       [len(history.history['val_loss']) - 1])
         # keeps running model and fit functions until the validation loss stops
@@ -253,20 +259,17 @@ class client:
                     y_test),
                 verbose=0)
             models.append(history)
-            '''
-            logger("Current number of layers ", str(len(model.layers)))
-            logger("Training Loss: ",history.history['loss']
-                        [len(history.history['val_loss']) - 1])
-            logger("Test Loss: ",history.history['val_loss']
-                        [len(history.history['val_loss']) - 1])
-            '''
+            logger("->","Current number of layers: "+ str(len(model.layers)))
+            logger("->","Training Loss: "+ str(history.history['loss']
+                        [len(history.history['val_loss']) - 1],'|'))
+            logger("->","Test Loss: "+ str(history.history['val_loss']
+                        [len(history.history['val_loss']) - 1]),'|')
             losses.append(history.history['val_loss']
                         [len(history.history['val_loss']) - 1])
             i += 1
         
-        final_model=models[models.index(max(models))]
+        final_model=models[models.index(min(losses))]
         logger('->',"Best number of layers found: "+ str(len(final_model.layers)))
-        logger("Evaluating Accuracies...")
         logger('->',"Training Accuracy: "+str(final_model.history['accuracy']
                      [len(models[i].history['val_accuracy']) - 1]))
         logger('->',"Test Accuracy: "+str(models.get(final_model.history['val_accuracy'])
@@ -345,13 +348,11 @@ class client:
             data, y, epochs=epochs, validation_data=(
                 X_test, y_test), verbose=0, callbacks=[es])
         models.append(history)
-        '''
-        logger("Current number of layers ", str(len(model.layers)))
-        logger("Training Loss: ",history.history['loss']
-                    [len(history.history['val_loss']) - 1])
-        logger("Test Loss: ",history.history['val_loss']
-                    [len(history.history['val_loss']) - 1])
-        '''
+        logger("->","Initial number of layers: "+ str(len(model.layers)))
+        logger("->","Training Loss: "+ str(history.history['loss']
+                    [len(history.history['val_loss']) - 1]),'|')
+        logger("->","Test Loss: "+ str(history.history['val_loss']
+                    [len(history.history['val_loss']) - 1]),'|')
         losses.append(history.history[maximizer]
                       [len(models[i].history[maximizer]) - 1])
         accuracies.append(history.history['val_accuracy']
@@ -370,21 +371,18 @@ class client:
                 verbose=0,
                 callbacks=[es])
             models.append(history)
-            '''
-            logger("Current number of layers ", str(len(model.layers)))
-            logger("Training Accuracy: ",history.history['accuracy']
-                     [len(models[i].history['val_accuracy']) - 1])
-            logger("Test Accuracy: ",history.history['val_accuracy']
-                     [len(history.history['val_accuracy']) - 1])
-            '''
+            logger("->","Current number of layers: "+ str(len(model.layers)))
+            logger("->","Training Accuracy: "+ str(history.history['accuracy']
+                        [len(history.history['val_loss']) - 1],'|'))
+            logger("->","Test Accuracy: "+ str(history.history['val_accuracy']
+                        [len(history.history['val_loss']) - 1]),'|')
             losses.append(history.history[maximizer]
                           [len(models[i].history[maximizer]) - 1])
             accuracies.append(history.history['val_accuracy']
                       [len(models[i].history['val_accuracy']) - 1])
             i += 1
-        final_model=models[models.index(max(models))]
+        final_model=models[models.index(max(accuracies))]
         logger('->',"Best number of layers found: "+ str(len(final_model.layers)))
-        logger("Evaluating Accuracies...")
         logger('->',"Training Accuracy: "+str(final_model.history['accuracy']
                      [len(models[i].history['val_accuracy']) - 1]))
         logger('->',"Test Accuracy: "+str(models.get(final_model.history['val_accuracy'])
@@ -799,7 +797,6 @@ class client:
             optimizer="adam",
             loss=loss_func,
             metrics=['accuracy'])
-        logger("Number of Layers: ",str(len(model.layers)))
 
         train_data = ImageDataGenerator(rescale = 1./255,
                                    shear_range = 0.2,
@@ -826,6 +823,11 @@ class client:
                     epochs=10,
                     verbose=0
          )
+        logger("->","Number of layers: "+ str(len(model.layers)))
+        logger("->","Training Accuracy: "+ str(history.history['accuracy']
+                    [len(history.history['val_loss']) - 1],'|'))
+        logger("->","Test Accuracy: "+ str(history.history['val_accuracy']
+                    [len(history.history['val_loss']) - 1]),'|')
         # storing values the model dictionary
         self.models["convolutional_NN"] = {
             "model": model,
