@@ -51,7 +51,7 @@ from keras.preprocessing.image import ImageDataGenerator
 
 warnings.simplefilter(action='error', category=FutureWarning)
 warnings.simplefilter(action="ignore", category=SettingWithCopyWarning)
-os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3' 
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '0' 
 
 # function imports from other files
 
@@ -81,12 +81,12 @@ def logger(instruction, found=""):
     global counter
 
     if counter == 0:
-        currLog += (" " * 2 * counter) + instruction + found
+        currLog += (" " * 2 * counter) + str(instruction) + str(found)
         #currLog += "\n"
     else:
         currLog += (" " * 2 * counter) + "|"
         currLog += "\n"
-        currLog += (" " * 2 * counter) + "|- " + instruction + found
+        currLog += (" " * 2 * counter) + "|- " + str(instruction) + str(found)
         #currLog += "\n"
         if instruction == "done...":
             currLog += "\n"
@@ -218,15 +218,14 @@ class client:
             callbacks=[es])
         models.append(history)
         print(currLog)
+
         logger("Initial number of layers ", str(len(model.layers)))
-        logger("Training Accuracy: ",history.history['accuracy']
-                     [len(history.history['val_accuracy']) - 1])
-        logger("Test Accuracy: ",history.history['val_accuracy']
-                     [len(history.history['val_accuracy']) - 1])
-        losses.append(models[i].history[maximizer]
-                      [len(models[i].history[maximizer]) - 1])
-        accuracies.append(models[i].history['val_accuracy']
-                      [len(models[i].history['val_accuracy']) - 1])
+        logger("Training Loss: ",history.history['loss']
+                     [len(history.history['val_loss']) - 1])
+        logger("Test Loss: ",history.history['val_loss']
+                     [len(history.history['val_loss']) - 1])
+        losses.append(history.history['val_loss']
+                      [len(history.history['val_loss']) - 1])
         # keeps running model and fit functions until the validation loss stops
         # decreasing
         logger("testing number of layers...")
@@ -243,17 +242,16 @@ class client:
                 verbose=0)
             models.append(history)
             logger("Current number of layers ", str(len(model.layers)))
-            logger("Training Accuracy: ",history.history['accuracy']
-                     [len(models[i].history['val_accuracy']) - 1])
-            logger("Test Accuracy: ",history.history['val_accuracy']
-                     [len(history.history['val_accuracy']) - 1])
-            losses.append(models[i].history[maximizer]
-                          [len(models[i].history[maximizer]) - 1])
-            accuracies.append(models[i].history['val_accuracy']
-                      [len(models[i].history['val_accuracy']) - 1])
+            logger("Training Loss: ",history.history['loss']
+                        [len(history.history['val_loss']) - 1])
+            logger("Test Loss: ",history.history['val_loss']
+                        [len(history.history['val_loss']) - 1])
+            losses.append(history.history['val_loss']
+                        [len(history.history['val_loss']) - 1])
+
             i += 1
         '''
-        final_model=models.get[len(models) - 1]
+        final_model=models.get[len(models) - 2]
         logger("The number of layers ", str(len(final_model.layers)))
         logger("Training Accuracy: ",final_model.history['accuracy']
                      [len(models[i].history['val_accuracy']) - 1])
@@ -276,9 +274,7 @@ class client:
             "plots": plots,
             'losses': {
                 'training_loss': history.history['loss'],
-                'val_loss': history.history['val_loss']},
-            'accuracies':{'training_accuracy': history.history['accuracy'],
-                'val_accuracy': history.history['val_accuracy']}}
+                'val_loss': history.history['val_loss']}}
 
         # returns the best model
         clearLog()
@@ -319,7 +315,7 @@ class client:
         # early stopping callback
         es = EarlyStopping(
             monitor=maximizer,
-            mode='min',
+            mode=callback_mode,
             verbose=0,
             patience=5)
 
@@ -335,9 +331,9 @@ class client:
                      [len(models[i].history['val_accuracy']) - 1])
         logger("Test Accuracy: ",history.history['val_accuracy']
                      [len(history.history['val_accuracy']) - 1])
-        losses.append(models[i].history[maximizer]
+        losses.append(history.history[maximizer]
                       [len(models[i].history[maximizer]) - 1])
-        accuracies.append(models[i].history['val_accuracy']
+        accuracies.append(history.history['val_accuracy']
                       [len(models[i].history['val_accuracy']) - 1])
         # keeps running model and fit functions until the validation loss stops
         # decreasing
@@ -353,14 +349,16 @@ class client:
                 verbose=0,
                 callbacks=[es])
             models.append(history)
+
             logger("Current number of layers ", str(len(model.layers)))
             logger("Training Accuracy: ",history.history['accuracy']
                      [len(models[i].history['val_accuracy']) - 1])
             logger("Test Accuracy: ",history.history['val_accuracy']
                      [len(history.history['val_accuracy']) - 1])
-            losses.append(models[i].history[maximizer]
+
+            losses.append(history.history[maximizer]
                           [len(models[i].history[maximizer]) - 1])
-            accuracies.append(models[i].history['val_accuracy']
+            accuracies.append(history.history['val_accuracy']
                       [len(models[i].history['val_accuracy']) - 1])
             i += 1
         '''
