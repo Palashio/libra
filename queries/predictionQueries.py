@@ -261,7 +261,7 @@ class client:
             models.append(history)
             logger("->","Current number of layers: "+ str(len(model.layers)))
             logger("->","Training Loss: "+ str(history.history['loss']
-                        [len(history.history['val_loss']) - 1],'|'))
+                        [len(history.history['val_loss']) - 1]),'|')
             logger("->","Test Loss: "+ str(history.history['val_loss']
                         [len(history.history['val_loss']) - 1]),'|')
             losses.append(history.history['val_loss']
