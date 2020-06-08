@@ -19,7 +19,7 @@ def get_keras_model_reg(dataset, i):
 
     # Adds values depending on what the i value is
     for x in range(i):
-        if(i < 5):
+        if (i < 5):
             model.add(
                 Dense(
                     i * 64,
@@ -35,6 +35,7 @@ def get_keras_model_reg(dataset, i):
     model.add(Dense(1, kernel_initializer="normal"))
     model.compile(loss='mean_squared_error', optimizer='adam')
     return model
+
 
 # Creates a classification neural network
 
@@ -54,7 +55,7 @@ def get_keras_model_class(dataset, i, num_classes):
 
     # Adds values depending on what the i value is
     for x in range(i):
-        if(i < 5):
+        if (i < 5):
             model.add(
                 Dense(
                     i * 64,
@@ -75,6 +76,7 @@ def get_keras_model_class(dataset, i, num_classes):
 
     return model
 
+
 # Sentiment analysis model
 def get_keras_text_class(max_features, num_classes):
     model = tf.keras.models.Sequential()
@@ -87,6 +89,7 @@ def get_keras_text_class(max_features, num_classes):
                   metrics=['accuracy'])
 
     return model
+
 
 def getKerasConvolutional():
     print("entered")
