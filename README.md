@@ -12,7 +12,7 @@ Libra is a deep learning API that allows users to use machine learning in their 
   
   * **Automation.** End-to-end pipelines containing hundreds of processes are automatically run for the user. The developer only has to consider what they want to accomplish from the task and the location of their initial dataset.
   
-  * **Easy Extensibility.** Queries are split into standalone modules. Under the dev-pipeline module you can pipeline both different and  new modules and integrate them into the workflow directly. This allows newly developed features to be easily tested before integrating them into the main program. 
+  * **Easy Extensibility.** Queries are split into standalone modules. Under the dev-pipeline module you can pipeline both different and new modules and integrate them into the workflow directly. This allows newly developed features to be easily tested before integrating them into the main program. 
 
 ***
 
@@ -33,7 +33,7 @@ Table of Contents
 * [Model Information](#model-modifications)
    * [Model Tuning](#model-tuning)
    * [Plotting](#plotting)
-   * [Dataset Information](dataset-information)
+   * [Dataset Information](#dataset-information)
 * [Dimensionality Reduction](#dimensionality-reduction)
    * [Reduction Pipeliner](#reduction-pipeliner)
    * [Principle Component Analysis](#principle-component-analysis)
@@ -42,6 +42,7 @@ Table of Contents
 * [Process Logger](#process-logger)
 * [Pipelining for Contributors](#pipelining-for-contributors)
 * [Providing Instructions](#instructions)
+* [Example Projects] (#example projects)
 
 ## Queries ##
 
