@@ -822,8 +822,8 @@ class client:
                                   test_size=0.2,
                                   random_state=49,
                                   epochs=10,
-                                  generate_plots=True,
-                                  maxTextLength=2000):
+                                  maxTextLength=20000,
+                                  generate_plots=True):
         data = pd.read_csv(self.dataset)
         data.fillna(0, inplace=True)
 
@@ -842,8 +842,7 @@ class client:
             X = self.encode_text(X, X)
 
         X = np.array(X)
-        for i in range(len(X)):
-            X[i] = np.array(X[i])
+
         model = get_keras_text_class(maxTextLength, 2)
 
         X_train, X_test, y_train, y_test = train_test_split(X, Y, test_size=test_size, random_state=random_state)
