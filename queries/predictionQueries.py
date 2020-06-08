@@ -110,6 +110,7 @@ class client:
         return get_similar_model(model_requested, self.models.keys())
         clearLog()
 
+
     # single regression query using a feed-forward neural network
     # instruction should be the value of a column
     def regression_query_ann(
@@ -166,7 +167,6 @@ class client:
 
         # get the first 3 layer model
         model = get_keras_model_reg(data, i)
-
         logger("training initial model...")
         history = model.fit(
             X_train,
@@ -179,6 +179,12 @@ class client:
             callbacks=[es])
         models.append(history)
         print(currLog)
+        initial_model=models[len(models) - 1]
+        logger("The number of layers ", str(len(initial_model.layers)))
+        logger("Training Accuracy: ",initial_model.history['accuracy']
+                     [len(initial_model.history['val_accuracy']) - 1])
+        logger("Test Accuracy: ",models.get(initial_model.history['val_accuracy'])
+                     [len(initial_model.history['val_accuracy']) - 1])
 
         losses.append(models[i].history[maximizer]
                       [len(models[i].history[maximizer]) - 1])
@@ -204,6 +210,12 @@ class client:
             accuracies.append(models[i].history['val_accuracy']
                       [len(models[i].history['val_accuracy']) - 1])
             i += 1
+        final_model=models.get[len(models) - 1]
+        logger("The number of layers ", str(len(final_model.layers)))
+        logger("Training Accuracy: ",final_model.history['accuracy']
+                     [len(models[i].history['val_accuracy']) - 1])
+        logger("Test Accuracy: ",models.get(final_model.history['val_accuracy'])
+                     [len(models[i].history['val_accuracy']) - 1])
 
         # calls function to generate plots in plot generation
         if generate_plots:
@@ -282,7 +294,7 @@ class client:
             data, y, epochs=epochs, validation_data=(
                 X_test, y_test), verbose=0, callbacks=[es])
         models.append(history)
-
+        
         losses.append(models[i].history[maximizer]
                       [len(models[i].history[maximizer]) - 1])
         accuracies.append(models[i].history['val_accuracy']
@@ -305,8 +317,13 @@ class client:
                           [len(models[i].history[maximizer]) - 1])
             accuracies.append(models[i].history['val_accuracy']
                       [len(models[i].history['val_accuracy']) - 1])
-            print("The number of layers " + str(len(model.layers)))
             i += 1
+        final_model=models[len(models) - 1]
+        logger("The number of layers ", str(len(final_model.layers)))
+        logger("Training Accuracy: ",final_model.history['accuracy']
+                     [len(models[i].history['val_accuracy']) - 1])
+        logger("Test Accuracy: ",models.get(final_model.history['val_accuracy'])
+                     [len(models[i].history['val_accuracy']) - 1])
 
         # genreates appropriate classification plots by feeding all information
         plots = generate_classification_plots(
@@ -735,7 +752,8 @@ class client:
             optimizer="adam",
             loss=loss_func,
             metrics=['accuracy'])
-        
+        logger("Number of Layers: ",str(len(model.layers)))
+
         train_data = ImageDataGenerator(rescale = 1./255,
                                    shear_range = 0.2,
                                    zoom_range = 0.2,
