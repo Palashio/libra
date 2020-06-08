@@ -70,7 +70,7 @@ def clearLog():
 # global variable parallels
 
 
-def logger(instruction, found="",end=''):
+def logger(instruction, found="",slash=''):
     global currLog
     global counter
 
@@ -78,10 +78,10 @@ def logger(instruction, found="",end=''):
         currLog += (" " * 2 * counter) + str(instruction) + str(found)
     elif instruction=="->":
             counter=counter-1
-            if end=='|':
-                currLog += (" " +end + str(instruction) + str(found))
+            if slash=='|':
+                currLog += (" " +slash + str(instruction) + str(found))
             else:
-                currLog += (" " * 2 * counter) + str(instruction) + str(found)   
+                currLog += (" " * 2 * counter) + str(instruction) + str(found)  
 
     else:
         currLog += (" " * 2 * counter) + "|"
