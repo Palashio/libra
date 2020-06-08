@@ -218,13 +218,11 @@ class client:
             callbacks=[es])
         models.append(history)
         print(currLog)
-        initial_model=models[len(models) - 1]
-        logger("The number of layers ", str(len(initial_model.layers)))
-        logger("Training Accuracy: ",initial_model.history['accuracy']
-                     [len(initial_model.history['val_accuracy']) - 1])
-        logger("Test Accuracy: ",models.get(initial_model.history['val_accuracy'])
-                     [len(initial_model.history['val_accuracy']) - 1])
-
+        logger("Initial number of layers ", str(len(model.layers)))
+        logger("Training Accuracy: ",history.history['accuracy']
+                     [len(history.history['val_accuracy']) - 1])
+        logger("Test Accuracy: ",history.history['val_accuracy']
+                     [len(history.history['val_accuracy']) - 1])
         losses.append(models[i].history[maximizer]
                       [len(models[i].history[maximizer]) - 1])
         accuracies.append(models[i].history['val_accuracy']
@@ -244,18 +242,24 @@ class client:
                     y_test),
                 verbose=0)
             models.append(history)
+            logger("Current number of layers ", str(len(model.layers)))
+            logger("Training Accuracy: ",history.history['accuracy']
+                     [len(models[i].history['val_accuracy']) - 1])
+            logger("Test Accuracy: ",history.history['val_accuracy']
+                     [len(history.history['val_accuracy']) - 1])
             losses.append(models[i].history[maximizer]
                           [len(models[i].history[maximizer]) - 1])
             accuracies.append(models[i].history['val_accuracy']
                       [len(models[i].history['val_accuracy']) - 1])
             i += 1
+        '''
         final_model=models.get[len(models) - 1]
         logger("The number of layers ", str(len(final_model.layers)))
         logger("Training Accuracy: ",final_model.history['accuracy']
                      [len(models[i].history['val_accuracy']) - 1])
         logger("Test Accuracy: ",models.get(final_model.history['val_accuracy'])
                      [len(models[i].history['val_accuracy']) - 1])
-
+        '''
         # calls function to generate plots in plot generation
         if generate_plots:
             init_plots, plot_names = generate_regression_plots(
@@ -326,7 +330,11 @@ class client:
             data, y, epochs=epochs, validation_data=(
                 X_test, y_test), verbose=0, callbacks=[es])
         models.append(history)
-        
+        logger("Initial number of layers ", str(len(model.layers)))
+        logger("Training Accuracy: ",history.history['accuracy']
+                     [len(models[i].history['val_accuracy']) - 1])
+        logger("Test Accuracy: ",history.history['val_accuracy']
+                     [len(history.history['val_accuracy']) - 1])
         losses.append(models[i].history[maximizer]
                       [len(models[i].history[maximizer]) - 1])
         accuracies.append(models[i].history['val_accuracy']
@@ -345,18 +353,24 @@ class client:
                 verbose=0,
                 callbacks=[es])
             models.append(history)
+            logger("Current number of layers ", str(len(model.layers)))
+            logger("Training Accuracy: ",history.history['accuracy']
+                     [len(models[i].history['val_accuracy']) - 1])
+            logger("Test Accuracy: ",history.history['val_accuracy']
+                     [len(history.history['val_accuracy']) - 1])
             losses.append(models[i].history[maximizer]
                           [len(models[i].history[maximizer]) - 1])
             accuracies.append(models[i].history['val_accuracy']
                       [len(models[i].history['val_accuracy']) - 1])
             i += 1
+        '''
         final_model=models[len(models) - 1]
         logger("The number of layers ", str(len(final_model.layers)))
         logger("Training Accuracy: ",final_model.history['accuracy']
                      [len(models[i].history['val_accuracy']) - 1])
         logger("Test Accuracy: ",models.get(final_model.history['val_accuracy'])
                      [len(models[i].history['val_accuracy']) - 1])
-
+        '''
         # genreates appropriate classification plots by feeding all information
         plots = generate_classification_plots(
             models[len(models) - 1], data, y, model, X_test, y_test)
