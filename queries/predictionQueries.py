@@ -114,13 +114,14 @@ def initial_preprocesser(data, instruction, preprocess):
             del data[column]
 
     # preprocess the dataset
+    full_pipeline = None
     if preprocess:
         logger("preprocessing data...")
-        data = structured_preprocesser(data)
+        data, full_pipeline = structured_preprocesser(data)
     else:
         data.fillna(0, inplace=True)
 
-    return data, y, remove
+    return data, y, remove, full_pipeline
 
 
 # class to store all query information
@@ -140,6 +141,17 @@ class client:
         logger("Getting model...")
         return get_similar_model(model_requested, self.models.keys())
         clearLog()
+
+    # param modelKey: string representation of the model to make prediction
+    # param data: dataframe version of desired prediction set
+    def predict(self, modelKey, data):
+        modeldict = self.models[modelKey]
+        data = modeldict['preprocesser'].transform(data)
+        print(data)
+        predictions = modeldict['model'].predict(data)
+        if modeldict.get('interpreter'):
+            predictions = modeldict['interpreter'].inverse_transform(predictions)
+        return predictions
 
     def neural_network_query(self,
             instruction,
@@ -180,18 +192,11 @@ class client:
         logger("reading in dataset...")
         data = pd.read_csv(self.dataset)
 
-        data, y, remove = initial_preprocesser(data, instruction, preprocess)
+        data, y, remove, full_pipeline = initial_preprocesser(data, instruction, preprocess)
 
         target_scaler = StandardScaler()
         y = target_scaler.fit_transform(np.array(y).reshape(-1,1))
 
-        
-        remove = get_similar_column(
-            get_value_instruction(instruction), data)
-        logger("hot encoding values and preprocessing...")
-        y = data[remove]
-        del data[remove]
-        logger("identifying target from instruction...")
         logger("establishing callback function...")
         X_train, X_test, y_train, y_test = train_test_split(
             data, y, test_size=test_size, random_state=random_state)
@@ -259,6 +264,8 @@ class client:
             'model': model,
             "target": remove,
             "plots": plots,
+            "preprocesser": full_pipeline,
+            "interpreter": target_scaler,
             'losses': {
                 'training_loss': history.history['loss'],
                 'val_loss': history.history['val_loss']}}
@@ -283,7 +290,7 @@ class client:
         # reads dataset and fills n/a values with zeroes
         data = pd.read_csv(self.dataset)
 
-        data, y, remove = initial_preprocesser(data, instruction, preprocess)
+        data, y, remove, full_pipeline = initial_preprocesser(data, instruction, preprocess)
 
         num_classes = len(np.unique(y))
 
@@ -344,6 +351,8 @@ class client:
             'num_classes': num_classes,
             "plots": plots,
             "target": remove,
+            "preprocesser": full_pipeline,
+            "interpreter": le,
             'losses': {
                 'training_loss': history.history['loss'],
                 'val_loss': history.history['val_loss']},
@@ -364,9 +373,11 @@ class client:
         data = pd.read_csv(self.dataset)
         dataPandas = data.copy()
 
+        full_pipeline = None
         if preprocess:
             logger("Preprocessing data...")
-            data = np.asarray(structured_preprocesser(data))
+            data, full_pipeline = structured_preprocesser(data)
+            data = np.array(data)
 
         modelStorage = []
         inertiaStor = []
@@ -411,7 +422,9 @@ class client:
 
         # stores plots and information in the dictionary client model
         self.models['kmeans_clustering'] = {
-            "model": modelStorage[len(modelStorage) - 1], "plots": plots}
+            "model": modelStorage[len(modelStorage) - 1], 
+            "preprocesser": full_pipeline,
+            "plots": plots}
         clearLog()
         # return modelStorage[len(modelStorage) - 1],
         # inertiaStor[len(inertiaStor) - 1], i
@@ -427,7 +440,7 @@ class client:
         # reads dataset and fills n/a values with zeroes
         data = pd.read_csv(self.dataset)
 
-        data, y, remove = initial_preprocesser(data, instruction, preprocess)
+        data, y, remove, full_pipeline = initial_preprocesser(data, instruction, preprocess)
         #classification_column = get_similar_column(getLabelwithInstruction(instruction), data)
 
         num_classes = len(np.unique(y))
@@ -450,6 +463,8 @@ class client:
                 clf.predict(X_test),
                 y_test),
             "target": remove,
+            "preprocesser": full_pipeline,
+            "interpreter": le,
             "cross_val_score": cross_val_score(
                 clf,
                 data,
@@ -468,7 +483,7 @@ class client:
         #Reads in dataset
         data = pd.read_csv(self.dataset)
 
-        data, y, remove = initial_preprocesser(data, instruction, preprocess)
+        data, y, remove, full_pipeline = initial_preprocesser(data, instruction, preprocess)
 
         #classification_column = get_similar_column(getLabelwithInstruction(instruction), data)
 
@@ -497,7 +512,10 @@ class client:
         knn = models[scores.index(min(scores))]
         self.models["nearest_neighbors"] = {
             "model": knn, "accuracy_score": scores.index(
-                min(scores)), "target": remove, "cross_val_score": cross_val_score(
+                min(scores)), 
+            "preprocesser": full_pipeline,
+            "interpreter": le, 
+            "target": remove, "cross_val_score": cross_val_score(
                 knn, data, y, cv=3)}
 
         clearLog()
@@ -507,7 +525,7 @@ class client:
         logger("Reading in dataset....")
         data = pd.read_csv(self.dataset)
 
-        data, y, remove = initial_preprocesser(data, instruction, preprocess)
+        data, y, remove, full_pipeline = initial_preprocesser(data, instruction, preprocess)
 
         #classification_column = get_similar_column(getLabelwithInstruction(instruction), data)
 
@@ -528,6 +546,8 @@ class client:
         self.models["decision_tree"] = {
             "model": clf,
             "target": remove,
+            "preprocesser": full_pipeline,
+            "interpeter": le,
             "cross_val_score": cross_val_score(
                 clf,
                 data,
@@ -546,7 +566,7 @@ class client:
         logger("Reading in dataset....")
         data = pd.read_csv(self.dataset)
 
-        data, y, remove = initial_preprocesser(data, instruction, preprocess)
+        data, y, remove, full_pipeline = initial_preprocesser(data, instruction, preprocess)
 
         #classification_column = get_similar_column(getLabelwithInstruction(instruction), data)
 
@@ -766,7 +786,5 @@ class client:
         print(self.models[model]['plots'].keys())
 
 
-newClient = client('./data/housing.csv').neural_network_query('Model median house value')
-
-
+newClient = client('./data/housing.csv').newClient.neural_network_query('Model median house value')
 
