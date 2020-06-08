@@ -15,6 +15,33 @@ from os import listdir
 from PIL import Image as PImage
 import cv2
 
+def initial_preprocesser(data, instruction, preprocess):
+    # get target column
+    logger("identifying target from instruction...")
+    remove = get_similar_column(
+            get_value_instruction(instruction), data)
+    y = data[remove]
+
+    # remove rows where target is NaN
+    data = data[y.notna()]
+    y = y[y.notna()]
+    del data[remove]
+
+    #identification of id columns: if they're an unique and non-numerical we have to remove
+    for column in data.columns:
+        if len(np.unique(data[column])) == len(data) and data[column].dtype.name == 'object':
+            del data[column]
+
+    # preprocess the dataset
+    full_pipeline = None
+    if preprocess:
+        logger("preprocessing data...")
+        data, full_pipeline = structured_preprocesser(data)
+    else:
+        data.fillna(0, inplace=True)
+
+    return data, y, remove, full_pipeline
+
 
 # Preprocesses the data appropriately for single reg data
 def structured_preprocesser(data):
