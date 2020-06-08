@@ -79,7 +79,7 @@ def logger(instruction, found="",end=''):
     elif instruction=="->":
             counter=counter-1
             if end=='|':
-                currLog += (" " * 2 * counter) + " " +end + str(found)
+                currLog += (" " +end + str(instruction) + str(found))
             else:
                 currLog += (" " * 2 * counter) + str(instruction) + str(found)   
 
