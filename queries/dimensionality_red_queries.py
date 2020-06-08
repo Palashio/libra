@@ -15,31 +15,24 @@ from sklearn.decomposition import PCA, FastICA
 from tabulate import tabulate
 from scipy.spatial.distance import cosine
 from pandas import DataFrame
-from sklearn import preprocessing, tree 
-from sklearn.preprocessing import LabelEncoder
+from sklearn import preprocessing, tree, svm 
+from sklearn.preprocessing import OneHotEncoder, StandardScaler, LabelEncoder
 from sklearn.metrics import accuracy_score
-from sklearn import preprocessing, svm
 from sklearn.compose import ColumnTransformer
 from sklearn.model_selection import train_test_split
 from sklearn.pipeline import Pipeline
-from sklearn.preprocessing import OneHotEncoder, StandardScaler
-from tensorflow import keras
-from tensorflow.python.keras.layers import Dense, Input
 from dataset_labelmatcher import get_similar_column
 from keras.callbacks import EarlyStopping
-from matplotlib import pyplot
 from grammartree import get_value_instruction
 from data_preprocesser import structured_preprocesser
-from predictionModelCreation import get_keras_model_reg
-from predictionModelCreation import get_keras_model_class
-from keras.utils import to_categorical
-from keras.utils import np_utils
+from predictionModelCreation import get_keras_model_class, get_keras_model_reg
+from keras.utils import (np_utils, to_categorical)
 from sklearn.cluster import KMeans
 import matplotlib.pyplot as plt
-from generatePlots import generate_clustering_plots, generate_regression_plots, generate_classification_plots, generate_classification_together
+from generatePlots import (generate_clustering_plots, generate_regression_plots, 
+     generate_classification_plots, generate_classification_together)
 from keras.models import Sequential
-from keras.layers import Dense, Conv2D, Flatten
-from keras.utils import to_categorical
+from keras.layers import Input, Dense, Conv2D, Flatten
 from os import listdir
 from tuner import tuneReg, tuneClass
 from sklearn.neighbors import KNeighborsClassifier
@@ -59,16 +52,17 @@ def logger(instruction, found = ""):
 
     if counter == 0:
         currLog += (" " * 2 * counter) + instruction + found 
-        currLog += "\n"        
+    elif instruction=="->":
+            counter=counter-1
+            currLog += (" " * 2 * counter) + " " + str(instruction) + str(found)
     else:
         currLog += (" " * 2 * counter) + "|" 
         currLog += "\n"
         currLog += (" " * 2 * counter) + "|- " + instruction + found 
-        currLog += "\n"
         if instruction == "done...":
             currLog +="\n"
-            currLog += "\n"
-
+            currLog +="\n"
+    
     counter += 1
     print(currLog)
     currLog=""
@@ -78,13 +72,13 @@ def dimensionality_reduc(instruction, dataset, arr=["RF", "PCA", "ICA"], inplace
     global counter
 
 
-    logger("loading dataset...")
+    logger("Loading dataset...")
     data = pd.read_csv(dataset)
     data.fillna(0, inplace=True)
 
-    logger("getting most similar column from instruction...")
+    logger("Getting most similar column from instruction...")
     target = get_similar_column(get_value_instruction(instruction), data)
-
+    logger("Preprocssing the data...")
     y = data[target]
     del data[target]
     le = preprocessing.LabelEncoder()
@@ -96,13 +90,13 @@ def dimensionality_reduc(instruction, dataset, arr=["RF", "PCA", "ICA"], inplace
     overall_storage = []
     finals = []
 
-    logger("generating dimensionality permutations...")
+    logger("Generating dimensionality permutations...")
     for i in range(1, len(arr) + 1):
         for elem in list(itertools.permutations(arr, i)):
             perms.append(elem)
 
-    logger("running each possible permutation...")
-    logger("realigning tensors...")
+    logger("Running each possible permutation...")
+    logger("TRealigning tensors...")
     for path in perms:
         storage = []
         storage.append(data)
@@ -125,7 +119,7 @@ def dimensionality_reduc(instruction, dataset, arr=["RF", "PCA", "ICA"], inplace
             if path.index(element) == len(path) - 1:
                 finals.append(overall_storage[len(overall_storage) - 1])
 
-    logger("getting best accuracies...")
+    logger("Getting best accuracies...")
     accs = []
     i = 0
     print("")
