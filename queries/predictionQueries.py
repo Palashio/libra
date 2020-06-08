@@ -821,7 +821,7 @@ class client:
                                   preprocess=True,
                                   test_size=0.2,
                                   random_state=49,
-                                  epochs=1,
+                                  epochs=10,
                                   generate_plots=True,
                                   maxTextLength=2000):
         data = pd.read_csv(self.dataset)
@@ -831,7 +831,7 @@ class client:
         target = get_similar_column(get_value_instruction(instruction), data)
         X = data[target]
         del data[target]
-        labels = get_similar_column(get_value_instruction("classification"), data)
+        labels = get_similar_column(get_value_instruction("Label"), data)
         Y = data[labels]
         Y = np.array(Y.array)
 
