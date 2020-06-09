@@ -201,19 +201,13 @@ class client:
         target_scaler = StandardScaler()
         y = target_scaler.fit_transform(np.array(y).reshape(-1,1))
         
-        remove = get_similar_column(
-            get_value_instruction(instruction), data)
-        logger("Hot encoding values and preprocessing...")
-        y = data[remove]
-        del data[remove]
-        logger("Identifying target from instruction...")
         logger("Establishing callback function...")
         X_train, X_test, y_train, y_test = train_test_split(
             data, y, test_size=test_size, random_state=random_state)
 
         models = []
         losses = []
-
+        model_data=[]
         # callback function to store lowest loss value
         es = EarlyStopping(
             monitor=maximizer,
@@ -236,6 +230,7 @@ class client:
             verbose=0,
             callbacks=[es])
         models.append(history)
+        model_data.append(model)
         print(currLog)
 
         logger("->","Initial number of layers "+ str(len(model.layers)))
@@ -261,6 +256,7 @@ class client:
                 y_test),
             verbose=0,
             callbacks=[es])
+            model_data.append(model)
             models.append(history)
             logger("->","Current number of layers: "+ str(len(model.layers)))
             logger("->","Training Loss: "+ str(history.history['loss']
@@ -270,13 +266,14 @@ class client:
             losses.append(history.history['val_loss']
                         [len(history.history['val_loss']) - 1])
             i += 1
-        
-        final_model=models[models.index(min(losses))]
+
+        final_model=model_data[model_data.index(min(losses))]
+        final_hist=models[models.index(min(losses))]
         logger('->',"Best number of layers found: "+ str(len(final_model.layers)))
-        logger('->',"Training Accuracy: "+str(final_model.history['accuracy']
-                     [len(models[i].history['val_accuracy']) - 1]))
-        logger('->',"Test Accuracy: "+str(models.get(final_model.history['val_accuracy'])
-                     [len(models[i].history['val_accuracy']) - 1]))
+        logger('->',"Training Accuracy: "+str(final_hist.history['accuracy']
+                     [len(final_hist.history['val_accuracy']) - 1]))
+        logger('->',"Test Accuracy: "+str(final_hist.history['val_accuracy']
+                     [len(final_hist.history['val_accuracy']) - 1]))
         
         # calls function to generate plots in plot generation
         if generate_plots:
@@ -335,6 +332,7 @@ class client:
         models = []
         losses = []
         accuracies=[]
+        model_data=[]
 
         # early stopping callback
         logger("Establishing callback function...")
@@ -350,6 +348,7 @@ class client:
         history = model.fit(
             data, y, epochs=epochs, validation_data=(
                 X_test, y_test), verbose=0, callbacks=[es])
+        model_data.append(model)
         models.append(history)
         logger("->","Initial number of layers: "+ str(len(model.layers)))
         logger("->","Training Loss: "+ str(history.history['loss']
@@ -379,17 +378,20 @@ class client:
                         [len(history.history['val_loss']) - 1],'|'))
             logger("->","Test Accuracy: "+ str(history.history['val_accuracy']
                         [len(history.history['val_loss']) - 1]),'|')
+            model_data.append(model)
             losses.append(history.history[maximizer]
                           [len(models[i].history[maximizer]) - 1])
             accuracies.append(history.history['val_accuracy']
                       [len(models[i].history['val_accuracy']) - 1])
             i += 1
-        final_model=models[models.index(max(accuracies))]
+
+        final_model=model_data[model_data.index(max(accuracies))]
+        final_hist=models[models.index(max(accuracies))]
         logger('->',"Best number of layers found: "+ str(len(final_model.layers)))
-        logger('->',"Training Accuracy: "+str(final_model.history['accuracy']
-                     [len(models[i].history['val_accuracy']) - 1]))
-        logger('->',"Test Accuracy: "+str(models.get(final_model.history['val_accuracy'])
-                     [len(models[i].history['val_accuracy']) - 1]))
+        logger('->',"Training Accuracy: "+str(final_hist.history['accuracy']
+                     [len(final_hist.history['val_accuracy']) - 1]))
+        logger('->',"Test Accuracy: "+str(final_hist.history['val_accuracy']
+                     [len(final_hist.history['val_accuracy']) - 1]))
 
         # genreates appropriate classification plots by feeding all information
         logger("Plotting Graphs...")
