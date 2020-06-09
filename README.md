@@ -42,7 +42,7 @@ Table of Contents
 * [Process Logger](#process-logger)
 * [Pipelining for Contributors](#pipelining-for-contributors)
 * [Providing Instructions](#instructions)
-* [Example Projects] (#example projects)
+* [Example Projects](#example-projects)
 
 ## Queries ##
 
@@ -365,3 +365,6 @@ Libra uses intelligent natural language processing to analyze user instructions 
   4. Levenshentein distances are used to match relevant parts of the sentence to a column name.
   5. Target column selected based on lowest levenshentein distance and is returned.
 
+## Example Projects ##
+
+To get started, take a look at some of these examples of data science projects analyzing datasets using Libra. 
