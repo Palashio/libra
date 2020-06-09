@@ -231,7 +231,6 @@ class client:
             callbacks=[es])
         models.append(history)
         model_data.append(model)
-        print(currLog)
 
         logger("->","Initial number of layers "+ str(len(model.layers)))
         logger("->","Training Loss: "+str(history.history['loss']
@@ -244,7 +243,6 @@ class client:
         # keeps running model and fit functions until the validation loss stops
         # decreasing
         logger("Testing number of layers...")
-        print(currLog)
         while(all(x > y for x, y in zip(losses, losses[1:]))):
             model = get_keras_model_reg(data, i)
             history = model.fit(
@@ -263,18 +261,19 @@ class client:
                         [len(history.history['val_loss']) - 1]),'|')
             logger("->","Test Loss: "+ str(history.history['val_loss']
                         [len(history.history['val_loss']) - 1]),'|')
+            print("")
             losses.append(history.history['val_loss']
                         [len(history.history['val_loss']) - 1])
             i += 1
 
-        final_model=model_data[model_data.index(min(losses))]
-        final_hist=models[models.index(min(losses))]
+        final_model=model_data[losses.index(min(losses))]
+        final_hist=models[losses.index(min(losses))]
         logger('->',"Best number of layers found: "+ str(len(final_model.layers)))
         logger('->',"Training Accuracy: "+str(final_hist.history['accuracy']
                      [len(final_hist.history['val_accuracy']) - 1]))
         logger('->',"Test Accuracy: "+str(final_hist.history['val_accuracy']
                      [len(final_hist.history['val_accuracy']) - 1]))
-        
+        print("")
         # calls function to generate plots in plot generation
         if generate_plots:
             logger("Plotting Graphs...")
@@ -284,7 +283,6 @@ class client:
             for x in range(len(plot_names)):
                 plots[str(plot_names[x])] = init_plots[x]
 
-        print(currLog)
         # stores values in the client object models dictionary field
         self.models['regression_ANN'] = {
             'model': model,
@@ -355,6 +353,7 @@ class client:
                     [len(history.history['val_loss']) - 1]),'|')
         logger("->","Test Loss: "+ str(history.history['val_loss']
                     [len(history.history['val_loss']) - 1]),'|')
+        print("")
         losses.append(history.history[maximizer]
                       [len(models[i].history[maximizer]) - 1])
         accuracies.append(history.history['val_accuracy']
@@ -378,6 +377,7 @@ class client:
                         [len(history.history['val_loss']) - 1],'|'))
             logger("->","Test Accuracy: "+ str(history.history['val_accuracy']
                         [len(history.history['val_loss']) - 1]),'|')
+            print("")
             model_data.append(model)
             losses.append(history.history[maximizer]
                           [len(models[i].history[maximizer]) - 1])
@@ -385,14 +385,14 @@ class client:
                       [len(models[i].history['val_accuracy']) - 1])
             i += 1
 
-        final_model=model_data[model_data.index(max(accuracies))]
-        final_hist=models[models.index(max(accuracies))]
+        final_model=model_data[losses.index(min(losses))]
+        final_hist=models[losses.index(min(losses))]
         logger('->',"Best number of layers found: "+ str(len(final_model.layers)))
         logger('->',"Training Accuracy: "+str(final_hist.history['accuracy']
                      [len(final_hist.history['val_accuracy']) - 1]))
         logger('->',"Test Accuracy: "+str(final_hist.history['val_accuracy']
                      [len(final_hist.history['val_accuracy']) - 1]))
-
+        print("")
         # genreates appropriate classification plots by feeding all information
         logger("Plotting Graphs...")
         plots = generate_classification_plots(
