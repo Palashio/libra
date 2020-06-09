@@ -22,7 +22,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import OneHotEncoder, StandardScaler
 from dataset_labelmatcher import get_similar_column, get_similar_model
-from keras.callbacks import EarlyStopping
+from tensorflow.keras.callbacks  import EarlyStopping
 from matplotlib import pyplot
 from grammartree import get_value_instruction
 from data_preprocesser import structured_preprocesser
@@ -208,7 +208,7 @@ class client:
         es = EarlyStopping(
             monitor=maximizer,
             mode=callback_mode,
-            verbose=1,
+            verbose=0,
             patience=5)
 
         i = 0
@@ -229,7 +229,7 @@ class client:
         models.append(history)
         print(currLog)
 
-        losses.append(models[i].history[maximizer]
+        losses.append(history.history[maximizer]
                       [len(models[i].history[maximizer]) - 1])
 
         # keeps running model and fit functions until the validation loss stops
@@ -246,7 +246,7 @@ class client:
                     X_test,
                     y_test), verbose=0)
             models.append(history)
-            losses.append(models[i].history[maximizer]
+            losses.append(history.history[maximizer]
                           [len(models[i].history[maximizer]) - 1])
             i += 1
 
@@ -309,7 +309,7 @@ class client:
         es = EarlyStopping(
             monitor=maximizer,
             mode='min',
-            verbose=1,
+            verbose=0,
             patience=5)
 
         i = 0
@@ -317,11 +317,11 @@ class client:
 
         history = model.fit(
             data, y, epochs=epochs, validation_data=(
-                X_test, y_test), callbacks=[es])
+                X_test, y_test), callbacks=[es], verbose=0)
         models.append(history)
 
-        losses.append(models[i].history[maximizer]
-                      [len(models[i].history[maximizer]) - 1])
+        losses.append(history.history[maximizer]
+                      [len(history.history[maximizer]) - 1])
 
         # keeps running model and fit functions until the validation loss stops
         # decreasing
@@ -334,10 +334,10 @@ class client:
                 validation_data=(
                     X_test,
                     y_test),
-                callbacks=[es])
+                callbacks=[es], verbose=0)
             models.append(history)
-            losses.append(models[i].history[maximizer]
-                          [len(models[i].history[maximizer]) - 1])
+            losses.append(history.history[maximizer]
+                          [len(history.history[maximizer]) - 1])
             print("The number of layers " + str(len(model.layers)))
             i += 1
 
