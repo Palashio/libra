@@ -4,12 +4,12 @@ import sys
 
 from keras_preprocessing import sequence
 
-from NLP_preprocessing import text_clean_up, lemmatize_text
-
 sys.path.insert(1, './preprocessing')
 sys.path.insert(1, './data_generation')
 sys.path.insert(1, './modeling')
 sys.path.insert(1, './plotting')
+
+
 import os
 import warnings
 from pandas.core.common import SettingWithCopyWarning
@@ -53,6 +53,7 @@ from sklearn.neighbors import KNeighborsClassifier
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.feature_selection import SelectFromModel
 from sklearn import preprocessing, tree
+from NLP_preprocessing import text_clean_up, lemmatize_text
 from keras.preprocessing.image import ImageDataGenerator
 
 warnings.simplefilter(action='error', category=FutureWarning)
@@ -84,25 +85,33 @@ def clearLog():
 # global variable parallels
 
 
-def logger(instruction, found=""):
+def logger(instruction, found="",slash=''):
     global currLog
     global counter
 
     if counter == 0:
-        currLog += (" " * 2 * counter) + instruction + found
-        # currLog += "\n"
+        currLog += (" " * 2 * counter) + str(instruction) + str(found)
+    elif instruction=="->":
+            counter=counter-1
+            if slash=='|':
+                currLog += (" " +slash + str(instruction) + str(found))
+            else:
+                currLog += (" " * 2 * counter) + str(instruction) + str(found)  
+
     else:
         currLog += (" " * 2 * counter) + "|"
         currLog += "\n"
-        currLog += (" " * 2 * counter) + "|- " + instruction + found
-        # currLog += "\n"
+        currLog += (" " * 2 * counter) + "|- " + str(instruction) + str(found)
         if instruction == "done...":
             currLog += "\n"
             currLog += "\n"
-
+        
     counter += 1
-    print(currLog)
-    currLog = ""
+    if instruction=="->":
+        print(currLog,end="")
+    else:
+        print(currLog)
+    currLog=""
 
 
 def initial_preprocesser(data, instruction, preprocess):
@@ -215,6 +224,7 @@ class client:
 
         models = []
         losses = []
+        model_data=[]
 
         # callback function to store lowest loss value
         es = EarlyStopping(
@@ -239,10 +249,18 @@ class client:
             callbacks=[es],
             verbose=0)
         models.append(history)
-        print(currLog)
+        model_data.append(model)
+
+        logger("->","Initial number of layers "+ str(len(model.layers)))
+        logger("->","Training Loss: "+str(history.history['loss']
+                     [len(history.history['val_loss']) - 1]),'|')
+        logger("->","Test Loss: "+ str(history.history['val_loss']
+                     [len(history.history['val_loss']) - 1]),'|')
+        print("")
+        
 
         losses.append(history.history[maximizer]
-                      [len(models[i].history[maximizer]) - 1])
+                      [len(history.history[maximizer]) - 1])
 
         # keeps running model and fit functions until the validation loss stops
         # decreasing
@@ -257,11 +275,26 @@ class client:
                 validation_data=(
                     X_test,
                     y_test), verbose=0)
+            model_data.append(model)
             models.append(history)
+            logger("->","Current number of layers: "+ str(len(model.layers)))
+            logger("->","Training Loss: "+ str(history.history['loss']
+                        [len(history.history['val_loss']) - 1]),'|')
+            logger("->","Test Loss: "+ str(history.history['val_loss']
+                        [len(history.history['val_loss']) - 1]),'|')
+            print("")
             losses.append(history.history[maximizer]
-                          [len(models[i].history[maximizer]) - 1])
+                          [len(history.history[maximizer]) - 1])
             i += 1
 
+        final_model=model_data[losses.index(min(losses))]
+        final_hist=models[losses.index(min(losses))]
+        logger('->',"Best number of layers found: "+ str(len(final_model.layers)))
+        logger('->',"Training Loss: "+str(final_hist.history['loss']
+                     [len(final_hist.history['val_loss']) - 1]))
+        logger('->',"Test Loss: "+str(final_hist.history['val_loss']
+                     [len(final_hist.history['val_loss']) - 1]))
+        print("")
         # calls function to generate plots in plot generation
         if generate_plots:
             init_plots, plot_names = generate_regression_plots(
@@ -316,6 +349,8 @@ class client:
 
         models = []
         losses = []
+        accuracies=[]
+        model_data=[]
 
         # early stopping callback
         es = EarlyStopping(
@@ -330,13 +365,22 @@ class client:
         history = model.fit(
             data, y, epochs=epochs, validation_data=(
                 X_test, y_test), callbacks=[es], verbose=0)
+
+        model_data.append(model)
         models.append(history)
+        logger("->","Initial number of layers: "+ str(len(model.layers)))
+        logger("->","Training Loss: "+ str(history.history['loss']
+                    [len(history.history['val_loss']) - 1]),'|')
+        logger("->","Test Loss: "+ str(history.history['val_loss']
+                    [len(history.history['val_loss']) - 1]),'|')
+        print("")
 
         losses.append(history.history[maximizer]
                       [len(history.history[maximizer]) - 1])
 
         # keeps running model and fit functions until the validation loss stops
         # decreasing
+        logger("testing number of layers...")
         while (all(x > y for x, y in zip(losses, losses[1:]))):
             model = get_keras_model_class(data, i, num_classes)
             history = model.fit(
@@ -347,11 +391,30 @@ class client:
                     X_test,
                     y_test),
                 callbacks=[es], verbose=0)
+
+            model_data.append(model)
             models.append(history)
+            logger("->","Current number of layers: "+ str(len(model.layers)))
+            logger("->","Training Loss: "+ str(history.history['loss']
+                        [len(history.history['val_loss']) - 1]),'|')
+            logger("->","Test Loss: "+ str(history.history['val_loss']
+                        [len(history.history['val_loss']) - 1]),'|')
+            print("")
+
             losses.append(history.history[maximizer]
                           [len(history.history[maximizer]) - 1])
-            print("The number of layers " + str(len(model.layers)))
+            accuracies.append(history.history['val_accuracy']
+                      [len(history.history['val_accuracy']) - 1])
             i += 1
+
+        final_model=model_data[losses.index(min(losses))]
+        final_hist=models[losses.index(min(losses))]
+        logger('->',"Best number of layers found: "+ str(len(final_model.layers)))
+        logger('->',"Training Accuracy: "+str(final_hist.history['accuracy']
+                     [len(final_hist.history['val_accuracy']) - 1]))
+        logger('->',"Test Accuracy: "+str(final_hist.history['val_accuracy']
+                     [len(final_hist.history['val_accuracy']) - 1]))
+        print("")
 
         # genreates appropriate classification plots by feeding all information
         plots = generate_classification_plots(
@@ -887,7 +950,11 @@ class client:
     def show_plots(self, model):
         print(self.models[model]['plots'].keys())
 
+<<<<<<< HEAD
 
 # newClient = client('./data/housing.csv').neural_network_query('Model median house value')
 newClient = client('./data/housing.csv').classification_query_ann('Model ocean proximity')
 
+=======
+newClient = client('./data/housing.csv').neural_network_query('Model ocean proximity')
+>>>>>>> master
