@@ -227,12 +227,12 @@ class client:
         model = get_keras_model_reg(data, i)
         logger("Training initial model...")
         history = model.fit(
-            np.asarray(X_train),
-            np.asarray(y_train),
+            X_train,
+            y_train,
             epochs=epochs,
             validation_data=(
-                np.asarray(X_test),
-                np.asarray(y_test)),
+                X_test,
+                y_test),
             verbose=0,
             callbacks=[es])
         models.append(history)
@@ -253,13 +253,14 @@ class client:
         while(all(x > y for x, y in zip(losses, losses[1:]))):
             model = get_keras_model_reg(data, i)
             history = model.fit(
-            np.asarray(X_train),
-            np.asarray(y_train),
+            X_train,
+            y_train,
             epochs=epochs,
             validation_data=(
-                np.asarray(X_test),
-                np.asarray(y_test)),
-                verbose=0)
+                X_test,
+                y_test),
+            verbose=0,
+            callbacks=[es])
             models.append(history)
             logger("->","Current number of layers: "+ str(len(model.layers)))
             logger("->","Training Loss: "+ str(history.history['loss']

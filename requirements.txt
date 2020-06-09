@@ -1,4 +1,4 @@
-stensorflow
+tensorflow
 keras
 numpy
 pandas
