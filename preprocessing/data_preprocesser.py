@@ -13,11 +13,13 @@ from keras.callbacks import EarlyStopping
 from matplotlib import pyplot
 from os import listdir
 from PIL import Image as PImage
+from dataset_labelmatcher import get_similar_column
+from grammartree import get_value_instruction
+
 import cv2
 
 def initial_preprocesser(data, instruction, preprocess):
     # get target column
-    logger("identifying target from instruction...")
     remove = get_similar_column(
             get_value_instruction(instruction), data)
     y = data[remove]
@@ -35,7 +37,6 @@ def initial_preprocesser(data, instruction, preprocess):
     # preprocess the dataset
     full_pipeline = None
     if preprocess:
-        logger("preprocessing data...")
         data, full_pipeline = structured_preprocesser(data)
     else:
         data.fillna(0, inplace=True)
@@ -61,18 +62,31 @@ def structured_preprocesser(data):
         ('imputer', SimpleImputer(strategy="constant", fill_value="")),
         ('one_hot_encoder', OneHotEncoder()),
     ])
-    # combine the two pipelines
-    full_pipeline = ColumnTransformer([
-        ("num", num_pipeline, numeric_columns),
-        ("cat", cat_pipeline, categorical_columns),
-    ])
 
-    # create labels for resultant dataframe
+    full_pipeline = None
+    # combine the two pipelines
+    if(len(numeric_columns) != 0 and len(categorical_columns) != 0):
+        full_pipeline = ColumnTransformer([
+            ("num", num_pipeline, numeric_columns),
+            ("cat", cat_pipeline, categorical_columns),
+        ])
+    elif len(numeric_columns) == 0:
+        full_pipeline = ColumnTransformer([
+            ("cat", cat_pipeline, categorical_columns),
+        ])
+    else:
+        full_pipeline = ColumnTransformer([
+            ("num", num_pipeline, numeric_columns),
+        ])
+
     data = full_pipeline.fit_transform(data)
-    enc = full_pipeline.named_transformers_['cat']['one_hot_encoder']
     new_columns = list(numeric_columns)
-    for col, values in zip(categorical_columns, enc.categories_):
-            new_columns.extend([col + '_' + str(value) for value in values])
+
+    if len(categorical_columns) != 0:
+        # create labels for resultant dataframe
+        enc = full_pipeline.named_transformers_['cat']['one_hot_encoder']
+        for col, values in zip(categorical_columns, enc.categories_):
+                new_columns.extend([col + '_' + str(value) for value in values])
             
     return pd.DataFrame(data, columns=new_columns), full_pipeline
 
