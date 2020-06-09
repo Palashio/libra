@@ -43,6 +43,7 @@ Table of Contents
 * [Pipelining for Contributors](#pipelining-for-contributors)
 * [Providing Instructions](#instructions)
 * [Example Projects](#example-projects)
+* [Additional Resources](#additional-resources)
 
 ## Queries ##
 
@@ -292,7 +293,7 @@ Performing Indepedent Component Analysis can be done by calling:
 dimensionality_ICA("Estimating median house value", path_to_dataset)
 ```
 
-If this does not converge a message will be displayed for users to warn them by default.  
+If this does not converge, a message will be displayed for users to warn them by default.  
 
 ***
 
@@ -368,3 +369,13 @@ Libra uses intelligent natural language processing to analyze user instructions 
 ## Example Projects ##
 
 To get started, take a look at some of these examples of data science projects analyzing datasets using Libra. 
+
+## Additional Resources ##
+
+From those beginners wading into the possibilities of utilizing machine learning to assist their data driven processes to those more experienced seeking to customize these solutions to their end-to-end pipeline problems, consider examining the following supplementary resources:
+
+  1. [Beginner's Guide to Deep Learning](https://heartbeat.fritz.ai/a-2019-beginners-guide-to-deep-learning-part-1-facff72a6097), the first part of an excellent introduction to common types which most data science problems can be generalized under and the broad categories of supported and oftenly used deep learning models.
+  2. [Simple Guide to Hyperparameter Tuning](https://towardsdatascience.com/simple-guide-to-hyperparameter-tuning-in-neural-networks-3fe03dad8594), an informative walkthrough explaining the methodology employed to select the ideal amount for parameters such as the number of epochs and learning rate for a neural network approach to a testing mathematical optimization algorithm.
+  3. [A Visual Introduction to Machine Learning Concepts](http://www.r2d3.us/), a series of data visualizations aimed to clarify questions ML neophytes may have regarding model implementation and interpretability.
+  4. [EDA Graphics Explanation](https://medium.com/@srivathsagottipati/exploratory-data-analysis-eda-4b81d84ef5cf), an article that covers the purpose and applicability of several of the data visualizations Libra will itself generate when doing initial data analysis once a particular model has been selected.   
+  5. [Simple Way to Deploy ML Model to the Cloud](https://towardsdatascience.com/simple-way-to-deploy-machine-learning-models-to-cloud-fd58b771fdcf) - Some of the specifics may not be applicable, but a good elucidation for intermediate ML practiconers  how to present/deploy your Libra developed model to a virtual setting apart from methods enabled in Libra is provided.
