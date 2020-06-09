@@ -2,7 +2,7 @@
 # inserting into sis path
 import sys
 sys.path.insert(1, './preprocessing')
-sys.path.insert(1, './data generation')
+sys.path.insert(1, './data_generation')
 sys.path.insert(1, './modeling')
 sys.path.insert(1, './plotting')
 import os 
@@ -786,5 +786,6 @@ class client:
         print(self.models[model]['plots'].keys())
 
 
-newClient = client('./data/housing.csv').neural_network_query('Model median house value')
+# newClient = client('./data/housing.csv').neural_network_query('Model median house value')
+newClient = client('./data/housing.csv').classification_query_ann('Model ocean proximity')
 
