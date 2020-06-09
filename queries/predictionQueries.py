@@ -1,6 +1,8 @@
 # Making functions in other directories accesible to this file by
 # inserting into sis path
 import sys
+
+print(sys.version)
 sys.path.insert(1, './preprocessing')
 sys.path.insert(1, './data generation')
 sys.path.insert(1, './modeling')
@@ -225,12 +227,12 @@ class client:
         model = get_keras_model_reg(data, i)
         logger("Training initial model...")
         history = model.fit(
-            X_train,
-            y_train,
+            np.asarray(X_train),
+            np.asarray(y_train),
             epochs=epochs,
             validation_data=(
-                X_test,
-                y_test),
+                np.asarray(X_test),
+                np.asarray(y_test)),
             verbose=0,
             callbacks=[es])
         models.append(history)
@@ -251,12 +253,12 @@ class client:
         while(all(x > y for x, y in zip(losses, losses[1:]))):
             model = get_keras_model_reg(data, i)
             history = model.fit(
-                X_train,
-                y_train,
-                epochs=epochs,
-                validation_data=(
-                    X_test,
-                    y_test),
+            np.asarray(X_train),
+            np.asarray(y_train),
+            epochs=epochs,
+            validation_data=(
+                np.asarray(X_test),
+                np.asarray(y_test)),
                 verbose=0)
             models.append(history)
             logger("->","Current number of layers: "+ str(len(model.layers)))

@@ -42,7 +42,7 @@ def structured_preprocesser(data):
 
     # create labels for resultant dataframe
     data = full_pipeline.fit_transform(data)
-    enc = full_pipeline.named_transformers_['cat']['one_hot_encoder']
+    enc = full_pipeline.named_transformers_['cat'].named_steps['one_hot_encoder']
     new_columns = list(numeric_columns)
     for col, values in zip(categorical_columns, enc.categories_):
             new_columns.extend([col + '_' + str(value) for value in values])
