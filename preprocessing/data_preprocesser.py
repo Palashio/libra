@@ -22,43 +22,32 @@ def structured_preprocesser(data):
     categorical_columns = data.select_dtypes(exclude=["number"]).columns
     numeric_columns = data.columns[data.dtypes.apply(
         lambda c: np.issubdtype(c, np.number))]
+    
+    # pipeline for numeric columns
+    num_pipeline = Pipeline([
+        ('imputer', SimpleImputer(strategy="median")),
+        ('std_scaler', StandardScaler()),
+    ])
 
-    # Only runs if the categorical columns is more than zero
-    if(len(categorical_columns) != 0):
+    # pipeline for categorical columns
+    cat_pipeline = Pipeline([
+        ('imputer', SimpleImputer(strategy="constant", fill_value="")),
+        ('one_hot_encoder', OneHotEncoder()),
+    ])
+    # combine the two pipelines
+    full_pipeline = ColumnTransformer([
+        ("num", num_pipeline, numeric_columns),
+        ("cat", cat_pipeline, categorical_columns),
+    ])
 
-        # Creates a feature mask and then transforms it using a labeler and a
-        # One Hot Encoder
-        categorical_feature_mask = data.dtypes == object
-        categorical_cols = data.columns[categorical_feature_mask].tolist()
-        labeled_df = data[categorical_cols]
-
-        labeled_df.fillna("", inplace=True)
-        enc = OneHotEncoder()
-        enc.fit(labeled_df)
-        onehotlabels = enc.transform(labeled_df).toarray()
-
-        new_columns = list()
-
-        # Changes the columns into the right shape
-        for col, values in zip(labeled_df.columns, enc.categories_):
+    # create labels for resultant dataframe
+    data = full_pipeline.fit_transform(data)
+    enc = full_pipeline.named_transformers_['cat']['one_hot_encoder']
+    new_columns = list(numeric_columns)
+    for col, values in zip(categorical_columns, enc.categories_):
             new_columns.extend([col + '_' + str(value) for value in values])
-
-        data = pd.concat([data, pd.DataFrame(
-            onehotlabels, columns=new_columns)], axis='columns')
-
-        # Deletes the main columns that're not One Hot Encoded
-        for x in categorical_cols:
-            del data[x]
-
-    if(len(numeric_columns) != 0):
-        # Imputes numeric columns with median
-        imputer = SimpleImputer(strategy="median")
-        data[numeric_columns] = imputer.fit_transform(data[numeric_columns])
-        # Scales numeric data
-        scaler = StandardScaler()
-        data[numeric_columns] = scaler.fit_transform(data[numeric_columns])
-
-    return data
+            
+    return pd.DataFrame(data, columns=new_columns), full_pipeline
 
 # Preprocesses images queried from images to (224, 224, 3)
 

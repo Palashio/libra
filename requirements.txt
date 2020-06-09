@@ -3,8 +3,12 @@ keras
 numpy
 pandas
 sklearn
-selenium
 pprint
 matplotlib
 os
 itertools
+tabulate
+textblob
+python-Levenshtein
+seaborn
+keras-tuner
