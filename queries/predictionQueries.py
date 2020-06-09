@@ -4,12 +4,12 @@ import sys
 
 from keras_preprocessing import sequence
 
-from NLP_preprocessing import text_clean_up, lemmatize_text
-
 sys.path.insert(1, './preprocessing')
 sys.path.insert(1, './data generation')
 sys.path.insert(1, './modeling')
 sys.path.insert(1, './plotting')
+
+
 import os
 import warnings
 from pandas.core.common import SettingWithCopyWarning
@@ -53,6 +53,7 @@ from sklearn.neighbors import KNeighborsClassifier
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.feature_selection import SelectFromModel
 from sklearn import preprocessing, tree
+from NLP_preprocessing import text_clean_up, lemmatize_text
 from keras.preprocessing.image import ImageDataGenerator
 
 warnings.simplefilter(action='error', category=FutureWarning)
@@ -887,4 +888,4 @@ class client:
     def show_plots(self, model):
         print(self.models[model]['plots'].keys())
 
-# newClient = client('./data/housing.csv').neural_network_query('Model median house value')
+newClient = client('./data/housing.csv').neural_network_query('Model median house value')
