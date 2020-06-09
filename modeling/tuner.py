@@ -15,9 +15,10 @@ from kerastuner.tuners import Hyperband
 from tensorflow import keras
 from tensorflow.keras.layers import Conv2D, MaxPooling2D, Dense, Flatten, Activation, Dropout
 from kerastuner.tuners import RandomSearch
+from data_reader import DataReader
 
 sys.path.insert(1, './preprocessing')
-sys.path.insert(1, './data generation')
+sys.path.insert(1, './data_generation')
 sys.path.insert(1, './modeling')
 sys.path.insert(1, './plotting')
 
@@ -129,8 +130,9 @@ class CNNHyperModel(HyperModel):
 
 
 def tuneReg(data, target):
+    dataReader = DataReader(data)
     # reads in dataset and processes it
-    data = pd.read_csv(data)
+    data = dataReader.data_generator()
     data = structured_preprocesser(data)
     print("entered1")
     # function build model using hyperparameter

@@ -1,57 +1,57 @@
 # Making functions in other directories accesible to this file by
 # inserting into sis path
+from generatePlots import (generate_clustering_plots,
+                           generate_regression_plots,
+                           generate_classification_plots,
+                           generate_classification_together)
+import os
+from data_reader import DataReader
+from keras.preprocessing.image import ImageDataGenerator
+from sklearn import preprocessing, tree
+from sklearn.feature_selection import SelectFromModel
+from sklearn.ensemble import RandomForestRegressor
+from sklearn.neighbors import KNeighborsClassifier
+from tuner import tuneReg, tuneClass, tuneCNN
+from os import listdir
+from dimensionality_red_queries import dimensionality_reduc
+from keras.layers import (Dense, Conv2D, Flatten, Input, MaxPooling2D,)
+from keras.models import Sequential
+import matplotlib.pyplot as plt
+from sklearn.cluster import KMeans
+from keras.utils import np_utils
+from keras.utils import to_categorical
+from predictionModelCreation import get_keras_model_class
+from predictionModelCreation import get_keras_model_reg
+from data_preprocesser import structured_preprocesser
+from grammartree import get_value_instruction
+from matplotlib import pyplot
+from keras.callbacks import EarlyStopping
+from dataset_labelmatcher import get_similar_column, get_similar_model
+from sklearn.preprocessing import OneHotEncoder, StandardScaler
+from sklearn.pipeline import Pipeline
+from sklearn.model_selection import train_test_split
+from sklearn.compose import ColumnTransformer
+from sklearn import preprocessing, svm
+from sklearn.metrics import accuracy_score
+from sklearn.preprocessing import LabelEncoder
+from pandas import DataFrame
+from sklearn.model_selection import cross_val_score
+from scipy.spatial.distance import cosine
+from tabulate import tabulate
+import pandas as pd
+import numpy as np
+from pandas.core.common import SettingWithCopyWarning
+import warnings
 import sys
 sys.path.insert(1, './preprocessing')
-sys.path.insert(1, './data generation')
+sys.path.insert(1, './data_generation')
 sys.path.insert(1, './modeling')
 sys.path.insert(1, './plotting')
-import os 
-import warnings
-from pandas.core.common import SettingWithCopyWarning
-import numpy as np
-import pandas as pd
-from tabulate import tabulate
-from scipy.spatial.distance import cosine
-from sklearn.model_selection import cross_val_score
-from pandas import DataFrame
-from sklearn.preprocessing import LabelEncoder
-from sklearn.metrics import accuracy_score
-from sklearn import preprocessing, svm
-from sklearn.compose import ColumnTransformer
-from sklearn.model_selection import train_test_split
-from sklearn.pipeline import Pipeline
-from sklearn.preprocessing import OneHotEncoder, StandardScaler
-from dataset_labelmatcher import get_similar_column, get_similar_model
-from keras.callbacks import EarlyStopping
-from matplotlib import pyplot
-from grammartree import get_value_instruction
-from data_preprocesser import structured_preprocesser
-from predictionModelCreation import get_keras_model_reg
-from predictionModelCreation import get_keras_model_class
-from keras.utils import to_categorical
-from keras.utils import np_utils
-from sklearn.cluster import KMeans
-import matplotlib.pyplot as plt
-from generatePlots import (generate_clustering_plots, 
-generate_regression_plots, 
-generate_classification_plots, 
-generate_classification_together)
-
-from keras.models import Sequential
-from keras.layers import (Dense, Conv2D, Flatten, Input,MaxPooling2D,)
-from dimensionality_red_queries import dimensionality_reduc
-from os import listdir
-from tuner import tuneReg, tuneClass, tuneCNN
-from sklearn.neighbors import KNeighborsClassifier
-from sklearn.ensemble import RandomForestRegressor
-from sklearn.feature_selection import SelectFromModel
-from sklearn import preprocessing, tree
-from keras.preprocessing.image import ImageDataGenerator
 
 
 warnings.simplefilter(action='error', category=FutureWarning)
 warnings.simplefilter(action="ignore", category=SettingWithCopyWarning)
-os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3' 
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
 # function imports from other files
 
@@ -94,9 +94,10 @@ def logger(instruction, found=""):
 
     counter += 1
     print(currLog)
-    currLog=""
+    currLog = ""
 
 # class to store all query information
+
 
 class client:
     def __init__(self, data):
@@ -115,26 +116,45 @@ class client:
         clearLog()
 
     def neural_network_query(self,
-            instruction,
-            preprocess=True,
-            test_size=0.2,
-            random_state=49,
-            epochs=50,
-            generate_plots=True,
-            callback_mode='min',
-            maximizer="val_loss"):
+                             instruction,
+                             preprocess=True,
+                             test_size=0.2,
+                             random_state=49,
+                             epochs=50,
+                             generate_plots=True,
+                             callback_mode='min',
+                             maximizer="val_loss"):
 
-        data = pd.read_csv(self.dataset)
-       
+        dataReader = DataReader(self.dataset)
+
+        data = dataReader.data_generator()
+
         if preprocess:
-            
-            remove = get_similar_column(get_value_instruction(instruction), data)
+
+            remove = get_similar_column(
+                get_value_instruction(instruction), data)
             if(data[remove].dtype.name == 'object'):
                 callback_mode = 'max'
-                maximizer= "val_accuracy"
-                self.classification_query_ann(instruction, preprocess=preprocess, test_size=test_size, random_state=random_state, epochs=epochs, generate_plots = generate_plots, callback_mode = callback_mode, maximizer= maximizer)
+                maximizer = "val_accuracy"
+                self.classification_query_ann(
+                    instruction,
+                    preprocess=preprocess,
+                    test_size=test_size,
+                    random_state=random_state,
+                    epochs=epochs,
+                    generate_plots=generate_plots,
+                    callback_mode=callback_mode,
+                    maximizer=maximizer)
             else:
-                self.regression_query_ann(instruction, preprocess=preprocess, test_size=test_size, random_state=random_state, epochs=epochs, generate_plots = generate_plots, callback_mode = callback_mode, maximizer= maximizer)
+                self.regression_query_ann(
+                    instruction,
+                    preprocess=preprocess,
+                    test_size=test_size,
+                    random_state=random_state,
+                    epochs=epochs,
+                    generate_plots=generate_plots,
+                    callback_mode=callback_mode,
+                    maximizer=maximizer)
 
     # single regression query using a feed-forward neural network
     # instruction should be the value of a column
@@ -149,9 +169,11 @@ class client:
             callback_mode='min',
             maximizer="val_loss"):
 
+        dataReader = DataReader(self.dataset)
+
         global currLog
         logger("reading in dataset...")
-        data = pd.read_csv(self.dataset)
+        data = dataReader.data_generator()
         logger("filling n/a values...")
         data.fillna(0, inplace=True)
 
@@ -165,8 +187,7 @@ class client:
         if preprocess:
             data = structured_preprocesser(data)
         # identifies the most similar column and creates dataset appropriately.
-        
-        
+
         remove = get_similar_column(
             get_value_instruction(instruction), data)
         logger("hot encoding values and preprocessing...")
@@ -201,7 +222,7 @@ class client:
                 X_test,
                 y_test),
             callbacks=[es],
-            verbose = 0)
+            verbose=0)
         models.append(history)
         print(currLog)
 
@@ -261,8 +282,10 @@ class client:
             generate_plots=True,
             maximizer="val_loss"):
 
+        dataReader = DataReader(self.dataset)
+
         # reads dataset and fills n/a values with zeroes
-        data = pd.read_csv(self.dataset)
+        data = dataReader.data_generator()
         data.fillna(0, inplace=True)
 
         remove = get_similar_column(
@@ -348,8 +371,11 @@ class client:
             generate_plots=True,
             base_clusters=1):
         logger("Reading dataset...")
+
+        dataReader = DataReader(self.dataset)
+
         # loads dataset and replaces n/a with zero
-        data = pd.read_csv(self.dataset)
+        data = dataReader.data_generator()
         data.fillna(0, inplace=True)
         dataPandas = data.copy()
 
@@ -412,8 +438,11 @@ class client:
             kernel='linear',
             cross_val_size=0.3):
         logger("Reading in dataset....")
+
+        dataReader = DataReader(self.dataset)
+
         # reads dataset and fills n/a values with zeroes
-        data = pd.read_csv(self.dataset)
+        data = dataReader.data_generator()
         data.fillna(0, inplace=True)
 
         logger("Identifying target columns...")
@@ -422,7 +451,7 @@ class client:
         y = data[remove]
         del data[remove]
 
-        # prepcoess the dataset
+        # preprocess the dataset
         logger("Preprocessing dataset")
         data = structured_preprocesser(data)
         #classification_column = get_similar_column(getLabelwithInstruction(instruction), data)
@@ -462,8 +491,11 @@ class client:
             min_neighbors=3,
             max_neighbors=10):
         logger("Reading in dataset....")
+
+        dataReader = DataReader(self.dataset)
+
         #Reads in dataset
-        data = pd.read_csv(self.dataset)
+        data = dataReader.data_generator()
         data.fillna(0, inplace=True)
 
         logger("Identifying target columns...")
@@ -472,7 +504,7 @@ class client:
         y = data[remove]
         del data[remove]
 
-        # prepcoess the dataset
+        # preprocess the dataset
         if preprocess:
             logger("Preprocessing dataset...")
             data = structured_preprocesser(data)
@@ -511,7 +543,10 @@ class client:
 
     def decision_tree_query(self, instruction, preprocess=True, test_size=0.2):
         logger("Reading in dataset....")
-        data = pd.read_csv(self.dataset)
+
+        dataReader = DataReader(self.dataset)
+
+        data = dataReader.data_generator()
         data.fillna(0, inplace=True)
 
         logger("Identifying target columns...")
@@ -559,7 +594,10 @@ class client:
             test_size=0.2,
             random_state=49):
         logger("Reading in dataset....")
-        data = pd.read_csv(self.dataset)
+
+        dataReader = DataReader(self.dataset)
+
+        data = dataReader.data_generator()
         data.fillna(0, inplace=True)
 
         logger("Identifying target columns...")
@@ -636,7 +674,8 @@ class client:
     def stat_analysis(self, column_name="none"):
         logger("Reading in dataset....")
         # Reading in dataset and creating pdtabulate variable to format outputs
-        data = pd.read_csv(self.dataset)
+        dataReader = DataReader(self.dataset)
+        data = dataReader.data_generator()
         data.fillna(0, inplace=True)
         logger("Creating lambda object to format...")
         def pdtabulate(df): return tabulate(
@@ -720,19 +759,19 @@ class client:
         # google chrome
         logger("Generating datasets for classes...")
         input_shape = (224, 224, 3)
-        #Assuming Downloaded Images in current Directory
-        data_path=os.getcwd()
-        num_classes=0
-        loss_func=""
+        # Assuming Downloaded Images in current Directory
+        data_path = os.getcwd()
+        num_classes = 0
+        loss_func = ""
         for a_class in argv:
             num_classes = num_classes + 1
-        if num_classes>2:
-            loss_func="categorical_crossentropy"
-        elif num_classes==2:
-            loss_func="binary_crossentropy"
-        
+        if num_classes > 2:
+            loss_func = "categorical_crossentropy"
+        elif num_classes == 2:
+            loss_func = "binary_crossentropy"
+
         logger("Creating convolutional neural network dynamically...")
-        #Convolutional Neural Network
+        # Convolutional Neural Network
         model = Sequential()
         model.add(
             Conv2D(
@@ -740,42 +779,44 @@ class client:
                 kernel_size=3,
                 activation="relu",
                 input_shape=(input_shape)))
-        model.add(MaxPooling2D(pool_size = (2, 2)))
+        model.add(MaxPooling2D(pool_size=(2, 2)))
         model.add(Conv2D(64, kernel_size=3, activation="relu"))
-        model.add(MaxPooling2D(pool_size = (2, 2)))
+        model.add(MaxPooling2D(pool_size=(2, 2)))
         model.add(Flatten())
         model.add(Dense(num_classes, activation="softmax"))
         model.compile(
             optimizer="adam",
             loss=loss_func,
             metrics=['accuracy'])
-        
-        train_data = ImageDataGenerator(rescale = 1./255,
-                                   shear_range = 0.2,
-                                   zoom_range = 0.2,
-                                   horizontal_flip = True)
-                                   
-        X_train = train_data.flow_from_directory(data_path+'/training_set',
-                                                 target_size = (224, 224),
-                                                 batch_size = 32,
-                                                 class_mode = 'categorical')
-        test_data=ImageDataGenerator(rescale = 1./255)
-        X_test = test_data.flow_from_directory(data_path+'/test_set',
-                                            target_size = (224, 224),
-                                            batch_size = 32,
-                                            class_mode = 'categorical')
-		#Fitting/Training the model
+
+        train_data = ImageDataGenerator(rescale=1. / 255,
+                                        shear_range=0.2,
+                                        zoom_range=0.2,
+                                        horizontal_flip=True)
+
+        X_train = train_data.flow_from_directory(data_path + '/training_set',
+                                                 target_size=(224, 224),
+                                                 batch_size=32,
+                                                 class_mode='categorical')
+        test_data = ImageDataGenerator(rescale=1. / 255)
+        X_test = test_data.flow_from_directory(data_path + '/test_set',
+                                               target_size=(224, 224),
+                                               batch_size=32,
+                                               class_mode='categorical')
+        # Fitting/Training the model
         print(X_train)
-        history=model.fit_generator(generator=X_train,
-                    steps_per_epoch=X_train.n//X_train.batch_size,
-                    validation_data=X_test,
-                    validation_steps=X_test.n//X_test.batch_size,
-                    epochs=10
-         )
+        history = model.fit_generator(
+            generator=X_train,
+            steps_per_epoch=X_train.n //
+            X_train.batch_size,
+            validation_data=X_test,
+            validation_steps=X_test.n //
+            X_test.batch_size,
+            epochs=10)
         # storing values the model dictionary
         self.models["convolutional_NN"] = {
             "model": model,
-            'num_classes': (2 if num_classes==1 else num_classes),
+            'num_classes': (2 if num_classes == 1 else num_classes),
             'losses': {
                 'training_loss': history.history['loss'],
                 'val_loss': history.history['val_loss']},
@@ -790,7 +831,4 @@ class client:
         print(self.models[model]['plots'].keys())
 
 
-newClient = client('./data/housing.csv').neural_network_query('Model median house value')
-
-
-
+# newClient = client('./data/housing.csv').neural_network_query('Model median house value')

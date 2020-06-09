@@ -1,3 +1,20 @@
+import seaborn as sns
+from sklearn.metrics import confusion_matrix, roc_curve
+import matplotlib.pyplot as plt
+from sklearn.cluster import KMeans
+from keras.utils import np_utils
+from keras.utils import to_categorical
+from predictionModelCreation import get_keras_model_class
+from predictionModelCreation import get_keras_model_reg
+from data_preprocesser import structured_preprocesser
+from matplotlib import pyplot as PLT
+from keras.callbacks import EarlyStopping
+from tensorflow.python.keras.layers import Dense, Input
+from sklearn.preprocessing import OneHotEncoder, StandardScaler
+from sklearn.pipeline import Pipeline
+from sklearn.model_selection import train_test_split
+from sklearn.compose import ColumnTransformer
+from sklearn import preprocessing
 import keras
 import numpy as np
 import pandas as pd
@@ -5,29 +22,13 @@ import tensorflow as tf
 import sys
 
 sys.path.insert(1, './preprocessing')
-sys.path.insert(1, './data generation')
+sys.path.insert(1, './data_generation')
 sys.path.insert(1, './modeling')
 sys.path.insert(1, './plotting')
 
-from sklearn import preprocessing
-from sklearn.compose import ColumnTransformer
-from sklearn.model_selection import train_test_split
-from sklearn.pipeline import Pipeline
-from sklearn.preprocessing import OneHotEncoder, StandardScaler
-from tensorflow.python.keras.layers import Dense, Input
-from keras.callbacks import EarlyStopping
-from matplotlib import pyplot as PLT
-from data_preprocesser import structured_preprocesser
-from predictionModelCreation import get_keras_model_reg
-from predictionModelCreation import get_keras_model_class
-from keras.utils import to_categorical
-from keras.utils import np_utils
-from sklearn.cluster import KMeans
-import matplotlib.pyplot as plt
-from sklearn.metrics import confusion_matrix, roc_curve
-import seaborn as sns
 
 # generates all of the plots in clustering
+
 def generate_clustering_plots(kmeans, dataPandas, dataset):
     plots = []
     plot_names = []
@@ -35,7 +36,7 @@ def generate_clustering_plots(kmeans, dataPandas, dataset):
     # columns with each other based on the cluster they're in
     for x in range(len(dataPandas.columns) - 1):
         for y in range(len(dataPandas.columns) - 1):
-            img=plt.figure()
+            img = plt.figure()
             plt.scatter(dataset[:, x], dataset[:, y],
                         c=kmeans.labels_, cmap='rainbow')
             plt.xlabel(str(dataPandas.columns[x]))
@@ -49,6 +50,8 @@ def generate_clustering_plots(kmeans, dataPandas, dataset):
     return plots, plot_names
 
 # generates all of the plots for regression
+
+
 def generate_regression_plots(history, data, label):
     plots = []
     plot_names = []
@@ -78,6 +81,8 @@ def generate_classification_plots(history, data, label, model, X_test, y_test):
     return return_plots
 
 # function to return both val and accuracy plots on one pane
+
+
 def generate_classification_together(history, data, model, X_test, y_test):
     plots = []
     plot_names = []
@@ -95,8 +100,9 @@ def generate_classification_together(history, data, model, X_test, y_test):
     plot_acc(history)
     plt.show()
 
+
 def plot_loss(history):
-    img=plt.figure()
+    img = plt.figure()
     plt.plot(history.history['loss'])
     plt.plot(history.history['val_loss'])
     plt.title('model loss')
@@ -105,19 +111,21 @@ def plot_loss(history):
     plt.legend(['train', 'test'], loc='upper left')
     return img
 
-def plot_corr(data,col=[]):
-    #Here, col is a string list which indicates the columns between 
-    #which the correlation is required. if left empty it shows the  
-    #correlation heatmap for all the variables.
-    img=plt.figure()
+
+def plot_corr(data, col=[]):
+    # Here, col is a string list which indicates the columns between
+    # which the correlation is required. if left empty it shows the
+    # correlation heatmap for all the variables.
+    img = plt.figure()
     if col:
-        data = data.loc[:, data.columns.intersection(['a','b'])]
+        data = data.loc[:, data.columns.intersection(['a', 'b'])]
     corr = data.corr()
     sns.heatmap(
-           corr, 
-           vmin=-1, vmax=1, center=0,
-           square=True)
+        corr,
+        vmin=-1, vmax=1, center=0,
+        square=True)
     return img
+
 
 def plot_acc(history):
     img = plt.figure()
@@ -127,4 +135,4 @@ def plot_acc(history):
     plt.ylabel('accuracy')
     plt.xlabel('epoch')
     plt.legend(['train', 'test'], loc='upper left')
-    return img 
+    return img
