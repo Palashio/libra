@@ -145,6 +145,51 @@ def processColorChanel(img):
     img = cv2.merge((b, g, r))
     return img
 
+def image_preprocess2(data_path):
+    image_dir = str(data_path)
+    loaded_shaped = []
+    imagesList = listdir(image_dir)
+
+    # store all the widths and heights of images
+    heights = []
+    widths = []
+
+    # get median of widths and heights
+    for image in imagesList:
+        try:
+            img = cv2.imread(image_dir + "/" + image)
+            heights.append(img.shape[0])
+            widths.append(img.shape[1])
+            loaded_shaped.append(img)
+        except BaseException:
+            continue
+
+    height = heights[int(len(heights)/2)]
+    width = widths[int(len(widths)/2)]
+
+    # resize images
+    for index, image in enumerate(loaded_shaped):
+        loaded_shaped[index] = processColorChanel2(image, height, width)
+
+    return loaded_shaped
+
+
+def processColorChanel2(img, height, width):
+    chanels = [chanel for chanel in cv2.split(img)]
+
+    for index, chanel in enumerate(chanels):
+        if chanel.shape[0] > height:
+            chanel = cv2.resize(chanel, dsize=(chanel.shape[1], height), interpolation=cv2.INTER_CUBIC)
+        else:
+            chanel = cv2.resize(chanel, dsize=(chanel.shape[1], height), interpolation=cv2.INTER_AREA)
+        if chanel.shape[1] > width:
+            chanel = cv2.resize(chanel, dsize=(width, height), interpolation=cv2.INTER_CUBIC)
+        else:
+            channel = cv2.resize(chanel, dsize=(width, height), interpolation=cv2.INTER_AREA)
+        chanels[index] = chanel
+
+    return cv2.merge(chanels)
+
 
 def process_dates(data):
 
