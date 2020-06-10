@@ -55,6 +55,7 @@ from sklearn.feature_selection import SelectFromModel
 from sklearn import preprocessing, tree
 from NLP_preprocessing import text_clean_up, lemmatize_text
 from keras.preprocessing.image import ImageDataGenerator
+from termcolor import colored
 
 warnings.simplefilter(action='error', category=FutureWarning)
 warnings.simplefilter(action="ignore", category=SettingWithCopyWarning)
@@ -85,19 +86,18 @@ def clearLog():
 # global variable parallels
 
 
-def logger(instruction, found="",slash=''):
+def logger(instruction, found="",slash='',color='white'):
     global currLog
     global counter
-
     if counter == 0:
         currLog += (" " * 2 * counter) + str(instruction) + str(found)
     elif instruction=="->":
             counter=counter-1
             if slash=='|':
-                currLog += (" " +slash + str(instruction) + str(found))
+                currLog += (" " * 2 * counter) + slash + str(found)
             else:
                 currLog += (" " * 2 * counter) + str(instruction) + str(found)  
-
+                currLog +='\n' 
     else:
         currLog += (" " * 2 * counter) + "|"
         currLog += "\n"
@@ -107,10 +107,11 @@ def logger(instruction, found="",slash=''):
             currLog += "\n"
         
     counter += 1
+    text = colored(currLog, color, attrs=['reverse', 'blink','bold']) 
     if instruction=="->":
-        print(currLog,end="")
+        print(text,end="")
     else:
-        print(currLog)
+        print(text)
     currLog=""
 
 # class to store all query information
@@ -275,12 +276,12 @@ class client:
 
         final_model=model_data[losses.index(min(losses))]
         final_hist=models[losses.index(min(losses))]
-        logger('->',"Best number of layers found: "+ str(len(final_model.layers)))
+        logger('->',"Best number of layers found: "+ str(len(final_model.layers)),color='blue')
         logger('->',"Training Loss: "+str(final_hist.history['loss']
-                     [len(final_hist.history['val_loss']) - 1]))
+                     [len(final_hist.history['val_loss']) - 1]),color='blue')
         logger('->',"Test Loss: "+str(final_hist.history['val_loss']
-                     [len(final_hist.history['val_loss']) - 1]))
-        print("")
+                     [len(final_hist.history['val_loss']) - 1]),color='blue')
+
         # calls function to generate plots in plot generation
         if generate_plots:
             init_plots, plot_names = generate_regression_plots(
@@ -403,12 +404,11 @@ class client:
 
         final_model=model_data[losses.index(min(losses))]
         final_hist=models[losses.index(min(losses))]
-        logger('->',"Best number of layers found: "+ str(len(final_model.layers)))
+        logger('->',"Best number of layers found: "+ str(len(final_model.layers)),color='blue')
         logger('->',"Training Accuracy: "+str(final_hist.history['accuracy']
-                     [len(final_hist.history['val_accuracy']) - 1]))
+                     [len(final_hist.history['val_accuracy']) - 1]),color='blue')
         logger('->',"Test Accuracy: "+str(final_hist.history['val_accuracy']
-                     [len(final_hist.history['val_accuracy']) - 1]))
-        print("")
+                     [len(final_hist.history['val_accuracy']) - 1]),color='blue')
 
         # genreates appropriate classification plots by feeding all information
         plots = generate_classification_plots(
@@ -659,6 +659,7 @@ class client:
             instruction,
             preprocess=True,
             test_size=0.2,
+            drop=None,
             random_state=49):
         logger("Reading in dataset....")
         dataReader = DataReader(self.dataset)
