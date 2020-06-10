@@ -1,6 +1,7 @@
 import keras
 import numpy as np
 import pandas as pd
+import os
 import tensorflow as tf
 from sklearn.compose import ColumnTransformer
 from sklearn.impute import SimpleImputer
@@ -112,42 +113,26 @@ def structured_preprocesser(data):
     return data, full_pipeline
 
 
-# Preprocesses images queried from images to (224, 224, 3)
+# def image_preprocess(data_path):
+#     image_dir = str(data_path)
+#     loaded_shaped = []
+#     imagesList = listdir(image_dir)
+#
+#     for image in imagesList:
+#         try:
+#             img = cv2.imread(image_dir + "/" + image)
+#             res = processColorChanel(img)
+#             loaded_shaped.append(res)
+#             # print(res)
+#         except BaseException:
+#             continue
+#
+#     return loaded_shaped
 
-
-def image_preprocess(data_path):
+# Preprocesses images queried from images to median of heighs/widths
+def image_preprocess2(data_path, new_folder=True):
     image_dir = str(data_path)
-    loaded_shaped = []
-    imagesList = listdir(image_dir)
-
-    for image in imagesList:
-        try:
-            img = cv2.imread(image_dir + "/" + image)
-            res = processColorChanel(img)
-            loaded_shaped.append(res)
-            # print(res)
-        except BaseException:
-            continue
-
-    return loaded_shaped
-
-
-# Seperates the color channels and then reshapes each of the channels to
-# (224, 224)
-def processColorChanel(img):
-    b, g, r = cv2.split(img)
-    # seperating each value into a color channel and resizing to a standard
-    # size of 224, 224, 3 <- because of RGB color channels. If it's not 3
-    # color channels it'll pad with zeroes
-    b = cv2.resize(b, dsize=(224, 224), interpolation=cv2.INTER_CUBIC)
-    g = cv2.resize(g, dsize=(224, 224), interpolation=cv2.INTER_CUBIC)
-    r = cv2.resize(r, dsize=(224, 224), interpolation=cv2.INTER_CUBIC)
-    img = cv2.merge((b, g, r))
-    return img
-
-def image_preprocess2(data_path):
-    image_dir = str(data_path)
-    loaded_shaped = []
+    loaded_shaped = {}
     imagesList = listdir(image_dir)
 
     # store all the widths and heights of images
@@ -160,19 +145,49 @@ def image_preprocess2(data_path):
             img = cv2.imread(image_dir + "/" + image)
             heights.append(img.shape[0])
             widths.append(img.shape[1])
-            loaded_shaped.append(img)
+            loaded_shaped[image] = img
+            #loaded_shaped.append(img)
         except BaseException:
             continue
 
+    heights.sort()
+    widths.sort()
     height = heights[int(len(heights)/2)]
     width = widths[int(len(widths)/2)]
 
     # resize images
-    for index, image in enumerate(loaded_shaped):
-        loaded_shaped[index] = processColorChanel2(image, height, width)
+    for img_name, image in loaded_shaped.items():
+        loaded_shaped[img_name] = processColorChanel2(image, height, width)
 
-    return loaded_shaped
+    # create new folder containing resized images
+    if (new_folder):
+        addResizedImages(data_path, loaded_shaped)
+    else:
+        replaceImages(data_path, loaded_shaped)
 
+def addResizedImages(data_path, loaded_shaped):
+    cwd = os.getcwd()
+
+    # create processed folder
+    os.chdir(data_path)
+    class_name = os.path.basename(os.getcwd())
+    os.chdir("..")
+    os.mkdir("proc_" + class_name)
+    os.chdir("proc_" + class_name)
+    # add images to processed folder
+    for img_name, img in loaded_shaped.items():
+        cv2.imwrite("proc_" + img_name, img)
+
+    os.chdir(cwd)
+
+def replaceImages(data_path, loaded_shaped):
+    cwd = os.getcwd()
+    os.chdir(data_path)
+
+    for img_name, img in loaded_shaped.items():
+        cv2.imwrite(img_name, img)
+
+    os.chdir(cwd)
 
 def processColorChanel2(img, height, width):
     chanels = [chanel for chanel in cv2.split(img)]
@@ -191,6 +206,20 @@ def processColorChanel2(img, height, width):
     return cv2.merge(chanels)
 
 
+# Seperates the color channels and then reshapes each of the channels to
+# (224, 224)
+def processColorChanel(img):
+    b, g, r = cv2.split(img)
+    # seperating each value into a color channel and resizing to a standard
+    # size of 224, 224, 3 <- because of RGB color channels. If it's not 3
+    # color channels it'll pad with zeroes
+    b = cv2.resize(b, dsize=(224, 224), interpolation=cv2.INTER_CUBIC)
+    g = cv2.resize(g, dsize=(224, 224), interpolation=cv2.INTER_CUBIC)
+    r = cv2.resize(r, dsize=(224, 224), interpolation=cv2.INTER_CUBIC)
+    img = cv2.merge((b, g, r))
+    return img
+
+
 def process_dates(data):
 
     for df in data.values():
@@ -204,3 +233,7 @@ def process_dates(data):
             df[f'{col}_MonthDay'] = df[col].dt.day
 
             del df[col]
+
+image_preprocess2('/Users/rostamvakhshoori/Desktop/set/training_set/dogs')
+image_preprocess2('/Users/rostamvakhshoori/Desktop/set/training_set/cats')
+image_preprocess2('/Users/rostamvakhshoori/Desktop/set/testing_set')
