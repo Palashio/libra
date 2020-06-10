@@ -954,3 +954,4 @@ class client:
 # Easier to comment the one you don't want to run instead of typing them out every time
 #newClient = client('./data/housing.csv').neural_network_query('Model median house value')
 newClient = client('./data/landslides_after_rainfall.csv').neural_network_query(instruction='Model distance', drop=['id', 'geolocation', 'source_link', 'source_name'])
+
