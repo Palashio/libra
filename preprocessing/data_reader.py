@@ -20,9 +20,10 @@ class DataReader():
             df = pd.read_csv(self.filepath)
         elif self.retrieve_extension() == '.xlsx':
             df = pd.read_excel(self.filepath)
+            for data in df:
+                if df[data].dtype.name == 'int64':
+                    df[data] = df[data].astype(float)
         elif self.retrieve_extension() == '.json':
             df = pd.read_json(self.filepath)
-        for data in df:
-            if df[data].dtype.name == 'int64':
-                df[data] = df[data].astype(float)
+
         return df

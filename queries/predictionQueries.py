@@ -43,7 +43,7 @@ from generatePlots import (generate_clustering_plots,
                            generate_classification_together)
 
 import tensorflow as tf
-
+from data_reader import DataReader
 from keras.models import Sequential
 from keras.layers import (Dense, Conv2D, Flatten, Input, MaxPooling2D, )
 from dimensionality_red_queries import dimensionality_reduc
@@ -211,7 +211,11 @@ class client:
 
         global currLog
         logger("reading in dataset...")
-        data = pd.read_csv(self.dataset)
+
+        dataReader = DataReader(self.dataset)
+        data = dataReader.data_generator()
+        # data = pd.read_csv(self.dataset)
+        
 
         data, y, remove, full_pipeline = initial_preprocesser(data, instruction, preprocess)
 
@@ -333,7 +337,10 @@ class client:
             maximizer="val_loss"):
 
         # reads dataset and fills n/a values with zeroes
-        data = pd.read_csv(self.dataset)
+        #data = pd.read_csv(self.dataset)
+
+        dataReader = DataReader(self.dataset)
+        data = dataReader.data_generator()
 
         data, y, remove, full_pipeline = initial_preprocesser(data, instruction, preprocess)
 
@@ -445,7 +452,11 @@ class client:
             base_clusters=1):
         logger("Reading dataset...")
         # loads dataset and replaces n/a with zero
-        data = pd.read_csv(self.dataset)
+        #data = pd.read_csv(self.dataset)
+
+        dataReader = DataReader(self.dataset)
+        data = dataReader.data_generator()
+
         dataPandas = data.copy()
 
         full_pipeline = None
@@ -513,7 +524,11 @@ class client:
             cross_val_size=0.3):
         logger("Reading in dataset....")
         # reads dataset and fills n/a values with zeroes
-        data = pd.read_csv(self.dataset)
+        #data = pd.read_csv(self.dataset)
+
+
+        dataReader = DataReader(self.dataset)
+        data = dataReader.data_generator()
 
         data, y, remove, full_pipeline = initial_preprocesser(data, instruction, preprocess)
         # classification_column = get_similar_column(getLabelwithInstruction(instruction), data)
@@ -556,7 +571,11 @@ class client:
             max_neighbors=10):
         logger("Reading in dataset....")
         # Reads in dataset
-        data = pd.read_csv(self.dataset)
+        #data = pd.read_csv(self.dataset)
+
+
+        dataReader = DataReader(self.dataset)
+        data = dataReader.data_generator()
 
         data, y, remove, full_pipeline = initial_preprocesser(data, instruction, preprocess)
 
@@ -950,11 +969,4 @@ class client:
     def show_plots(self, model):
         print(self.models[model]['plots'].keys())
 
-<<<<<<< HEAD
-
-# newClient = client('./data/housing.csv').neural_network_query('Model median house value')
-newClient = client('./data/housing.csv').classification_query_ann('Model ocean proximity')
-
-=======
-newClient = client('./data/housing.csv').neural_network_query('Model ocean proximity')
->>>>>>> master
+newClient = client('./data/housing.csv').neural_network_query('Model median house value')
