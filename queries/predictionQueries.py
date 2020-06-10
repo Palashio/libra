@@ -174,7 +174,7 @@ class client:
     def regression_query_ann(
             self,
             instruction,
-            drop,
+            drop = None,
             preprocess=True,
             test_size=0.2,
             random_state=49,
@@ -190,7 +190,7 @@ class client:
         data = dataReader.data_generator()
         # data = pd.read_csv(self.dataset)
 
-        data = pd.read_csv(self.dataset)
+        
         if drop is not None:
             data.drop(drop, axis=1, inplace=True)
 
@@ -233,7 +233,7 @@ class client:
                 X_test,
                 y_test),
             callbacks=[es],
-            verbose=1)
+            verbose=0)
         models.append(history)
         model_data.append(model)
 
@@ -312,6 +312,7 @@ class client:
             instruction,
             preprocess=True,
             callback_mode='min',
+            drop = None,
             random_state=49,
             test_size=0.2,
             epochs=5,
@@ -320,9 +321,13 @@ class client:
 
         # reads dataset and fills n/a values with zeroes
         #data = pd.read_csv(self.dataset)
+   
 
         dataReader = DataReader(self.dataset)
         data = dataReader.data_generator()
+
+        if drop is not None:
+            data.drop(drop, axis=1, inplace=True)    
 
         data, y, remove, full_pipeline = initial_preprocesser(data, instruction, preprocess)
 
@@ -431,6 +436,7 @@ class client:
             self,
             preprocess=True,
             generate_plots=True,
+            drop = None,
             base_clusters=1):
         logger("Reading dataset...")
         # loads dataset and replaces n/a with zero
@@ -438,6 +444,9 @@ class client:
 
         dataReader = DataReader(self.dataset)
         data = dataReader.data_generator()
+
+        if drop is not None:
+            data.drop(drop, axis=1, inplace=True)     
 
         dataPandas = data.copy()
 
@@ -503,6 +512,7 @@ class client:
             test_size=0.2,
             kernel='linear',
             preprocess=True,
+            drop = None,
             cross_val_size=0.3):
         logger("Reading in dataset....")
         # reads dataset and fills n/a values with zeroes
@@ -511,6 +521,9 @@ class client:
 
         dataReader = DataReader(self.dataset)
         data = dataReader.data_generator()
+
+        if drop is not None:
+            data.drop(drop, axis=1, inplace=True)     
 
         data, y, remove, full_pipeline = initial_preprocesser(data, instruction, preprocess)
         # classification_column = get_similar_column(getLabelwithInstruction(instruction), data)
@@ -549,6 +562,7 @@ class client:
             self,
             instruction,
             preprocess=True,
+            drop = None, 
             min_neighbors=3,
             max_neighbors=10):
         logger("Reading in dataset....")
@@ -559,6 +573,8 @@ class client:
         dataReader = DataReader(self.dataset)
         data = dataReader.data_generator()
 
+        if drop is not None:
+            data.drop(drop, axis=1, inplace=True)     
         data, y, remove, full_pipeline = initial_preprocesser(data, instruction, preprocess)
 
         # classification_column = get_similar_column(getLabelwithInstruction(instruction), data)
@@ -597,9 +613,14 @@ class client:
         clearLog()
         return knn
 
-    def decision_tree_query(self, instruction, preprocess=True, test_size=0.2):
+    def decision_tree_query(self, instruction, preprocess=True, test_size=0.2, drop = None):
         logger("Reading in dataset....")
-        data = pd.read_csv(self.dataset)
+
+        dataReader = DataReader(self.dataset)
+        data = dataReader.data_generator()
+
+        if drop is not None:
+            data.drop(drop, axis=1, inplace=True)     
 
         data, y, remove, full_pipeline = initial_preprocesser(data, instruction, preprocess)
 
@@ -640,7 +661,11 @@ class client:
             test_size=0.2,
             random_state=49):
         logger("Reading in dataset....")
-        data = pd.read_csv(self.dataset)
+        dataReader = DataReader(self.dataset)
+        data = dataReader.data_generator()
+
+        if drop is not None:
+            data.drop(drop, axis=1, inplace=True)    
 
         data, y, remove, full_pipeline = initial_preprocesser(data, instruction, preprocess)
 
@@ -705,10 +730,15 @@ class client:
                     self.models["convolutional_NN"]["num_classes"])
                 self.models["convolutional_NN"]["model"] = model
 
-    def stat_analysis(self, column_name="none"):
+    def stat_analysis(self, column_name="none", drop = None):
         logger("Reading in dataset....")
         # Reading in dataset and creating pdtabulate variable to format outputs
-        data = pd.read_csv(self.dataset)
+        dataReader = DataReader(self.dataset)
+        data = dataReader.data_generator()
+
+        if drop is not None:
+            data.drop(drop, axis=1, inplace=True)   
+
         data.fillna(0, inplace=True)
         logger("Creating lambda object to format...")
 
