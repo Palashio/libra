@@ -234,6 +234,4 @@ def process_dates(data):
 
             del df[col]
 
-image_preprocess2('/Users/rostamvakhshoori/Desktop/set/training_set/dogs')
-image_preprocess2('/Users/rostamvakhshoori/Desktop/set/training_set/cats')
-image_preprocess2('/Users/rostamvakhshoori/Desktop/set/testing_set')
+
