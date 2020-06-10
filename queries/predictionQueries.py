@@ -30,7 +30,7 @@ from dataset_labelmatcher import get_similar_column, get_similar_model
 from tensorflow.keras.callbacks  import EarlyStopping
 from matplotlib import pyplot
 from grammartree import get_value_instruction
-from data_preprocesser import structured_preprocesser
+from data_preprocesser import structured_preprocesser, initial_preprocesser
 from predictionModelCreation import get_keras_model_reg, get_keras_text_class
 from predictionModelCreation import get_keras_model_class
 from keras.utils import to_categorical
@@ -113,34 +113,6 @@ def logger(instruction, found="",slash=''):
         print(currLog)
     currLog=""
 
-
-def initial_preprocesser(data, instruction, preprocess):
-    # get target column
-    logger("identifying target from instruction...")
-    remove = get_similar_column(
-        get_value_instruction(instruction), data)
-    y = data[remove]
-
-    # remove rows where target is NaN
-    data = data[y.notna()]
-    del data[remove]
-
-    # identification of id columns: if they're an unique and non-numerical we have to remove
-    for column in data.columns:
-        if len(np.unique(data[column])) == len(data) and data[column].dtype.name == 'object':
-            del data[column]
-
-    # preprocess the dataset
-    full_pipeline = None
-    if preprocess:
-        logger("preprocessing data...")
-        data, full_pipeline = structured_preprocesser(data)
-    else:
-        data.fillna(0, inplace=True)
-
-    return data, y, remove, full_pipeline
-
-
 # class to store all query information
 
 class client:
@@ -172,6 +144,7 @@ class client:
 
     def neural_network_query(self,
                              instruction,
+                             drop=None,
                              preprocess=True,
                              test_size=0.2,
                              random_state=49,
@@ -194,13 +167,14 @@ class client:
             else:
                 self.regression_query_ann(instruction, preprocess=preprocess, test_size=test_size,
                                           random_state=random_state, epochs=epochs, generate_plots=generate_plots,
-                                          callback_mode=callback_mode, maximizer=maximizer)
+                                          callback_mode=callback_mode, maximizer=maximizer, drop=None)
 
     # single regression query using a feed-forward neural network
     # instruction should be the value of a column
     def regression_query_ann(
             self,
             instruction,
+            drop = None,
             preprocess=True,
             test_size=0.2,
             random_state=49,
@@ -215,16 +189,24 @@ class client:
         dataReader = DataReader(self.dataset)
         data = dataReader.data_generator()
         # data = pd.read_csv(self.dataset)
+
         
+        if drop is not None:
+            data.drop(drop, axis=1, inplace=True)
 
-        data, y, remove, full_pipeline = initial_preprocesser(data, instruction, preprocess)
 
+        data, y, target, full_pipeline = initial_preprocesser(data, instruction, preprocess)
+
+        X_train = data['train']
+        y_train = data['train'][target]
+        X_test = data['test']
+        y_test = data['test'][target]
+        
+        # Only used for the interpreter
         target_scaler = StandardScaler()
-        y = target_scaler.fit_transform(np.array(y).reshape(-1, 1))
+        target_scaler.fit_transform(np.array(y).reshape(-1, 1))
 
         logger("establishing callback function...")
-        X_train, X_test, y_train, y_test = train_test_split(
-            data, y, test_size=test_size, random_state=random_state)
 
         models = []
         losses = []
@@ -311,7 +293,7 @@ class client:
         # stores values in the client object models dictionary field
         self.models['regression_ANN'] = {
             'model': model,
-            "target": remove,
+            "target": target,
             "plots": plots,
             "preprocesser": full_pipeline,
             "interpreter": target_scaler,
@@ -330,6 +312,7 @@ class client:
             instruction,
             preprocess=True,
             callback_mode='min',
+            drop = None,
             random_state=49,
             test_size=0.2,
             epochs=5,
@@ -338,9 +321,13 @@ class client:
 
         # reads dataset and fills n/a values with zeroes
         #data = pd.read_csv(self.dataset)
+   
 
         dataReader = DataReader(self.dataset)
         data = dataReader.data_generator()
+
+        if drop is not None:
+            data.drop(drop, axis=1, inplace=True)    
 
         data, y, remove, full_pipeline = initial_preprocesser(data, instruction, preprocess)
 
@@ -449,6 +436,7 @@ class client:
             self,
             preprocess=True,
             generate_plots=True,
+            drop = None,
             base_clusters=1):
         logger("Reading dataset...")
         # loads dataset and replaces n/a with zero
@@ -456,6 +444,9 @@ class client:
 
         dataReader = DataReader(self.dataset)
         data = dataReader.data_generator()
+
+        if drop is not None:
+            data.drop(drop, axis=1, inplace=True)     
 
         dataPandas = data.copy()
 
@@ -521,6 +512,7 @@ class client:
             test_size=0.2,
             kernel='linear',
             preprocess=True,
+            drop = None,
             cross_val_size=0.3):
         logger("Reading in dataset....")
         # reads dataset and fills n/a values with zeroes
@@ -529,6 +521,9 @@ class client:
 
         dataReader = DataReader(self.dataset)
         data = dataReader.data_generator()
+
+        if drop is not None:
+            data.drop(drop, axis=1, inplace=True)     
 
         data, y, remove, full_pipeline = initial_preprocesser(data, instruction, preprocess)
         # classification_column = get_similar_column(getLabelwithInstruction(instruction), data)
@@ -567,6 +562,7 @@ class client:
             self,
             instruction,
             preprocess=True,
+            drop = None, 
             min_neighbors=3,
             max_neighbors=10):
         logger("Reading in dataset....")
@@ -577,6 +573,8 @@ class client:
         dataReader = DataReader(self.dataset)
         data = dataReader.data_generator()
 
+        if drop is not None:
+            data.drop(drop, axis=1, inplace=True)     
         data, y, remove, full_pipeline = initial_preprocesser(data, instruction, preprocess)
 
         # classification_column = get_similar_column(getLabelwithInstruction(instruction), data)
@@ -615,9 +613,14 @@ class client:
         clearLog()
         return knn
 
-    def decision_tree_query(self, instruction, preprocess=True, test_size=0.2):
+    def decision_tree_query(self, instruction, preprocess=True, test_size=0.2, drop = None):
         logger("Reading in dataset....")
-        data = pd.read_csv(self.dataset)
+
+        dataReader = DataReader(self.dataset)
+        data = dataReader.data_generator()
+
+        if drop is not None:
+            data.drop(drop, axis=1, inplace=True)     
 
         data, y, remove, full_pipeline = initial_preprocesser(data, instruction, preprocess)
 
@@ -658,7 +661,11 @@ class client:
             test_size=0.2,
             random_state=49):
         logger("Reading in dataset....")
-        data = pd.read_csv(self.dataset)
+        dataReader = DataReader(self.dataset)
+        data = dataReader.data_generator()
+
+        if drop is not None:
+            data.drop(drop, axis=1, inplace=True)    
 
         data, y, remove, full_pipeline = initial_preprocesser(data, instruction, preprocess)
 
@@ -723,10 +730,15 @@ class client:
                     self.models["convolutional_NN"]["num_classes"])
                 self.models["convolutional_NN"]["model"] = model
 
-    def stat_analysis(self, column_name="none"):
+    def stat_analysis(self, column_name="none", drop = None):
         logger("Reading in dataset....")
         # Reading in dataset and creating pdtabulate variable to format outputs
-        data = pd.read_csv(self.dataset)
+        dataReader = DataReader(self.dataset)
+        data = dataReader.data_generator()
+
+        if drop is not None:
+            data.drop(drop, axis=1, inplace=True)   
+
         data.fillna(0, inplace=True)
         logger("Creating lambda object to format...")
 
@@ -969,4 +981,7 @@ class client:
     def show_plots(self, model):
         print(self.models[model]['plots'].keys())
 
-newClient = client('./data/housing.csv').neural_network_query('Model median house value')
+# Easier to comment the one you don't want to run instead of typing them out every time
+#newClient = client('./data/housing.csv').neural_network_query('Model median house value')
+newClient = client('./data/landslides_after_rainfall.csv').neural_network_query(instruction='Model distance', drop=['id', 'geolocation', 'source_link', 'source_name'])
+

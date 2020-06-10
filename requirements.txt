@@ -12,3 +12,4 @@ textblob
 python-Levenshtein
 seaborn
 keras-tuner
+spacy
