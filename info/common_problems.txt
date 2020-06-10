@@ -19,9 +19,23 @@
 
 4)If you're getting an error related to installing Textblob:
 	either go into your folder from terminal, and then pip install 
+
 	or
+
 	make sure that you're treated each of the folders as source folders
+
+    or
+
+    try installing a gcc compiler and then retrying 
 
 5) If you've previous installed anaconda on your machine, and are getting unable to import module errors. Make sure that your libraries are being installed in the right place. 
 	It should not be installing in /anaconda/ paths. 
+
+6) If you're trying to run the codebase and it keeps saying you have to install this: nltk.download('averaged_perception_tagger')
+    include: 
+
+    import nltk
+    nltk.download('averaged_perceptron_tagger')
+
+
 
