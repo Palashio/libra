@@ -153,7 +153,9 @@ class client:
                              callback_mode='min',
                              maximizer="val_loss"):
 
-        data = pd.read_csv(self.dataset)
+        # data = pd.read_csv(self.dataset)
+        dataReader = DataReader(self.dataset)
+        data = dataReader.data_generator()
 
         if preprocess:
 
@@ -320,7 +322,7 @@ class client:
             maximizer="val_loss"):
 
         # reads dataset and fills n/a values with zeroes
-        #data = pd.read_csv(self.dataset)
+        # data = pd.read_csv(self.dataset)
    
 
         dataReader = DataReader(self.dataset)
@@ -440,7 +442,7 @@ class client:
             base_clusters=1):
         logger("Reading dataset...")
         # loads dataset and replaces n/a with zero
-        #data = pd.read_csv(self.dataset)
+        # data = pd.read_csv(self.dataset)
 
         dataReader = DataReader(self.dataset)
         data = dataReader.data_generator()
@@ -516,7 +518,7 @@ class client:
             cross_val_size=0.3):
         logger("Reading in dataset....")
         # reads dataset and fills n/a values with zeroes
-        #data = pd.read_csv(self.dataset)
+        # data = pd.read_csv(self.dataset)
 
 
         dataReader = DataReader(self.dataset)
@@ -567,7 +569,7 @@ class client:
             max_neighbors=10):
         logger("Reading in dataset....")
         # Reads in dataset
-        #data = pd.read_csv(self.dataset)
+        # data = pd.read_csv(self.dataset)
 
 
         dataReader = DataReader(self.dataset)
@@ -918,7 +920,9 @@ class client:
                                   epochs=10,
                                   maxTextLength=20000,
                                   generate_plots=True):
-        data = pd.read_csv(self.dataset)
+        # data = pd.read_csv(self.dataset)
+        dataReader = DataReader(self.dataset)
+        data = dataReader.data_generator()
         data.fillna(0, inplace=True)
 
         # Get target columns
