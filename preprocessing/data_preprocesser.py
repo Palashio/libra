@@ -201,7 +201,7 @@ def processColorChanel2(img, height, width):
         if chanel.shape[1] > width:
             chanel = cv2.resize(chanel, dsize=(width, height), interpolation=cv2.INTER_CUBIC)
         else:
-            channel = cv2.resize(chanel, dsize=(width, height), interpolation=cv2.INTER_AREA)
+            chanel = cv2.resize(chanel, dsize=(width, height), interpolation=cv2.INTER_AREA)
         chanels[index] = chanel
 
     return cv2.merge(chanels)
