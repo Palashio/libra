@@ -56,6 +56,7 @@ from sklearn import preprocessing, tree
 from NLP_preprocessing import text_clean_up, lemmatize_text
 from keras.preprocessing.image import ImageDataGenerator
 from termcolor import colored
+from keras.models import model_from_json
 
 warnings.simplefilter(action='error', category=FutureWarning)
 warnings.simplefilter(action="ignore", category=SettingWithCopyWarning)
@@ -65,6 +66,9 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
 currLog = ""
 counter = 0
+save_model=0
+number=0
+current_dir=os.getcw()
 
 # allows for all columns to be displayed when printing()
 pd.options.display.width = None
@@ -86,7 +90,7 @@ def clearLog():
 # global variable parallels
 
 
-def logger(instruction, found="",slash='',color='white'):
+def logger(instruction, found="",slash=''):
     global currLog
     global counter
     if counter == 0:
@@ -107,11 +111,10 @@ def logger(instruction, found="",slash='',color='white'):
             currLog += "\n"
         
     counter += 1
-    text = colored(currLog, color, attrs=['reverse', 'blink','bold']) 
     if instruction=="->":
-        print(text,end="")
+        print(currLog,end="")
     else:
-        print(text)
+        print(currLog)
     currLog=""
 
 # class to store all query information
@@ -131,6 +134,31 @@ class client:
         logger("Getting model...")
         return get_similar_model(model_requested, self.models.keys())
         clearLog()
+
+#Loading the user defined model given that the user provides the model path
+def load_model(self,load_path):
+    #load_path=print((" "*2*counter)+"Enter model name with path: ")
+    load_file=load_path[load_path.rindex("/")+1:load_path.rindex(".")]
+    #loading model json file
+    json_file = open(load_path, 'r')
+    json_model = json_file.read()
+    json_file.close()
+    loaded_model = model_from_json(json_model)
+    # loading weights in the model
+    loaded_model.load_weights(load_file+".h5")
+    logger("Model loaded...")
+    return loaded_model
+
+	#save the model in the current directory
+    def save(self,model):
+        save_model=print((" "*2*counter)+"Press 1 to save the model:")
+        if save_model==1:
+            model_json = model.to_json()
+            with open(current_dir+"/model"+str(number)+".json", "w") as json_file:
+                json_file.write(model_json)
+            # serialize weights to HDF5
+        model.save_weights("model"+str(number)+".h5")
+        logger("->","Saved model to disk as model"+str(number))
 
     # param modelKey: string representation of the model to make prediction
     # param data: dataframe version of desired prediction set
@@ -276,11 +304,11 @@ class client:
 
         final_model=model_data[losses.index(min(losses))]
         final_hist=models[losses.index(min(losses))]
-        logger('->',"Best number of layers found: "+ str(len(final_model.layers)),color='blue')
+        logger('->',"Best number of layers found: "+ str(len(final_model.layers)))
         logger('->',"Training Loss: "+str(final_hist.history['loss']
-                     [len(final_hist.history['val_loss']) - 1]),color='blue')
+                     [len(final_hist.history['val_loss']) - 1]))
         logger('->',"Test Loss: "+str(final_hist.history['val_loss']
-                     [len(final_hist.history['val_loss']) - 1]),color='blue')
+                     [len(final_hist.history['val_loss']) - 1]))
 
         # calls function to generate plots in plot generation
         if generate_plots:
@@ -290,17 +318,17 @@ class client:
             for x in range(len(plot_names)):
                 plots[str(plot_names[x])] = init_plots[x]
 
-        print(currLog)
+        self.save(final_model)
         # stores values in the client object models dictionary field
         self.models['regression_ANN'] = {
-            'model': model,
+            'model': final_model,
             "target": target,
             "plots": plots,
             "preprocesser": full_pipeline,
             "interpreter": target_scaler,
             'losses': {
-                'training_loss': history.history['loss'],
-                'val_loss': history.history['val_loss']}}
+                'training_loss': final_hist.history['loss'],
+                'val_loss': final_hist.history['val_loss']}}
 
         # returns the best model
         clearLog()
@@ -404,30 +432,32 @@ class client:
 
         final_model=model_data[losses.index(min(losses))]
         final_hist=models[losses.index(min(losses))]
-        logger('->',"Best number of layers found: "+ str(len(final_model.layers)),color='blue')
+        logger('->',"Best number of layers found: "+ str(len(final_model.layers)))
         logger('->',"Training Accuracy: "+str(final_hist.history['accuracy']
-                     [len(final_hist.history['val_accuracy']) - 1]),color='blue')
+                     [len(final_hist.history['val_accuracy']) - 1]))
         logger('->',"Test Accuracy: "+str(final_hist.history['val_accuracy']
-                     [len(final_hist.history['val_accuracy']) - 1]),color='blue')
+                     [len(final_hist.history['val_accuracy']) - 1]))
 
         # genreates appropriate classification plots by feeding all information
         plots = generate_classification_plots(
             models[len(models) - 1], data, y, model, X_test, y_test)
 
+        self.save(final_model)
+
         # stores the values and plots into the object dictionary
         self.models["classification_ANN"] = {
-            "model": model,
+            "model": final_model,
             'num_classes': num_classes,
             "plots": plots,
             "target": remove,
             "preprocesser": full_pipeline,
             "interpreter": le,
             'losses': {
-                'training_loss': history.history['loss'],
-                'val_loss': history.history['val_loss']},
+                'training_loss': final_hist.history['loss'],
+                'val_loss': final_hist.history['val_loss']},
             'accuracy': {
-                'training_accuracy': history.history['accuracy'],
-                'validation_accuracy': history.history['val_accuracy']}}
+                'training_accuracy': final_hist.history['accuracy'],
+                'validation_accuracy': final_hist.history['val_accuracy']}}
 
         # returns the last model
         return model
@@ -693,7 +723,7 @@ class client:
         logger("Identifying top scores...")
         for model in models:
             scores.append(accuracy_score(model.predict(X_test), y_test))
-
+        self.save(models[scores.index(max(scores))])
         clearLog()
 
         # returns classificaiton model with the highest score
