@@ -1,4 +1,8 @@
 import pandas as pd
+import tensorflow as tf
+from tensorflow.python.client import device_lib
+
+# import torch.cuda as cuda
 
 # Creates a constructor for the DataReader class to create Pandas DataFrame
 # objects based off of the dataset's file extension
@@ -25,5 +29,11 @@ class DataReader():
                     df[data] = df[data].astype(float)
         elif self.retrieve_extension() == '.json':
             df = pd.read_json(self.filepath)
-
         return df
+    def get_available_gpus(self):
+        local_device_protos = device_lib.list_local_devices()
+        return [x.name for x in local_device_protos if x.device_type == 'GPU']
+    def is_gpu_available_1(self):
+        return tf.test.gpu_device_name() != ''
+    # def is_gpu_available_2(self):
+    #     return cuda.is_available()
