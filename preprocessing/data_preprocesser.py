@@ -114,18 +114,20 @@ def structured_preprocesser(data):
 
 
 # Preprocesses images from images to median of heighs/widths
-def image_preprocess2(data_path, new_folder=True):
+def image_preprocess(data_path, new_folder=True):
     training_path = data_path + "/training_set"
     testing_path = data_path + "/testing_set"
 
     heights = []
     widths = []
+    classification = 0
 
     training_dict = {}
     for class_folder in listdir(training_path):
         if not os.path.isdir(training_path + "/" + class_folder):
             continue
         training_dict[class_folder] = {}
+        classification += 1
         for image in listdir(training_path + "/" + class_folder):
             try:
                 img = cv2.imread(training_path + "/" + class_folder + "/" + image)
@@ -171,6 +173,7 @@ def image_preprocess2(data_path, new_folder=True):
             replaceImages(training_path + "/" + class_folder, images)
         replaceImages(testing_path + "/test_folder", testing_dict)
 
+    return {"num_categories":classification, "height":height, "width":width}
 
 def addResizedImages(data_path, folder_name, images):
 
