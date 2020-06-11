@@ -25,6 +25,7 @@ Table of Contents
    * [get_keras_model_reg](#get_keras_model_reg)
    * [get_keras_model_class](#get_keras_model_class)
    * [get_keras_text_class](#get_keras_text_class)
+   * [getKerasConvolutional](#getKerasConvolutional)
 * [Process Logger](#process-logger)
 * [Pipelining for Contributors](#pipelining-for-contributors)
 * [Providing Instructions](#instructions)
