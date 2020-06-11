@@ -113,40 +113,35 @@ def structured_preprocesser(data):
     return data, full_pipeline
 
 
-# def image_preprocess(data_path):
-#     image_dir = str(data_path)
-#     loaded_shaped = []
-#     imagesList = listdir(image_dir)
-#
-#     for image in imagesList:
-#         try:
-#             img = cv2.imread(image_dir + "/" + image)
-#             res = processColorChanel(img)
-#             loaded_shaped.append(res)
-#             # print(res)
-#         except BaseException:
-#             continue
-#
-#     return loaded_shaped
-
-# Preprocesses images queried from images to median of heighs/widths
+# Preprocesses images from images to median of heighs/widths
 def image_preprocess2(data_path, new_folder=True):
-    image_dir = str(data_path)
-    loaded_shaped = {}
-    imagesList = listdir(image_dir)
+    training_path = data_path + "/training_set"
+    testing_path = data_path + "/testing_set"
 
-    # store all the widths and heights of images
     heights = []
     widths = []
 
-    # get median of widths and heights
-    for image in imagesList:
+    training_dict = {}
+    for class_folder in listdir(training_path):
+        if not os.path.isdir(training_path + "/" + class_folder):
+            continue
+        training_dict[class_folder] = {}
+        for image in listdir(training_path + "/" + class_folder):
+            try:
+                img = cv2.imread(training_path + "/" + class_folder + "/" + image)
+                heights.append(img.shape[0])
+                widths.append(img.shape[1])
+                training_dict[class_folder][image] = img
+            except BaseException:
+                continue
+
+    testing_dict = {}
+    for image in listdir(testing_path + "/test_folder"):
         try:
-            img = cv2.imread(image_dir + "/" + image)
+            img = cv2.imread(testing_path + "/test_folder/" + image)
             heights.append(img.shape[0])
             widths.append(img.shape[1])
-            loaded_shaped[image] = img
-            #loaded_shaped.append(img)
+            testing_dict[image] = img
         except BaseException:
             continue
 
@@ -156,38 +151,41 @@ def image_preprocess2(data_path, new_folder=True):
     width = widths[int(len(widths)/2)]
 
     # resize images
-    for img_name, image in loaded_shaped.items():
-        loaded_shaped[img_name] = processColorChanel2(image, height, width)
+    for class_folder, images in training_dict.items():
+        for image_name, image in images.items():
+            training_dict[class_folder][image_name] = processColorChanel2(image, height, width)
+
+    for image_name, image in testing_dict.items():
+        testing_dict[image_name] = processColorChanel2(image, height, width)
 
     # create new folder containing resized images
-    if (new_folder):
-        addResizedImages(data_path, loaded_shaped)
+    if new_folder:
+        os.mkdir(data_path + "/proc_training_set")
+        for class_folder, images in training_dict.items():
+            addResizedImages(data_path + "/proc_training_set", class_folder, images)
+        os.mkdir(data_path + "/proc_testing_set")
+        addResizedImages(data_path + "/proc_testing_set", "test_folder", testing_dict)
+    # replace images with newly resized images
     else:
-        replaceImages(data_path, loaded_shaped)
+        for class_folder, images in training_dict.items():
+            replaceImages(training_path + "/" + class_folder, images)
+        replaceImages(testing_path + "/test_folder", testing_dict)
 
-def addResizedImages(data_path, loaded_shaped):
-    cwd = os.getcwd()
+
+def addResizedImages(data_path, folder_name, images):
 
     # create processed folder
-    os.chdir(data_path)
-    class_name = os.path.basename(os.getcwd())
-    os.chdir("..")
-    os.mkdir("proc_" + class_name)
-    os.chdir("proc_" + class_name)
+    os.mkdir(data_path + "/proc_" + folder_name)
     # add images to processed folder
-    for img_name, img in loaded_shaped.items():
-        cv2.imwrite("proc_" + img_name, img)
+    for img_name, img in images.items():
+        cv2.imwrite(data_path + "/proc_" + folder_name + "/proc_" + img_name, img)
 
-    os.chdir(cwd)
 
 def replaceImages(data_path, loaded_shaped):
-    cwd = os.getcwd()
-    os.chdir(data_path)
 
     for img_name, img in loaded_shaped.items():
-        cv2.imwrite(img_name, img)
+        cv2.imwrite(data_path + "/" + img_name, img)
 
-    os.chdir(cwd)
 
 def processColorChanel2(img, height, width):
     chanels = [chanel for chanel in cv2.split(img)]
@@ -233,5 +231,3 @@ def process_dates(data):
             df[f'{col}_MonthDay'] = df[col].dt.day
 
             del df[col]
-
-
