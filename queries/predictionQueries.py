@@ -26,6 +26,7 @@ from keras.utils import to_categorical
 from predictionModelCreation import get_keras_model_class
 from predictionModelCreation import get_keras_model_reg, get_keras_text_class
 from data_preprocesser import structured_preprocesser, initial_preprocesser
+from data_preprocesser import image_preprocess, add_resized_images, replace_images, process_color_channel
 from grammartree import get_value_instruction
 from matplotlib import pyplot
 from tensorflow.keras.callbacks import EarlyStopping
@@ -1048,6 +1049,6 @@ class client:
 
 # Easier to comment the one you don't want to run instead of typing them
 # out every time
-newClient = client(
-    './data/housing.csv').neural_network_query('Model median house value')
+# newClient = client(
+#     './data/housing.csv').neural_network_query('Model median house value')
 #newClient = client('./data/landslides_after_rainfall.csv').neural_network_query(instruction='Model distance', drop=['id', 'geolocation', 'source_link', 'source_name'])
