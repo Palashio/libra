@@ -2,20 +2,14 @@
 # inserting into sis path
 import sys
 import torch
-import torch.nn.functional as F
-from torch.utils.data import Dataset, DataLoader, RandomSampler, SequentialSampler
+from torch.utils.data import DataLoader
 
 # Importing the T5 modules from huggingface/transformers
-from torch.version import cuda
 from transformers import T5Tokenizer, T5ForConditionalGeneration
 
-from keras import Model
 from keras_preprocessing import sequence
 
-from keras_preprocessing.sequence import pad_sequences
-from keras_preprocessing.text import Tokenizer
-
-from NLP_Helper.huggingfaceModelRetrainHelper import train, CustomDataset, inference
+from huggingfaceModelRetrainHelper import train, CustomDataset, inference
 
 sys.path.insert(1, './preprocessing')
 sys.path.insert(1, './data_generation')
@@ -30,41 +24,30 @@ import pandas as pd
 from tabulate import tabulate
 from scipy.spatial.distance import cosine
 from sklearn.model_selection import cross_val_score
-from pandas import DataFrame
 from sklearn.preprocessing import LabelEncoder
 from sklearn.metrics import accuracy_score
-from sklearn import preprocessing, svm
-from sklearn.compose import ColumnTransformer
+from sklearn import svm
 from sklearn.model_selection import train_test_split
-from sklearn.pipeline import Pipeline
-from sklearn.preprocessing import OneHotEncoder, StandardScaler
+from sklearn.preprocessing import StandardScaler
 from dataset_labelmatcher import get_similar_column, get_similar_model
 from tensorflow.keras.callbacks import EarlyStopping
-from matplotlib import pyplot
 from grammartree import get_value_instruction
 from data_preprocesser import structured_preprocesser, initial_preprocesser
 from predictionModelCreation import get_keras_model_reg, get_keras_text_class
 from predictionModelCreation import get_keras_model_class
-from keras.utils import to_categorical
 from keras.utils import np_utils
 from sklearn.cluster import KMeans
-import matplotlib.pyplot as plt
 from generatePlots import (generate_clustering_plots,
                            generate_regression_plots,
-                           generate_classification_plots,
-                           generate_classification_together)
-import tensorflow_hub as hub
+                           generate_classification_plots)
 
 import tensorflow as tf
 from data_reader import DataReader
 from keras.models import Sequential
-from keras.layers import (Dense, Conv2D, Flatten, Input, MaxPooling2D, )
+from keras.layers import (Dense, Conv2D, Flatten, MaxPooling2D, )
 from dimensionality_red_queries import dimensionality_reduc
-from os import listdir
 from tuner import tuneReg, tuneClass, tuneCNN
 from sklearn.neighbors import KNeighborsClassifier
-from sklearn.ensemble import RandomForestRegressor
-from sklearn.feature_selection import SelectFromModel
 from sklearn import preprocessing, tree
 from NLP_preprocessing import text_clean_up, lemmatize_text, get_target_values
 from keras.preprocessing.image import ImageDataGenerator
