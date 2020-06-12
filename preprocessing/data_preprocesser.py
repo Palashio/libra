@@ -146,7 +146,8 @@ def image_preprocess(data_path, new_folder=True):
         classification += 1
         for image in listdir(training_path + "/" + class_folder):
             try:
-                img = cv2.imread(training_path + "/" + class_folder + "/" + image)
+                img = cv2.imread(
+                    training_path + "/" + class_folder + "/" + image)
                 heights.append(img.shape[0])
                 widths.append(img.shape[1])
                 training_dict[class_folder][image] = img
@@ -160,7 +161,8 @@ def image_preprocess(data_path, new_folder=True):
         testing_dict[class_folder] = {}
         for image in listdir(testing_path + "/" + class_folder):
             try:
-                img = cv2.imread(testing_path + "/" + class_folder + "/" + image)
+                img = cv2.imread(
+                    testing_path + "/" + class_folder + "/" + image)
                 heights.append(img.shape[0])
                 widths.append(img.shape[1])
                 testing_dict[class_folder][image] = img
@@ -169,17 +171,19 @@ def image_preprocess(data_path, new_folder=True):
 
     heights.sort()
     widths.sort()
-    height = heights[int(len(heights)/2)]
-    width = widths[int(len(widths)/2)]
+    height = heights[int(len(heights) / 2)]
+    width = widths[int(len(widths) / 2)]
 
     # resize images
     for class_folder, images in training_dict.items():
         for image_name, image in images.items():
-            training_dict[class_folder][image_name] = process_color_channel(image, height, width)
+            training_dict[class_folder][image_name] = process_color_channel(
+                image, height, width)
 
     for class_folder, images in testing_dict.items():
         for image_name, image in images.items():
-            testing_dict[class_folder][image_name] = process_color_channel(image, height, width)
+            testing_dict[class_folder][image_name] = process_color_channel(
+                image, height, width)
 
     # create new folder containing resized images
     if new_folder:
@@ -188,13 +192,21 @@ def image_preprocess(data_path, new_folder=True):
             shutil.rmtree(data_path + "/proc_training_set")
         os.mkdir(data_path + "/proc_training_set")
         for class_folder, images in training_dict.items():
-            add_resized_images(data_path + "/proc_training_set", class_folder, images)
+            add_resized_images(
+                data_path +
+                "/proc_training_set",
+                class_folder,
+                images)
         # check if proc_testing_set folder exists
         if os.path.isdir(data_path + "/proc_testing_set"):
             shutil.rmtree(data_path + "/proc_testing_set")
         os.mkdir(data_path + "/proc_testing_set")
         for class_folder, images in testing_dict.items():
-            add_resized_images(data_path + "/proc_testing_set", class_folder, images)
+            add_resized_images(
+                data_path +
+                "/proc_testing_set",
+                class_folder,
+                images)
     # replace images with newly resized images
     else:
         for class_folder, images in training_dict.items():
@@ -202,7 +214,7 @@ def image_preprocess(data_path, new_folder=True):
         for class_folder, images in testing_dict.items():
             replace_images(testing_path + "/" + class_folder, images)
 
-    return {"num_categories":classification, "height":height, "width":width}
+    return {"num_categories": classification, "height": height, "width": width}
 
 
 def add_resized_images(data_path, folder_name, images):
@@ -211,7 +223,13 @@ def add_resized_images(data_path, folder_name, images):
     os.mkdir(data_path + "/proc_" + folder_name)
     # add images to processed folder
     for img_name, img in images.items():
-        cv2.imwrite(data_path + "/proc_" + folder_name + "/proc_" + img_name, img)
+        cv2.imwrite(
+            data_path +
+            "/proc_" +
+            folder_name +
+            "/proc_" +
+            img_name,
+            img)
 
 
 def replace_images(data_path, loaded_shaped):
@@ -225,13 +243,33 @@ def process_color_channel(img, height, width):
 
     for index, chanel in enumerate(chanels):
         if chanel.shape[0] > height:
-            chanel = cv2.resize(chanel, dsize=(chanel.shape[1], height), interpolation=cv2.INTER_CUBIC)
+            chanel = cv2.resize(
+                chanel,
+                dsize=(
+                    chanel.shape[1],
+                    height),
+                interpolation=cv2.INTER_CUBIC)
         else:
-            chanel = cv2.resize(chanel, dsize=(chanel.shape[1], height), interpolation=cv2.INTER_AREA)
+            chanel = cv2.resize(
+                chanel,
+                dsize=(
+                    chanel.shape[1],
+                    height),
+                interpolation=cv2.INTER_AREA)
         if chanel.shape[1] > width:
-            chanel = cv2.resize(chanel, dsize=(width, height), interpolation=cv2.INTER_CUBIC)
+            chanel = cv2.resize(
+                chanel,
+                dsize=(
+                    width,
+                    height),
+                interpolation=cv2.INTER_CUBIC)
         else:
-            chanel = cv2.resize(chanel, dsize=(width, height), interpolation=cv2.INTER_AREA)
+            chanel = cv2.resize(
+                chanel,
+                dsize=(
+                    width,
+                    height),
+                interpolation=cv2.INTER_AREA)
         chanels[index] = chanel
 
     return cv2.merge(chanels)
