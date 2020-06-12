@@ -135,20 +135,6 @@ class client:
         return get_similar_model(model_requested, self.models.keys())
         clearLog()
 
-#Loading the user defined model given that the user provides the model path
-def load_model(self,load_path):
-    #load_path=print((" "*2*counter)+"Enter model name with path: ")
-    load_file=load_path[load_path.rindex("/")+1:load_path.rindex(".")]
-    #loading model json file
-    json_file = open(load_path, 'r')
-    json_model = json_file.read()
-    json_file.close()
-    loaded_model = model_from_json(json_model)
-    # loading weights in the model
-    loaded_model.load_weights(load_file+".h5")
-    logger("Model loaded...")
-    return loaded_model
-
 	#save the model in the current directory
     def save(self,model):
         save_model=print((" "*2*counter)+"Press 1 to save the model:")
@@ -157,8 +143,8 @@ def load_model(self,load_path):
             with open(current_dir+"/model"+str(number)+".json", "w") as json_file:
                 json_file.write(model_json)
             # serialize weights to HDF5
-        model.save_weights("model"+str(number)+".h5")
-        logger("->","Saved model to disk as model"+str(number))
+            model.save_weights("model"+str(number)+".h5")
+            logger("->","Saved model to disk as model"+str(number))
 
     # param modelKey: string representation of the model to make prediction
     # param data: dataframe version of desired prediction set
