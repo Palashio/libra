@@ -877,14 +877,14 @@ class client:
         # google chrome
         logger("Generating datasets for classes...")
         # Assuming Downloaded Images in current Directory if no data_path provided
-        if data_path == None:
+        if data_path is None:
             data_path = os.getcwd()
         # process images
         processInfo = image_preprocess(data_path, new_folders)
         input_shape = (processInfo["height"], processInfo["width"], 3)
         num_classes = processInfo["num_categories"]
         loss_func = ""
-        if (new_folders):
+        if new_folders:
             training_path = "/proc_training_set"
             testing_path = "/proc_testing_set"
         else:
@@ -904,7 +904,7 @@ class client:
                 64,
                 kernel_size=3,
                 activation="relu",
-                input_shape=(input_shape)))
+                input_shape=input_shape))
         model.add(MaxPooling2D(pool_size=(2, 2)))
         model.add(Conv2D(64, kernel_size=3, activation="relu"))
         model.add(MaxPooling2D(pool_size=(2, 2)))

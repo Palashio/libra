@@ -264,5 +264,3 @@ def process_dates(data):
             df[f'{col}_MonthDay'] = df[col].dt.day
 
             del df[col]
-
-image_preprocess("/Users/rostamvakhshoori/Desktop/Data")
