@@ -31,18 +31,19 @@ def tokenize_text(dataset):
     return dataset
 
 
-# Cleans up text data by removing unnecessary characters (links, punctuation, uppercase letters, numbers, whitespace)
+# Cleans up text data by removing unnecessary characters (links,
+# punctuation, uppercase letters, numbers, whitespace)
 
 def text_clean_up(dataset):
     newDataset = []
     for text in dataset:
         clean_text = re.sub(r'http\S+', '', text)
         punctuation = '!"#$%&()*+-/:;<=>?@[\\]^_`{|}~'
-        clean_text = ''.join(ch for ch in clean_text if ch not in set(punctuation))
+        clean_text = ''.join(
+            ch for ch in clean_text if ch not in set(punctuation))
         clean_text = clean_text.lower()
-        clean_text = re.sub('\d', ' ', clean_text)
+        clean_text = re.sub(r'\d', ' ', clean_text)
         clean_text = ' '.join(clean_text.split())
         newDataset.append(clean_text)
 
     return newDataset
-

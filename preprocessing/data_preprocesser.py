@@ -19,8 +19,11 @@ import cv2
 
 
 def initial_preprocesser(data, instruction, preprocess):
-    # Scans for object columns just in case we have a datetime column that isn't detected
-    object_columns = [col for col, col_type in data.dtypes.iteritems() if col_type == 'object']
+    # Scans for object columns just in case we have a datetime column that
+    # isn't detected
+    object_columns = [
+        col for col,
+        col_type in data.dtypes.iteritems() if col_type == 'object']
 
     # Handles dates without timestamps
     for col in object_columns:
@@ -31,7 +34,7 @@ def initial_preprocesser(data, instruction, preprocess):
 
     # get target column
     target = get_similar_column(
-            get_value_instruction(instruction), data)
+        get_value_instruction(instruction), data)
     y = data[target]
 
     # remove rows where target is NaN
@@ -65,7 +68,8 @@ def structured_preprocesser(data):
     process_dates(data)
 
     # identifies the categorical and numerical columns
-    categorical_columns = data['train'].select_dtypes(exclude=["number"]).columns
+    categorical_columns = data['train'].select_dtypes(
+        exclude=["number"]).columns
     numeric_columns = data['train'].columns[data['train'].dtypes.apply(
         lambda c: np.issubdtype(c, np.number))]
 
@@ -97,17 +101,28 @@ def structured_preprocesser(data):
         ])
 
     train = full_pipeline.fit_transform(data['train'])
-    train_encoded_cols = full_pipeline.named_transformers_['cat']['one_hot_encoder'].get_feature_names()
+    train_encoded_cols = full_pipeline.named_transformers_[
+        'cat']['one_hot_encoder'].get_feature_names()
     train_cols = [*list(numeric_columns), *train_encoded_cols]
 
     test = full_pipeline.transform(data['test'])
-    test_encoded_cols = full_pipeline.named_transformers_['cat']['one_hot_encoder'].get_feature_names()
+    test_encoded_cols = full_pipeline.named_transformers_[
+        'cat']['one_hot_encoder'].get_feature_names()
     test_cols = [*list(numeric_columns), *test_encoded_cols]
 
     # Ternary clause because when running housing.csv,
-    # the product of preprocessing is np array, but not when using landslide data... not sure why
-    data['train'] = pd.DataFrame((train.toarray() if not isinstance(train, np.ndarray) else train), columns=train_cols)
-    data['test'] = pd.DataFrame((test.toarray() if not isinstance(train, np.ndarray) else test), columns=test_cols)
+    # the product of preprocessing is np array, but not when using landslide
+    # data... not sure why
+    data['train'] = pd.DataFrame(
+        (train.toarray() if not isinstance(
+            train,
+            np.ndarray) else train),
+        columns=train_cols)
+    data['test'] = pd.DataFrame(
+        (test.toarray() if not isinstance(
+            train,
+            np.ndarray) else test),
+        columns=test_cols)
 
     return data, full_pipeline
 
