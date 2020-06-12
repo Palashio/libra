@@ -47,13 +47,56 @@ from pandas.core.common import SettingWithCopyWarning
 import warnings
 import os
 import sys
+import torch
+from torch.utils.data import DataLoader
+
+# Importing the T5 modules from huggingface/transformers
+from transformers import T5Tokenizer, T5ForConditionalGeneration
 
 from keras_preprocessing import sequence
+
+from huggingfaceModelRetrainHelper import train, CustomDataset, inference
 
 sys.path.insert(1, './preprocessing')
 sys.path.insert(1, './data_generation')
 sys.path.insert(1, './modeling')
 sys.path.insert(1, './plotting')
+
+import os
+import warnings
+from pandas.core.common import SettingWithCopyWarning
+import numpy as np
+import pandas as pd
+from tabulate import tabulate
+from scipy.spatial.distance import cosine
+from sklearn.model_selection import cross_val_score
+from sklearn.preprocessing import LabelEncoder
+from sklearn.metrics import accuracy_score
+from sklearn import svm
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+from dataset_labelmatcher import get_similar_column, get_similar_model
+from tensorflow.keras.callbacks import EarlyStopping
+from grammartree import get_value_instruction
+from data_preprocesser import structured_preprocesser, initial_preprocesser
+from predictionModelCreation import get_keras_model_reg, get_keras_text_class
+from predictionModelCreation import get_keras_model_class
+from keras.utils import np_utils
+from sklearn.cluster import KMeans
+from generatePlots import (generate_clustering_plots,
+                           generate_regression_plots,
+                           generate_classification_plots)
+
+import tensorflow as tf
+from data_reader import DataReader
+from keras.models import Sequential
+from keras.layers import (Dense, Conv2D, Flatten, MaxPooling2D, )
+from dimensionality_red_queries import dimensionality_reduc
+from tuner import tuneReg, tuneClass, tuneCNN
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn import preprocessing, tree
+from NLP_preprocessing import text_clean_up, lemmatize_text, get_target_values
+from keras.preprocessing.image import ImageDataGenerator
 
 
 warnings.simplefilter(action='error', category=FutureWarning)
@@ -270,6 +313,7 @@ class client:
         model_data.append(model)
 
         logger("->", "Initial number of layers " + str(len(model.layers)))
+        
         logger("->", "Training Loss: " + \
                str(history.history['loss'][len(history.history['val_loss']) - 1]), '|')
         logger("->", "Test Loss: " +
@@ -296,6 +340,7 @@ class client:
             model_data.append(model)
             models.append(history)
             logger("->", "Current number of layers: " + str(len(model.layers)))
+
             logger("->", "Training Loss: " +
                    str(history.history['loss'][len(history.history['val_loss']) -
                                                1]), '|')
@@ -309,8 +354,10 @@ class client:
 
         final_model = model_data[losses.index(min(losses))]
         final_hist = models[losses.index(min(losses))]
+
         logger('->', "Best number of layers found: " +
                str(len(final_model.layers)))
+
         logger('->', "Training Loss: " + str(final_hist.history['loss']
                                              [len(final_hist.history['val_loss']) - 1]))
         logger('->', "Test Loss: " + str(final_hist.history['val_loss']
@@ -358,6 +405,7 @@ class client:
             save_path=os.getcwd()):
 
         # reads dataset and fills n/a values with zeroes
+
         #data = pd.read_csv(self.dataset)
 
         dataReader = DataReader(self.dataset)
@@ -401,6 +449,7 @@ class client:
         model_data.append(model)
         models.append(history)
         logger("->", "Initial number of layers: " + str(len(model.layers)))
+
         logger("->", "Training Loss: " +
                str(history.history['loss'][len(history.history['val_loss']) - 1]), '|')
         logger("->", "Test Loss: " +
@@ -428,6 +477,7 @@ class client:
             model_data.append(model)
             models.append(history)
             logger("->", "Current number of layers: " + str(len(model.layers)))
+
             logger("->", "Training Loss: " +
                    str(history.history['loss'][len(history.history['val_loss']) -
                                                1]), '|')
@@ -444,6 +494,7 @@ class client:
 
         final_model = model_data[losses.index(min(losses))]
         final_hist = models[losses.index(min(losses))]
+
         logger('->', "Best number of layers found: " +
                str(len(final_model.layers)))
         logger('->', "Training Accuracy: " + str(final_hist.history['accuracy']
@@ -484,7 +535,7 @@ class client:
             base_clusters=1):
         logger("Reading dataset...")
         # loads dataset and replaces n/a with zero
-        #data = pd.read_csv(self.dataset)
+        # data = pd.read_csv(self.dataset)
 
         dataReader = DataReader(self.dataset)
         data = dataReader.data_generator()
@@ -561,7 +612,8 @@ class client:
             cross_val_size=0.3):
         logger("Reading in dataset....")
         # reads dataset and fills n/a values with zeroes
-        #data = pd.read_csv(self.dataset)
+        # data = pd.read_csv(self.dataset)
+
 
         dataReader = DataReader(self.dataset)
         data = dataReader.data_generator()
@@ -612,6 +664,7 @@ class client:
             max_neighbors=10):
         logger("Reading in dataset....")
         # Reads in dataset
+
         #data = pd.read_csv(self.dataset)
 
         dataReader = DataReader(self.dataset)
@@ -619,6 +672,7 @@ class client:
 
         if drop is not None:
             data.drop(drop, axis=1, inplace=True)
+
         data, y, remove, full_pipeline = initial_preprocesser(
             data, instruction, preprocess)
 
@@ -657,6 +711,7 @@ class client:
 
         clearLog()
         return knn
+
 
     def decision_tree_query(
             self,
@@ -971,18 +1026,13 @@ class client:
                                   test_size=0.2,
                                   random_state=49,
                                   epochs=10,
-                                  maxTextLength=20000,
+                                  maxTextLength=200,
                                   generate_plots=True):
         data = pd.read_csv(self.dataset)
         data.fillna(0, inplace=True)
 
-        # Get target columns
-        target = get_similar_column(get_value_instruction(instruction), data)
-        X = data[target]
-        del data[target]
-        labels = get_similar_column(get_value_instruction("Label"), data)
-        Y = data[labels]
-        Y = np.array(Y.array)
+        X, Y = get_target_values(data, instruction, "label")
+        Y = np.array(Y)
 
         if preprocess:
             logger("Preprocessing data...")
@@ -1031,6 +1081,81 @@ class client:
             'accuracy': {
                 'training_accuracy': history.history['accuracy'],
                 'validation_accuracy': history.history['val_accuracy']}}
+
+    # Document summarization predict wrapper
+    def get_summary(self, text):
+        modelInfo = self.models.get("Document Summarization")
+        model = modelInfo['model']
+        model.eval()
+        tokenizer = T5Tokenizer.from_pretrained("t5-small")
+        MAX_LEN = 512
+        SUMMARY_LEN = 150
+        df = pd.DataFrame({'text': [""], 'ctext': [text]})
+        set = CustomDataset(df, tokenizer, MAX_LEN, SUMMARY_LEN)
+        params = {
+            'batch_size': 1,
+            'shuffle': True,
+            'num_workers': 0
+        }
+        loader = DataLoader(set, **params)
+        predictions, actuals = inference(tokenizer, model, "cpu", loader)
+        return predictions
+
+    # text summarization query
+    def summarization_query(self, instruction,
+                           preprocess=True,
+                           test_size=0.2,
+                           random_state=49,
+                           epochs=1,
+                           generate_plots=True):
+
+        data = pd.read_csv(self.dataset)
+        data.fillna(0, inplace=True)
+
+        logger("Preprocessing data...")
+
+        X, Y = get_target_values(data, instruction, "summary")
+        df = pd.DataFrame({'text': Y, 'ctext': X})
+
+        device = 'cpu'
+
+        TRAIN_BATCH_SIZE = 64
+        TRAIN_EPOCHS = 10
+        LEARNING_RATE = 1e-4
+        SEED = 42
+        MAX_LEN = 512
+        SUMMARY_LEN = 150
+
+        torch.manual_seed(SEED)
+        np.random.seed(SEED)
+
+        tokenizer = T5Tokenizer.from_pretrained("t5-small")
+
+        train_size = 0.8
+        train_dataset = df.sample(frac=train_size, random_state=SEED).reset_index(drop=True)
+
+        training_set = CustomDataset(train_dataset, tokenizer, MAX_LEN, SUMMARY_LEN)
+        train_params = {
+            'batch_size': TRAIN_BATCH_SIZE,
+            'shuffle': True,
+            'num_workers': 0
+        }
+
+        training_loader = DataLoader(training_set, **train_params)
+# used small model
+        model = T5ForConditionalGeneration.from_pretrained("t5-small")
+        model = model.to(device)
+
+        optimizer = torch.optim.Adam(params=model.parameters(), lr=LEARNING_RATE)
+
+        logger('Initiating Fine-Tuning for the model on your dataset')
+
+        for epoch in range(TRAIN_EPOCHS):
+            train(epoch, tokenizer, model, device, training_loader, optimizer)
+
+        self.models["Document Summarization"] = {
+            "model": model
+        }
 
     def dimensionality_reducer(self, instruction):
         dimensionality_reduc(instruction, self.dataset)
