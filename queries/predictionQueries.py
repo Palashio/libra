@@ -1,14 +1,26 @@
 # Making functions in other directories accesible to this file by
 # inserting into sis path
 import sys
+import torch
+import torch.nn.functional as F
+from torch.utils.data import Dataset, DataLoader, RandomSampler, SequentialSampler
 
+# Importing the T5 modules from huggingface/transformers
+from torch.version import cuda
+from transformers import T5Tokenizer, T5ForConditionalGeneration
+
+from keras import Model
 from keras_preprocessing import sequence
+
+from keras_preprocessing.sequence import pad_sequences
+from keras_preprocessing.text import Tokenizer
+
+from NLP_Helper.huggingfaceModelRetrainHelper import train, CustomDataset, inference
 
 sys.path.insert(1, './preprocessing')
 sys.path.insert(1, './data_generation')
 sys.path.insert(1, './modeling')
 sys.path.insert(1, './plotting')
-
 
 import os
 import warnings
@@ -27,7 +39,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import OneHotEncoder, StandardScaler
 from dataset_labelmatcher import get_similar_column, get_similar_model
-from tensorflow.keras.callbacks  import EarlyStopping
+from tensorflow.keras.callbacks import EarlyStopping
 from matplotlib import pyplot
 from grammartree import get_value_instruction
 from data_preprocesser import structured_preprocesser, initial_preprocesser
@@ -41,6 +53,7 @@ from generatePlots import (generate_clustering_plots,
                            generate_regression_plots,
                            generate_classification_plots,
                            generate_classification_together)
+import tensorflow_hub as hub
 
 import tensorflow as tf
 from data_reader import DataReader
@@ -53,7 +66,7 @@ from sklearn.neighbors import KNeighborsClassifier
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.feature_selection import SelectFromModel
 from sklearn import preprocessing, tree
-from NLP_preprocessing import text_clean_up, lemmatize_text
+from NLP_preprocessing import text_clean_up, lemmatize_text, get_target_values
 from keras.preprocessing.image import ImageDataGenerator
 
 warnings.simplefilter(action='error', category=FutureWarning)
@@ -85,18 +98,18 @@ def clearLog():
 # global variable parallels
 
 
-def logger(instruction, found="",slash=''):
+def logger(instruction, found="", slash=''):
     global currLog
     global counter
 
     if counter == 0:
         currLog += (" " * 2 * counter) + str(instruction) + str(found)
-    elif instruction=="->":
-            counter=counter-1
-            if slash=='|':
-                currLog += (" " +slash + str(instruction) + str(found))
-            else:
-                currLog += (" " * 2 * counter) + str(instruction) + str(found)  
+    elif instruction == "->":
+        counter = counter - 1
+        if slash == '|':
+            currLog += (" " + slash + str(instruction) + str(found))
+        else:
+            currLog += (" " * 2 * counter) + str(instruction) + str(found)
 
     else:
         currLog += (" " * 2 * counter) + "|"
@@ -105,13 +118,14 @@ def logger(instruction, found="",slash=''):
         if instruction == "done...":
             currLog += "\n"
             currLog += "\n"
-        
+
     counter += 1
-    if instruction=="->":
-        print(currLog,end="")
+    if instruction == "->":
+        print(currLog, end="")
     else:
         print(currLog)
-    currLog=""
+    currLog = ""
+
 
 # class to store all query information
 
@@ -174,7 +188,7 @@ class client:
     def regression_query_ann(
             self,
             instruction,
-            drop = None,
+            drop=None,
             preprocess=True,
             test_size=0.2,
             random_state=49,
@@ -190,10 +204,8 @@ class client:
         data = dataReader.data_generator()
         # data = pd.read_csv(self.dataset)
 
-        
         if drop is not None:
             data.drop(drop, axis=1, inplace=True)
-
 
         data, y, target, full_pipeline = initial_preprocesser(data, instruction, preprocess)
 
@@ -201,7 +213,7 @@ class client:
         y_train = data['train'][target]
         X_test = data['test']
         y_test = data['test'][target]
-        
+
         # Only used for the interpreter
         target_scaler = StandardScaler()
         target_scaler.fit_transform(np.array(y).reshape(-1, 1))
@@ -210,7 +222,7 @@ class client:
 
         models = []
         losses = []
-        model_data=[]
+        model_data = []
 
         # callback function to store lowest loss value
         es = EarlyStopping(
@@ -237,13 +249,12 @@ class client:
         models.append(history)
         model_data.append(model)
 
-        logger("->","Initial number of layers "+ str(len(model.layers)))
-        logger("->","Training Loss: "+str(history.history['loss']
-                     [len(history.history['val_loss']) - 1]),'|')
-        logger("->","Test Loss: "+ str(history.history['val_loss']
-                     [len(history.history['val_loss']) - 1]),'|')
+        logger("->", "Initial number of layers " + str(len(model.layers)))
+        logger("->", "Training Loss: " + str(history.history['loss']
+                                             [len(history.history['val_loss']) - 1]), '|')
+        logger("->", "Test Loss: " + str(history.history['val_loss']
+                                         [len(history.history['val_loss']) - 1]), '|')
         print("")
-        
 
         losses.append(history.history[maximizer]
                       [len(history.history[maximizer]) - 1])
@@ -263,23 +274,23 @@ class client:
                     y_test), verbose=0)
             model_data.append(model)
             models.append(history)
-            logger("->","Current number of layers: "+ str(len(model.layers)))
-            logger("->","Training Loss: "+ str(history.history['loss']
-                        [len(history.history['val_loss']) - 1]),'|')
-            logger("->","Test Loss: "+ str(history.history['val_loss']
-                        [len(history.history['val_loss']) - 1]),'|')
+            logger("->", "Current number of layers: " + str(len(model.layers)))
+            logger("->", "Training Loss: " + str(history.history['loss']
+                                                 [len(history.history['val_loss']) - 1]), '|')
+            logger("->", "Test Loss: " + str(history.history['val_loss']
+                                             [len(history.history['val_loss']) - 1]), '|')
             print("")
             losses.append(history.history[maximizer]
                           [len(history.history[maximizer]) - 1])
             i += 1
 
-        final_model=model_data[losses.index(min(losses))]
-        final_hist=models[losses.index(min(losses))]
-        logger('->',"Best number of layers found: "+ str(len(final_model.layers)))
-        logger('->',"Training Loss: "+str(final_hist.history['loss']
-                     [len(final_hist.history['val_loss']) - 1]))
-        logger('->',"Test Loss: "+str(final_hist.history['val_loss']
-                     [len(final_hist.history['val_loss']) - 1]))
+        final_model = model_data[losses.index(min(losses))]
+        final_hist = models[losses.index(min(losses))]
+        logger('->', "Best number of layers found: " + str(len(final_model.layers)))
+        logger('->', "Training Loss: " + str(final_hist.history['loss']
+                                             [len(final_hist.history['val_loss']) - 1]))
+        logger('->', "Test Loss: " + str(final_hist.history['val_loss']
+                                         [len(final_hist.history['val_loss']) - 1]))
         print("")
         # calls function to generate plots in plot generation
         if generate_plots:
@@ -312,7 +323,7 @@ class client:
             instruction,
             preprocess=True,
             callback_mode='min',
-            drop = None,
+            drop=None,
             random_state=49,
             test_size=0.2,
             epochs=5,
@@ -320,14 +331,13 @@ class client:
             maximizer="val_loss"):
 
         # reads dataset and fills n/a values with zeroes
-        #data = pd.read_csv(self.dataset)
-   
+        # data = pd.read_csv(self.dataset)
 
         dataReader = DataReader(self.dataset)
         data = dataReader.data_generator()
 
         if drop is not None:
-            data.drop(drop, axis=1, inplace=True)    
+            data.drop(drop, axis=1, inplace=True)
 
         data, y, remove, full_pipeline = initial_preprocesser(data, instruction, preprocess)
 
@@ -343,8 +353,8 @@ class client:
 
         models = []
         losses = []
-        accuracies=[]
-        model_data=[]
+        accuracies = []
+        model_data = []
 
         # early stopping callback
         es = EarlyStopping(
@@ -362,11 +372,11 @@ class client:
 
         model_data.append(model)
         models.append(history)
-        logger("->","Initial number of layers: "+ str(len(model.layers)))
-        logger("->","Training Loss: "+ str(history.history['loss']
-                    [len(history.history['val_loss']) - 1]),'|')
-        logger("->","Test Loss: "+ str(history.history['val_loss']
-                    [len(history.history['val_loss']) - 1]),'|')
+        logger("->", "Initial number of layers: " + str(len(model.layers)))
+        logger("->", "Training Loss: " + str(history.history['loss']
+                                             [len(history.history['val_loss']) - 1]), '|')
+        logger("->", "Test Loss: " + str(history.history['val_loss']
+                                         [len(history.history['val_loss']) - 1]), '|')
         print("")
 
         losses.append(history.history[maximizer]
@@ -388,26 +398,26 @@ class client:
 
             model_data.append(model)
             models.append(history)
-            logger("->","Current number of layers: "+ str(len(model.layers)))
-            logger("->","Training Loss: "+ str(history.history['loss']
-                        [len(history.history['val_loss']) - 1]),'|')
-            logger("->","Test Loss: "+ str(history.history['val_loss']
-                        [len(history.history['val_loss']) - 1]),'|')
+            logger("->", "Current number of layers: " + str(len(model.layers)))
+            logger("->", "Training Loss: " + str(history.history['loss']
+                                                 [len(history.history['val_loss']) - 1]), '|')
+            logger("->", "Test Loss: " + str(history.history['val_loss']
+                                             [len(history.history['val_loss']) - 1]), '|')
             print("")
 
             losses.append(history.history[maximizer]
                           [len(history.history[maximizer]) - 1])
             accuracies.append(history.history['val_accuracy']
-                      [len(history.history['val_accuracy']) - 1])
+                              [len(history.history['val_accuracy']) - 1])
             i += 1
 
-        final_model=model_data[losses.index(min(losses))]
-        final_hist=models[losses.index(min(losses))]
-        logger('->',"Best number of layers found: "+ str(len(final_model.layers)))
-        logger('->',"Training Accuracy: "+str(final_hist.history['accuracy']
-                     [len(final_hist.history['val_accuracy']) - 1]))
-        logger('->',"Test Accuracy: "+str(final_hist.history['val_accuracy']
-                     [len(final_hist.history['val_accuracy']) - 1]))
+        final_model = model_data[losses.index(min(losses))]
+        final_hist = models[losses.index(min(losses))]
+        logger('->', "Best number of layers found: " + str(len(final_model.layers)))
+        logger('->', "Training Accuracy: " + str(final_hist.history['accuracy']
+                                                 [len(final_hist.history['val_accuracy']) - 1]))
+        logger('->', "Test Accuracy: " + str(final_hist.history['val_accuracy']
+                                             [len(final_hist.history['val_accuracy']) - 1]))
         print("")
 
         # genreates appropriate classification plots by feeding all information
@@ -436,17 +446,17 @@ class client:
             self,
             preprocess=True,
             generate_plots=True,
-            drop = None,
+            drop=None,
             base_clusters=1):
         logger("Reading dataset...")
         # loads dataset and replaces n/a with zero
-        #data = pd.read_csv(self.dataset)
+        # data = pd.read_csv(self.dataset)
 
         dataReader = DataReader(self.dataset)
         data = dataReader.data_generator()
 
         if drop is not None:
-            data.drop(drop, axis=1, inplace=True)     
+            data.drop(drop, axis=1, inplace=True)
 
         dataPandas = data.copy()
 
@@ -512,18 +522,17 @@ class client:
             test_size=0.2,
             kernel='linear',
             preprocess=True,
-            drop = None,
+            drop=None,
             cross_val_size=0.3):
         logger("Reading in dataset....")
         # reads dataset and fills n/a values with zeroes
-        #data = pd.read_csv(self.dataset)
-
+        # data = pd.read_csv(self.dataset)
 
         dataReader = DataReader(self.dataset)
         data = dataReader.data_generator()
 
         if drop is not None:
-            data.drop(drop, axis=1, inplace=True)     
+            data.drop(drop, axis=1, inplace=True)
 
         data, y, remove, full_pipeline = initial_preprocesser(data, instruction, preprocess)
         # classification_column = get_similar_column(getLabelwithInstruction(instruction), data)
@@ -562,19 +571,18 @@ class client:
             self,
             instruction,
             preprocess=True,
-            drop = None, 
+            drop=None,
             min_neighbors=3,
             max_neighbors=10):
         logger("Reading in dataset....")
         # Reads in dataset
-        #data = pd.read_csv(self.dataset)
-
+        # data = pd.read_csv(self.dataset)
 
         dataReader = DataReader(self.dataset)
         data = dataReader.data_generator()
 
         if drop is not None:
-            data.drop(drop, axis=1, inplace=True)     
+            data.drop(drop, axis=1, inplace=True)
         data, y, remove, full_pipeline = initial_preprocesser(data, instruction, preprocess)
 
         # classification_column = get_similar_column(getLabelwithInstruction(instruction), data)
@@ -613,14 +621,14 @@ class client:
         clearLog()
         return knn
 
-    def decision_tree_query(self, instruction, preprocess=True, test_size=0.2, drop = None):
+    def decision_tree_query(self, instruction, preprocess=True, test_size=0.2, drop=None):
         logger("Reading in dataset....")
 
         dataReader = DataReader(self.dataset)
         data = dataReader.data_generator()
 
         if drop is not None:
-            data.drop(drop, axis=1, inplace=True)     
+            data.drop(drop, axis=1, inplace=True)
 
         data, y, remove, full_pipeline = initial_preprocesser(data, instruction, preprocess)
 
@@ -665,7 +673,7 @@ class client:
         data = dataReader.data_generator()
 
         if drop is not None:
-            data.drop(drop, axis=1, inplace=True)    
+            data.drop(drop, axis=1, inplace=True)
 
         data, y, remove, full_pipeline = initial_preprocesser(data, instruction, preprocess)
 
@@ -730,14 +738,14 @@ class client:
                     self.models["convolutional_NN"]["num_classes"])
                 self.models["convolutional_NN"]["model"] = model
 
-    def stat_analysis(self, column_name="none", drop = None):
+    def stat_analysis(self, column_name="none", drop=None):
         logger("Reading in dataset....")
         # Reading in dataset and creating pdtabulate variable to format outputs
         dataReader = DataReader(self.dataset)
         data = dataReader.data_generator()
 
         if drop is not None:
-            data.drop(drop, axis=1, inplace=True)   
+            data.drop(drop, axis=1, inplace=True)
 
         data.fillna(0, inplace=True)
         logger("Creating lambda object to format...")
@@ -916,18 +924,13 @@ class client:
                                   test_size=0.2,
                                   random_state=49,
                                   epochs=10,
-                                  maxTextLength=20000,
+                                  maxTextLength=200,
                                   generate_plots=True):
         data = pd.read_csv(self.dataset)
         data.fillna(0, inplace=True)
 
-        # Get target columns
-        target = get_similar_column(get_value_instruction(instruction), data)
-        X = data[target]
-        del data[target]
-        labels = get_similar_column(get_value_instruction("Label"), data)
-        Y = data[labels]
-        Y = np.array(Y.array)
+        X, Y = get_target_values(data, instruction, "label")
+        Y = np.array(Y)
 
         if preprocess:
             logger("Preprocessing data...")
@@ -975,6 +978,81 @@ class client:
                 'training_accuracy': history.history['accuracy'],
                 'validation_accuracy': history.history['val_accuracy']}}
 
+    # Document summarization predict wrapper
+    def get_summary(self, text):
+        modelInfo = self.models.get("Document Summarization")
+        model = modelInfo['model']
+        model.eval()
+        tokenizer = T5Tokenizer.from_pretrained("t5-small")
+        MAX_LEN = 512
+        SUMMARY_LEN = 150
+        df = pd.DataFrame({'text': [""], 'ctext': [text]})
+        set = CustomDataset(df, tokenizer, MAX_LEN, SUMMARY_LEN)
+        params = {
+            'batch_size': 1,
+            'shuffle': True,
+            'num_workers': 0
+        }
+        loader = DataLoader(set, **params)
+        predictions, actuals = inference(tokenizer, model, "cpu", loader)
+        return predictions
+
+    # text summarization query
+    def document_sum_query(self, instruction,
+                           preprocess=True,
+                           test_size=0.2,
+                           random_state=49,
+                           epochs=1,
+                           generate_plots=True):
+
+        data = pd.read_csv(self.dataset)
+        data.fillna(0, inplace=True)
+
+        logger("Preprocessing data...")
+
+        X, Y = get_target_values(data, instruction, "summary")
+        df = pd.DataFrame({'text': Y, 'ctext': X})
+
+        device = 'cpu'
+
+        TRAIN_BATCH_SIZE = 2  # input batch size for training (default: 64)
+        TRAIN_EPOCHS = 2  # number of epochs to train (default: 10)
+        LEARNING_RATE = 1e-4  # learning rate (default: 0.01)
+        SEED = 42  # random seed (default: 42)
+        MAX_LEN = 512
+        SUMMARY_LEN = 150
+
+        torch.manual_seed(SEED)
+        np.random.seed(SEED)
+
+        tokenizer = T5Tokenizer.from_pretrained("t5-small")
+
+        train_size = 0.8
+        train_dataset = df.sample(frac=train_size, random_state=SEED).reset_index(drop=True)
+
+        training_set = CustomDataset(train_dataset, tokenizer, MAX_LEN, SUMMARY_LEN)
+        train_params = {
+            'batch_size': TRAIN_BATCH_SIZE,
+            'shuffle': True,
+            'num_workers': 0
+        }
+
+        training_loader = DataLoader(training_set, **train_params)
+# used small model
+        model = T5ForConditionalGeneration.from_pretrained("t5-small")
+        model = model.to(device)
+
+        optimizer = torch.optim.Adam(params=model.parameters(), lr=LEARNING_RATE)
+
+        logger('Initiating Fine-Tuning for the model on your dataset')
+
+        for epoch in range(TRAIN_EPOCHS):
+            train(epoch, tokenizer, model, device, training_loader, optimizer)
+
+        self.models["Document Summarization"] = {
+            "model": model
+        }
+
     def dimensionality_reducer(self, instruction):
         dimensionality_reduc(instruction, self.dataset)
 
@@ -982,6 +1060,7 @@ class client:
         print(self.models[model]['plots'].keys())
 
 # Easier to comment the one you don't want to run instead of typing them out every time
-#newClient = client('./data/housing.csv').neural_network_query('Model median house value')
-newClient = client('./data/landslides_after_rainfall.csv').neural_network_query(instruction='Model distance', drop=['id', 'geolocation', 'source_link', 'source_name'])
-
+# newClient = client('./data/housing.csv').neural_network_query('Model median house value')
+newClient = client('./data/landslides_after_rainfall.csv').neural_network_query(instruction='Model distance',
+                                                                              drop=['id', 'geolocation',
+                                                                              'source_link', 'source_name'])
