@@ -97,7 +97,7 @@ Table of Contents
 
 ***
 
-## grammatree ##
+## grammartree ##
 
 ### get_value_instruction ###
 
