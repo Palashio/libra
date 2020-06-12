@@ -6,6 +6,8 @@ from keras import Model
 from keras.layers import LSTM, Embedding, TimeDistributed, Concatenate
 from tensorflow.python.keras.layers import Dense, Input
 import numpy as np
+from keras.models import model_from_json
+import os
 
 # Creates a regression neural network
 
@@ -97,3 +99,18 @@ def get_keras_text_class(max_features, num_classes):
 
 def getKerasConvolutional():
     print("entered")
+
+
+# Loading the user defined model given that the user provides the model path.
+# The user must provide the model Directory.
+def load_model(self, load_path):
+    load_file = load_path[load_path.rindex("/") + 1:load_path.rindex(".")]
+    # loading model json file
+    json_file = open(load_path, 'r')
+    json_model = json_file.read()
+    json_file.close()
+    loaded_model = model_from_json(json_model)
+    # loading weights in the model
+    loaded_model.load_weights(load_file + ".h5")
+    print("Model loaded...")
+    return loaded_model
