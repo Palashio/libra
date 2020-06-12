@@ -924,22 +924,14 @@ class client:
                                         horizontal_flip=True)
 
         X_train = train_data.flow_from_directory(data_path + training_path,
-                                                 << << << < HEAD
                                                  target_size=input_single,
                                                  color_mode='rgb',
-                                                 == == == =
-                                                 target_size=(processInfo["height"], processInfo["width"]),
-                                                 >>>>>> > 38dd0a3099d58fb5994c62a7c8851ee70a4c1680
                                                  batch_size=32,
                                                  class_mode='categorical')
         test_data = ImageDataGenerator(rescale=1. / 255)
         X_test = test_data.flow_from_directory(data_path + testing_path,
-                                               << << << < HEAD
                                                target_size=input_single,
                                                color_mode='rgb',
-                                               == == == =
-                                               target_size=(processInfo["height"], processInfo["width"]),
-                                               >>>>>> > 38dd0a3099d58fb5994c62a7c8851ee70a4c1680
                                                batch_size=32,
                                                class_mode='categorical')
 
@@ -1065,9 +1057,4 @@ class client:
 # out every time
 # newClient = client(
 #     './data/housing.csv').neural_network_query('Model median house value')
-<< << << < HEAD
 #newClient = client('./data/landslides_after_rainfall.csv').neural_network_query(instruction='Model distance', drop=['id', 'geolocation', 'source_link', 'source_name'])
-newClient = client("").convolutional_query()
-== == == =
-#newClient = client('./data/landslides_after_rainfall.csv').neural_network_query(instruction='Model distance', drop=['id', 'geolocation', 'source_link', 'source_name'])
->>>>>> > 38dd0a3099d58fb5994c62a7c8851ee70a4c1680
