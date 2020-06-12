@@ -1,5 +1,13 @@
 # Making functions in other directories accesible to this file by
 # inserting into sis path
+import sys 
+
+sys.path.insert(1, './preprocessing')
+sys.path.insert(1, './data_generation')
+sys.path.insert(1, './modeling')
+sys.path.insert(1, './plotting')
+
+
 from keras.models import model_from_json
 from termcolor import colored
 from keras.preprocessing.image import ImageDataGenerator
@@ -50,11 +58,6 @@ import os
 import sys
 
 from keras_preprocessing import sequence
-
-sys.path.insert(1, './preprocessing')
-sys.path.insert(1, './data_generation')
-sys.path.insert(1, './modeling')
-sys.path.insert(1, './plotting')
 
 warnings.simplefilter(action='error', category=FutureWarning)
 warnings.simplefilter(action="ignore", category=SettingWithCopyWarning)
@@ -882,6 +885,7 @@ class client:
         # process images
         processInfo = image_preprocess(data_path, new_folders)
         input_shape = (processInfo["height"], processInfo["width"], 3)
+        input_single = (processInfo["height"], processInfo["width"])
         num_classes = processInfo["num_categories"]
         loss_func = ""
         if new_folders:
@@ -895,6 +899,8 @@ class client:
             loss_func = "categorical_crossentropy"
         elif num_classes == 2:
             loss_func = "binary_crossentropy"
+
+
 
         logger("Creating convolutional neural network dynamically...")
         # Convolutional Neural Network
@@ -920,17 +926,22 @@ class client:
                                         zoom_range=0.2,
                                         horizontal_flip=True)
 
+        
+
         X_train = train_data.flow_from_directory(data_path + training_path,
-                                                 target_size=input_shape,
+                                                 target_size=input_single,
+                                                 color_mode = 'rgb',
                                                  batch_size=32,
                                                  class_mode='categorical')
         test_data = ImageDataGenerator(rescale=1. / 255)
         X_test = test_data.flow_from_directory(data_path + testing_path,
-                                               target_size=input_shape,
+                                               target_size=input_single,
+                                               color_mode = 'rgb',
                                                batch_size=32,
                                                class_mode='categorical')
-        # Fitting/Training the model
-        print(X_train)
+
+
+        # print(X_train)
         history = model.fit_generator(
             generator=X_train,
             steps_per_epoch=X_train.n //
@@ -939,6 +950,7 @@ class client:
             validation_steps=X_test.n //
             X_test.batch_size,
             epochs=10)
+        
         # storing values the model dictionary
         self.models["convolutional_NN"] = {
             "model": model,
@@ -1052,3 +1064,4 @@ class client:
 # newClient = client(
 #     './data/housing.csv').neural_network_query('Model median house value')
 #newClient = client('./data/landslides_after_rainfall.csv').neural_network_query(instruction='Model distance', drop=['id', 'geolocation', 'source_link', 'source_name'])
+newClient = client("").convolutional_query()
