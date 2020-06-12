@@ -44,21 +44,21 @@ def initial_preprocesser(data, instruction, preprocess):
     y = y[y.notna()]
 
     del data[target]
-
     X_train, X_test, y_train, y_test = train_test_split(
         data, y, test_size=0.2, random_state=49)
 
     data = {
-        'train': pd.concat([X_train, y_train], axis=1),
-        'test': pd.concat([X_test, y_test], axis=1)
+        'train': pd.concat([X_train], axis=1),
+        'test': pd.concat([X_test], axis=1)
     }
-
     # preprocess the dataset
     full_pipeline = None
     if preprocess:
         data, full_pipeline = structured_preprocesser(data)
     else:
         data.fillna(0, inplace=True)
+
+    y = {'train': y_train, 'test': y_test}
 
     return data, y, target, full_pipeline
 
@@ -103,14 +103,13 @@ def structured_preprocesser(data):
         ])
 
     train = full_pipeline.fit_transform(data['train'])
-    train_encoded_cols = full_pipeline.named_transformers_[
-        'cat']['one_hot_encoder'].get_feature_names()
-    train_cols = [*list(numeric_columns), *train_encoded_cols]
+
+    train_cols = generate_column_labels(full_pipeline, numeric_columns)
 
     test = full_pipeline.transform(data['test'])
-    test_encoded_cols = full_pipeline.named_transformers_[
-        'cat']['one_hot_encoder'].get_feature_names()
-    test_cols = [*list(numeric_columns), *test_encoded_cols]
+
+    test_cols = generate_column_labels(full_pipeline, numeric_columns)
+
 
     # Ternary clause because when running housing.csv,
     # the product of preprocessing is np array, but not when using landslide
@@ -302,3 +301,15 @@ def process_dates(data):
             df[f'{col}_MonthDay'] = df[col].dt.day
 
             del df[col]
+
+
+# Sees if one hot encoding occurred, if not just uses numeric cols
+def generate_column_labels(pipeline, numeric_cols):
+    try:
+        encoded_cols = pipeline.named_transformers_['cat']['one_hot_encoder'].get_feature_names()
+        cols = [*list(numeric_cols), *encoded_cols]
+
+    except:
+        cols = list(numeric_cols)
+
+    return cols

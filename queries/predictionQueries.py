@@ -273,8 +273,8 @@ class client:
         if drop is not None:
             data.drop(drop, axis=1, inplace=True)
 
-        data, y, target, full_pipeline = initial_preprocesser(
-            data, instruction, preprocess)
+        data, y, target, full_pipeline = initial_preprocesser(data, instruction, preprocess)
+
 
         X_train = data['train']
         y_train = data['train'][target]
@@ -625,18 +625,27 @@ class client:
         if drop is not None:
             data.drop(drop, axis=1, inplace=True)
 
-        data, y, remove, full_pipeline = initial_preprocesser(
-            data, instruction, preprocess)
-        # classification_column = get_similar_column(getLabelwithInstruction(instruction), data)
+        data, y, target, full_pipeline = initial_preprocesser(data, instruction, preprocess)
 
+
+        X_train = data['train']
+        y_train = y['train']
+        X_test = data['test']
+        y_test = y['test']
+
+        # classification_column = get_similar_column(getLabelwithInstruction(instruction), data)
         num_classes = len(np.unique(y))
 
-        # encodes the label dataset into 0's and 1's
-        le = preprocessing.LabelEncoder()
-        y = le.fit_transform(y)
+        # Needed to make a custom label encoder due to train test split changes
+        # Can still be inverse transformed, just a bit of extra work
+        y_vals = np.unique(pd.concat([y['train'], y['test']], axis=0))
+        label_mappings = {}
+        for i in range(len(y_vals)):
+            label_mappings[y_vals[i]] = i
 
-        X_train, X_test, y_train, y_test = train_test_split(
-            data, y, test_size=test_size, random_state=49)
+        y_train = y_train.apply(lambda x: label_mappings[x]).values
+        y_test = y_test.apply(lambda x: label_mappings[x]).values
+
 
         # Fitting to SVM and storing in the model dictionary
         logger("Fitting Support Vector Machine")
@@ -648,13 +657,13 @@ class client:
             "accuracy_score": accuracy_score(
                 clf.predict(X_test),
                 y_test),
-            "target": remove,
+            "target": target,
             "preprocesser": full_pipeline,
-            "interpreter": le,
+            "interpreter": label_mappings,
             "cross_val_score": cross_val_score(
                 clf,
-                data,
-                y,
+                X_train,
+                y_train,
                 cv=cross_val_size)}
         clearLog()
         return svm
@@ -734,18 +743,31 @@ class client:
         data, y, remove, full_pipeline = initial_preprocesser(
             data, instruction, preprocess)
 
+
+        X_train = data['train']
+        y_train = y['train']
+        X_test = data['test']
+        y_test = y['test']
+
+
         # classification_column = get_similar_column(getLabelwithInstruction(instruction), data)
 
+        # Needed to make a custom label encoder due to train test split changes
+        # Can still be inverse transformed, just a bit of extra work
+        y_vals = np.unique(pd.concat([y['train'], y['test']], axis=0))
+        label_mappings = {}
+        for i in range(len(y_vals)):
+            label_mappings[y_vals[i]] = i
+
+        # Custom label encoder due to train test split
+        y_train = y_train.apply(lambda x: label_mappings[x]).values
+        y_test = y_test.apply(lambda x: label_mappings[x]).values
         num_classes = len(np.unique(y))
 
-        # encodes the label dataset into 0's and 1's
-        le = preprocessing.LabelEncoder()
-        y = le.fit_transform(y)
 
         # fitting and storing
         logger("Fitting Decision Tree...")
-        X_train, X_test, y_train, y_test = train_test_split(
-            data, y, test_size=test_size, random_state=49)
+
         clf = tree.DecisionTreeClassifier()
         clf = clf.fit(X_train, y_train)
 
@@ -753,12 +775,15 @@ class client:
         self.models["decision_tree"] = {
             "model": clf,
             "target": remove,
+            "accuracy_score": accuracy_score(
+                clf.predict(X_test),
+                y_test),
             "preprocesser": full_pipeline,
-            "interpeter": le,
+            "interpeter": label_mappings,
             "cross_val_score": cross_val_score(
                 clf,
-                data,
-                y,
+                X_train,
+                y_train,
                 cv=3)}
 
         clearLog()
@@ -1181,8 +1206,10 @@ class client:
         print(self.models[model]['plots'].keys())
 
 
+
 # Easier to comment the one you don't want to run instead of typing them
 # out every time
 # newClient = client(
 #     './data/housing.csv').neural_network_query('Model median house value')
 #newClient = client('./data/landslides_after_rainfall.csv').neural_network_query(instruction='Model distance', drop=['id', 'geolocation', 'source_link', 'source_name'])
+
