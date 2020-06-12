@@ -1,63 +1,61 @@
 # Making functions in other directories accesible to this file by
 # inserting into sis path
-import sys 
+from keras_preprocessing import sequence
+import sys
+import os
+import warnings
+from pandas.core.common import SettingWithCopyWarning
+import numpy as np
+import pandas as pd
+from tabulate import tabulate
+from scipy.spatial.distance import cosine
+from sklearn.model_selection import cross_val_score
+from pandas import DataFrame
+from sklearn.preprocessing import LabelEncoder
+from sklearn.metrics import accuracy_score
+from sklearn import preprocessing, svm
+from sklearn.compose import ColumnTransformer
+from sklearn.model_selection import train_test_split
+from sklearn.pipeline import Pipeline
+from sklearn.preprocessing import OneHotEncoder, StandardScaler
+from dataset_labelmatcher import get_similar_column, get_similar_model
+from tensorflow.keras.callbacks import EarlyStopping
+from matplotlib import pyplot
+from grammartree import get_value_instruction
+from data_preprocesser import image_preprocess, add_resized_images, replace_images, process_color_channel
+from data_preprocesser import structured_preprocesser, initial_preprocesser
+from predictionModelCreation import get_keras_model_reg, get_keras_text_class
+from predictionModelCreation import get_keras_model_class
+from keras.utils import to_categorical
+from keras.utils import np_utils
+from sklearn.cluster import KMeans
+import matplotlib.pyplot as plt
+from generatePlots import (generate_clustering_plots,
+                           generate_regression_plots,
+                           generate_classification_plots,
+                           generate_classification_together)
+import tensorflow as tf
+from data_reader import DataReader
+from keras.models import Sequential
+from keras.layers import (Dense, Conv2D, Flatten, Input, MaxPooling2D, )
+from dimensionality_red_queries import dimensionality_reduc
+from os import listdir
+from tuner import tuneReg, tuneClass, tuneCNN
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.ensemble import RandomForestRegressor
+from sklearn.feature_selection import SelectFromModel
+from sklearn import preprocessing, tree
+from NLP_preprocessing import text_clean_up, lemmatize_text
+from keras.preprocessing.image import ImageDataGenerator
+from termcolor import colored
+from keras.models import model_from_json
+import sys
 
 sys.path.insert(1, './preprocessing')
 sys.path.insert(1, './data_generation')
 sys.path.insert(1, './modeling')
 sys.path.insert(1, './plotting')
 
-
-from keras.models import model_from_json
-from termcolor import colored
-from keras.preprocessing.image import ImageDataGenerator
-from NLP_preprocessing import text_clean_up, lemmatize_text
-from sklearn import preprocessing, tree
-from sklearn.feature_selection import SelectFromModel
-from sklearn.ensemble import RandomForestRegressor
-from sklearn.neighbors import KNeighborsClassifier
-from tuner import tuneReg, tuneClass, tuneCNN
-from os import listdir
-from dimensionality_red_queries import dimensionality_reduc
-from keras.layers import (Dense, Conv2D, Flatten, Input, MaxPooling2D, )
-from keras.models import Sequential
-from data_reader import DataReader
-import tensorflow as tf
-from generatePlots import (generate_clustering_plots,
-                           generate_regression_plots,
-                           generate_classification_plots,
-                           generate_classification_together)
-import matplotlib.pyplot as plt
-from sklearn.cluster import KMeans
-from keras.utils import np_utils
-from keras.utils import to_categorical
-from predictionModelCreation import get_keras_model_class
-from predictionModelCreation import get_keras_model_reg, get_keras_text_class
-from data_preprocesser import structured_preprocesser, initial_preprocesser
-from data_preprocesser import image_preprocess, add_resized_images, replace_images, process_color_channel
-from grammartree import get_value_instruction
-from matplotlib import pyplot
-from tensorflow.keras.callbacks import EarlyStopping
-from dataset_labelmatcher import get_similar_column, get_similar_model
-from sklearn.preprocessing import OneHotEncoder, StandardScaler
-from sklearn.pipeline import Pipeline
-from sklearn.model_selection import train_test_split
-from sklearn.compose import ColumnTransformer
-from sklearn import preprocessing, svm
-from sklearn.metrics import accuracy_score
-from sklearn.preprocessing import LabelEncoder
-from pandas import DataFrame
-from sklearn.model_selection import cross_val_score
-from scipy.spatial.distance import cosine
-from tabulate import tabulate
-import pandas as pd
-import numpy as np
-from pandas.core.common import SettingWithCopyWarning
-import warnings
-import os
-import sys
-
-from keras_preprocessing import sequence
 
 warnings.simplefilter(action='error', category=FutureWarning)
 warnings.simplefilter(action="ignore", category=SettingWithCopyWarning)
@@ -879,7 +877,8 @@ class client:
         # generates the dataset based on instructions using a selenium query on
         # google chrome
         logger("Generating datasets for classes...")
-        # Assuming Downloaded Images in current Directory if no data_path provided
+        # Assuming Downloaded Images in current Directory if no data_path
+        # provided
         if data_path is None:
             data_path = os.getcwd()
         # process images
@@ -899,8 +898,6 @@ class client:
             loss_func = "categorical_crossentropy"
         elif num_classes == 2:
             loss_func = "binary_crossentropy"
-
-
 
         logger("Creating convolutional neural network dynamically...")
         # Convolutional Neural Network
@@ -926,28 +923,25 @@ class client:
                                         zoom_range=0.2,
                                         horizontal_flip=True)
 
-        
-
         X_train = train_data.flow_from_directory(data_path + training_path,
-<<<<<<< HEAD
+                                                 << << << < HEAD
                                                  target_size=input_single,
-                                                 color_mode = 'rgb',
-=======
+                                                 color_mode='rgb',
+                                                 == == == =
                                                  target_size=(processInfo["height"], processInfo["width"]),
->>>>>>> 38dd0a3099d58fb5994c62a7c8851ee70a4c1680
+                                                 >>>>>> > 38dd0a3099d58fb5994c62a7c8851ee70a4c1680
                                                  batch_size=32,
                                                  class_mode='categorical')
         test_data = ImageDataGenerator(rescale=1. / 255)
         X_test = test_data.flow_from_directory(data_path + testing_path,
-<<<<<<< HEAD
+                                               << << << < HEAD
                                                target_size=input_single,
-                                               color_mode = 'rgb',
-=======
+                                               color_mode='rgb',
+                                               == == == =
                                                target_size=(processInfo["height"], processInfo["width"]),
->>>>>>> 38dd0a3099d58fb5994c62a7c8851ee70a4c1680
+                                               >>>>>> > 38dd0a3099d58fb5994c62a7c8851ee70a4c1680
                                                batch_size=32,
                                                class_mode='categorical')
-
 
         # print(X_train)
         history = model.fit_generator(
@@ -958,7 +952,7 @@ class client:
             validation_steps=X_test.n //
             X_test.batch_size,
             epochs=10)
-        
+
         # storing values the model dictionary
         self.models["convolutional_NN"] = {
             "model": model,
@@ -1071,9 +1065,9 @@ class client:
 # out every time
 # newClient = client(
 #     './data/housing.csv').neural_network_query('Model median house value')
-<<<<<<< HEAD
+<< << << < HEAD
 #newClient = client('./data/landslides_after_rainfall.csv').neural_network_query(instruction='Model distance', drop=['id', 'geolocation', 'source_link', 'source_name'])
 newClient = client("").convolutional_query()
-=======
+== == == =
 #newClient = client('./data/landslides_after_rainfall.csv').neural_network_query(instruction='Model distance', drop=['id', 'geolocation', 'source_link', 'source_name'])
->>>>>>> 38dd0a3099d58fb5994c62a7c8851ee70a4c1680
+>>>>>> > 38dd0a3099d58fb5994c62a7c8851ee70a4c1680
