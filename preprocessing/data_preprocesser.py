@@ -154,14 +154,18 @@ def image_preprocess(data_path, new_folder=True):
                 continue
 
     testing_dict = {}
-    for image in listdir(testing_path):
-        try:
-            img = cv2.imread(testing_path + "/" + image)
-            heights.append(img.shape[0])
-            widths.append(img.shape[1])
-            testing_dict[image] = img
-        except BaseException:
+    for class_folder in listdir(testing_path):
+        if not os.path.isdir(testing_path + "/" + class_folder):
             continue
+        testing_dict[class_folder] = {}
+        for image in listdir(testing_path + "/" + class_folder):
+            try:
+                img = cv2.imread(testing_path + "/" + class_folder + "/" + image)
+                heights.append(img.shape[0])
+                widths.append(img.shape[1])
+                testing_dict[class_folder][image] = img
+            except BaseException:
+                continue
 
     heights.sort()
     widths.sort()
@@ -173,8 +177,9 @@ def image_preprocess(data_path, new_folder=True):
         for image_name, image in images.items():
             training_dict[class_folder][image_name] = process_color_channel(image, height, width)
 
-    for image_name, image in testing_dict.items():
-        testing_dict[image_name] = process_color_channel(image, height, width)
+    for class_folder, images in testing_dict.items():
+        for image_name, image in images.items():
+            testing_dict[class_folder][image_name] = process_color_channel(image, height, width)
 
     # create new folder containing resized images
     if new_folder:
@@ -187,14 +192,18 @@ def image_preprocess(data_path, new_folder=True):
         # check if proc_testing_set folder exists
         if os.path.isdir(data_path + "/proc_testing_set"):
             shutil.rmtree(data_path + "/proc_testing_set")
-        add_resized_images(data_path, "testing_set", testing_dict)
+        os.mkdir(data_path + "/proc_testing_set")
+        for class_folder, images in testing_dict.items():
+            add_resized_images(data_path + "/proc_testing_set", class_folder, images)
     # replace images with newly resized images
     else:
         for class_folder, images in training_dict.items():
             replace_images(training_path + "/" + class_folder, images)
-        replace_images(testing_path + "/test_folder", testing_dict)
+        for class_folder, images in testing_dict.items():
+            replace_images(testing_path + "/" + class_folder, images)
 
     return {"num_categories":classification, "height":height, "width":width}
+
 
 def add_resized_images(data_path, folder_name, images):
 
@@ -255,3 +264,5 @@ def process_dates(data):
             df[f'{col}_MonthDay'] = df[col].dt.day
 
             del df[col]
+
+image_preprocess("/Users/rostamvakhshoori/Desktop/Data")

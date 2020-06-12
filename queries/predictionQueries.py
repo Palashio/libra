@@ -921,12 +921,12 @@ class client:
                                         horizontal_flip=True)
 
         X_train = train_data.flow_from_directory(data_path + training_path,
-                                                 target_size=(processInfo["height"], processInfo["width"]),
+                                                 target_size=input_shape,
                                                  batch_size=32,
                                                  class_mode='categorical')
         test_data = ImageDataGenerator(rescale=1. / 255)
         X_test = test_data.flow_from_directory(data_path + testing_path,
-                                               target_size=(processInfo["height"], processInfo["width"]),
+                                               target_size=input_shape,
                                                batch_size=32,
                                                class_mode='categorical')
         # Fitting/Training the model
