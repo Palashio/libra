@@ -90,9 +90,9 @@ Table of Contents
 
 ### produceMask ###
 
-'''python
+``` python
 libra.produceMask(instruction_label)
-'''
+```
 Generates/stores with base object a mask of list representation of form [int, int, int] based on frequency of distinct characters 
 
 Parameters: 
