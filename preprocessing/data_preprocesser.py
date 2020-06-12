@@ -138,9 +138,9 @@ def image_preprocess(data_path, new_folder=True):
                 continue
 
     testing_dict = {}
-    for image in listdir(testing_path + "/test_folder"):
+    for image in listdir(testing_path):
         try:
-            img = cv2.imread(testing_path + "/test_folder/" + image)
+            img = cv2.imread(testing_path + "/" + image)
             heights.append(img.shape[0])
             widths.append(img.shape[1])
             testing_dict[image] = img
@@ -155,27 +155,26 @@ def image_preprocess(data_path, new_folder=True):
     # resize images
     for class_folder, images in training_dict.items():
         for image_name, image in images.items():
-            training_dict[class_folder][image_name] = processColorChanel2(image, height, width)
+            training_dict[class_folder][image_name] = process_color_channel(image, height, width)
 
     for image_name, image in testing_dict.items():
-        testing_dict[image_name] = processColorChanel2(image, height, width)
+        testing_dict[image_name] = process_color_channel(image, height, width)
 
     # create new folder containing resized images
     if new_folder:
         os.mkdir(data_path + "/proc_training_set")
         for class_folder, images in training_dict.items():
-            addResizedImages(data_path + "/proc_training_set", class_folder, images)
-        os.mkdir(data_path + "/proc_testing_set")
-        addResizedImages(data_path + "/proc_testing_set", "test_folder", testing_dict)
+            add_resized_images(data_path + "/proc_training_set", class_folder, images)
+        add_resized_images(data_path, "testing_set", testing_dict)
     # replace images with newly resized images
     else:
         for class_folder, images in training_dict.items():
-            replaceImages(training_path + "/" + class_folder, images)
-        replaceImages(testing_path + "/test_folder", testing_dict)
+            replace_images(training_path + "/" + class_folder, images)
+        replace_images(testing_path + "/test_folder", testing_dict)
 
     return {"num_categories":classification, "height":height, "width":width}
 
-def addResizedImages(data_path, folder_name, images):
+def add_resized_images(data_path, folder_name, images):
 
     # create processed folder
     os.mkdir(data_path + "/proc_" + folder_name)
@@ -184,13 +183,13 @@ def addResizedImages(data_path, folder_name, images):
         cv2.imwrite(data_path + "/proc_" + folder_name + "/proc_" + img_name, img)
 
 
-def replaceImages(data_path, loaded_shaped):
+def replace_images(data_path, loaded_shaped):
 
     for img_name, img in loaded_shaped.items():
         cv2.imwrite(data_path + "/" + img_name, img)
 
 
-def processColorChanel2(img, height, width):
+def process_color_channel(img, height, width):
     chanels = [chanel for chanel in cv2.split(img)]
 
     for index, chanel in enumerate(chanels):
@@ -209,16 +208,16 @@ def processColorChanel2(img, height, width):
 
 # Seperates the color channels and then reshapes each of the channels to
 # (224, 224)
-def processColorChanel(img):
-    b, g, r = cv2.split(img)
-    # seperating each value into a color channel and resizing to a standard
-    # size of 224, 224, 3 <- because of RGB color channels. If it's not 3
-    # color channels it'll pad with zeroes
-    b = cv2.resize(b, dsize=(224, 224), interpolation=cv2.INTER_CUBIC)
-    g = cv2.resize(g, dsize=(224, 224), interpolation=cv2.INTER_CUBIC)
-    r = cv2.resize(r, dsize=(224, 224), interpolation=cv2.INTER_CUBIC)
-    img = cv2.merge((b, g, r))
-    return img
+# def processColorChanel(img):
+#     b, g, r = cv2.split(img)
+#     # seperating each value into a color channel and resizing to a standard
+#     # size of 224, 224, 3 <- because of RGB color channels. If it's not 3
+#     # color channels it'll pad with zeroes
+#     b = cv2.resize(b, dsize=(224, 224), interpolation=cv2.INTER_CUBIC)
+#     g = cv2.resize(g, dsize=(224, 224), interpolation=cv2.INTER_CUBIC)
+#     r = cv2.resize(r, dsize=(224, 224), interpolation=cv2.INTER_CUBIC)
+#     img = cv2.merge((b, g, r))
+#     return img
 
 
 def process_dates(data):

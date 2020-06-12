@@ -31,7 +31,7 @@ from tensorflow.keras.callbacks  import EarlyStopping
 from matplotlib import pyplot
 from grammartree import get_value_instruction
 from data_preprocesser import structured_preprocesser, initial_preprocesser
-from data_preprocesser import image_preprocess, addResizedImages, replaceImages, processColorChanel2
+from data_preprocesser import image_preprocess, add_resized_images, replace_images, process_color_channel
 from predictionModelCreation import get_keras_model_reg, get_keras_text_class
 from predictionModelCreation import get_keras_model_class
 from keras.utils import to_categorical
@@ -819,13 +819,15 @@ class client:
             print("-------------------------")
             print(pdtabulate(data[column_name]).describe())
 
-    def convolutional_query(self, new_folders=True):
+    def convolutional_query(self, data_path=None, new_folders=True):
         logger("Creating CNN generation query")
         # generates the dataset based on instructions using a selenium query on
         # google chrome
         logger("Generating datasets for classes...")
-        # Assuming Downloaded Images in current Directory
-        data_path = os.getcwd()
+        # Assuming Downloaded Images in current Directory if no data_path provided
+        if data_path == None:
+            data_path = os.getcwd()
+        # process images
         processInfo = image_preprocess(data_path, new_folders)
         input_shape = (processInfo["height"], processInfo["width"], 3)
         num_classes = processInfo["num_categories"]
@@ -836,8 +838,7 @@ class client:
         else:
             training_path = "/training_set"
             testing_path = "/testing_set"
-        # for a_class in argv:
-        #     num_classes = num_classes + 1
+
         if num_classes > 2:
             loss_func = "categorical_crossentropy"
         elif num_classes == 2:
@@ -992,4 +993,3 @@ class client:
 # Easier to comment the one you don't want to run instead of typing them out every time
 # newClient = client('./data/housing.csv').neural_network_query('Model median house value')
 # newClient = client('./data/landslides_after_rainfall.csv').neural_network_query(instruction='Model distance', drop=['id', 'geolocation', 'source_link', 'source_name'])
-
