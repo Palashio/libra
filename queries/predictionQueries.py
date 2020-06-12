@@ -66,7 +66,6 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
 currLog = ""
 counter = 0
-save_model=0
 number=0
 current_dir=os.getcw()
 
@@ -136,7 +135,7 @@ class client:
         clearLog()
 
 	#save the model in the current directory
-    def save(self,model):
+    def save(self,model,save_model):
         save_model=print((" "*2*counter)+"Press 1 to save the model:")
         if save_model==1:
             model_json = model.to_json()
@@ -166,7 +165,8 @@ class client:
                              epochs=50,
                              generate_plots=True,
                              callback_mode='min',
-                             maximizer="val_loss"):
+                             maximizer="val_loss",
+                             save_model=1):
 
         data = pd.read_csv(self.dataset)
 
@@ -178,11 +178,11 @@ class client:
                 maximizer = "val_accuracy"
                 self.classification_query_ann(instruction, preprocess=preprocess, test_size=test_size,
                                               random_state=random_state, epochs=epochs, generate_plots=generate_plots,
-                                              callback_mode=callback_mode, maximizer=maximizer)
+                                              callback_mode=callback_mode, maximizer=maximizer, save_model=save_model)
             else:
                 self.regression_query_ann(instruction, preprocess=preprocess, test_size=test_size,
                                           random_state=random_state, epochs=epochs, generate_plots=generate_plots,
-                                          callback_mode=callback_mode, maximizer=maximizer, drop=None)
+                                          callback_mode=callback_mode, maximizer=maximizer, drop=None,save_model=save_model)
 
     # single regression query using a feed-forward neural network
     # instruction should be the value of a column
@@ -196,7 +196,7 @@ class client:
             epochs=50,
             generate_plots=True,
             callback_mode='min',
-            maximizer="val_loss"):
+            maximizer="val_loss", save_model):
 
         global currLog
         logger("reading in dataset...")
@@ -304,7 +304,7 @@ class client:
             for x in range(len(plot_names)):
                 plots[str(plot_names[x])] = init_plots[x]
 
-        self.save(final_model)
+        self.save(final_model,save_model)
         # stores values in the client object models dictionary field
         self.models['regression_ANN'] = {
             'model': final_model,
@@ -332,7 +332,7 @@ class client:
             test_size=0.2,
             epochs=5,
             generate_plots=True,
-            maximizer="val_loss"):
+            maximizer="val_loss", save_model=1):
 
         # reads dataset and fills n/a values with zeroes
         #data = pd.read_csv(self.dataset)
@@ -428,7 +428,7 @@ class client:
         plots = generate_classification_plots(
             models[len(models) - 1], data, y, model, X_test, y_test)
 
-        self.save(final_model)
+        self.save(final_model,save_model)
 
         # stores the values and plots into the object dictionary
         self.models["classification_ANN"] = {
@@ -676,7 +676,7 @@ class client:
             preprocess=True,
             test_size=0.2,
             drop=None,
-            random_state=49):
+            random_state=49, save_model=1):
         logger("Reading in dataset....")
         dataReader = DataReader(self.dataset)
         data = dataReader.data_generator()
@@ -709,7 +709,7 @@ class client:
         logger("Identifying top scores...")
         for model in models:
             scores.append(accuracy_score(model.predict(X_test), y_test))
-        self.save(models[scores.index(max(scores))])
+        self.save(models[scores.index(max(scores))],save_model)
         clearLog()
 
         # returns classificaiton model with the highest score
