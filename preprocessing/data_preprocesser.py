@@ -1,7 +1,8 @@
 import keras
+import os
+import shutil
 import numpy as np
 import pandas as pd
-import os
 import tensorflow as tf
 from sklearn.compose import ColumnTransformer
 from sklearn.impute import SimpleImputer
@@ -162,9 +163,15 @@ def image_preprocess(data_path, new_folder=True):
 
     # create new folder containing resized images
     if new_folder:
+        # check if proc_training_set folder exists
+        if os.path.isdir(data_path + "/proc_training_set"):
+            shutil.rmtree(data_path + "/proc_training_set")
         os.mkdir(data_path + "/proc_training_set")
         for class_folder, images in training_dict.items():
             add_resized_images(data_path + "/proc_training_set", class_folder, images)
+        # check if proc_testing_set folder exists
+        if os.path.isdir(data_path + "/proc_testing_set"):
+            shutil.rmtree(data_path + "/proc_testing_set")
         add_resized_images(data_path, "testing_set", testing_dict)
     # replace images with newly resized images
     else:
