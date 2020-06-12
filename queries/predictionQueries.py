@@ -981,7 +981,7 @@ class client:
         return predictions
 
     # text summarization query
-    def document_sum_query(self, instruction,
+    def summarization_query(self, instruction,
                            preprocess=True,
                            test_size=0.2,
                            random_state=49,
@@ -998,10 +998,10 @@ class client:
 
         device = 'cpu'
 
-        TRAIN_BATCH_SIZE = 2  # input batch size for training (default: 64)
-        TRAIN_EPOCHS = 2  # number of epochs to train (default: 10)
-        LEARNING_RATE = 1e-4  # learning rate (default: 0.01)
-        SEED = 42  # random seed (default: 42)
+        TRAIN_BATCH_SIZE = 64
+        TRAIN_EPOCHS = 10
+        LEARNING_RATE = 1e-4
+        SEED = 42
         MAX_LEN = 512
         SUMMARY_LEN = 150
 
@@ -1044,6 +1044,6 @@ class client:
 
 # Easier to comment the one you don't want to run instead of typing them out every time
 # newClient = client('./data/housing.csv').neural_network_query('Model median house value')
-newClient = client('./data/landslides_after_rainfall.csv').neural_network_query(instruction='Model distance',
-                                                                              drop=['id', 'geolocation',
-                                                                              'source_link', 'source_name'])
+# newClient = client('./data/landslides_after_rainfall.csv').neural_network_query(instruction='Model distance',
+#                                                                               drop=['id', 'geolocation',
+#                                                                               'source_link', 'source_name'])
