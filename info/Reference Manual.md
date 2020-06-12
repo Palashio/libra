@@ -43,7 +43,19 @@ Table of Contents
 * [NLP_preprocessing.py](#NLP_preprocessing)
   * [lemmatize_text](#lemmatize_text)
   * [tokenize_text](#tokenize_text)
-  * [text_clean_up](#text_clean_up)
+
+``` python
+libra.produceMask(instruction_label)
+```
+
+Generates/stores with base object an encoding mask of form list ```[int/long, int/long, int/long]``` based on frequency of distinct characters used for sequence to sequence pre-training for natural language generation
+
+Parameters -- instruction_label: `str`
+Acquires a string based of the instruction sent to encode in the form of a mask
+
+Returns -- mask: `[int/long, int/long, int/long]` 
+Outputs an list of encoded numerical representation of the instruction text recieved
+* [text_clean_up](#text_clean_up)
 * [data_preprocesser.py](#data_preprocesser)
   * [initial_preprocesser](#initial_preprocesser)
   * [structured_preprocesser](#structured_preprocesser)
@@ -93,11 +105,14 @@ Table of Contents
 ``` python
 libra.produceMask(instruction_label)
 ```
-Generates/stores with base object a mask of list representation of form [int, int, int] based on frequency of distinct characters 
 
-Parameters: 
-Output:
+Generates/stores with base object an encoding mask of form list ```[int/long, int/long, int/long]``` based on frequency of distinct characters used for sequence to sequence pre-training for natural language generation
 
+Parameters -- instruction_label: `str`
+Acquires a string based of the instruction sent to encode in the form of a mask
+
+Returns -- mask: `[int/long, int/long, int/long]` 
+Outputs an list of encoded numerical representation of the instruction text recieved
 
 ### get_similar_column ###
 
