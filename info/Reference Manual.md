@@ -48,8 +48,7 @@ Table of Contents
   * [initial_preprocesser](#initial_preprocesser)
   * [structured_preprocesser](#structured_preprocesser)
   * [image_preprocess](#image_preprocess)
-  * [processColorChanel](#processColorChanel)
-  * [process_dates](#process_dates)
+  * [processColorChanel](#processColorChanel)  * [process_dates](#process_dates)
 * [data_reader.py](#data_reader)
   * [class DataReader](#class-DataReader)
     * [init](#__init__-DataReader)
@@ -90,6 +89,15 @@ Table of Contents
 ## dataset_labelmatcher ##
 
 ### produceMask ###
+
+'''python
+libra.produceMask(instruction_label)
+'''
+Generates/stores with base object a mask of list representation of form [int, int, int] based on frequency of distinct characters 
+
+Parameters: 
+Output:
+
 
 ### get_similar_column ###
 
