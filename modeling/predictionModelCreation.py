@@ -53,8 +53,8 @@ def get_keras_model_class(dataset, i, num_classes):
     model = tf.keras.Sequential()
     model.add(
         Dense(
-            dataset.shape[1],
-            input_dim=dataset.shape[1],
+            dataset['train'].shape[1],
+            input_dim=dataset['train'].shape[1],
             kernel_initializer='normal',
             activation='relu'))
     model.add(Dense(64, activation="relu"))
