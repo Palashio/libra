@@ -105,12 +105,16 @@ libra.produceMask(instruction_label)
 Generates/stores with base object an encoding mask of form list ```[int/long, int/long, int/long]``` based on frequency of distinct characters used for sequence to sequence pre-training for natural language generation
 
 
-Parameters -- instruction_label: `str`
+Parameters -- 
+
+instruction_label: `str`
 
 Acquires a string based of the instruction sent to encode in the form of a mask
 
 
-Returns -- mask: `[int/long, int/long, int/long]` 
+Returns -- 
+
+mask: `[int/long, int/long, int/long]` 
 
 Outputs an list of encoded numerical representation of the instruction text recieved
 
@@ -1545,14 +1549,16 @@ Outputs an list of encoded numerical representation of the instruction text reci
 client.show_plots(self, model)
 ```
 
-Generates/stores with base object an encoding mask of form list ```[int/long, int/long, int/long]``` based on frequency of distinct characters used for sequence to sequence pre-training for natural language generation
+Displays all relevant plots generated during the training and validation of the model made in the client session
 
 
-Parameters -- instruction_label: `str`
+Parameters -- 
+model: `[]`
 
 Acquires a string based of the instruction sent to encode in the form of a mask
 
 
-Returns -- mask: `[int/long, int/long, int/long]` 
+Returns -- 
+mask: `[int/long, int/long, int/long]` 
 
 Outputs an list of encoded numerical representation of the instruction text recieved
