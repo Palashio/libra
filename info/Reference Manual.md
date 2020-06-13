@@ -1542,7 +1542,7 @@ Outputs an list of encoded numerical representation of the instruction text reci
 #### show_plots ####
 
 ``` python
-client.predict_text_sentiment(self, dataset, text)
+client.show_plots(self, model)
 ```
 
 Generates/stores with base object an encoding mask of form list ```[int/long, int/long, int/long]``` based on frequency of distinct characters used for sequence to sequence pre-training for natural language generation
