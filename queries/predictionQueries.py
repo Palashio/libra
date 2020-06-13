@@ -275,13 +275,14 @@ class client:
         data, y, target, full_pipeline = initial_preprocesser(data, instruction, preprocess)
 
         X_train = data['train']
-        y_train = y['train']
         X_test = data['test']
-        y_test = y['test']
 
-        # Only used for the interpreter
+
+        # Target scaling
         target_scaler = StandardScaler()
-        target_scaler.fit_transform(np.array(y['train']).reshape(-1, 1))
+
+        y_train = target_scaler.fit_transform(np.array(y['train']).reshape(-1, 1))
+        y_test = target_scaler.transform(np.array(y['test']).reshape(-1,1))
 
         logger("establishing callback function...")
 
@@ -419,21 +420,24 @@ class client:
         data, y, remove, full_pipeline = initial_preprocesser(
             data, instruction, preprocess)
 
+        # Needed to make a custom label encoder due to train test split changes
+        # Can still be inverse transformed, just a bit of extra work
+        y = pd.concat([y['train'], y['test']], axis=0)
+
         num_classes = len(np.unique(y))
 
         X_train = data['train']
-        y_train = y['train']
         X_test = data['test']
-        y_test = y['test']
-        # Needed to make a custom label encoder due to train test split changes
-        # Can still be inverse transformed, just a bit of extra work
-        y_vals = np.unique(pd.concat([y['train'], y['test']], axis=0))
-        label_mappings = {}
-        for i in range(len(y_vals)):
-            label_mappings[y_vals[i]] = i
 
-        y_train = y_train.apply(lambda x: label_mappings[x]).values
-        y_test = y_test.apply(lambda x: label_mappings[x]).values
+        # ANN needs target one hot encoded for classification
+        one_hot_encoder = OneHotEncoder()
+
+        y = pd.DataFrame(one_hot_encoder.fit_transform(np.reshape(y.values, (-1,1))).toarray(),
+                         columns=one_hot_encoder.get_feature_names())
+
+        y_train = y.iloc[:len(X_train)]
+        y_test = y.iloc[len(X_train):]
+
 
         models = []
         losses = []
@@ -524,7 +528,7 @@ class client:
             "plots": plots,
             "target": remove,
             "preprocesser": full_pipeline,
-            "interpreter": label_mappings,
+            "interpreter": one_hot_encoder,
             'losses': {
                 'training_loss': final_hist.history['loss'],
                 'val_loss': final_hist.history['val_loss']},
@@ -1206,5 +1210,5 @@ class client:
 
 # Easier to comment the one you don't want to run instead of typing them
 # out every time
-#newClient = client('./data/housing.csv').neural_network_query('Model ocean proximity')
-newClient = client('./data/landslides_after_rainfall.csv').neural_network_query(instruction='Model distance', drop=['id', 'geolocation', 'source_link', 'source_name'])
+newClient = client('./data/housing.csv').neural_network_query('Model median house value')
+#newClient = client('./data/landslides_after_rainfall.csv').neural_network_query(instruction='Model distance', drop=['id', 'geolocation', 'source_link', 'source_name'])
