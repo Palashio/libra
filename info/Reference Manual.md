@@ -53,6 +53,7 @@ Table of Contents
   * [image_preprocess](#image_preprocess)
   * [processColorChanel](#processColorChanel)  
   * [process_dates](#process_dates)
+  * [generate_column_labels](#generate_column_labels)
 * [data_reader.py](#data_reader)
   * [class DataReader](#class-DataReader)
     * [init](#__init__-DataReader)
@@ -70,6 +71,7 @@ Table of Contents
   * [class client](#class-client)
     * [init](#__init__-client)
     * [get_models](#get_models)
+    * [save](#save)
     * [predict](#predict)
     * [neural_network_query](#neural_network_query)
     * [regression_query_ann](#regression_query_ann)
@@ -788,7 +790,21 @@ Returns -- mask: `[int/long, int/long, int/long]`
 
 Outputs an list of encoded numerical representation of the instruction text recieved
 
-### processColorChanel ###
+``` python
+libra.process_dates(data)
+```
+
+Generates/stores with base object an encoding mask of form list ```[int/long, int/long, int/long]``` based on frequency of distinct characters used for sequence to sequence pre-training for natural language generation
+
+
+Parameters -- instruction_label: `str`
+
+Acquires a string based of the instruction sent to encode in the form of a mask
+
+
+Returns -- mask: `[int/long, int/long, int/long]` 
+
+Outputs an list of encoded numerical representation of the instruction text recieved### processColorChanel ###
 
 ``` python
 libra.generate_regression_plots(history, data, label)
@@ -810,6 +826,24 @@ Outputs an list of encoded numerical representation of the instruction text reci
 
 ``` python
 libra.process_dates(data)
+```
+
+Generates/stores with base object an encoding mask of form list ```[int/long, int/long, int/long]``` based on frequency of distinct characters used for sequence to sequence pre-training for natural language generation
+
+
+Parameters -- instruction_label: `str`
+
+Acquires a string based of the instruction sent to encode in the form of a mask
+
+
+Returns -- mask: `[int/long, int/long, int/long]` 
+
+Outputs an list of encoded numerical representation of the instruction text recieved
+
+### generate_column_labels ###
+
+``` python
+libra.generate_column_labels(pipeline, numeric_cols)
 ```
 
 Generates/stores with base object an encoding mask of form list ```[int/long, int/long, int/long]``` based on frequency of distinct characters used for sequence to sequence pre-training for natural language generation
@@ -885,7 +919,7 @@ Outputs an list of encoded numerical representation of the instruction text reci
 #### data_generator ####
 
 ``` python
-libra.data_generator(self)
+DataReader.data_generator(self)
 ```
 
 Generates/stores with base object an encoding mask of form list ```[int/long, int/long, int/long]``` based on frequency of distinct characters used for sequence to sequence pre-training for natural language generation
@@ -1038,14 +1072,123 @@ Outputs an list of encoded numerical representation of the instruction text reci
 
 ### class-client ###
 
+``` python
+class client()
+```
+
+Generates/stores with base object an encoding mask of form list ```[int/long, int/long, int/long]``` based on frequency of distinct characters used for sequence to sequence pre-training for natural language generation
+
+
+Parameters -- instruction_label: `str`
+
+Acquires a string based of the instruction sent to encode in the form of a mask
+
+
+Returns -- mask: `[int/long, int/long, int/long]` 
+
+Outputs an list of encoded numerical representation of the instruction text recieved
+
 #### __init__-client ####
+
+``` python
+client.__init__(self, data)
+```
+
+Generates/stores with base object an encoding mask of form list ```[int/long, int/long, int/long]``` based on frequency of distinct characters used for sequence to sequence pre-training for natural language generation
+
+
+Parameters -- instruction_label: `str`
+
+Acquires a string based of the instruction sent to encode in the form of a mask
+
+
+Returns -- mask: `[int/long, int/long, int/long]` 
+
+Outputs an list of encoded numerical representation of the instruction text recieved
 
 #### get_models ####
 
+``` python
+client.get_models(self, model_requested)
+```
+
+Generates/stores with base object an encoding mask of form list ```[int/long, int/long, int/long]``` based on frequency of distinct characters used for sequence to sequence pre-training for natural language generation
+
+
+Parameters -- instruction_label: `str`
+
+Acquires a string based of the instruction sent to encode in the form of a mask
+
+
+Returns -- mask: `[int/long, int/long, int/long]` 
+
+Outputs an list of encoded numerical representation of the instruction text recieved
+
+#### save ####
+
+``` python
+client.save(self, model, save_model, save_path = os.getcwd())
+```
+
+Generates/stores with base object an encoding mask of form list ```[int/long, int/long, int/long]``` based on frequency of distinct characters used for sequence to sequence pre-training for natural language generation
+
+
+Parameters -- instruction_label: `str`
+
+Acquires a string based of the instruction sent to encode in the form of a mask
+
+
+Returns -- mask: `[int/long, int/long, int/long]` 
+
+Outputs an list of encoded numerical representation of the instruction text recieved
+
 #### predict ####
 
+``` python
+client.predict(self, modelKey, data)
+```
+
+Generates/stores with base object an encoding mask of form list ```[int/long, int/long, int/long]``` based on frequency of distinct characters used for sequence to sequence pre-training for natural language generation
+
+
+Parameters -- instruction_label: `str`
+
+Acquires a string based of the instruction sent to encode in the form of a mask
+
+
+Returns -- mask: `[int/long, int/long, int/long]` 
+
+Outputs an list of encoded numerical representation of the instruction text recieved
+
 #### neural_network_query ####
-    
+
+``` python
+client.neural_network_query(self, 
+                            instruction,
+                            drop=None,
+                            preprocess=True,
+                            test_size=0.2,
+                            random_state=49,
+                            epochs=50,
+                            generate_plots=True,
+                            callback_mode='min',
+                            maximizer="val_loss",
+                            save_model=True,
+                            save_path=os.getcwd())
+```
+
+Generates/stores with base object an encoding mask of form list ```[int/long, int/long, int/long]``` based on frequency of distinct characters used for sequence to sequence pre-training for natural language generation
+
+
+Parameters -- instruction_label: `str`
+
+Acquires a string based of the instruction sent to encode in the form of a mask
+
+
+Returns -- mask: `[int/long, int/long, int/long]` 
+
+Outputs an list of encoded numerical representation of the instruction text recieved
+
 #### regression_query_ann ####
     
 #### classification_query_ann ####
