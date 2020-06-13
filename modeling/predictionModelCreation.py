@@ -48,7 +48,6 @@ def get_keras_model_reg(dataset, i):
 
 def get_keras_model_class(dataset, i, num_classes):
     size_max_network = 10
-
     # base model
     model = tf.keras.Sequential()
     model.add(
