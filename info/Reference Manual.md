@@ -87,6 +87,8 @@ Table of Contents
     * [encode_text](#encode_text)
     * [predict_text_sentiment](#predict_text_sentiment)
     * [text_classification_query](#text_classification_query)
+    * [get_summary](#get_summary)
+    * [summarization_query](#summarization_query)
     * [dimensionality_reducer](#dimensionality_reducer)
     * [show_plots](#show_plots)
 
@@ -1480,6 +1482,44 @@ Acquires a string based of the instruction sent to encode in the form of a mask
 Returns -- mask: `[int/long, int/long, int/long]` 
 
 Outputs an list of encoded numerical representation of the instruction text recieved
+
+#### get_summary #### 
+
+``` python
+client.get_summary(self, text)
+```
+
+Generates/stores with base object an encoding mask of form list ```[int/long, int/long, int/long]``` based on frequency of distinct characters used for sequence to sequence pre-training for natural language generation
+
+
+Parameters -- instruction_label: `str`
+
+Acquires a string based of the instruction sent to encode in the form of a mask
+
+
+Returns -- mask: `[int/long, int/long, int/long]`
+
+#### summarization_query ####
+
+``` python
+client.summarization_query(self, 
+                           instruction,
+                           preprocess=True,
+                           test_size=0.2,
+                           random_state=49,
+                           epochs=1,
+                           generate_plots=True)
+```
+
+Generates/stores with base object an encoding mask of form list ```[int/long, int/long, int/long]``` based on frequency of distinct characters used for sequence to sequence pre-training for natural language generation
+
+
+Parameters -- instruction_label: `str`
+
+Acquires a string based of the instruction sent to encode in the form of a mask
+
+
+Returns -- mask: `[int/long, int/long, int/long]`
 
 #### dimensionality_reducer ####
 
