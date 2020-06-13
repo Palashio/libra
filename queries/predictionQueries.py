@@ -102,7 +102,6 @@ from sklearn import preprocessing, tree
 from NLP_preprocessing import text_clean_up, lemmatize_text, get_target_values
 from keras.preprocessing.image import ImageDataGenerator
 
-
 warnings.simplefilter(action='error', category=FutureWarning)
 warnings.simplefilter(action="ignore", category=SettingWithCopyWarning)
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
@@ -275,15 +274,14 @@ class client:
 
         data, y, target, full_pipeline = initial_preprocesser(data, instruction, preprocess)
 
-
         X_train = data['train']
-        y_train = data['train'][target]
+        y_train = y['train']
         X_test = data['test']
-        y_test = data['test'][target]
+        y_test = y['test']
 
         # Only used for the interpreter
         target_scaler = StandardScaler()
-        target_scaler.fit_transform(np.array(y).reshape(-1, 1))
+        target_scaler.fit_transform(np.array(y['train']).reshape(-1, 1))
 
         logger("establishing callback function...")
 
@@ -317,7 +315,7 @@ class client:
         model_data.append(model)
 
         logger("->", "Initial number of layers " + str(len(model.layers)))
-        
+
         logger("->", "Training Loss: " + \
                str(history.history['loss'][len(history.history['val_loss']) - 1]), '|')
         logger("->", "Test Loss: " +
@@ -410,7 +408,7 @@ class client:
 
         # reads dataset and fills n/a values with zeroes
 
-        #data = pd.read_csv(self.dataset)
+        # data = pd.read_csv(self.dataset)
 
         dataReader = DataReader(self.dataset)
         data = dataReader.data_generator()
@@ -423,13 +421,19 @@ class client:
 
         num_classes = len(np.unique(y))
 
-        # encodes the label dataset into 0's and 1's
-        le = preprocessing.LabelEncoder()
-        y = le.fit_transform(y)
-        y = np_utils.to_categorical(y)
+        X_train = data['train']
+        y_train = y['train']
+        X_test = data['test']
+        y_test = y['test']
+        # Needed to make a custom label encoder due to train test split changes
+        # Can still be inverse transformed, just a bit of extra work
+        y_vals = np.unique(pd.concat([y['train'], y['test']], axis=0))
+        label_mappings = {}
+        for i in range(len(y_vals)):
+            label_mappings[y_vals[i]] = i
 
-        X_train, X_test, y_train, y_test = train_test_split(
-            data, y, test_size=test_size, random_state=random_state)
+        y_train = y_train.apply(lambda x: label_mappings[x]).values
+        y_test = y_test.apply(lambda x: label_mappings[x]).values
 
         models = []
         losses = []
@@ -447,7 +451,7 @@ class client:
         model = get_keras_model_class(data, i, num_classes)
 
         history = model.fit(
-            data, y, epochs=epochs, validation_data=(
+            X_train, y_train, epochs=epochs, validation_data=(
                 X_test, y_test), callbacks=[es], verbose=0)
 
         model_data.append(model)
@@ -504,7 +508,7 @@ class client:
         logger('->', "Training Accuracy: " + str(final_hist.history['accuracy']
                                                  [len(final_hist.history['val_accuracy']) - 1]))
         logger('->', "Test Accuracy: " + str(final_hist.history['val_accuracy'][
-               len(final_hist.history['val_accuracy']) - 1]))
+                                                 len(final_hist.history['val_accuracy']) - 1]))
 
         # genreates appropriate classification plots by feeding all information
         plots = generate_classification_plots(
@@ -520,7 +524,7 @@ class client:
             "plots": plots,
             "target": remove,
             "preprocesser": full_pipeline,
-            "interpreter": le,
+            "interpreter": label_mappings,
             'losses': {
                 'training_loss': final_hist.history['loss'],
                 'val_loss': final_hist.history['val_loss']},
@@ -573,7 +577,7 @@ class client:
         # continues to increase cluster size until SSE values don't decrease by
         # 1000 - this value was decided based on precedence
         while (all(earlier >= later for earlier,
-                   later in zip(inertiaStor, inertiaStor[1:]))):
+                                        later in zip(inertiaStor, inertiaStor[1:]))):
             kmeans = KMeans(n_clusters=i, random_state=0).fit(data)
             modelStorage.append(kmeans)
             inertiaStor.append(kmeans.inertia_)
@@ -616,8 +620,7 @@ class client:
             cross_val_size=0.3):
         logger("Reading in dataset....")
         # reads dataset and fills n/a values with zeroes
-        # data = pd.read_csv(self.dataset)
-
+        #data = pd.read_csv(self.dataset)
 
         dataReader = DataReader(self.dataset)
         data = dataReader.data_generator()
@@ -678,7 +681,7 @@ class client:
         logger("Reading in dataset....")
         # Reads in dataset
 
-        #data = pd.read_csv(self.dataset)
+        # data = pd.read_csv(self.dataset)
 
         dataReader = DataReader(self.dataset)
         data = dataReader.data_generator()
@@ -725,7 +728,6 @@ class client:
         clearLog()
         return knn
 
-
     def decision_tree_query(
             self,
             instruction,
@@ -743,12 +745,10 @@ class client:
         data, y, remove, full_pipeline = initial_preprocesser(
             data, instruction, preprocess)
 
-
         X_train = data['train']
         y_train = y['train']
         X_test = data['test']
         y_test = y['test']
-
 
         # classification_column = get_similar_column(getLabelwithInstruction(instruction), data)
 
@@ -763,7 +763,6 @@ class client:
         y_train = y_train.apply(lambda x: label_mappings[x]).values
         y_test = y_test.apply(lambda x: label_mappings[x]).values
         num_classes = len(np.unique(y))
-
 
         # fitting and storing
         logger("Fitting Decision Tree...")
@@ -1022,10 +1021,10 @@ class client:
         history = model.fit_generator(
             generator=X_train,
             steps_per_epoch=X_train.n //
-            X_train.batch_size,
+                            X_train.batch_size,
             validation_data=X_test,
             validation_steps=X_test.n //
-            X_test.batch_size,
+                             X_test.batch_size,
             epochs=10)
 
         # storing values the model dictionary
@@ -1145,11 +1144,11 @@ class client:
 
     # text summarization query
     def summarization_query(self, instruction,
-                           preprocess=True,
-                           test_size=0.2,
-                           random_state=49,
-                           epochs=1,
-                           generate_plots=True):
+                            preprocess=True,
+                            test_size=0.2,
+                            random_state=49,
+                            epochs=1,
+                            generate_plots=True):
 
         data = pd.read_csv(self.dataset)
         data.fillna(0, inplace=True)
@@ -1184,7 +1183,7 @@ class client:
         }
 
         training_loader = DataLoader(training_set, **train_params)
-# used small model
+        # used small model
         model = T5ForConditionalGeneration.from_pretrained("t5-small")
         model = model.to(device)
 
@@ -1205,11 +1204,7 @@ class client:
     def show_plots(self, model):
         print(self.models[model]['plots'].keys())
 
-
-
 # Easier to comment the one you don't want to run instead of typing them
 # out every time
-# newClient = client(
-#     './data/housing.csv').neural_network_query('Model median house value')
-#newClient = client('./data/landslides_after_rainfall.csv').neural_network_query(instruction='Model distance', drop=['id', 'geolocation', 'source_link', 'source_name'])
-
+#newClient = client('./data/housing.csv').neural_network_query('Model ocean proximity')
+newClient = client('./data/landslides_after_rainfall.csv').neural_network_query(instruction='Model distance', drop=['id', 'geolocation', 'source_link', 'source_name'])
