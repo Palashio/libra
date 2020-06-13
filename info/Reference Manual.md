@@ -381,7 +381,7 @@ Outputs an list of encoded numerical representation of the instruction text reci
 ### class CNNHyperModel ###
 
 ``` python
-CNNHyperModel(HyperModel)
+class CNNHyperModel(HyperModel)
 ```
 
 Generates/stores with base object an encoding mask of form list ```[int/long, int/long, int/long]``` based on frequency of distinct characters used for sequence to sequence pre-training for natural language generation
@@ -808,39 +808,233 @@ Outputs an list of encoded numerical representation of the instruction text reci
 
 ### process_dates ###
 
+``` python
+libra.process_dates(data)
+```
+
+Generates/stores with base object an encoding mask of form list ```[int/long, int/long, int/long]``` based on frequency of distinct characters used for sequence to sequence pre-training for natural language generation
+
+
+Parameters -- instruction_label: `str`
+
+Acquires a string based of the instruction sent to encode in the form of a mask
+
+
+Returns -- mask: `[int/long, int/long, int/long]` 
+
+Outputs an list of encoded numerical representation of the instruction text recieved
+
 ***
 
 ## data_reader ##
-  
+
 ### class-DataReader ###
+
+``` python
+class DataReader()
+```
+
+Generates/stores with base object an encoding mask of form list ```[int/long, int/long, int/long]``` based on frequency of distinct characters used for sequence to sequence pre-training for natural language generation
+
+
+Parameters -- instruction_label: `str`
+
+Acquires a string based of the instruction sent to encode in the form of a mask
+
+
+Returns -- mask: `[int/long, int/long, int/long]` 
+
+Outputs an list of encoded numerical representation of the instruction text recieved
     
 #### __init__-DataReader ####
-    
+
+``` python
+DataReader.__init__(self, filepath)
+```
+
+Generates/stores with base object an encoding mask of form list ```[int/long, int/long, int/long]``` based on frequency of distinct characters used for sequence to sequence pre-training for natural language generation
+
+
+Parameters -- instruction_label: `str`
+
+Acquires a string based of the instruction sent to encode in the form of a mask
+
+
+Returns -- mask: `[int/long, int/long, int/long]` 
+
+Outputs an list of encoded numerical representation of the instruction text recieved
+
 #### retrieve_extension ####
+
+``` python
+DataReader.retrieve_extension(self)
+```
+
+Generates/stores with base object an encoding mask of form list ```[int/long, int/long, int/long]``` based on frequency of distinct characters used for sequence to sequence pre-training for natural language generation
+
+
+Parameters -- instruction_label: `str`
+
+Acquires a string based of the instruction sent to encode in the form of a mask
+
+
+Returns -- mask: `[int/long, int/long, int/long]` 
+
+Outputs an list of encoded numerical representation of the instruction text recieved
     
 #### data_generator ####
+
+``` python
+libra.data_generator(self)
+```
+
+Generates/stores with base object an encoding mask of form list ```[int/long, int/long, int/long]``` based on frequency of distinct characters used for sequence to sequence pre-training for natural language generation
+
+
+Parameters -- instruction_label: `str`
+
+Acquires a string based of the instruction sent to encode in the form of a mask
+
+
+Returns -- mask: `[int/long, int/long, int/long]` 
+
+Outputs an list of encoded numerical representation of the instruction text recieved
 
 ***
 
 ## dimensionality_red_queries ##
-  
+
 ### logger ###
+
+``` python
+libra.logger(instruction, found="", slash="")
+```
+
+Generates/stores with base object an encoding mask of form list ```[int/long, int/long, int/long]``` based on frequency of distinct characters used for sequence to sequence pre-training for natural language generation
+
+Parameters -- instruction_label: `str`
+
+Acquires a string based of the instruction sent to encode in the form of a mask
+
+
+Returns -- mask: `[int/long, int/long, int/long]` 
+
+Outputs an list of encoded numerical representation of the instruction text recieved
  
 ### dimensionality_reduc ###
-  
+
+``` python
+libra.dimensionality_reduc(instruction, dataset, arr = ["RF", "PCA", "ICA"], inplace = True)
+```
+
+Generates/stores with base object an encoding mask of form list ```[int/long, int/long, int/long]``` based on frequency of distinct characters used for sequence to sequence pre-training for natural language generation
+
+
+Parameters -- instruction_label: `str`
+
+Acquires a string based of the instruction sent to encode in the form of a mask
+
+
+Returns -- mask: `[int/long, int/long, int/long]` 
+
+Outputs an list of encoded numerical representation of the instruction text recieved
+
+
 ### dimensionality_RF ###
+
+``` python
+libra.dimensionality_RF(instruction, dataset, target="", y="", n_features=10)
+```
+
+Generates/stores with base object an encoding mask of form list ```[int/long, int/long, int/long]``` based on frequency of distinct characters used for sequence to sequence pre-training for natural language generation
+
+
+Parameters -- instruction_label: `str`
+
+Acquires a string based of the instruction sent to encode in the form of a mask
+
+
+Returns -- mask: `[int/long, int/long, int/long]` 
+
+Outputs an list of encoded numerical representation of the instruction text recieved
 
 ### dimensionality_PCA ###
 
+``` python
+libra.dimensionality_PCA(instruction, dataset, target="", y="", n_components=10)
+```
+
+Generates/stores with base object an encoding mask of form list ```[int/long, int/long, int/long]``` based on frequency of distinct characters used for sequence to sequence pre-training for natural language generation
+
+
+Parameters -- instruction_label: `str`
+
+Acquires a string based of the instruction sent to encode in the form of a mask
+
+
+Returns -- mask: `[int/long, int/long, int/long]` 
+
+Outputs an list of encoded numerical representation of the instruction text recieved
+
+
 ### dimensionality_ICA ###
 
+``` python
+libra.dimensionality_ICA(instruction, dataset, target="", y="")
+```
+
+Generates/stores with base object an encoding mask of form list ```[int/long, int/long, int/long]``` based on frequency of distinct characters used for sequence to sequence pre-training for natural language generation
+
+
+Parameters -- instruction_label: `str`
+
+Acquires a string based of the instruction sent to encode in the form of a mask
+
+
+Returns -- mask: `[int/long, int/long, int/long]` 
+
+Outputs an list of encoded numerical representation of the instruction text recieved
+
+
 ### get_last_file ###
+
+``` python
+libra.get_last_file()
+```
+
+Generates/stores with base object an encoding mask of form list ```[int/long, int/long, int/long]``` based on frequency of distinct characters used for sequence to sequence pre-training for natural language generation
+
+
+Parameters -- instruction_label: `str`
+
+Acquires a string based of the instruction sent to encode in the form of a mask
+
+
+Returns -- mask: `[int/long, int/long, int/long]` 
+
+Outputs an list of encoded numerical representation of the instruction text recieved
 
 ***
 
 ## predictionQueries ##
 
 ### clearLog ###
+
+``` python
+libra.clearLog()
+```
+
+Generates/stores with base object an encoding mask of form list ```[int/long, int/long, int/long]``` based on frequency of distinct characters used for sequence to sequence pre-training for natural language generation
+
+
+Parameters -- instruction_label: `str`
+
+Acquires a string based of the instruction sent to encode in the form of a mask
+
+
+Returns -- mask: `[int/long, int/long, int/long]` 
+
+Outputs an list of encoded numerical representation of the instruction text recieved
 
 ### class-client ###
 
