@@ -1190,9 +1190,63 @@ Returns -- mask: `[int/long, int/long, int/long]`
 Outputs an list of encoded numerical representation of the instruction text recieved
 
 #### regression_query_ann ####
-    
+
+``` python
+client.regression_query_ann(self, 
+                            instruction,
+                            drop=None,
+                            preprocess=True,
+                            test_size=0.2,
+                            random_state=49,
+                            epochs=50,
+                            generate_plots=True,
+                            callback_mode='min',
+                            maximizer="val_loss",
+                              save_path=os.getcwd())
+```
+
+Generates/stores with base object an encoding mask of form list ```[int/long, int/long, int/long]``` based on frequency of distinct characters used for sequence to sequence pre-training for natural language generation
+
+
+Parameters -- instruction_label: `str`
+
+Acquires a string based of the instruction sent to encode in the form of a mask
+
+
+Returns -- mask: `[int/long, int/long, int/long]` 
+
+Outputs an list of encoded numerical representation of the instruction text recieved
+
 #### classification_query_ann ####
-    
+
+``` python
+client.classification_query_ann(self, 
+                                instruction,
+                                preprocess=True,
+                                callback_mode='min',
+                                drop=None,
+                                random_state=49,
+                                test_size=0.2,
+                                epochs=5,
+                                generate_plots=True,
+                                callback_mode='min',
+                                maximizer="val_loss",
+                                save_model=True,
+                                save_path=os.getcwd())
+```
+
+Generates/stores with base object an encoding mask of form list ```[int/long, int/long, int/long]``` based on frequency of distinct characters used for sequence to sequence pre-training for natural language generation
+
+
+Parameters -- instruction_label: `str`
+
+Acquires a string based of the instruction sent to encode in the form of a mask
+
+
+Returns -- mask: `[int/long, int/long, int/long]` 
+
+Outputs an list of encoded numerical representation of the instruction text recieved
+
 #### kmeans_clustering_query ####
     
 #### svm_query ####
