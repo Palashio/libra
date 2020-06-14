@@ -1473,17 +1473,26 @@ Outputs an list of encoded numerical representation of the instruction text reci
 client.predict_text_sentiment(self, dataset, text)
 ```
 
-Generates/stores with base object an encoding mask of form list ```[int/long, int/long, int/long]``` based on frequency of distinct characters used for sequence to sequence pre-training for natural language generation
+
+Wrapper function used for repeated caching of standard backend processing/prediction tasks needed for sentiment analysis when sentiment analysis text classification query is called
 
 
-Parameters -- instruction_label: `str`
+*Parameters --* 
 
-Acquires a string based of the instruction sent to encode in the form of a mask
+dataset
+
+Data to be analyzed that is initialized in the client class instance
+
+text: `str`
+
+Text that comes from the document/dataset which is being analyzed
 
 
-Returns -- mask: `[int/long, int/long, int/long]` 
+*Returns --* 
 
-Outputs an list of encoded numerical representation of the instruction text recieved
+`classes.get(tf.keras.backend.get_value(prediction)[0])`
+
+Retrieves classes of sequences of text predicted by the sentiment analysis LSTM model
 
 #### text_classification_query ####
 
@@ -1498,17 +1507,45 @@ client.text_classification_query(self,
                                  generate_plots=True)
 ```
 
-Generates/stores with base object an encoding mask of form list ```[int/long, int/long, int/long]``` based on frequency of distinct characters used for sequence to sequence pre-training for natural language generation
+Generates LSTM model used to solve sentiment analysis text classification problem written in query sent to/in client class instance
 
 
-Parameters -- instruction_label: `str`
+*Parameters --* 
 
-Acquires a string based of the instruction sent to encode in the form of a mask
+instruction: `str`
+
+String that is the instruction from a written query sent to/in the client class instance
+
+preprocess = True (`bool`)
+
+Option to preprocess the data (is set by default to true)
+
+test_size=0.2 (`float`)
+
+Percentage measure of the proportion of the data to include in test split of the dataset (is set by default to 0.2)
+
+random_state=49 (`int`)
+
+Random value assigned that ensures the shuffling of the dataset before applying the test/training split remains the same across multiple runs (is set by default to 49)
+
+epochs=10 (`int`)
+
+Number of full cycles used for model fitting/training on the training dataset (is set by default to 1)
+
+maxTextLength=200
+
+Maximum length in terms of characters per sequence found in text of dataset initialized in client class instance (is set by default to 200)
+
+generate_plots=True (`bool`)
+
+Option to generate all relevant plots for query (is set by default to true)
 
 
-Returns -- mask: `[int/long, int/long, int/long]` 
+*Returns --* 
 
-Outputs an list of encoded numerical representation of the instruction text recieved
+None
+
+Executes document summarization training/testing and outputs/stores resulting summary/metrics/associated plots
 
 #### get_summary #### 
 
@@ -1516,7 +1553,7 @@ Outputs an list of encoded numerical representation of the instruction text reci
 client.get_summary(self, text)
 ```
 
-Wrapper function used for repeated caching of predictions for text summarization when text summarization query is called 
+Wrapper function used for repeated caching of standard backend processing/prediction tasks needed for text summarization when text summarization query is called 
 
 
 *Parameters --* 
@@ -1530,7 +1567,7 @@ Text that comes from the document/dataset which is being analyzed
 
 predictions: `[]`
 
-List of performance metrics of predictions made in terms of properly summarizing the document
+List of decoded predicted summarizations of the document being summarized
 
 #### summarization_query ####
 
@@ -1571,14 +1608,14 @@ Number of full cycles used for model fitting/training on the training dataset (i
 
 generate_plots=True (`bool`)
 
-Option to generate all relevant plots for query (is set by default to 1)
+Option to generate all relevant plots for query (is set by default to true)
 
 
 *Returns --* 
 
 None
 
-Executes document summarization training and outputs resulting summary/metrics/associated plots
+Executes document summarization model training/testing and outputs resulting summary/metrics/associated plots
 
 #### dimensionality_reducer ####
 
