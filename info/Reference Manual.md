@@ -1520,6 +1520,7 @@ client.summarization_query(self,
 ```
 
 Generates/stores contextual summmary from textual data in document using T5 pretrained text-to-text transformers  
+
 Parameters -- 
 
 instruction: `str`
