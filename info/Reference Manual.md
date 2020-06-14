@@ -59,6 +59,13 @@ Table of Contents
     * [init](#__init__-DataReader)
     * [retrieve_extension](#retrieve_extension)
     * [data_generator](#data_generator)
+* [huggingfaceModelRetrainHelper.py](#huggingfaceModelRetrainHelper)
+  * [train](#train)
+  * [class CustomDataset](#class-CustomDataset)
+    * [init](#__init__-CustomDataset)
+    * [len](#__len__)
+    * [getitem](#__getitem__)
+  * [inference](#inference)
 * [dimensionality_red_queries.py](#dimensionality_red_queries)
   * [dimensionality_reduc](#dimensionality_reduc)
   * [dimensionality_RF](#dimensionality_RF)
@@ -942,6 +949,22 @@ Outputs an list of encoded numerical representation of the instruction text reci
 
 ***
 
+## huggingfaceModelRetrainHelper ##
+
+### train ###
+
+### class-CustomDataset ###
+
+#### __init__-CustomDataset ####
+
+#### __len__ #### 
+
+#### __getitem__ ####
+
+###  ###
+
+***
+
 ## dimensionality_red_queries ##
 
 ### logger ###
@@ -1504,10 +1527,7 @@ String that is from the
 
 *Returns --*
 
-None
-
-
-
+predictions: 
 
 #### summarization_query ####
 
