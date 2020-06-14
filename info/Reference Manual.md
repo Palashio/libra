@@ -1455,17 +1455,25 @@ Outputs an list of encoded numerical representation of the instruction text reci
 client.encode_text(self, dataset, text)
 ```
 
-Generates/stores with base object an encoding mask of form list ```[int/long, int/long, int/long]``` based on frequency of distinct characters used for sequence to sequence pre-training for natural language generation
+Encodes text found in dataset into tokenized sequences for usage by text-related ML models
 
 
-Parameters -- instruction_label: `str`
+*Parameters --* 
 
-Acquires a string based of the instruction sent to encode in the form of a mask
+dataset
+
+Data to be analyzed that is initialized in the client class instance
+
+text: `str`
+
+Text that comes from the document/dataset which is being analyzed
 
 
-Returns -- mask: `[int/long, int/long, int/long]` 
+*Returns --* 
 
-Outputs an list of encoded numerical representation of the instruction text recieved
+result: `[int, int, ..., int]` 
+
+List of sequence of integers representing the individual parts of the text
 
 #### predict_text_sentiment ####
 
