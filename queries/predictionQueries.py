@@ -1,15 +1,7 @@
 # Making functions in other directories accesible to this file by
 # inserting into sis path
-import sys
-
 from keras_preprocessing import sequence
-
-sys.path.insert(1, './preprocessing')
-sys.path.insert(1, './data_generation')
-sys.path.insert(1, './modeling')
-sys.path.insert(1, './plotting')
-
-
+import sys
 import os
 import warnings
 from pandas.core.common import SettingWithCopyWarning
@@ -27,9 +19,10 @@ from sklearn.model_selection import train_test_split
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import OneHotEncoder, StandardScaler
 from dataset_labelmatcher import get_similar_column, get_similar_model
-from tensorflow.keras.callbacks  import EarlyStopping
+from tensorflow.keras.callbacks import EarlyStopping
 from matplotlib import pyplot
 from grammartree import get_value_instruction
+from data_preprocesser import image_preprocess, add_resized_images, replace_images, process_color_channel
 from data_preprocesser import structured_preprocesser, initial_preprocesser
 from predictionModelCreation import get_keras_model_reg, get_keras_text_class
 from predictionModelCreation import get_keras_model_class
@@ -41,7 +34,6 @@ from generatePlots import (generate_clustering_plots,
                            generate_regression_plots,
                            generate_classification_plots,
                            generate_classification_together)
-
 import tensorflow as tf
 from data_reader import DataReader
 from keras.models import Sequential
@@ -55,6 +47,60 @@ from sklearn.feature_selection import SelectFromModel
 from sklearn import preprocessing, tree
 from NLP_preprocessing import text_clean_up, lemmatize_text
 from keras.preprocessing.image import ImageDataGenerator
+from termcolor import colored
+from keras.models import model_from_json
+import sys
+import torch
+from torch.utils.data import DataLoader
+
+# Importing the T5 modules from huggingface/transformers
+from transformers import T5Tokenizer, T5ForConditionalGeneration
+
+from keras_preprocessing import sequence
+
+from huggingfaceModelRetrainHelper import train, CustomDataset, inference
+
+sys.path.insert(1, './preprocessing')
+sys.path.insert(1, './data_generation')
+sys.path.insert(1, './modeling')
+sys.path.insert(1, './plotting')
+
+import os
+import warnings
+from pandas.core.common import SettingWithCopyWarning
+import numpy as np
+import pandas as pd
+from tabulate import tabulate
+from scipy.spatial.distance import cosine
+from sklearn.model_selection import cross_val_score
+from sklearn.preprocessing import LabelEncoder
+from sklearn.metrics import accuracy_score
+from sklearn import svm
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+from dataset_labelmatcher import get_similar_column, get_similar_model
+from tensorflow.keras.callbacks import EarlyStopping
+from grammartree import get_value_instruction
+from data_preprocesser import structured_preprocesser, initial_preprocesser
+
+from predictionModelCreation import get_keras_model_reg, get_keras_text_class
+from predictionModelCreation import get_keras_model_class
+from keras.utils import np_utils
+from sklearn.cluster import KMeans
+from generatePlots import (generate_clustering_plots,
+                           generate_regression_plots,
+                           generate_classification_plots)
+
+import tensorflow as tf
+from data_reader import DataReader
+from keras.models import Sequential
+from keras.layers import (Dense, Conv2D, Flatten, MaxPooling2D, )
+from dimensionality_red_queries import dimensionality_reduc
+from tuner import tuneReg, tuneClass, tuneCNN
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn import preprocessing, tree
+from NLP_preprocessing import text_clean_up, lemmatize_text, get_target_values
+from keras.preprocessing.image import ImageDataGenerator
 
 warnings.simplefilter(action='error', category=FutureWarning)
 warnings.simplefilter(action="ignore", category=SettingWithCopyWarning)
@@ -64,6 +110,8 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
 currLog = ""
 counter = 0
+number = 0
+# current_dir=os.getcw()
 
 # allows for all columns to be displayed when printing()
 pd.options.display.width = None
@@ -85,19 +133,17 @@ def clearLog():
 # global variable parallels
 
 
-def logger(instruction, found="",slash=''):
+def logger(instruction, found="", slash=''):
     global currLog
     global counter
-
     if counter == 0:
         currLog += (" " * 2 * counter) + str(instruction) + str(found)
-    elif instruction=="->":
-            counter=counter-1
-            if slash=='|':
-                currLog += (" " +slash + str(instruction) + str(found))
-            else:
-                currLog += (" " * 2 * counter) + str(instruction) + str(found)  
-
+    elif instruction == "->":
+        counter = counter - 1
+        if slash == '|':
+            currLog += (" " * 2 * counter) + slash + str(found)
+        else:
+            currLog += (" " * 2 * counter) + str(instruction) + str(found)
     else:
         currLog += (" " * 2 * counter) + "|"
         currLog += "\n"
@@ -105,15 +151,16 @@ def logger(instruction, found="",slash=''):
         if instruction == "done...":
             currLog += "\n"
             currLog += "\n"
-        
+
     counter += 1
-    if instruction=="->":
-        print(currLog,end="")
+    if instruction == "->":
+        print(currLog, end="")
     else:
         print(currLog)
-    currLog=""
+    currLog = ""
 
 # class to store all query information
+
 
 class client:
     def __init__(self, data):
@@ -131,6 +178,15 @@ class client:
         return get_similar_model(model_requested, self.models.keys())
         clearLog()
 
+        # save the model in the current directory
+    def save(self, model, save_model, save_path=os.getcwd()):
+        model_json = model.to_json()
+        with open(save_path + "/model" + str(number) + ".json", "w") as json_file:
+            json_file.write(model_json)
+            # serialize weights to HDF5
+            model.save_weights(save_path + str(number) + ".h5")
+            logger("->", "Saved model to disk as model" + str(number))
+
     # param modelKey: string representation of the model to make prediction
     # param data: dataframe version of desired prediction set
     def predict(self, modelKey, data):
@@ -139,7 +195,8 @@ class client:
         print(data)
         predictions = modeldict['model'].predict(data)
         if modeldict.get('interpreter'):
-            predictions = modeldict['interpreter'].inverse_transform(predictions)
+            predictions = modeldict['interpreter'].inverse_transform(
+                predictions)
         return predictions
 
     def neural_network_query(self,
@@ -151,7 +208,9 @@ class client:
                              epochs=50,
                              generate_plots=True,
                              callback_mode='min',
-                             maximizer="val_loss"):
+                             maximizer="val_loss",
+                             save_model=True,
+                             save_path=os.getcwd()):
 
         # data = pd.read_csv(self.dataset)
         dataReader = DataReader(self.dataset)
@@ -159,31 +218,51 @@ class client:
 
         if preprocess:
 
-            remove = get_similar_column(get_value_instruction(instruction), data)
+            remove = get_similar_column(
+                get_value_instruction(instruction), data)
             if (data[remove].dtype.name == 'object'):
                 callback_mode = 'max'
                 maximizer = "val_accuracy"
-                self.classification_query_ann(instruction, preprocess=preprocess, test_size=test_size,
-                                              random_state=random_state, epochs=epochs, generate_plots=generate_plots,
-                                              callback_mode=callback_mode, maximizer=maximizer)
+                self.classification_query_ann(
+                    instruction,
+                    preprocess=preprocess,
+                    test_size=test_size,
+                    random_state=random_state,
+                    epochs=epochs,
+                    generate_plots=generate_plots,
+                    callback_mode=callback_mode,
+                    maximizer=maximizer,
+                    save_model=save_model,
+                    save_path=save_path)
             else:
-                self.regression_query_ann(instruction, preprocess=preprocess, test_size=test_size,
-                                          random_state=random_state, epochs=epochs, generate_plots=generate_plots,
-                                          callback_mode=callback_mode, maximizer=maximizer, drop=None)
+                self.regression_query_ann(
+                    instruction,
+                    preprocess=preprocess,
+                    test_size=test_size,
+                    random_state=random_state,
+                    epochs=epochs,
+                    generate_plots=generate_plots,
+                    callback_mode=callback_mode,
+                    maximizer=maximizer,
+                    drop=None,
+                    save_model=save_model,
+                    save_path=save_path)
 
     # single regression query using a feed-forward neural network
     # instruction should be the value of a column
     def regression_query_ann(
             self,
             instruction,
-            drop = None,
+            drop=None,
             preprocess=True,
             test_size=0.2,
             random_state=49,
             epochs=50,
             generate_plots=True,
             callback_mode='min',
-            maximizer="val_loss"):
+            maximizer="val_loss",
+            save_model=True,
+            save_path=os.getcwd()):
 
         global currLog
         logger("reading in dataset...")
@@ -192,27 +271,26 @@ class client:
         data = dataReader.data_generator()
         # data = pd.read_csv(self.dataset)
 
-        
         if drop is not None:
             data.drop(drop, axis=1, inplace=True)
-
 
         data, y, target, full_pipeline = initial_preprocesser(data, instruction, preprocess)
 
         X_train = data['train']
-        y_train = data['train'][target]
         X_test = data['test']
-        y_test = data['test'][target]
-        
-        # Only used for the interpreter
+
+
+        # Target scaling
         target_scaler = StandardScaler()
-        target_scaler.fit_transform(np.array(y).reshape(-1, 1))
+
+        y_train = target_scaler.fit_transform(np.array(y['train']).reshape(-1, 1))
+        y_test = target_scaler.transform(np.array(y['test']).reshape(-1,1))
 
         logger("establishing callback function...")
 
         models = []
         losses = []
-        model_data=[]
+        model_data = []
 
         # callback function to store lowest loss value
         es = EarlyStopping(
@@ -239,13 +317,14 @@ class client:
         models.append(history)
         model_data.append(model)
 
-        logger("->","Initial number of layers "+ str(len(model.layers)))
-        logger("->","Training Loss: "+str(history.history['loss']
-                     [len(history.history['val_loss']) - 1]),'|')
-        logger("->","Test Loss: "+ str(history.history['val_loss']
-                     [len(history.history['val_loss']) - 1]),'|')
+        logger("->", "Initial number of layers " + str(len(model.layers)))
+
+        logger("->", "Training Loss: " + \
+               str(history.history['loss'][len(history.history['val_loss']) - 1]), '|')
+        logger("->", "Test Loss: " +
+               str(history.history['val_loss'][len(history.history['val_loss']) -
+                                               1]), '|')
         print("")
-        
 
         losses.append(history.history[maximizer]
                       [len(history.history[maximizer]) - 1])
@@ -265,24 +344,30 @@ class client:
                     y_test), verbose=0)
             model_data.append(model)
             models.append(history)
-            logger("->","Current number of layers: "+ str(len(model.layers)))
-            logger("->","Training Loss: "+ str(history.history['loss']
-                        [len(history.history['val_loss']) - 1]),'|')
-            logger("->","Test Loss: "+ str(history.history['val_loss']
-                        [len(history.history['val_loss']) - 1]),'|')
+            logger("->", "Current number of layers: " + str(len(model.layers)))
+
+            logger("->", "Training Loss: " +
+                   str(history.history['loss'][len(history.history['val_loss']) -
+                                               1]), '|')
+            logger("->", "Test Loss: " +
+                   str(history.history['val_loss'][len(history.history['val_loss']) -
+                                                   1]), '|')
             print("")
             losses.append(history.history[maximizer]
                           [len(history.history[maximizer]) - 1])
             i += 1
 
-        final_model=model_data[losses.index(min(losses))]
-        final_hist=models[losses.index(min(losses))]
-        logger('->',"Best number of layers found: "+ str(len(final_model.layers)))
-        logger('->',"Training Loss: "+str(final_hist.history['loss']
-                     [len(final_hist.history['val_loss']) - 1]))
-        logger('->',"Test Loss: "+str(final_hist.history['val_loss']
-                     [len(final_hist.history['val_loss']) - 1]))
-        print("")
+        final_model = model_data[losses.index(min(losses))]
+        final_hist = models[losses.index(min(losses))]
+
+        logger('->', "Best number of layers found: " +
+               str(len(final_model.layers)))
+
+        logger('->', "Training Loss: " + str(final_hist.history['loss']
+                                             [len(final_hist.history['val_loss']) - 1]))
+        logger('->', "Test Loss: " + str(final_hist.history['val_loss']
+                                         [len(final_hist.history['val_loss']) - 1]))
+
         # calls function to generate plots in plot generation
         if generate_plots:
             init_plots, plot_names = generate_regression_plots(
@@ -291,17 +376,18 @@ class client:
             for x in range(len(plot_names)):
                 plots[str(plot_names[x])] = init_plots[x]
 
-        print(currLog)
+        if save_model:
+            self.save(final_model, save_model)
         # stores values in the client object models dictionary field
         self.models['regression_ANN'] = {
-            'model': model,
+            'model': final_model,
             "target": target,
             "plots": plots,
             "preprocesser": full_pipeline,
             "interpreter": target_scaler,
             'losses': {
-                'training_loss': history.history['loss'],
-                'val_loss': history.history['val_loss']}}
+                'training_loss': final_hist.history['loss'],
+                'val_loss': final_hist.history['val_loss']}}
 
         # returns the best model
         clearLog()
@@ -314,39 +400,56 @@ class client:
             instruction,
             preprocess=True,
             callback_mode='min',
-            drop = None,
+            drop=None,
             random_state=49,
             test_size=0.2,
             epochs=5,
             generate_plots=True,
-            maximizer="val_loss"):
+            maximizer="val_loss",
+            save_model=True,
+            save_path=os.getcwd()):
 
         # reads dataset and fills n/a values with zeroes
+<<<<<<< HEAD
         # data = pd.read_csv(self.dataset)
    
+=======
+
+        # data = pd.read_csv(self.dataset)
+>>>>>>> b77064aba529f72d056ca27d9f3575be73daeb68
 
         dataReader = DataReader(self.dataset)
         data = dataReader.data_generator()
 
         if drop is not None:
-            data.drop(drop, axis=1, inplace=True)    
+            data.drop(drop, axis=1, inplace=True)
 
-        data, y, remove, full_pipeline = initial_preprocesser(data, instruction, preprocess)
+        data, y, remove, full_pipeline = initial_preprocesser(
+            data, instruction, preprocess)
+
+        # Needed to make a custom label encoder due to train test split changes
+        # Can still be inverse transformed, just a bit of extra work
+        y = pd.concat([y['train'], y['test']], axis=0)
 
         num_classes = len(np.unique(y))
 
-        # encodes the label dataset into 0's and 1's
-        le = preprocessing.LabelEncoder()
-        y = le.fit_transform(y)
-        y = np_utils.to_categorical(y)
+        X_train = data['train']
+        X_test = data['test']
 
-        X_train, X_test, y_train, y_test = train_test_split(
-            data, y, test_size=test_size, random_state=random_state)
+        # ANN needs target one hot encoded for classification
+        one_hot_encoder = OneHotEncoder()
+
+        y = pd.DataFrame(one_hot_encoder.fit_transform(np.reshape(y.values, (-1,1))).toarray(),
+                         columns=one_hot_encoder.get_feature_names())
+
+        y_train = y.iloc[:len(X_train)]
+        y_test = y.iloc[len(X_train):]
+
 
         models = []
         losses = []
-        accuracies=[]
-        model_data=[]
+        accuracies = []
+        model_data = []
 
         # early stopping callback
         es = EarlyStopping(
@@ -359,16 +462,18 @@ class client:
         model = get_keras_model_class(data, i, num_classes)
 
         history = model.fit(
-            data, y, epochs=epochs, validation_data=(
+            X_train, y_train, epochs=epochs, validation_data=(
                 X_test, y_test), callbacks=[es], verbose=0)
 
         model_data.append(model)
         models.append(history)
-        logger("->","Initial number of layers: "+ str(len(model.layers)))
-        logger("->","Training Loss: "+ str(history.history['loss']
-                    [len(history.history['val_loss']) - 1]),'|')
-        logger("->","Test Loss: "+ str(history.history['val_loss']
-                    [len(history.history['val_loss']) - 1]),'|')
+        logger("->", "Initial number of layers: " + str(len(model.layers)))
+
+        logger("->", "Training Loss: " +
+               str(history.history['loss'][len(history.history['val_loss']) - 1]), '|')
+        logger("->", "Test Loss: " +
+               str(history.history['val_loss'][len(history.history['val_loss']) -
+                                               1]), '|')
         print("")
 
         losses.append(history.history[maximizer]
@@ -390,46 +495,53 @@ class client:
 
             model_data.append(model)
             models.append(history)
-            logger("->","Current number of layers: "+ str(len(model.layers)))
-            logger("->","Training Loss: "+ str(history.history['loss']
-                        [len(history.history['val_loss']) - 1]),'|')
-            logger("->","Test Loss: "+ str(history.history['val_loss']
-                        [len(history.history['val_loss']) - 1]),'|')
+            logger("->", "Current number of layers: " + str(len(model.layers)))
+
+            logger("->", "Training Loss: " +
+                   str(history.history['loss'][len(history.history['val_loss']) -
+                                               1]), '|')
+            logger("->", "Test Loss: " +
+                   str(history.history['val_loss'][len(history.history['val_loss']) -
+                                                   1]), '|')
             print("")
 
             losses.append(history.history[maximizer]
                           [len(history.history[maximizer]) - 1])
             accuracies.append(history.history['val_accuracy']
-                      [len(history.history['val_accuracy']) - 1])
+                              [len(history.history['val_accuracy']) - 1])
             i += 1
 
-        final_model=model_data[losses.index(min(losses))]
-        final_hist=models[losses.index(min(losses))]
-        logger('->',"Best number of layers found: "+ str(len(final_model.layers)))
-        logger('->',"Training Accuracy: "+str(final_hist.history['accuracy']
-                     [len(final_hist.history['val_accuracy']) - 1]))
-        logger('->',"Test Accuracy: "+str(final_hist.history['val_accuracy']
-                     [len(final_hist.history['val_accuracy']) - 1]))
-        print("")
+        final_model = model_data[losses.index(min(losses))]
+        final_hist = models[losses.index(min(losses))]
+
+        logger('->', "Best number of layers found: " +
+               str(len(final_model.layers)))
+        logger('->', "Training Accuracy: " + str(final_hist.history['accuracy']
+                                                 [len(final_hist.history['val_accuracy']) - 1]))
+        logger('->', "Test Accuracy: " + str(final_hist.history['val_accuracy'][
+                                                 len(final_hist.history['val_accuracy']) - 1]))
 
         # genreates appropriate classification plots by feeding all information
         plots = generate_classification_plots(
             models[len(models) - 1], data, y, model, X_test, y_test)
 
+        if save_model:
+            self.save(final_model, save_model)
+
         # stores the values and plots into the object dictionary
         self.models["classification_ANN"] = {
-            "model": model,
+            "model": final_model,
             'num_classes': num_classes,
             "plots": plots,
             "target": remove,
             "preprocesser": full_pipeline,
-            "interpreter": le,
+            "interpreter": one_hot_encoder,
             'losses': {
-                'training_loss': history.history['loss'],
-                'val_loss': history.history['val_loss']},
+                'training_loss': final_hist.history['loss'],
+                'val_loss': final_hist.history['val_loss']},
             'accuracy': {
-                'training_accuracy': history.history['accuracy'],
-                'validation_accuracy': history.history['val_accuracy']}}
+                'training_accuracy': final_hist.history['accuracy'],
+                'validation_accuracy': final_hist.history['val_accuracy']}}
 
         # returns the last model
         return model
@@ -438,7 +550,7 @@ class client:
             self,
             preprocess=True,
             generate_plots=True,
-            drop = None,
+            drop=None,
             base_clusters=1):
         logger("Reading dataset...")
         # loads dataset and replaces n/a with zero
@@ -448,7 +560,7 @@ class client:
         data = dataReader.data_generator()
 
         if drop is not None:
-            data.drop(drop, axis=1, inplace=True)     
+            data.drop(drop, axis=1, inplace=True)
 
         dataPandas = data.copy()
 
@@ -475,7 +587,8 @@ class client:
         logger("Identifying best centroid count and optimizing accuracy")
         # continues to increase cluster size until SSE values don't decrease by
         # 1000 - this value was decided based on precedence
-        while (all(earlier >= later for earlier, later in zip(inertiaStor, inertiaStor[1:]))):
+        while (all(earlier >= later for earlier,
+                                        later in zip(inertiaStor, inertiaStor[1:]))):
             kmeans = KMeans(n_clusters=i, random_state=0).fit(data)
             modelStorage.append(kmeans)
             inertiaStor.append(kmeans.inertia_)
@@ -514,30 +627,39 @@ class client:
             test_size=0.2,
             kernel='linear',
             preprocess=True,
-            drop = None,
+            drop=None,
             cross_val_size=0.3):
         logger("Reading in dataset....")
         # reads dataset and fills n/a values with zeroes
         # data = pd.read_csv(self.dataset)
 
-
         dataReader = DataReader(self.dataset)
         data = dataReader.data_generator()
 
         if drop is not None:
-            data.drop(drop, axis=1, inplace=True)     
+            data.drop(drop, axis=1, inplace=True)
 
-        data, y, remove, full_pipeline = initial_preprocesser(data, instruction, preprocess)
+        data, y, target, full_pipeline = initial_preprocesser(data, instruction, preprocess)
+
+
+        X_train = data['train']
+        y_train = y['train']
+        X_test = data['test']
+        y_test = y['test']
+
         # classification_column = get_similar_column(getLabelwithInstruction(instruction), data)
-
         num_classes = len(np.unique(y))
 
-        # encodes the label dataset into 0's and 1's
-        le = preprocessing.LabelEncoder()
-        y = le.fit_transform(y)
+        # Needed to make a custom label encoder due to train test split changes
+        # Can still be inverse transformed, just a bit of extra work
+        y_vals = np.unique(pd.concat([y['train'], y['test']], axis=0))
+        label_mappings = {}
+        for i in range(len(y_vals)):
+            label_mappings[y_vals[i]] = i
 
-        X_train, X_test, y_train, y_test = train_test_split(
-            data, y, test_size=test_size, random_state=49)
+        y_train = y_train.apply(lambda x: label_mappings[x]).values
+        y_test = y_test.apply(lambda x: label_mappings[x]).values
+
 
         # Fitting to SVM and storing in the model dictionary
         logger("Fitting Support Vector Machine")
@@ -549,13 +671,13 @@ class client:
             "accuracy_score": accuracy_score(
                 clf.predict(X_test),
                 y_test),
-            "target": remove,
+            "target": target,
             "preprocesser": full_pipeline,
-            "interpreter": le,
+            "interpreter": label_mappings,
             "cross_val_score": cross_val_score(
                 clf,
-                data,
-                y,
+                X_train,
+                y_train,
                 cv=cross_val_size)}
         clearLog()
         return svm
@@ -564,20 +686,26 @@ class client:
             self,
             instruction,
             preprocess=True,
-            drop = None, 
+            drop=None,
             min_neighbors=3,
             max_neighbors=10):
         logger("Reading in dataset....")
         # Reads in dataset
+<<<<<<< HEAD
         # data = pd.read_csv(self.dataset)
+=======
+>>>>>>> b77064aba529f72d056ca27d9f3575be73daeb68
 
+        # data = pd.read_csv(self.dataset)
 
         dataReader = DataReader(self.dataset)
         data = dataReader.data_generator()
 
         if drop is not None:
-            data.drop(drop, axis=1, inplace=True)     
-        data, y, remove, full_pipeline = initial_preprocesser(data, instruction, preprocess)
+            data.drop(drop, axis=1, inplace=True)
+
+        data, y, remove, full_pipeline = initial_preprocesser(
+            data, instruction, preprocess)
 
         # classification_column = get_similar_column(getLabelwithInstruction(instruction), data)
 
@@ -615,29 +743,45 @@ class client:
         clearLog()
         return knn
 
-    def decision_tree_query(self, instruction, preprocess=True, test_size=0.2, drop = None):
+    def decision_tree_query(
+            self,
+            instruction,
+            preprocess=True,
+            test_size=0.2,
+            drop=None):
         logger("Reading in dataset....")
 
         dataReader = DataReader(self.dataset)
         data = dataReader.data_generator()
 
         if drop is not None:
-            data.drop(drop, axis=1, inplace=True)     
+            data.drop(drop, axis=1, inplace=True)
 
-        data, y, remove, full_pipeline = initial_preprocesser(data, instruction, preprocess)
+        data, y, remove, full_pipeline = initial_preprocesser(
+            data, instruction, preprocess)
+
+        X_train = data['train']
+        y_train = y['train']
+        X_test = data['test']
+        y_test = y['test']
 
         # classification_column = get_similar_column(getLabelwithInstruction(instruction), data)
 
-        num_classes = len(np.unique(y))
+        # Needed to make a custom label encoder due to train test split changes
+        # Can still be inverse transformed, just a bit of extra work
+        y_vals = np.unique(pd.concat([y['train'], y['test']], axis=0))
+        label_mappings = {}
+        for i in range(len(y_vals)):
+            label_mappings[y_vals[i]] = i
 
-        # encodes the label dataset into 0's and 1's
-        le = preprocessing.LabelEncoder()
-        y = le.fit_transform(y)
+        # Custom label encoder due to train test split
+        y_train = y_train.apply(lambda x: label_mappings[x]).values
+        y_test = y_test.apply(lambda x: label_mappings[x]).values
+        num_classes = len(np.unique(y))
 
         # fitting and storing
         logger("Fitting Decision Tree...")
-        X_train, X_test, y_train, y_test = train_test_split(
-            data, y, test_size=test_size, random_state=49)
+
         clf = tree.DecisionTreeClassifier()
         clf = clf.fit(X_train, y_train)
 
@@ -645,12 +789,15 @@ class client:
         self.models["decision_tree"] = {
             "model": clf,
             "target": remove,
+            "accuracy_score": accuracy_score(
+                clf.predict(X_test),
+                y_test),
             "preprocesser": full_pipeline,
-            "interpeter": le,
+            "interpeter": label_mappings,
             "cross_val_score": cross_val_score(
                 clf,
-                data,
-                y,
+                X_train,
+                y_train,
                 cv=3)}
 
         clearLog()
@@ -661,15 +808,17 @@ class client:
             instruction,
             preprocess=True,
             test_size=0.2,
-            random_state=49):
+            drop=None,
+            random_state=49, save_model=1):
         logger("Reading in dataset....")
         dataReader = DataReader(self.dataset)
         data = dataReader.data_generator()
 
         if drop is not None:
-            data.drop(drop, axis=1, inplace=True)    
+            data.drop(drop, axis=1, inplace=True)
 
-        data, y, remove, full_pipeline = initial_preprocesser(data, instruction, preprocess)
+        data, y, remove, full_pipeline = initial_preprocesser(
+            data, instruction, preprocess)
 
         # classification_column = get_similar_column(getLabelwithInstruction(instruction), data)
 
@@ -694,7 +843,7 @@ class client:
         logger("Identifying top scores...")
         for model in models:
             scores.append(accuracy_score(model.predict(X_test), y_test))
-
+        self.save(models[scores.index(max(scores))], save_model)
         clearLog()
 
         # returns classificaiton model with the highest score
@@ -732,14 +881,14 @@ class client:
                     self.models["convolutional_NN"]["num_classes"])
                 self.models["convolutional_NN"]["model"] = model
 
-    def stat_analysis(self, column_name="none", drop = None):
+    def stat_analysis(self, column_name="none", drop=None):
         logger("Reading in dataset....")
         # Reading in dataset and creating pdtabulate variable to format outputs
         dataReader = DataReader(self.dataset)
         data = dataReader.data_generator()
 
         if drop is not None:
-            data.drop(drop, axis=1, inplace=True)   
+            data.drop(drop, axis=1, inplace=True)
 
         data.fillna(0, inplace=True)
         logger("Creating lambda object to format...")
@@ -820,18 +969,28 @@ class client:
             print("-------------------------")
             print(pdtabulate(data[column_name]).describe())
 
-    def convolutional_query(self, *argv):
+    def convolutional_query(self, data_path=None, new_folders=True):
         logger("Creating CNN generation query")
         # generates the dataset based on instructions using a selenium query on
         # google chrome
         logger("Generating datasets for classes...")
-        input_shape = (224, 224, 3)
-        # Assuming Downloaded Images in current Directory
-        data_path = os.getcwd()
-        num_classes = 0
+        # Assuming Downloaded Images in current Directory if no data_path
+        # provided
+        if data_path is None:
+            data_path = os.getcwd()
+        # process images
+        processInfo = image_preprocess(data_path, new_folders)
+        input_shape = (processInfo["height"], processInfo["width"], 3)
+        input_single = (processInfo["height"], processInfo["width"])
+        num_classes = processInfo["num_categories"]
         loss_func = ""
-        for a_class in argv:
-            num_classes = num_classes + 1
+        if new_folders:
+            training_path = "/proc_training_set"
+            testing_path = "/proc_testing_set"
+        else:
+            training_path = "/training_set"
+            testing_path = "/testing_set"
+
         if num_classes > 2:
             loss_func = "categorical_crossentropy"
         elif num_classes == 2:
@@ -845,7 +1004,7 @@ class client:
                 64,
                 kernel_size=3,
                 activation="relu",
-                input_shape=(input_shape)))
+                input_shape=input_shape))
         model.add(MaxPooling2D(pool_size=(2, 2)))
         model.add(Conv2D(64, kernel_size=3, activation="relu"))
         model.add(MaxPooling2D(pool_size=(2, 2)))
@@ -861,23 +1020,28 @@ class client:
                                         zoom_range=0.2,
                                         horizontal_flip=True)
 
-        X_train = train_data.flow_from_directory(data_path + '/training_set',
-                                                 target_size=(224, 224),
+        X_train = train_data.flow_from_directory(data_path + training_path,
+                                                 target_size=input_single,
+                                                 color_mode='rgb',
                                                  batch_size=32,
                                                  class_mode='categorical')
         test_data = ImageDataGenerator(rescale=1. / 255)
-        X_test = test_data.flow_from_directory(data_path + '/test_set',
-                                               target_size=(224, 224),
+        X_test = test_data.flow_from_directory(data_path + testing_path,
+                                               target_size=input_single,
+                                               color_mode='rgb',
                                                batch_size=32,
                                                class_mode='categorical')
-        # Fitting/Training the model
-        print(X_train)
-        history = model.fit_generator(generator=X_train,
-                                      steps_per_epoch=X_train.n // X_train.batch_size,
-                                      validation_data=X_test,
-                                      validation_steps=X_test.n // X_test.batch_size,
-                                      epochs=10
-                                      )
+
+        # print(X_train)
+        history = model.fit_generator(
+            generator=X_train,
+            steps_per_epoch=X_train.n //
+                            X_train.batch_size,
+            validation_data=X_test,
+            validation_steps=X_test.n //
+                             X_test.batch_size,
+            epochs=10)
+
         # storing values the model dictionary
         self.models["convolutional_NN"] = {
             "model": model,
@@ -918,20 +1082,15 @@ class client:
                                   test_size=0.2,
                                   random_state=49,
                                   epochs=10,
-                                  maxTextLength=20000,
+                                  maxTextLength=200,
                                   generate_plots=True):
         # data = pd.read_csv(self.dataset)
         dataReader = DataReader(self.dataset)
         data = dataReader.data_generator()
         data.fillna(0, inplace=True)
 
-        # Get target columns
-        target = get_similar_column(get_value_instruction(instruction), data)
-        X = data[target]
-        del data[target]
-        labels = get_similar_column(get_value_instruction("Label"), data)
-        Y = data[labels]
-        Y = np.array(Y.array)
+        X, Y = get_target_values(data, instruction, "label")
+        Y = np.array(Y)
 
         if preprocess:
             logger("Preprocessing data...")
@@ -943,7 +1102,8 @@ class client:
 
         model = get_keras_text_class(maxTextLength, 2)
 
-        X_train, X_test, y_train, y_test = train_test_split(X, Y, test_size=test_size, random_state=random_state)
+        X_train, X_test, y_train, y_test = train_test_split(
+            X, Y, test_size=test_size, random_state=random_state)
         X_train = sequence.pad_sequences(X_train, maxlen=maxTextLength)
         X_test = sequence.pad_sequences(X_test, maxlen=maxTextLength)
 
@@ -960,7 +1120,8 @@ class client:
         logger("Test accuracy:" + str(acc))
 
         if generate_plots:
-            # generates appropriate classification plots by feeding all information
+            # generates appropriate classification plots by feeding all
+            # information
             plots = generate_classification_plots(
                 history, X, Y, model, X_test, y_test)
 
@@ -979,13 +1140,88 @@ class client:
                 'training_accuracy': history.history['accuracy'],
                 'validation_accuracy': history.history['val_accuracy']}}
 
+    # Document summarization predict wrapper
+    def get_summary(self, text):
+        modelInfo = self.models.get("Document Summarization")
+        model = modelInfo['model']
+        model.eval()
+        tokenizer = T5Tokenizer.from_pretrained("t5-small")
+        MAX_LEN = 512
+        SUMMARY_LEN = 150
+        df = pd.DataFrame({'text': [""], 'ctext': [text]})
+        set = CustomDataset(df, tokenizer, MAX_LEN, SUMMARY_LEN)
+        params = {
+            'batch_size': 1,
+            'shuffle': True,
+            'num_workers': 0
+        }
+        loader = DataLoader(set, **params)
+        predictions, actuals = inference(tokenizer, model, "cpu", loader)
+        return predictions
+
+    # text summarization query
+    def summarization_query(self, instruction,
+                            preprocess=True,
+                            test_size=0.2,
+                            random_state=49,
+                            epochs=1,
+                            generate_plots=True):
+
+        data = pd.read_csv(self.dataset)
+        data.fillna(0, inplace=True)
+
+        logger("Preprocessing data...")
+
+        X, Y = get_target_values(data, instruction, "summary")
+        df = pd.DataFrame({'text': Y, 'ctext': X})
+
+        device = 'cpu'
+
+        TRAIN_BATCH_SIZE = 64
+        TRAIN_EPOCHS = 10
+        LEARNING_RATE = 1e-4
+        SEED = 42
+        MAX_LEN = 512
+        SUMMARY_LEN = 150
+
+        torch.manual_seed(SEED)
+        np.random.seed(SEED)
+
+        tokenizer = T5Tokenizer.from_pretrained("t5-small")
+
+        train_size = 0.8
+        train_dataset = df.sample(frac=train_size, random_state=SEED).reset_index(drop=True)
+
+        training_set = CustomDataset(train_dataset, tokenizer, MAX_LEN, SUMMARY_LEN)
+        train_params = {
+            'batch_size': TRAIN_BATCH_SIZE,
+            'shuffle': True,
+            'num_workers': 0
+        }
+
+        training_loader = DataLoader(training_set, **train_params)
+        # used small model
+        model = T5ForConditionalGeneration.from_pretrained("t5-small")
+        model = model.to(device)
+
+        optimizer = torch.optim.Adam(params=model.parameters(), lr=LEARNING_RATE)
+
+        logger('Initiating Fine-Tuning for the model on your dataset')
+
+        for epoch in range(TRAIN_EPOCHS):
+            train(epoch, tokenizer, model, device, training_loader, optimizer)
+
+        self.models["Document Summarization"] = {
+            "model": model
+        }
+
     def dimensionality_reducer(self, instruction):
         dimensionality_reduc(instruction, self.dataset)
 
     def show_plots(self, model):
         print(self.models[model]['plots'].keys())
 
-# Easier to comment the one you don't want to run instead of typing them out every time
-#newClient = client('./data/housing.csv').neural_network_query('Model median house value')
-newClient = client('./data/landslides_after_rainfall.csv').neural_network_query(instruction='Model distance', drop=['id', 'geolocation', 'source_link', 'source_name'])
-
+# Easier to comment the one you don't want to run instead of typing them
+# out every time
+newClient = client('./data/housing.csv').neural_network_query('Model median house value')
+#newClient = client('./data/landslides_after_rainfall.csv').neural_network_query(instruction='Model distance', drop=['id', 'geolocation', 'source_link', 'source_name'])
