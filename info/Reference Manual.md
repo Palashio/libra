@@ -1473,7 +1473,7 @@ Text that comes from the document/dataset which is being analyzed
 
 result: `[int, int, ..., int]` 
 
-List of sequence of integers representing the individual identified parts of the whole text
+List of sequence of integers representing the individual identified text parts of the whole text
 
 #### predict_text_sentiment ####
 
