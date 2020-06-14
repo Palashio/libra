@@ -313,3 +313,42 @@ def generate_column_labels(pipeline, numeric_cols):
         cols = list(numeric_cols)
 
     return cols
+
+def clustering_preprocessor(data):
+    # identifies the categorical and numerical columns
+    categorical_columns = data.select_dtypes(exclude=["number"]).columns
+    numeric_columns = data.columns[data.dtypes.apply(
+        lambda c: np.issubdtype(c, np.number))]
+ 
+    # pipeline for numeric columns
+    num_pipeline = Pipeline([
+        ('imputer', SimpleImputer(strategy="median")),
+        ('std_scaler', StandardScaler()),
+    ])
+ 
+    # pipeline for categorical columns
+    cat_pipeline = Pipeline([
+        ('imputer', SimpleImputer(strategy="constant", fill_value="")),
+        ('one_hot_encoder', OneHotEncoder()),
+    ])
+ 
+    # combine the two pipelines
+    if len(numeric_columns) != 0 and len(categorical_columns) != 0:
+        full_pipeline = ColumnTransformer([
+            ("num", num_pipeline, numeric_columns),
+            ("cat", cat_pipeline, categorical_columns),
+        ])
+    elif len(numeric_columns) == 0:
+        full_pipeline = ColumnTransformer([
+            ("cat", cat_pipeline, categorical_columns),
+        ])
+    else:
+        full_pipeline = ColumnTransformer([
+            ("num", num_pipeline, numeric_columns),
+        ])
+ 
+    data = full_pipeline.fit_transform(data)
+ 
+    new_columns = generate_column_labels(full_pipeline, numeric_columns)
+ 
+    return pd.DataFrame(data, columns=new_columns), full_pipeline

@@ -1,7 +1,7 @@
 # Making functions in other directories accesible to this file by
 # inserting into sis path
-from keras_preprocessing import sequence
 import sys
+from keras_preprocessing import sequence
 import os
 import warnings
 from pandas.core.common import SettingWithCopyWarning
@@ -22,85 +22,46 @@ from dataset_labelmatcher import get_similar_column, get_similar_model
 from tensorflow.keras.callbacks import EarlyStopping
 from matplotlib import pyplot
 from grammartree import get_value_instruction
-from data_preprocesser import image_preprocess, add_resized_images, replace_images, process_color_channel
-from data_preprocesser import structured_preprocesser, initial_preprocesser
-from predictionModelCreation import get_keras_model_reg, get_keras_text_class
-from predictionModelCreation import get_keras_model_class
+from prediction_model_creation import get_keras_model_reg, get_keras_text_class
+from prediction_model_creation import get_keras_model_class
 from keras.utils import to_categorical
 from keras.utils import np_utils
 from sklearn.cluster import KMeans
 import matplotlib.pyplot as plt
-from generatePlots import (generate_clustering_plots,
-                           generate_regression_plots,
-                           generate_classification_plots,
-                           generate_classification_together)
 import tensorflow as tf
 from data_reader import DataReader
-from keras.models import Sequential
-from keras.layers import (Dense, Conv2D, Flatten, Input, MaxPooling2D, )
 from dimensionality_red_queries import dimensionality_reduc
 from os import listdir
-from tuner import tuneReg, tuneClass, tuneCNN
-from sklearn.neighbors import KNeighborsClassifier
-from sklearn.ensemble import RandomForestRegressor
-from sklearn.feature_selection import SelectFromModel
-from sklearn import preprocessing, tree
+
 from NLP_preprocessing import text_clean_up, lemmatize_text
 from keras.preprocessing.image import ImageDataGenerator
 from termcolor import colored
 from keras.models import model_from_json
+from feedforward_nn import regression_ann, classification_ann, convolutional
+from supplementaries import tune_helper, stats
+from classification_models import k_means_clustering, train_svm, nearest_neighbors, decision_tree
+from sklearn import svm
+from sklearn.preprocessing import StandardScaler
+from keras.layers import (Dense, Conv2D, Flatten, MaxPooling2D, )
+from NLP_preprocessing import text_clean_up, lemmatize_text, get_target_values
 import sys
-import torch
-from torch.utils.data import DataLoader
-
-# Importing the T5 modules from huggingface/transformers
-from transformers import T5Tokenizer, T5ForConditionalGeneration
-
-from keras_preprocessing import sequence
-
-from huggingfaceModelRetrainHelper import train, CustomDataset, inference
 
 sys.path.insert(1, './preprocessing')
 sys.path.insert(1, './data_generation')
 sys.path.insert(1, './modeling')
 sys.path.insert(1, './plotting')
 
-import os
-import warnings
-from pandas.core.common import SettingWithCopyWarning
-import numpy as np
-import pandas as pd
-from tabulate import tabulate
-from scipy.spatial.distance import cosine
-from sklearn.model_selection import cross_val_score
-from sklearn.preprocessing import LabelEncoder
-from sklearn.metrics import accuracy_score
-from sklearn import svm
-from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import StandardScaler
-from dataset_labelmatcher import get_similar_column, get_similar_model
-from tensorflow.keras.callbacks import EarlyStopping
-from grammartree import get_value_instruction
-from data_preprocesser import structured_preprocesser, initial_preprocesser
 
-from predictionModelCreation import get_keras_model_reg, get_keras_text_class
-from predictionModelCreation import get_keras_model_class
-from keras.utils import np_utils
-from sklearn.cluster import KMeans
-from generatePlots import (generate_clustering_plots,
-                           generate_regression_plots,
-                           generate_classification_plots)
+# import torch
+# from torch.utils.data import DataLoader
 
-import tensorflow as tf
-from data_reader import DataReader
-from keras.models import Sequential
-from keras.layers import (Dense, Conv2D, Flatten, MaxPooling2D, )
-from dimensionality_red_queries import dimensionality_reduc
-from tuner import tuneReg, tuneClass, tuneCNN
-from sklearn.neighbors import KNeighborsClassifier
-from sklearn import preprocessing, tree
-from NLP_preprocessing import text_clean_up, lemmatize_text, get_target_values
-from keras.preprocessing.image import ImageDataGenerator
+# # Importing the T5 modules from huggingface/transformers
+# from transformers import T5Tokenizer, T5ForConditionalGeneration
+
+# from keras_preprocessing import sequence
+
+# from huggingfaceModelRetrainHelper import train, CustomDataset, inference
+
 
 
 warnings.simplefilter(action='error', category=FutureWarning)
@@ -112,13 +73,13 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 currLog = ""
 counter = 0
 number = 0
-# current_dir=os.getcw()
+# # current_dir=os.getcw()
 
-# allows for all columns to be displayed when printing()
-pd.options.display.width = None
+# # allows for all columns to be displayed when printing()
+# pd.options.display.width = None
 
 
-# clears the log when new process is started up
+# # clears the log when new process is started up
 
 
 def clearLog():
@@ -263,6 +224,7 @@ class client:
             save_model=True,
             save_path=os.getcwd()):
 
+<<<<<<< Updated upstream
         global currLog
         logger("reading in dataset...")
 
@@ -391,6 +353,21 @@ class client:
         # returns the best model
         clearLog()
         return models[len(models) - 1]
+=======
+        self.models['regression_ANN'] = regression_ann(
+            instruction=instruction,
+            dataset=self.dataset,
+            drop=drop,
+            preprocess=preprocess,
+            test_size=test_size,
+            random_state=random_state,
+            epochs=epochs,
+            generate_plots=generate_plots,
+            callback_mode=callback_mode,
+            maximizer=maximizer,
+            save_model=save_model,
+            save_path=save_path)
+>>>>>>> Stashed changes
 
     # query for multilabel classification query, does not work for
     # binaryclassification, fits to feed-forward neural network
@@ -408,6 +385,7 @@ class client:
             save_model=True,
             save_path=os.getcwd()):
 
+<<<<<<< Updated upstream
         # reads dataset and fills n/a values with zeroes
 
         #data = pd.read_csv(self.dataset)
@@ -667,14 +645,59 @@ class client:
                 cv=cross_val_size)}
         clearLog()
         return svm
+=======
+        self.models['classification_ANN'] = classification_ann(
+            instruction=instruction,
+            dataset=self.dataset,
+            drop=drop,
+            preprocess=preprocess,
+            test_size=test_size,
+            random_state=random_state,
+            epochs=epochs,
+            generate_plots=generate_plots,
+            callback_mode=callback_mode,
+            maximizer=maximizer,
+            save_model=save_model,
+            save_path=save_path)
+
+    def kmeans_clustering_query(self,
+                                preprocess=True,
+                                generate_plots=True,
+                                drop=None,
+                                base_clusters=1):
+
+        self.models['k_means_clustering'] = k_means_clustering(
+            dataset=self.dataset,
+            preprocess=preprocess,
+            generate_plots=generate_plots,
+            drop=drop,
+            base_clusters=base_clusters)
+
+    def svm_query(self,
+                  instruction,
+                  test_size=0.2,
+                  kernel='linear',
+                  preprocess=True,
+                  drop=None,
+                  cross_val_size=0.3):
+
+        self.models['svm'] = train_svm(instruction,
+                                       dataset=self.dataset,
+                                       test_size=test_size,
+                                       kernel=kernel,
+                                       preprocess=preprocess,
+                                       drop=drop,
+                                       cross_val_size=cross_val_size)
+>>>>>>> Stashed changes
 
     def nearest_neighbor_query(
             self,
-            instruction,
+            instruction=None,
             preprocess=True,
             drop=None,
             min_neighbors=3,
             max_neighbors=10):
+<<<<<<< Updated upstream
         logger("Reading in dataset....")
         # Reads in dataset
 
@@ -724,6 +747,15 @@ class client:
 
         clearLog()
         return knn
+=======
+        self.models['nearest_neigbor'] = nearest_neighbors(
+            instruction=instruction,
+            dataset=self.dataset,
+            preprocess=preprocess,
+            drop=drop,
+            min_neighbors=min_neighbors,
+            max_neighbors=max_neighbors)
+>>>>>>> Stashed changes
 
 
     def decision_tree_query(
@@ -732,6 +764,7 @@ class client:
             preprocess=True,
             test_size=0.2,
             drop=None):
+<<<<<<< Updated upstream
         logger("Reading in dataset....")
 
         dataReader = DataReader(self.dataset)
@@ -831,131 +864,33 @@ class client:
             scores.append(accuracy_score(model.predict(X_test), y_test))
         self.save(models[scores.index(max(scores))], save_model)
         clearLog()
+=======
+>>>>>>> Stashed changes
 
-        # returns classificaiton model with the highest score
-        return models[scores.index(max(scores))]
+        self.models['decision_tree'] = decision_tree(instruction,
+                                                     dataset=self.dataset,
+                                                     preprocess=True,
+                                                     test_size=0.2,
+                                                     drop=None)
 
     def tune(self, model_to_tune):
-        logger("Getting target model for tuning...")
-
-        # checks to see which requested model is in the self.models
-        for key in self.models:
-
-            # processing for regression feed forward NN
-            if key == 'regression_ANN':
-                logger("Tuning model hyperparameters")
-                returned_model = tuneReg(
-                    self.dataset, self.models[key]["target"])
-                self.models['regression_ANN'] = {'model': returned_model}
-                return returned_model
-            # processing for classification feed forward NN
-            if key == model_to_tune and key == "classification_ANN":
-                logger("Tuning model hyperparameters")
-                returned_model = tuneClass(
-                    self.models[key]["target"],
-                    self.models[key]["num_classes"])
-                self.models['classification_ANN'] = {'model': returned_model}
-                return returned_model
-            # processing for convolutional NN
-            if key == model_to_tune and key == "convolutional_NN":
-                logger("Tuning model hyperparameters")
-                X = self.models['convolutional_NN']["X"]
-                y = self.models['convolutional_NN']["y"]
-                model = tuneCNN(
-                    np.asarray(X),
-                    np.asarray(y),
-                    self.models["convolutional_NN"]["num_classes"])
-                self.models["convolutional_NN"]["model"] = model
+        self.models = tune_helper(
+            model_to_tune=model_to_tune,
+            dataset=self.dataset,
+            models=self.models,
+        )
 
     def stat_analysis(self, column_name="none", drop=None):
-        logger("Reading in dataset....")
-        # Reading in dataset and creating pdtabulate variable to format outputs
-        dataReader = DataReader(self.dataset)
-        data = dataReader.data_generator()
+        stats(
+            dataset=self.dataset,
+            drop=drop,
+            column_name=column_name
+        )
 
-        if drop is not None:
-            data.drop(drop, axis=1, inplace=True)
-
-        data.fillna(0, inplace=True)
-        logger("Creating lambda object to format...")
-
-        def pdtabulate(df):
-            return tabulate(
-                df, headers='keys', tablefmt='psql')
-
-        logger("Identifying columns to transform....")
-
-        # identifying categorical and numerical columns, and encoding
-        # appropriately
-        categor = data.select_dtypes(exclude=['int', 'float'])
-        categor = categor.apply(LabelEncoder().fit_transform)
-        for value in categor.columns:
-            data[str(value)] = categor[str(value)]
-
-        # if user doesn't specify column analysis on performed on the whole
-        # dataset
-        if column_name == "none":
-            columns = []
-            sim = []
-            for first_val in data.columns:
-                for sec_val in data.columns:
-                    if first_val == sec_val:
-                        continue
-                    columns.append(str(first_val) + "_" + str(sec_val))
-                    sim.append(1 - cosine(data[first_val], data[sec_val]))
-                df = pd.DataFrame(columns=columns)
-                df.loc[len(df)] = sim
-
-            cols = []
-            vals = []
-            logger("Restructuring dataset for similarity...")
-            # identifying top 5 feature importances and appending them to an
-            # array for display
-            for val in np.argpartition(np.asarray(df.iloc[0]), -5)[-5:]:
-                cols.append(df.columns[val])
-                vals.append(df[df.columns[val]].iloc[0])
-                frame = pd.DataFrame(columns=cols)
-                frame.loc[len(df)] = vals
-            print("Similarity Spectrum")
-            print(pdtabulate(frame))
-            print()
-            print("Dataset Description")
-            print(pdtabulate(data.describe()))
-
-        else:
-            logger("Performing similarity calculations....")
-            columns = []
-            sim = []
-            # identifying columns to be compared
-            for val in data.columns:
-                if val == column_name:
-                    continue
-                columns.append(str(column_name) + "_" + str(val))
-                sim.append(1 - cosine(data[column_name], data[val]))
-            df = pd.DataFrame(columns=columns)
-            df.loc[len(df)] = sim
-
-            cols = []
-            vals = []
-            # identifying top 5 feature importances and appending them to a
-            # dataset
-            for val in np.argpartition(np.asarray(df.iloc[0]), -5)[-5:]:
-                cols.append(df.columns[val])
-                vals.append(df[df.columns[val]].iloc[0])
-                frame = pd.DataFrame(columns=cols)
-                frame.loc[len(df)] = vals
-
-            # displaying the similarity spectrum and the formatted
-            # data.describe()
-            print("Similarity Spectrum")
-            print("-------------------------")
-            print(pdtabulate(frame))
-            print()
-            print("Dataset Description")
-            print("-------------------------")
-            print(pdtabulate(data[column_name]).describe())
+        return
 
     def convolutional_query(self, data_path=None, new_folders=True):
+<<<<<<< Updated upstream
         logger("Creating CNN generation query")
         # generates the dataset based on instructions using a selenium query on
         # google chrome
@@ -1027,17 +962,11 @@ class client:
             validation_steps=X_test.n //
             X_test.batch_size,
             epochs=10)
+=======
+>>>>>>> Stashed changes
 
         # storing values the model dictionary
-        self.models["convolutional_NN"] = {
-            "model": model,
-            'num_classes': (2 if num_classes == 1 else num_classes),
-            'losses': {
-                'training_loss': history.history['loss'],
-                'val_loss': history.history['val_loss']},
-            'accuracy': {
-                'training_accuracy': history.history['accuracy'],
-                'validation_accuracy': history.history['val_accuracy']}}
+        self.models["convolutional_NN"] = convolutional(data_path=data_path, new_folders=new_folders)
 
     # text encoder
     def encode_text(self, dataset, text):
@@ -1174,9 +1103,13 @@ class client:
         tokenizer = T5Tokenizer.from_pretrained("t5-small")
 
         train_size = 0.8
-        train_dataset = df.sample(frac=train_size, random_state=SEED).reset_index(drop=True)
+        train_dataset = df.sample(
+            frac=train_size,
+            random_state=SEED).reset_index(
+            drop=True)
 
-        training_set = CustomDataset(train_dataset, tokenizer, MAX_LEN, SUMMARY_LEN)
+        training_set = CustomDataset(
+            train_dataset, tokenizer, MAX_LEN, SUMMARY_LEN)
         train_params = {
             'batch_size': TRAIN_BATCH_SIZE,
             'shuffle': True,
@@ -1188,7 +1121,8 @@ class client:
         model = T5ForConditionalGeneration.from_pretrained("t5-small")
         model = model.to(device)
 
-        optimizer = torch.optim.Adam(params=model.parameters(), lr=LEARNING_RATE)
+        optimizer = torch.optim.Adam(
+            params=model.parameters(), lr=LEARNING_RATE)
 
         logger('Initiating Fine-Tuning for the model on your dataset')
 
@@ -1206,6 +1140,7 @@ class client:
         print(self.models[model]['plots'].keys())
 
 
+<<<<<<< Updated upstream
 
 # Easier to comment the one you don't want to run instead of typing them
 # out every time
@@ -1213,3 +1148,10 @@ class client:
 #     './data/housing.csv').neural_network_query('Model median house value')
 #newClient = client('./data/landslides_after_rainfall.csv').neural_network_query(instruction='Model distance', drop=['id', 'geolocation', 'source_link', 'source_name'])
 
+=======
+# Easier to comment the one you don't want to run instead of typing them
+# out every time
+newClient = client('./data/housing.csv').stat_analysis()
+
+#newClient = client('./data/landslides_after_rainfall.csv').neural_network_query(instruction='Model distance', drop=['id', 'geolocation', 'source_link', 'source_name'])
+>>>>>>> Stashed changes
