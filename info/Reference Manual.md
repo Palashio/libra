@@ -1518,16 +1518,19 @@ client.get_summary(self, text)
 
 Wrapper function used for repeated caching of predictions for text summarization when text summarization query is called 
 
+
 *Parameters --* 
 
 text: `str`
 
-String that is from the 
+Text that comes from the document/dataset which is being analyzed
 
 
 *Returns --*
 
-predictions: 
+predictions: `[]`
+
+List of performance metrics of predictions made in terms of properly summarizing the document
 
 #### summarization_query ####
 
