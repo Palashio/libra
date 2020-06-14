@@ -102,7 +102,7 @@ Table of Contents
 libra.produceMask(instruction_label)
 ```
 
-Generates/stores with base object an encoding mask of form list ```[int/long, int/long, int/long]``` based on frequency of distinct characters used for sequence to sequence pre-training for natural language generation
+Generates/stores with base object an encoding mask of form list ```[int/float, int/float, int/float]``` based on frequency of distinct characters used for sequence to sequence pre-training for natural language generation
 
 
 Parameters -- 
@@ -114,7 +114,7 @@ A string based of the instruction sent to encode in the form of a mask
 
 Returns -- 
 
-mask: `[int/long, int/long, int/long]` 
+mask: `[int/float, int/float, int/float]` 
 
 Outputs an list of encoded numerical representation of the instruction text recieved
 
@@ -1501,7 +1501,11 @@ Parameters -- instruction_label: `str`
 Acquires a string based of the instruction sent to encode in the form of a mask
 
 
-Returns -- mask: `[int/long, int/long, int/long]`
+Returns -- 
+
+mask: `[int/long, int/long, int/long]`
+
+
 
 #### summarization_query ####
 
@@ -1515,15 +1519,39 @@ client.summarization_query(self,
                            generate_plots=True)
 ```
 
-Generates/stores with base object an encoding mask of form list ```[int/long, int/long, int/long]``` based on frequency of distinct characters used for sequence to sequence pre-training for natural language generation
+Generates/stores contextual summmary from textual data in document using T5 pretrained text-to-text transformers  
+Parameters -- 
+
+instruction: `str`
+
+String that is the instruction from a written query sent to/in the client class instance
+
+preprocess = True (`bool`)
+
+Option to preprocess the data (is set by default to true)
+
+test_size=0.2 (`float`)
+
+Percentage measure of the proportion of the data to include in test split of the dataset (is set by default to 0.2)
+
+random_state=49 (`int`)
+
+Random value assigned that ensures the shuffling of the dataset before applying the test/training split remains the same across multiple runs (is set by default to 49)
+
+epochs=1 (`int`)
+
+Number of full cycles used for model fitting/training on the training dataset (is set by default to 1)
+
+generate_plots=True (`bool`)
+
+Option to generate all relevant plots for query (is set by default to 1)
 
 
-Parameters -- instruction_label: `str`
+Returns -- 
 
-Acquires a string based of the instruction sent to encode in the form of a mask
+None
 
-
-Returns -- mask: `[int/long, int/long, int/long]`
+Executes document summarization training and outputs resulting summary/metrics/associated plots
 
 #### dimensionality_reducer ####
 
@@ -1538,7 +1566,7 @@ Parameters --
 
 instruction: `str`
 
-A string that is the instruction sent when writing a query sent to the client class instance
+A string that is the instruction from a written query sent to/in the client class instance
 
 
 Returns --
