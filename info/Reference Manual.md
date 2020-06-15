@@ -1437,17 +1437,25 @@ Outputs an list of encoded numerical representation of the instruction text reci
 client.convolutional_query(self, data_path=None, new_folders=True)
 ```
 
-Generates/stores with base object an encoding mask of form list ```[int/long, int/long, int/long]``` based on frequency of distinct characters used for sequence to sequence pre-training for natural language generation
+Generates/stores convolutional neural network model (dynamically utilizing images acquired from automated web browsing session) used to solve visual analysis problem request from written query sent to/in client class instance
 
 
-Parameters -- instruction_label: `str`
+*Parameters --*
 
-Acquires a string based of the instruction sent to encode in the form of a mask
+data_path: None (`str`)
+
+String representation of file path name where images are stored (default is set to none/assumption is to use current working directory)
+
+new_folders: True (`bool`)
+
+Option to create new folder/subdirectory to store images in current working directory (default is set to true)
 
 
-Returns -- mask: `[int/long, int/long, int/long]` 
+*Returns --*
 
-Outputs an list of encoded numerical representation of the instruction text recieved
+None 
+
+Executes dynamic convolutional neural network model training/testing and outputs resulting summary/metrics/associated plots
 
 #### encode_text ####
 
@@ -1515,7 +1523,7 @@ client.text_classification_query(self,
                                  generate_plots=True)
 ```
 
-Generates LSTM model used to solve sentiment analysis text classification problem written in query sent to/in client class instance
+Generates LSTM model used to solve sentiment analysis text classification problem request from written query sent to/in client class instance
 
 
 *Parameters --* 
@@ -1524,27 +1532,27 @@ instruction: `str`
 
 String that is the instruction from a written query sent to/in the client class instance
 
-preprocess = True (`bool`)
+preprocess: True (`bool`)
 
 Option to preprocess the data (is set by default to true)
 
-test_size=0.2 (`float`)
+test_size: 0.2 (`float`)
 
 Percentage measure of the proportion of the data to include in test split of the dataset (is set by default to 0.2)
 
-random_state=49 (`int`)
+random_state: 49 (`int`)
 
 Random value assigned that ensures the shuffling of the dataset before applying the test/training split remains the same across multiple runs (is set by default to 49)
 
-epochs=10 (`int`)
+epochs: 10 (`int`)
 
 Number of full cycles used for model fitting/training on the training dataset (is set by default to 1)
 
-maxTextLength=200 (`int`)
+maxTextLength: 200 (`int`)
 
 Maximum length in terms of characters per sequence found in text of dataset initialized in client class instance (is set by default to 200)
 
-generate_plots=True (`bool`)
+generate_plots: True (`bool`)
 
 Option to generate all relevant plots for query (is set by default to true)
 
@@ -1573,7 +1581,7 @@ Text that comes from the document/dataset which is being analyzed
 
 *Returns --*
 
-predictions: `[]`
+predictions: `[str, str,..., str]`
 
 List of decoded predicted summarizations of the document being summarized
 
@@ -1589,7 +1597,7 @@ client.summarization_query(self,
                            generate_plots=True)
 ```
 
-Generates/stores contextual summmary of textual data in document using T5 pretrained text-to-text transformers from written query sent to the client class instance  
+Generates/stores contextual summmary of textual data in document using T5 pretrained text-to-text transformers from written query sent to/in the client class instance  
 
 
 *Parameters --* 
@@ -1598,23 +1606,23 @@ instruction: `str`
 
 String that is the instruction from a written query sent to/in the client class instance
 
-preprocess = True (`bool`)
+preprocess: True (`bool`)
 
 Option to preprocess the data (is set by default to true)
 
-test_size=0.2 (`float`)
+test_size: 0.2 (`float`)
 
 Percentage measure of the proportion of the data to include in test split of the dataset (is set by default to 0.2)
 
-random_state=49 (`int`)
+random_state: 49 (`int`)
 
 Random value assigned that ensures the shuffling of the dataset before applying the test/training split remains the same across multiple runs (is set by default to 49)
 
-epochs=1 (`int`)
+epochs: 1 (`int`)
 
 Number of full cycles used for model fitting/training on the training dataset (is set by default to 1)
 
-generate_plots=True (`bool`)
+generate_plots: True (`bool`)
 
 Option to generate all relevant plots for query (is set by default to true)
 
@@ -1631,7 +1639,7 @@ Executes document summarization model training/testing and outputs resulting sum
 client.dimensionality_reducer(self, instruction)
 ```
 
-Chooses and applies dimensionality reduction algorithm to the dataset provided based on instruction given in query sent to the client class instance
+Chooses and applies dimensionality reduction algorithm to the dataset provided based on instruction from written query sent to/in the client class instance
 
 
 *Parameters --* 
