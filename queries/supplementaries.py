@@ -1,9 +1,9 @@
 from tuner import tuneReg, tuneClass, tuneCNN
-import numpy as np 
+import numpy as np
 from data_reader import DataReader
 from tabulate import tabulate
 from data_preprocesser import structured_preprocesser, initial_preprocesser
-import pandas as pd 
+import pandas as pd
 from sklearn.preprocessing import LabelEncoder
 from scipy.spatial.distance import cosine
 
@@ -58,6 +58,7 @@ def logger(instruction, found="", slash=''):
         print(currLog)
     currLog = ""
 
+
 def tune_helper(
     model_to_tune=None,
     dataset=None,
@@ -67,20 +68,20 @@ def tune_helper(
 ):
     logger("Getting target model for tuning...")
 
-        # checks to see which requested model is in the self.models
+    # checks to see which requested model is in the self.models
 
-            # processing for regression feed forward NN
+    # processing for regression feed forward NN
     if model_to_tune == 'regression_ANN':
         logger("Tuning model hyperparameters")
         returned_model = tuneReg(dataset, models[model_to_tune]["target"])
         models['regression_ANN'] = {'model': returned_model}
         return returned_model
-            # processing for classification feed forward NN
+        # processing for classification feed forward NN
     if model_to_tune == "classification_ANN":
         logger("Tuning model hyperparameters")
         returned_model = tuneClass(
-        models[model_to_tune]["target"],
-                    models[model_to_tune]["num_classes"])
+            models[model_to_tune]["target"],
+            models[model_to_tune]["num_classes"])
         models['classification_ANN'] = {'model': returned_model}
         return returned_model
         # processing for convolutional NN
@@ -97,7 +98,6 @@ def tune_helper(
 
 
 def stats(dataset=None,
-            drop=None,
-            column_name=None):
-            return
-
+          drop=None,
+          column_name=None):
+    return
