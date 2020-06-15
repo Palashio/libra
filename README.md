@@ -86,7 +86,7 @@ Creating a convolutional neural network for a dataset you already have created i
 newClient = client()
 newClient.convolutional_query('path_to_class1', 'path_to_class2', 'path_to_class3')
 ```
-For this query, no initial shallow tuning is performed is done because of how memory intensive CNN's can be. User specified parameters for this query are currently being implemented. The defaults can be found in the `predictionQueries.py` file.
+For this query, no initial shallow tuning is performed is done because of how memory intensive CNN's can be. User specified parameters for this query are currently being implemented. The defaults can be found in the `prediction_queries.py` file.
 
 ### K-means Clustering ###
 

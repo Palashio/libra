@@ -9,13 +9,13 @@ from tuner import tuneReg, tuneClass
 from os import listdir
 from keras.layers import Dense, Conv2D, Flatten
 from keras.models import Sequential
-from generatePlots import generate_clustering_plots, generate_regression_plots, generate_classification_plots, generate_classification_together
+from generate_plots import generate_clustering_plots, generate_regression_plots, generate_classification_plots, generate_classification_together
 import matplotlib.pyplot as plt
 from sklearn.cluster import KMeans
 from keras.utils import np_utils
 from keras.utils import to_categorical
-from predictionModelCreation import get_keras_model_class
-from predictionModelCreation import get_keras_model_reg
+from prediction_model_creation import get_keras_model_class
+from prediction_model_creation import get_keras_model_reg
 from data_preprocesser import structured_preprocesser
 from grammartree import get_value_instruction
 from matplotlib import pyplot

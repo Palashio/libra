@@ -1,4 +1,4 @@
-from data_preprocesser import structured_preprocesser
+from data_preprocesser import structured_preprocesser, clustering_preprocessor
 import tensorflow as tf
 import keras
 from tensorflow.python.keras.layers import Dense, Input
@@ -133,7 +133,7 @@ def tuneReg(data, target):
     dataReader = DataReader(data)
     # reads in dataset and processes it
     data = dataReader.data_generator()
-    data = structured_preprocesser(data)
+    data = data_preprocesser(data)
     print("entered1")
     # function build model using hyperparameter
 
