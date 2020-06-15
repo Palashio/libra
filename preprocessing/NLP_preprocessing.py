@@ -1,6 +1,6 @@
 # Lemmatizer for text
 import re
-
+import tensorflow as tf
 import numpy as np
 import spacy
 from keras_preprocessing.sequence import pad_sequences
@@ -94,6 +94,15 @@ def fix_slang(text):
     text = re.sub(r"[-()\"#/@;:<>{}`+=~|.!?,]", "", text)
     return text
 
+
+# text encoder
+def encode_text(dataset, text):
+    tokenizer = tf.keras.preprocessing.text.Tokenizer(
+        num_words=None, filters='!"#$%&()*+,-./:;<=>?@[\\]^_`{|}~\t\n', lower=True,
+        split=' ', char_level=False, oov_token=None, document_count=0)
+    tokenizer.fit_on_texts(dataset)
+    result = tokenizer.texts_to_sequences(text)
+    return result
 
 # def decode_sequence(input_seq, encoder_model, target_word_index, decoder_model, reverse_target_word_index,
 #                     max_len_summary=50):

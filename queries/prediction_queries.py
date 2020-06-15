@@ -2,6 +2,8 @@
 # inserting into sis path
 import sys
 
+from predictionQueries import text_classification_query, get_summary, summarization_query, predict_text_sentiment
+
 sys.path.insert(1, './preprocessing')
 sys.path.insert(1, './data_generation')
 sys.path.insert(1, './modeling')
@@ -39,7 +41,7 @@ from data_reader import DataReader
 from dimensionality_red_queries import dimensionality_reduc
 from os import listdir
 
-from NLP_preprocessing import text_clean_up, lemmatize_text
+from NLP_preprocessing import text_clean_up, lemmatize_text, encode_text
 from keras.preprocessing.image import ImageDataGenerator
 from termcolor import colored
 from keras.models import model_from_json
@@ -61,7 +63,6 @@ from keras_preprocessing import sequence
 
 from huggingfaceModelRetrainHelper import train, CustomDataset, inference
 
-
 warnings.simplefilter(action='error', category=FutureWarning)
 warnings.simplefilter(action="ignore", category=SettingWithCopyWarning)
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
@@ -71,6 +72,8 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 currLog = ""
 counter = 0
 number = 0
+
+
 # # current_dir=os.getcw()
 
 # # allows for all columns to be displayed when printing()
@@ -119,6 +122,7 @@ def logger(instruction, found="", slash=''):
         print(currLog)
     currLog = ""
 
+
 # class to store all query information
 
 
@@ -139,6 +143,7 @@ class client:
         clearLog()
 
         # save the model in the current directory
+
     def save(self, model, save_model, save_path=os.getcwd()):
         model_json = model.to_json()
         with open(save_path + "/model" + str(number) + ".json", "w") as json_file:
@@ -344,109 +349,19 @@ class client:
         # storing values the model dictionary
         self.models["convolutional_NN"] = convolutional(data_path=data_path, new_folders=new_folders)
 
-    # text encoder
-    def encode_text(self, dataset, text):
-        tokenizer = tf.keras.preprocessing.text.Tokenizer(
-            num_words=None, filters='!"#$%&()*+,-./:;<=>?@[\\]^_`{|}~\t\n', lower=True,
-            split=' ', char_level=False, oov_token=None, document_count=0)
-        tokenizer.fit_on_texts(dataset)
-        result = tokenizer.texts_to_sequences(text)
-        return result
-
     # Sentiment analysis predict wrapper
     def predict_text_sentiment(self, text):
-        classes = {0: "Negative", 1: "Positive", 2: "Neutral"}
-        sentimentInfo = self.models.get("Text Classification LSTM")
-        vocab = sentimentInfo["vocabulary"]
-        # Clean up text
-        text = lemmatize_text(text_clean_up([text]))
-        # Encode text
-        text = self.encode_text(vocab, text)
-        text = sequence.pad_sequences(text, sentimentInfo["maxTextLength"])
-        model = sentimentInfo["model"]
-        prediction = tf.keras.backend.argmax(model.predict(text))
-        return classes.get(tf.keras.backend.get_value(prediction)[0])
+        return predict_text_sentiment(text)
 
     # sentiment analysis query
-    def text_classification_query(self, instruction,
-                                  preprocess=True,
-                                  test_size=0.2,
-                                  random_state=49,
-                                  epochs=10,
-                                  maxTextLength=200,
-                                  generate_plots=True):
-        data = pd.read_csv(self.dataset)
-        data.fillna(0, inplace=True)
-
-        X, Y = get_target_values(data, instruction, "label")
-        Y = np.array(Y)
-
-        if preprocess:
-            logger("Preprocessing data...")
-            X = lemmatize_text(text_clean_up(X.array))
-            vocab = X
-            X = self.encode_text(X, X)
-
-        X = np.array(X)
-
-        model = get_keras_text_class(maxTextLength, 2)
-
-        X_train, X_test, y_train, y_test = train_test_split(
-            X, Y, test_size=test_size, random_state=random_state)
-        X_train = sequence.pad_sequences(X_train, maxlen=maxTextLength)
-        X_test = sequence.pad_sequences(X_test, maxlen=maxTextLength)
-
-        logger("Training Model...")
-        history = model.fit(X_train, y_train,
-                            batch_size=32,
-                            epochs=epochs,
-                            validation_split=0.1)
-
-        logger("Testing Model...")
-        score, acc = model.evaluate(X_test, y_test,
-                                    batch_size=32)
-
-        logger("Test accuracy:" + str(acc))
-
-        if generate_plots:
-            # generates appropriate classification plots by feeding all
-            # information
-            plots = generate_classification_plots(
-                history, X, Y, model, X_test, y_test)
+    def text_classification_query(self, instruction):
 
         # storing values the model dictionary
-        self.models["Text Classification LSTM"] = {
-            "model": model,
-            'num_classes': 2,
-            "plots": plots,
-            "target": Y,
-            "vocabulary": vocab,
-            "maxTextLength": maxTextLength,
-            'losses': {
-                'training_loss': history.history['loss'],
-                'val_loss': history.history['val_loss']},
-            'accuracy': {
-                'training_accuracy': history.history['accuracy'],
-                'validation_accuracy': history.history['val_accuracy']}}
+        self.models["Text Classification LSTM"] = text_classification_query(instruction)
 
     # Document summarization predict wrapper
     def get_summary(self, text):
-        modelInfo = self.models.get("Document Summarization")
-        model = modelInfo['model']
-        model.eval()
-        tokenizer = T5Tokenizer.from_pretrained("t5-small")
-        MAX_LEN = 512
-        SUMMARY_LEN = 150
-        df = pd.DataFrame({'text': [""], 'ctext': [text]})
-        set = CustomDataset(df, tokenizer, MAX_LEN, SUMMARY_LEN)
-        params = {
-            'batch_size': 1,
-            'shuffle': True,
-            'num_workers': 0
-        }
-        loader = DataLoader(set, **params)
-        predictions, actuals = inference(tokenizer, model, "cpu", loader)
-        return predictions
+        return get_summary(text)
 
     # text summarization query
     def summarization_query(self, instruction,
@@ -456,58 +371,7 @@ class client:
                             epochs=1,
                             generate_plots=True):
 
-        data = pd.read_csv(self.dataset)
-        data.fillna(0, inplace=True)
-
-        logger("Preprocessing data...")
-
-        X, Y = get_target_values(data, instruction, "summary")
-        df = pd.DataFrame({'text': Y, 'ctext': X})
-
-        device = 'cpu'
-
-        TRAIN_BATCH_SIZE = 64
-        TRAIN_EPOCHS = 10
-        LEARNING_RATE = 1e-4
-        SEED = 42
-        MAX_LEN = 512
-        SUMMARY_LEN = 150
-
-        torch.manual_seed(SEED)
-        np.random.seed(SEED)
-
-        tokenizer = T5Tokenizer.from_pretrained("t5-small")
-
-        train_size = 0.8
-        train_dataset = df.sample(
-            frac=train_size,
-            random_state=SEED).reset_index(
-            drop=True)
-
-        training_set = CustomDataset(
-            train_dataset, tokenizer, MAX_LEN, SUMMARY_LEN)
-        train_params = {
-            'batch_size': TRAIN_BATCH_SIZE,
-            'shuffle': True,
-            'num_workers': 0
-        }
-
-        training_loader = DataLoader(training_set, **train_params)
-        # used small model
-        model = T5ForConditionalGeneration.from_pretrained("t5-small")
-        model = model.to(device)
-
-        optimizer = torch.optim.Adam(
-            params=model.parameters(), lr=LEARNING_RATE)
-
-        logger('Initiating Fine-Tuning for the model on your dataset')
-
-        for epoch in range(TRAIN_EPOCHS):
-            train(epoch, tokenizer, model, device, training_loader, optimizer)
-
-        self.models["Document Summarization"] = {
-            "model": model
-        }
+        self.models["Document Summarization"] = summarization_query(instruction)
 
     def dimensionality_reducer(self, instruction):
         dimensionality_reduc(instruction, self.dataset)
@@ -520,4 +384,5 @@ class client:
 # out every time
 newClient = client('./data/housing.csv').stat_analysis()
 
-#newClient = client('./data/landslides_after_rainfall.csv').neural_network_query(instruction='Model distance', drop=['id', 'geolocation', 'source_link', 'source_name'])
+# newClient = client('./data/landslides_after_rainfall.csv').neural_network_query(instruction='Model distance',
+# drop=['id', 'geolocation', 'source_link', 'source_name'])

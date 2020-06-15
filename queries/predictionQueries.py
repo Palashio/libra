@@ -1,6 +1,8 @@
 # Making functions in other directories accesible to this file by
 # inserting into sis path
 import sys
+
+import torch
 from keras_preprocessing import sequence
 import os
 import warnings
@@ -18,10 +20,16 @@ from sklearn.compose import ColumnTransformer
 from sklearn.model_selection import train_test_split
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import OneHotEncoder, StandardScaler
+from torch.utils.data import DataLoader
+from transformers import T5ForConditionalGeneration, T5Tokenizer
+
 from dataset_labelmatcher import get_similar_column, get_similar_model
 from tensorflow.keras.callbacks import EarlyStopping
 from matplotlib import pyplot
+
+from generate_plots import generate_classification_plots
 from grammartree import get_value_instruction
+from huggingfaceModelRetrainHelper import train, CustomDataset, inference
 from prediction_model_creation import get_keras_model_reg, get_keras_text_class
 from prediction_model_creation import get_keras_model_class
 from keras.utils import to_categorical
@@ -1038,9 +1046,9 @@ class client:
             plots = generate_classification_plots(
                 history, X, Y, model, X_test, y_test)
 
+        logger("Storing information in client object...")
         # storing values the model dictionary
-        self.models["Text Classification LSTM"] = {
-            "model": model,
+        self.models["Text Classification LSTM"] = {"model": model,
             'num_classes': 2,
             "plots": plots,
             "target": Y,
@@ -1052,6 +1060,7 @@ class client:
             'accuracy': {
                 'training_accuracy': history.history['accuracy'],
                 'validation_accuracy': history.history['val_accuracy']}}
+        return self.models["Text Classification LSTM"]
 
     # Document summarization predict wrapper
     def get_summary(self, text):
@@ -1132,6 +1141,7 @@ class client:
         self.models["Document Summarization"] = {
             "model": model
         }
+        return self.models["Document Summarization"]
 
     def dimensionality_reducer(self, instruction):
         dimensionality_reduc(instruction, self.dataset)
@@ -1140,7 +1150,6 @@ class client:
         print(self.models[model]['plots'].keys())
 
 
-<<<<<<< Updated upstream
 
 # Easier to comment the one you don't want to run instead of typing them
 # out every time
@@ -1148,10 +1157,3 @@ class client:
 #     './data/housing.csv').neural_network_query('Model median house value')
 #newClient = client('./data/landslides_after_rainfall.csv').neural_network_query(instruction='Model distance', drop=['id', 'geolocation', 'source_link', 'source_name'])
 
-=======
-# Easier to comment the one you don't want to run instead of typing them
-# out every time
-newClient = client('./data/housing.csv').stat_analysis()
-
-#newClient = client('./data/landslides_after_rainfall.csv').neural_network_query(instruction='Model distance', drop=['id', 'geolocation', 'source_link', 'source_name'])
->>>>>>> Stashed changes
