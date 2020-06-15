@@ -1419,17 +1419,25 @@ Outputs an list of encoded numerical representation of the instruction text reci
 client.stat_analysis(self, column_name="none", drop=None)
 ```
 
-Generates/stores with base object an encoding mask of form list ```[int/long, int/long, int/long]``` based on frequency of distinct characters used for sequence to sequence pre-training for natural language generation
+Generates formatted tabular dataset providing synthesis of key statistics/features of given data 
 
 
-Parameters -- instruction_label: `str`
+`Parameters --`
 
-Acquires a string based of the instruction sent to encode in the form of a mask
+column_name: none (`str`)
+
+String that is the column name for column the user chooses to analyze from dataset initalized in client class instance (default is set to none/assumption is that all columns will be subject for analysis)
+
+drop: None
+
+Option to drop any columns from analysis of dataset initialized in client class instance (default is set to none) 
 
 
-Returns -- mask: `[int/long, int/long, int/long]` 
+`Returns --`
 
-Outputs an list of encoded numerical representation of the instruction text recieved
+None
+
+Executes all encoding/processing/similarity calculations to outputs resulting tabulated statistical description/feature selection of dataset
 
 #### convolutional_query ####
 
@@ -1444,7 +1452,7 @@ Generates/stores convolutional neural network model (dynamically utilizing image
 
 data_path: None (`str`)
 
-String representation of file path name where images are stored (default is set to none/assumption is to use current working directory)
+String that is the file path name where images are stored (default is set to none/assumption is to use current working directory)
 
 new_folders: True (`bool`)
 
