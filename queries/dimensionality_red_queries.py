@@ -228,7 +228,7 @@ def dimensionality_RF(instruction, dataset, target="", y="", n_features=10):
         accuracy_scores), list(columns[the_index])
 
 
-def dimensionality_PCA(instruction, dataset, target="", y="", n_components=10):
+def dimensionality_PCA(instruction, dataset, target="", y=""):
     global currLog
     global counter
 
@@ -243,13 +243,14 @@ def dimensionality_PCA(instruction, dataset, target="", y="", n_components=10):
         del data[remove]
         le = preprocessing.LabelEncoder()
         y = le.fit_transform(y)
-
-    pca = PCA(n_components=len(dataset.columns))
+    
+    #  PCA will hold 92% of the variance
+    pca = PCA(0.92)
     data_modified = pca.fit_transform(dataset)
 
     X_train, X_test, y_train, y_test = train_test_split(
         dataset, y, test_size=0.2, random_state=49)
-    X_train_mod, none, y_train_mod, none1 = train_test_split(
+    X_train_mod, X_test_mod, y_train_mod, y_test_mod = train_test_split(
         data_modified, y, test_size=0.2, random_state=49)
 
     clf = tree.DecisionTreeClassifier()
@@ -257,11 +258,20 @@ def dimensionality_PCA(instruction, dataset, target="", y="", n_components=10):
 
     clf_mod = tree.DecisionTreeClassifier()
     clf_mod.fit(X_train_mod, y_train_mod)
+    acc=[]
+    acc.append(accuracy_score(
+            clf_mod.predict(X_test_mod), y_test_mod))
+    for j in ["entropy","gini"]:
+        for i in range(3,len(dataset.columns)):
+            model=tree.DecisionTreeClassifier(criterion=j, max_depth=i)
+            model=model.fit(X_train,y_train)
+            pred=model.predict(X_test)
+            acc.append(accuracy_score(pred,y_test))
 
     accuracies = [
         accuracy_score(
-            clf.predict(X_test), y_test), accuracy_score(
-            clf_mod.predict(none), none1)]
+            clf.predict(X_test), y_test), max(acc)]
+
     data_modified = pd.DataFrame(data_modified)
 
     y_combined = np.r_[y_train, y_test]
