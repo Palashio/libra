@@ -1401,17 +1401,21 @@ Outputs an list of encoded numerical representation of the instruction text reci
 client.tune(self, model_to_tune)
 ```
 
-Generates/stores with base object an encoding mask of form list ```[int/long, int/long, int/long]``` based on frequency of distinct characters used for sequence to sequence pre-training for natural language generation
+Optimizes hyperparameters controlling the learning process of a neural network model depending on the type of that model previously requested from written query sent to/in client class instance
 
 
-Parameters -- instruction_label: `str`
+*Parameters --*
 
-Acquires a string based of the instruction sent to encode in the form of a mask
+model_to_tune: `object`
+
+Neural network model previously instantiated in client class instance 
 
 
-Returns -- mask: `[int/long, int/long, int/long]` 
+*Returns --*
 
-Outputs an list of encoded numerical representation of the instruction text recieved
+returned_model: `object`
+
+Neural network model that is tuned from the prior variant of the selected model
 
 #### stat_analysis ####
 
@@ -1422,7 +1426,7 @@ client.stat_analysis(self, column_name="none", drop=None)
 Generates formatted tabular dataset providing synthesis of key statistics/features of given data 
 
 
-`Parameters --`
+*Parameters --*
 
 column_name: none (`str`)
 
@@ -1433,7 +1437,7 @@ drop: None
 Option to drop any columns from analysis of dataset initialized in client class instance (default is set to none) 
 
 
-`Returns --`
+*Returns --*
 
 None
 
