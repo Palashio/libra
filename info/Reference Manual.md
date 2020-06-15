@@ -1312,17 +1312,33 @@ client.svm_query(self,
                  cross_val_size=0.3)
 ```
 
-Generates/stores with base object an encoding mask of form list ```[int/long, int/long, int/long]``` based on frequency of distinct characters used for sequence to sequence pre-training for natural language generation
+Generates support vector machine model used to solve classification problem request from written query sent to/in client class instance 
 
 
-Parameters -- instruction_label: `str`
+*Parameters --* 
 
-Acquires a string based of the instruction sent to encode in the form of a mask
+instruction: `str`
+
+String that is the instruction from a written query sent to/in the client class instance
+
+preprocess: True (`bool`)
+
+Option to preprocess the data used by the model (is set by default to true)
+
+test_size: 0.2 (`float`)
+
+Percentage measure of the proportion of the data to include in test split of the dataset (is set by default to 0.2)
+
+drop: None (`str`)
+
+Option to drop any columns during analysis of data (default is set to None)
 
 
-Returns -- mask: `[int/long, int/long, int/long]` 
+*Returns --* 
 
-Outputs an list of encoded numerical representation of the instruction text recieved
+clf: `object` 
+
+Retrieves the classification model after training/testing and storing its information in client instance class
     
 #### nearest_neighbor_query ####
 
@@ -1336,17 +1352,37 @@ client.nearest_neighbor_query(self,
                               max_neighbors=10)
 ```
 
-Generates/stores with base object an encoding mask of form list ```[int/long, int/long, int/long]``` based on frequency of distinct characters used for sequence to sequence pre-training for natural language generation
+Generates k nearest neighbor model used to solve classification problem request from written query sent to/in client class instance 
 
 
-Parameters -- instruction_label: `str`
+*Parameters --* 
 
-Acquires a string based of the instruction sent to encode in the form of a mask
+instruction: `str`
+
+String that is the instruction from a written query sent to/in the client class instance
+
+preprocess: True (`bool`)
+
+Option to preprocess the data used by the model (is set by default to true)
+
+drop: None (`str`)
+
+Option to drop any columns during analysis of data (default is set to None)
+
+min_neighbors: 3 (`int`)
+
+Minimum number of closest neighboring training examples in the feature space to a particular observation in dataset initialized for analysis in client class instance (default is set to 3)
+
+max_neighbors: 10 (`int`)
+
+Maximum number of closest neighboring training examples in the feature space to a particular observation in dataset initialized for analysis in client class instance (default is set to 10)
 
 
-Returns -- mask: `[int/long, int/long, int/long]` 
+*Returns --* 
 
-Outputs an list of encoded numerical representation of the instruction text recieved
+knn: `object` 
+
+Retrieves the k nearest neighbor classification model after training/testing and storing its information in client instance class
 
 #### decision_tree_query ####
 
@@ -1354,36 +1390,11 @@ Outputs an list of encoded numerical representation of the instruction text reci
 client.decision_tree_query(self, 
                            instruction,
                            preprocess=True,
-                           drop=None,
                            test_size=0.2,
-                           drop=True)
+                           drop=None)
 ```
 
-Generates/stores with base object an encoding mask of form list ```[int/long, int/long, int/long]``` based on frequency of distinct characters used for sequence to sequence pre-training for natural language generation
-
-
-Parameters -- instruction_label: `str`
-
-Acquires a string based of the instruction sent to encode in the form of a mask
-
-
-Returns -- mask: `[int/long, int/long, int/long]` 
-
-Outputs an list of encoded numerical representation of the instruction text recieved
-
-#### allClassQuery ####
-
-``` python
-client.allClassQuery(self, 
-                     instruction,
-                     preprocess=True,
-                     test_size=0.2
-                     drop=None,
-                     random_state=49,
-                     save_model=1)
-```
-
-Generates/stores with base object an encoding mask of form list ```[int/long, int/long, int/long]``` based on frequency of distinct characters used for sequence to sequence pre-training for natural language generation
+Generates decision tree model used to solve classification problem request from written query sent to/in client class instance 
 
 
 *Parameters --* 
@@ -1402,7 +1413,71 @@ Percentage measure of the proportion of the data to include in test split of the
 
 drop: None (`str`)
 
-Option to drop any columns during analysis of data by any of the traditional classification machine learning models supported by the written query
+Option to drop any columns during analysis of data (default is set to None)
+
+
+*Returns --* 
+
+clf: `object` 
+
+Retrieves the classification model after training/testing and storing its information in client instance class
+
+#### allClassQuery ####
+
+``` python
+client.allClassQuery(self, 
+*Parameters --* 
+
+instruction: `str`
+
+String that is the instruction from a written query sent to/in the client class instance
+
+preprocess: True (`bool`)
+
+Option to preprocess the data (is set by default to true)
+
+test_size: 0.2 (`float`)
+
+Percentage measure of the proportion of the data to include in test split of the dataset (is set by default to 0.2)
+
+drop: None (`str`)
+
+Option to drop any columns during analysis of data (default is set to None)
+
+random_state: 49 (`int`)
+
+Random value assigned that ensures the shuffling of the dataset before applying the test/training split remains the same across multiple runs (is set by default to 49)
+
+save_model: 1 (`int`)
+
+Option to specify whether to save model (is set by default to 1 which is to save the model in the format of a Tensorflow SavedModel file)                     instruction,
+                     preprocess=True,
+                     test_size=0.2
+                     drop=None,
+                     random_state=49,
+                     save_model=1)
+```
+
+Generates all traditional machine learning classification models (decision tree/nearest neighbor/support vector machine)/selects best one used to solve classification problem request from written query sent to/in client class instance 
+
+
+*Parameters --* 
+
+instruction: `str`
+
+String that is the instruction from a written query sent to/in the client class instance
+
+preprocess: True (`bool`)
+
+Option to preprocess the data (is set by default to true)
+
+test_size: 0.2 (`float`)
+
+Percentage measure of the proportion of the data to include in test split of the dataset (is set by default to 0.2)
+
+drop: None (`str`)
+
+Option to drop any columns during analysis of data (default is set to None)
 
 random_state: 49 (`int`)
 
@@ -1417,7 +1492,7 @@ Option to specify whether to save model (is set by default to 1 which is to save
 
 models[scores.index(max(scores))]: 'object'
 
-Retrieves the classification model with the highest score of accuracy
+Retrieves the classification model with the highest metric scores on data after training/testing each model and storing their information in client instance class
 
 #### tune ####
 
@@ -1458,14 +1533,14 @@ String that is the column name for column the user chooses to analyze from datas
 
 drop: None
 
-Option to drop any columns from analysis of dataset initialized in client class instance (default is set to none) 
+Option to drop any columns from analysis of dataset initialized for analysis in client class instance (default is set to none) 
 
 
 *Returns --*
 
 None
 
-Executes all encoding/processing/similarity calculations to outputs resulting tabulated statistical description/feature selection of dataset
+Executes all encoding/processing/similarity calculations to outputs resulting tabulated statistical description/feature selection of dataset initialized for analysis in client class instance
 
 #### convolutional_query ####
 
