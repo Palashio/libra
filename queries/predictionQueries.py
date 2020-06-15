@@ -41,7 +41,7 @@ from data_reader import DataReader
 from dimensionality_red_queries import dimensionality_reduc
 from os import listdir
 
-from NLP_preprocessing import text_clean_up, lemmatize_text
+from NLP_preprocessing import text_clean_up, lemmatize_text, encode_text
 from keras.preprocessing.image import ImageDataGenerator
 from termcolor import colored
 from keras.models import model_from_json
@@ -976,15 +976,6 @@ class client:
         # storing values the model dictionary
         self.models["convolutional_NN"] = convolutional(data_path=data_path, new_folders=new_folders)
 
-    # text encoder
-    def encode_text(self, dataset, text):
-        tokenizer = tf.keras.preprocessing.text.Tokenizer(
-            num_words=None, filters='!"#$%&()*+,-./:;<=>?@[\\]^_`{|}~\t\n', lower=True,
-            split=' ', char_level=False, oov_token=None, document_count=0)
-        tokenizer.fit_on_texts(dataset)
-        result = tokenizer.texts_to_sequences(text)
-        return result
-
     # Sentiment analysis predict wrapper
     def predict_text_sentiment(self, text):
         classes = {0: "Negative", 1: "Positive", 2: "Neutral"}
@@ -993,7 +984,7 @@ class client:
         # Clean up text
         text = lemmatize_text(text_clean_up([text]))
         # Encode text
-        text = self.encode_text(vocab, text)
+        text = encode_text(vocab, text)
         text = sequence.pad_sequences(text, sentimentInfo["maxTextLength"])
         model = sentimentInfo["model"]
         prediction = tf.keras.backend.argmax(model.predict(text))
@@ -1017,7 +1008,7 @@ class client:
             logger("Preprocessing data...")
             X = lemmatize_text(text_clean_up(X.array))
             vocab = X
-            X = self.encode_text(X, X)
+            X = encode_text(X, X)
 
         X = np.array(X)
 
