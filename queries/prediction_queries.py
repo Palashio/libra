@@ -51,15 +51,15 @@ from sklearn.preprocessing import StandardScaler
 from keras.layers import (Dense, Conv2D, Flatten, MaxPooling2D, )
 from NLP_preprocessing import text_clean_up, lemmatize_text, get_target_values
 
-# import torch
-# from torch.utils.data import DataLoader
+import torch
+from torch.utils.data import DataLoader
 
-# # Importing the T5 modules from huggingface/transformers
-# from transformers import T5Tokenizer, T5ForConditionalGeneration
+# Importing the T5 modules from huggingface/transformers
+from transformers import T5Tokenizer, T5ForConditionalGeneration
 
-# from keras_preprocessing import sequence
+from keras_preprocessing import sequence
 
-# from huggingfaceModelRetrainHelper import train, CustomDataset, inference
+from huggingfaceModelRetrainHelper import train, CustomDataset, inference
 
 
 warnings.simplefilter(action='error', category=FutureWarning)
