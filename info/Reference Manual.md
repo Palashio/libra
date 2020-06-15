@@ -1540,7 +1540,7 @@ epochs=10 (`int`)
 
 Number of full cycles used for model fitting/training on the training dataset (is set by default to 1)
 
-maxTextLength=200
+maxTextLength=200 (int)
 
 Maximum length in terms of characters per sequence found in text of dataset initialized in client class instance (is set by default to 200)
 
