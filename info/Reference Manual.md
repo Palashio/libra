@@ -1278,27 +1278,46 @@ Outputs an list of encoded numerical representation of the instruction text reci
 
 #### kmeans_clustering_query ####
 
-
 ``` python
 client.kmeans_clustering_query(self, 
                                instruction,
                                preprocess=True,
                                generate_plots=True,
-                               drop=True,
-                               save_path=os.getcwd())
+                               drop=None,
+                               base_clusters=1)
 ```
 
-Generates/stores with base object an encoding mask of form list ```[int/long, int/long, int/long]``` based on frequency of distinct characters used for sequence to sequence pre-training for natural language generation
+Generates kmeans clustering model used to solve cluster analysis problem request from written query sent to/in client class instance 
 
 
-Parameters -- instruction_label: `str`
+*Parameters --* 
 
-Acquires a string based of the instruction sent to encode in the form of a mask
+instruction: `str`
+
+String that is the instruction from a written query sent to/in the client class instance
+
+preprocess: True (`bool`)
+
+Option to preprocess the data used by the model (is set by default to true)
+
+generate_plots: True (`bool`)
+
+Option to generate all relevant plots for query (is set by default to true)
+
+drop: None (`str`)
+
+Option to drop any columns during analysis of data (is set by default is set to None)
+
+base_clusters: 1 (`int`)
+
+Value specifying the number of clusters the kmeans clustering algorthim uses as a baseline when developing the model (is set by default to 1)
 
 
-Returns -- mask: `[int/long, int/long, int/long]` 
+*Returns --* 
 
-Outputs an list of encoded numerical representation of the instruction text recieved
+svm: `object` 
+
+Retrieves the k means clustering model after training/testing and storing its information in client instance class
 
 #### svm_query ####
 
@@ -1321,24 +1340,32 @@ instruction: `str`
 
 String that is the instruction from a written query sent to/in the client class instance
 
-preprocess: True (`bool`)
-
-Option to preprocess the data used by the model (is set by default to true)
-
 test_size: 0.2 (`float`)
 
 Percentage measure of the proportion of the data to include in test split of the dataset (is set by default to 0.2)
 
-drop: None (`str`)
+kernel: "linear" (`str`)
+
+String representing type of kernel function used by the support vector machine model
+
+preprocess: True (`bool`)
+
+Option to preprocess the data used by the model (is set by default to true)
+
+drop: True (`bool`)
 
 Option to drop any columns during analysis of data (default is set to None)
+
+cross_val_size: 0.3 (`float`)
+
+Percentage measure of the proportion of the data to include in test split of the dataset for cross validation metrics (is set by default to 0.3)
 
 
 *Returns --* 
 
-clf: `object` 
+svm: `object` 
 
-Retrieves the classification model after training/testing and storing its information in client instance class
+Retrieves the support vector machine classification model after training/testing and storing its information in client instance class
     
 #### nearest_neighbor_query ####
 
