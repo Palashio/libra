@@ -1315,9 +1315,9 @@ Value specifying the number of clusters the kmeans clustering algorthim uses as 
 
 *Returns --* 
 
-svm: `object` 
+None
 
-Retrieves the k means clustering model after training/testing and storing its information in client instance class
+Executes k means clustering model training/testing and outputs resulting summary/metrics/associated plots
 
 #### svm_query ####
 
