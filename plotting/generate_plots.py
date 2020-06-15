@@ -1,25 +1,7 @@
-import seaborn as sns
-from sklearn.metrics import confusion_matrix, roc_curve
-import matplotlib.pyplot as plt
-from sklearn.cluster import KMeans
-from keras.utils import np_utils
-from keras.utils import to_categorical
-from prediction_model_creation import get_keras_model_class
-from prediction_model_creation import get_keras_model_reg
-from data_preprocesser import structured_preprocesser
-from matplotlib import pyplot as PLT
-from keras.callbacks import EarlyStopping
-from tensorflow.python.keras.layers import Dense, Input
-from sklearn.preprocessing import OneHotEncoder, StandardScaler
-from sklearn.pipeline import Pipeline
-from sklearn.model_selection import train_test_split
-from sklearn.compose import ColumnTransformer
-from sklearn import preprocessing
-import keras
-import numpy as np
-import pandas as pd
-import tensorflow as tf
 import sys
+
+import matplotlib.pyplot as plt
+import seaborn as sns
 
 sys.path.insert(1, './preprocessing')
 sys.path.insert(1, './data_generation')

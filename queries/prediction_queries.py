@@ -2,66 +2,24 @@
 # inserting into sis path
 import sys
 
-from predictionQueries import text_classification_query, get_summary, summarization_query, predict_text_sentiment
+from queries.nlp_queries import predict_text_sentiment, text_classification_query, get_summary, summarization_query
+import os
+import warnings
+from pandas.core.common import SettingWithCopyWarning
+import pandas as pd
+from dataset_labelmatcher import get_similar_column, get_similar_model
+from grammartree import get_value_instruction
+from dimensionality_red_queries import dimensionality_reduc
+from feedforward_nn import regression_ann, classification_ann, convolutional
+from supplementaries import tune_helper, stats
+from classification_models import k_means_clustering, train_svm, nearest_neighbors, decision_tree
 
 sys.path.insert(1, './preprocessing')
 sys.path.insert(1, './data_generation')
 sys.path.insert(1, './modeling')
 sys.path.insert(1, './plotting')
 
-from keras_preprocessing import sequence
-import os
-import warnings
-from pandas.core.common import SettingWithCopyWarning
-import numpy as np
-import pandas as pd
-from tabulate import tabulate
-from scipy.spatial.distance import cosine
-from sklearn.model_selection import cross_val_score
-from pandas import DataFrame
-from sklearn.preprocessing import LabelEncoder
-from sklearn.metrics import accuracy_score
-from sklearn import preprocessing, svm
-from sklearn.compose import ColumnTransformer
-from sklearn.model_selection import train_test_split
-from sklearn.pipeline import Pipeline
-from sklearn.preprocessing import OneHotEncoder, StandardScaler
-from dataset_labelmatcher import get_similar_column, get_similar_model
-from tensorflow.keras.callbacks import EarlyStopping
-from matplotlib import pyplot
-from grammartree import get_value_instruction
-from prediction_model_creation import get_keras_model_reg, get_keras_text_class
-from prediction_model_creation import get_keras_model_class
-from keras.utils import to_categorical
-from keras.utils import np_utils
-from sklearn.cluster import KMeans
-import matplotlib.pyplot as plt
-import tensorflow as tf
-from data_reader import DataReader
-from dimensionality_red_queries import dimensionality_reduc
-from os import listdir
-
-from NLP_preprocessing import text_clean_up, lemmatize_text, encode_text
-from keras.preprocessing.image import ImageDataGenerator
-from termcolor import colored
-from keras.models import model_from_json
-from feedforward_nn import regression_ann, classification_ann, convolutional
-from supplementaries import tune_helper, stats
-from classification_models import k_means_clustering, train_svm, nearest_neighbors, decision_tree
-from sklearn import svm
-from sklearn.preprocessing import StandardScaler
-from keras.layers import (Dense, Conv2D, Flatten, MaxPooling2D, )
-from NLP_preprocessing import text_clean_up, lemmatize_text, get_target_values
-
-import torch
-from torch.utils.data import DataLoader
-
 # Importing the T5 modules from huggingface/transformers
-from transformers import T5Tokenizer, T5ForConditionalGeneration
-
-from keras_preprocessing import sequence
-
-from huggingfaceModelRetrainHelper import train, CustomDataset, inference
 
 warnings.simplefilter(action='error', category=FutureWarning)
 warnings.simplefilter(action="ignore", category=SettingWithCopyWarning)
@@ -351,17 +309,17 @@ class client:
 
     # Sentiment analysis predict wrapper
     def predict_text_sentiment(self, text):
-        return predict_text_sentiment(text)
+        return predict_text_sentiment(self=self, text=text)
 
     # sentiment analysis query
     def text_classification_query(self, instruction):
 
         # storing values the model dictionary
-        self.models["Text Classification LSTM"] = text_classification_query(instruction)
+        self.models["Text Classification LSTM"] = text_classification_query(self=self, instruction=instruction)
 
     # Document summarization predict wrapper
     def get_summary(self, text):
-        return get_summary(text)
+        return get_summary(self=self, text=text)
 
     # text summarization query
     def summarization_query(self, instruction,
@@ -371,7 +329,7 @@ class client:
                             epochs=1,
                             generate_plots=True):
 
-        self.models["Document Summarization"] = summarization_query(instruction)
+        self.models["Document Summarization"] = summarization_query(self=self, instruction=instruction)
 
     def dimensionality_reducer(self, instruction):
         dimensionality_reduc(instruction, self.dataset)
