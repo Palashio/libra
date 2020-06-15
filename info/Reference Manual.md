@@ -1497,7 +1497,6 @@ List of sequence of integers representing the individual identified text parts o
 client.predict_text_sentiment(self, dataset, text)
 ```
 
-
 Wrapper function used for repeated caching of standard backend processing/prediction tasks needed for sentiment analysis when sentiment analysis text classification query is called
 
 
