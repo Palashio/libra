@@ -1386,14 +1386,38 @@ client.allClassQuery(self,
 Generates/stores with base object an encoding mask of form list ```[int/long, int/long, int/long]``` based on frequency of distinct characters used for sequence to sequence pre-training for natural language generation
 
 
-Parameters -- instruction_label: `str`
+*Parameters --* 
 
-Acquires a string based of the instruction sent to encode in the form of a mask
+instruction: `str`
+
+String that is the instruction from a written query sent to/in the client class instance
+
+preprocess: True (`bool`)
+
+Option to preprocess the data (is set by default to true)
+
+test_size: 0.2 (`float`)
+
+Percentage measure of the proportion of the data to include in test split of the dataset (is set by default to 0.2)
+
+drop: None (`str`)
+
+Option to drop any columns during analysis of data by any of the traditional classification machine learning models supported by the written query
+
+random_state: 49 (`int`)
+
+Random value assigned that ensures the shuffling of the dataset before applying the test/training split remains the same across multiple runs (is set by default to 49)
+
+save_model: 1 (`int`)
+
+Option to specify whether to save model (is set by default to 1 which is to save the model in the format of a Tensorflow SavedModel file)
 
 
-Returns -- mask: `[int/long, int/long, int/long]` 
+*Returns --*
 
-Outputs an list of encoded numerical representation of the instruction text recieved
+models[scores.index(max(scores))]: 'object'
+
+Retrieves the classification model with the highest score of accuracy
 
 #### tune ####
 
