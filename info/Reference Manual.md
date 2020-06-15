@@ -1277,9 +1277,21 @@ preprocess: True (`bool`)
 
 Option to preprocess the data used by the model (is set by default to true)
 
-generate_plots: True (`bool`)
+callback_mode: "min" (`str`)
 
-Option to generate all relevant plots for query (is set by default to true)
+String representing type of saving mechanism for multiple epochs of training of model (is set by default to min/epoch iteration of model will be saved only if maximizer function gets increased or in this case the val_loss function is reduced)
+
+test_size: 0.2 (`float`)
+
+Percentage measure of the proportion of the data to include in test split of the dataset (is set by default to 0.2)
+
+random_state: 49 (`int`)
+
+Random value assigned that ensures the shuffling of the dataset before applying the test/training split remains the same across multiple runs (is set by default to 49)
+
+epochs: 5 (`int`)
+
+Number of full cycles used for model fitting/training on the training dataset (is set by default to 5)
 
 drop: None (`str`)
 
@@ -1291,7 +1303,7 @@ Option to generate all relevant plots for query (is set by default to true)
 
 save_path: os.getcwd() (`None`)
 
-
+File path in computer directory where artificial neural network model is saved in (is set by default to os.getcwd()/current working directory)
 
 
 *Returns --* 
@@ -1683,7 +1695,7 @@ Random value assigned that ensures the shuffling of the dataset before applying 
 
 epochs: 10 (`int`)
 
-Number of full cycles used for model fitting/training on the training dataset (is set by default to 1)
+Number of full cycles used for model fitting/training on the training dataset (is set by default to 10)
 
 maxTextLength: 200 (`int`)
 
