@@ -1,3 +1,10 @@
+import sys 
+
+sys.path.insert(1, './preprocessing')
+sys.path.insert(1, './data_generation')
+sys.path.insert(1, './modeling')
+sys.path.insert(1, './plotting')
+
 from data_preprocesser import structured_preprocesser, clustering_preprocessor
 import tensorflow as tf
 import keras
@@ -17,10 +24,7 @@ from tensorflow.keras.layers import Conv2D, MaxPooling2D, Dense, Flatten, Activa
 from kerastuner.tuners import RandomSearch
 from data_reader import DataReader
 
-sys.path.insert(1, './preprocessing')
-sys.path.insert(1, './data_generation')
-sys.path.insert(1, './modeling')
-sys.path.insert(1, './plotting')
+
 
 
 # creates hypermodel class for CNN tuning
@@ -133,7 +137,7 @@ def tuneReg(data, target):
     dataReader = DataReader(data)
     # reads in dataset and processes it
     data = dataReader.data_generator()
-    data = data_preprocesser(data)
+    data = structured_preprocesser(data)
     print("entered1")
     # function build model using hyperparameter
 
