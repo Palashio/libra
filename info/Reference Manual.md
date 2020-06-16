@@ -1207,7 +1207,7 @@ client.neural_network_query(self,
 ```
 
 
-Generates feed-forward artificial neural network model used to solve only multilabel classification problem request from written query sent to/in client class instance 
+Generates artificial neural network model that choose between classification or regression problem request from written query sent to/in client class instance 
 
 
 *Parameters --* 
@@ -1261,7 +1261,7 @@ File path in computer directory where artificial neural network model is saved i
 
 None
 
-Executes feed-forward artificial neural network model training/testing and outputs resulting summary/metrics/associated plots
+Executes artificial neural network model training/testing and outputs resulting summary/metrics/associated plots
 
 #### regression_query_ann ####
 
