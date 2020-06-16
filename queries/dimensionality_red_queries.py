@@ -1,6 +1,6 @@
 from sklearn.feature_selection import SelectFromModel
 from sklearn import preprocessing, tree
-import itertools
+from itertools import product, permutations
 from data_reader import DataReader
 import os
 from sklearn.ensemble import RandomForestRegressor
@@ -22,7 +22,7 @@ from matplotlib import pyplot
 from keras.callbacks import EarlyStopping
 from dataset_labelmatcher import get_similar_column
 from tensorflow.python.keras.layers import Dense, Input
-from tensorflow import keras
+from xgboost import XGBClassifier
 from sklearn.preprocessing import OneHotEncoder, StandardScaler
 from sklearn.pipeline import Pipeline
 from sklearn.model_selection import train_test_split
@@ -33,7 +33,7 @@ from sklearn.preprocessing import LabelEncoder
 from pandas import DataFrame
 from scipy.spatial.distance import cosine
 from tabulate import tabulate
-from sklearn.decomposition import PCA, FastICA
+from sklearn.decomposition import PCA, FastICA, KernelPCA
 import tensorflow as tf
 import pandas as pd
 import numpy as np
@@ -60,16 +60,12 @@ def logger(instruction, found=""):
     global counter
 
     if counter == 0:
-        currLog += (" " * 2 * counter) + instruction + found
-        currLog += "\n"
+        currLog += (" " * 2 * counter) + instruction + found + "\n"
     else:
-        currLog += (" " * 2 * counter) + "|"
-        currLog += "\n"
-        currLog += (" " * 2 * counter) + "|- " + instruction + found
-        currLog += "\n"
+        currLog += (" " * 2 * counter) + "|" + "\n"
+        currLog += (" " * 2 * counter) + "|- " + instruction + found + "\n"
         if instruction == "done...":
-            currLog += "\n"
-            currLog += "\n"
+            currLog += "\n" + "\n"
 
     counter += 1
     print(currLog)
@@ -82,6 +78,7 @@ def dimensionality_reduc(
         arr=[
             "RF",
             "PCA",
+            "KPCA",
             "ICA"],
         inplace=False):
     global currLog
@@ -109,46 +106,37 @@ def dimensionality_reduc(
 
     logger("generating dimensionality permutations...")
     for i in range(1, len(arr) + 1):
-        for elem in list(itertools.permutations(arr, i)):
+        for elem in list(permutations(arr, i)):
             perms.append(elem)
 
     logger("running each possible permutation...")
     logger("realigning tensors...")
     for path in perms:
-        storage = []
-        storage.append(data)
+        currSet = data
         for element in path:
             if element == "RF":
-                currSet = storage[len(storage) - 1]
-                data_mod, beg_acc_RF, final_acc_RF, col_removed_RF = dimensionality_RF(
+                data_mod, beg_acc, final_acc, col_removed = dimensionality_RF(
                     instruction, currSet, target, y)
-                storage.append(data_mod)
-                overall_storage.append(
-                    list([data_mod, beg_acc_RF, final_acc_RF, col_removed_RF]))
-            if element == "PCA":
-                currSet = storage[len(storage) - 1]
-                data_mod, beg_acc_PCA, final_acc_PCA, col_removed_PCA = dimensionality_PCA(
+            elif element == "PCA":
+                data_mod, beg_acc, final_acc, col_removed = dimensionality_PCA(
                     instruction, currSet, target, y)
-                storage.append(data_mod)
-                overall_storage.append(
-                    list([data_mod, beg_acc_PCA, final_acc_PCA, col_removed_PCA]))
-            if element == "ICA":
-                currSet = storage[len(storage) - 1]
-                data_mod, beg_acc_ICA, final_acc_ICA, col_removed_ICA = dimensionality_ICA(
+            elif element == "KPCA":
+                data_mod, beg_acc, final_acc, col_removed = dimensionality_KPCA(
                     instruction, currSet, target, y)
-                storage.append(data_mod)
-                overall_storage.append(
-                    list([data_mod, beg_acc_ICA, final_acc_ICA, col_removed_ICA]))
-            if path.index(element) == len(path) - 1:
-                finals.append(overall_storage[len(overall_storage) - 1])
-
-    logger("getting best accuracies...")
+            elif element == "ICA":
+                data_mod, beg_acc, final_acc, col_removed = dimensionality_ICA(
+                    instruction, currSet, target, y)
+            overall_storage.append(
+                    list([data_mod, beg_acc, final_acc, col_removed]))
+            currSet=data_mod
+        finals.append(overall_storage[len(overall_storage) - 1])
+            
+    logger("Fetching Best Accuracies...")
     accs = []
-    i = 0
     print("")
     print("Baseline Accuracy: " + str(finals[0][1]))
     print("----------------------------")
-    for element in finals:
+    for i,element in product(range(len(finals)),finals):
         print("Permutation --> " +
               str(perms[i]) +
               " | Final Accuracy --> " +
@@ -158,7 +146,6 @@ def dimensionality_reduc(
                               str(perms[i]) +
                               " | Final Accuracy --> " +
                               str(element[2])]))
-        i += 1
     print("")
     print("Best Accuracies")
     print("----------------------------")
@@ -200,27 +187,25 @@ def dimensionality_RF(instruction, dataset, target="", y="", n_features=10):
     datas.append(dataset)
     columns.append([])
 
-    for x in range(4, len(dataset.columns)):
-        feature_model = RandomForestRegressor(random_state=1, max_depth=10)
-        feature_model.fit(X_train, y_train)
+    for i,x in product(range(3,10), range(4, len(dataset.columns))):
+            feature_model = RandomForestRegressor(random_state=1, max_depth=i)
+            feature_model.fit(X_train, y_train)
 
-        importances = feature_model.feature_importances_
-        indices = np.argsort(importances)[-x:]
-        columns.append(dataset.columns[indices])
+            importances = feature_model.feature_importances_
+            indices = np.argsort(importances)[-x:]
+            columns.append(dataset.columns[indices])
 
-        X_temp_train = X_train[dataset.columns[indices]]
-        X_temp_test = X_test[dataset.columns[indices]]
+            X_temp_train = X_train[dataset.columns[indices]]
+            X_temp_test = X_test[dataset.columns[indices]]
 
-        X_combined = np.r_[X_temp_train, X_temp_test]
-        y_combined = np.r_[y_train, y_test]
-        val = pd.DataFrame(X_combined)
-        val[target] = y_combined
-        datas.append(val)
+            val = pd.DataFrame(np.r_[X_temp_train, X_temp_test])
+            val[target] = np.r_[y_train, y_test]
+            datas.append(val)
 
-        vr = tree.DecisionTreeClassifier()
-        vr.fit(X_temp_train, y_train)
+            vr = tree.DecisionTreeClassifier()
+            vr.fit(X_temp_train, y_train)
 
-        accuracy_scores.append(accuracy_score(vr.predict(X_temp_test), y_test))
+            accuracy_scores.append(accuracy_score(vr.predict(X_temp_test), y_test))
 
     the_index = accuracy_scores.index(max(accuracy_scores))
 
@@ -228,7 +213,7 @@ def dimensionality_RF(instruction, dataset, target="", y="", n_features=10):
         accuracy_scores), list(columns[the_index])
 
 
-def dimensionality_PCA(instruction, dataset, target="", y="", n_components=10):
+def dimensionality_PCA(instruction, dataset, target="", y=""):
     global currLog
     global counter
 
@@ -243,13 +228,15 @@ def dimensionality_PCA(instruction, dataset, target="", y="", n_components=10):
         del data[remove]
         le = preprocessing.LabelEncoder()
         y = le.fit_transform(y)
-
-    pca = PCA(n_components=len(dataset.columns))
+    
+    #  PCA will hold 92% of the variance
+    pca = PCA(0.92)
+    #pca = PCA(n_components=len(dataset.columns))
     data_modified = pca.fit_transform(dataset)
 
     X_train, X_test, y_train, y_test = train_test_split(
         dataset, y, test_size=0.2, random_state=49)
-    X_train_mod, none, y_train_mod, none1 = train_test_split(
+    X_train_mod, X_test_mod, y_train_mod, y_test_mod = train_test_split(
         data_modified, y, test_size=0.2, random_state=49)
 
     clf = tree.DecisionTreeClassifier()
@@ -257,18 +244,21 @@ def dimensionality_PCA(instruction, dataset, target="", y="", n_components=10):
 
     clf_mod = tree.DecisionTreeClassifier()
     clf_mod.fit(X_train_mod, y_train_mod)
-
-    accuracies = [
-        accuracy_score(
-            clf.predict(X_test), y_test), accuracy_score(
-            clf_mod.predict(none), none1)]
+    acc=[]
+    acc.append(accuracy_score(
+            clf_mod.predict(X_test_mod), y_test_mod))
+    for i,j in product(range(3,10), ["entropy","gini"]):
+            model=tree.DecisionTreeClassifier(criterion=j, max_depth=i)
+            model=model.fit(X_train_mod,y_train_mod)
+            acc.append(accuracy_score(model.predict(X_test_mod),y_test))
+    del i,j
     data_modified = pd.DataFrame(data_modified)
-
     y_combined = np.r_[y_train, y_test]
     data_modified[target] = y_combined
     # data_modified.to_csv("./data/housingPCA.csv")
 
-    return data_modified, accuracies[0], accuracies[1], (len(
+    return data_modified, accuracy_score(
+            clf.predict(X_test), y_test), max(acc), (len(
         dataset.columns) - len(data_modified.columns))
 
 
@@ -293,7 +283,7 @@ def dimensionality_ICA(instruction, dataset, target="", y=""):
 
     X_train, X_test, y_train, y_test = train_test_split(
         dataset, y, test_size=0.2, random_state=49)
-    X_train_mod, none, y_train_mod, none1 = train_test_split(
+    X_train_mod, X_test_mod, y_train_mod, y_test_mod = train_test_split(
         data_modified, y, test_size=0.2, random_state=49)
 
     clf = tree.DecisionTreeClassifier()
@@ -301,18 +291,20 @@ def dimensionality_ICA(instruction, dataset, target="", y=""):
 
     clf_mod = tree.DecisionTreeClassifier()
     clf_mod.fit(X_train_mod, y_train_mod)
-
-    accuracies = [
-        accuracy_score(
-            clf.predict(X_test), y_test), accuracy_score(
-            clf_mod.predict(none), none1)]
+    acc=[]
+    acc.append(accuracy_score(
+            clf_mod.predict(X_test_mod), y_test_mod))
+    for i,j in product(range(3,10), ["entropy","gini"]):
+            model=tree.DecisionTreeClassifier(criterion=j, max_depth=i)
+            model=model.fit(X_train,y_train)
+            acc.append(accuracy_score(model.predict(X_test),y_test))
+    del i,j
     data_modified = pd.DataFrame(data_modified)
-
-    y_combined = np.r_[y_train, y_test]
-    data_modified[target] = y_combined
+    data_modified[target] = np.r_[y_train, y_test]
     # data_modified.to_csv("./data/housingPCA.csv")
 
-    return data_modified, accuracies[0], accuracies[1], (len(
+    return data_modified, accuracy_score(
+            clf.predict(X_test), y_test), max(acc), (len(
         dataset.columns) - len(data_modified.columns))
 
 
@@ -329,6 +321,65 @@ def get_last_file():
                 max_dir = dirname
                 max_file = fname
     return max_file, max_dir, max_mtime
+
+def dimensionality_KPCA(instruction, dataset, target="", y=""):
+    global currLog
+    global counter
+
+    dataReader = DataReader("./data/" + get_last_file()[0])
+
+    if target == "":
+        data = dataReader.data_generator()
+        data.fillna(0, inplace=True)
+        remove = get_similar_column(get_value_instruction(instruction), data)
+
+        y = data[remove]
+        del data[remove]
+        le = preprocessing.LabelEncoder()
+        y = le.fit_transform(y)
+    
+    kpca = KernelPCA(n_components=len(dataset.columns),kernel="rbf")
+    data_modified = kpca.fit_transform(dataset)
+
+    X_train, X_test, y_train, y_test = train_test_split(
+        dataset, y, test_size=0.2, random_state=49)
+    X_train_mod, X_test_mod, y_train_mod, y_test_mod = train_test_split(
+        data_modified, y, test_size=0.2, random_state=49)
+
+    clf = tree.DecisionTreeClassifier()
+    clf.fit(X_train, y_train)
+
+    clf_mod = tree.DecisionTreeClassifier()
+    clf_mod.fit(X_train_mod, y_train_mod)
+    acc=[]
+    acc.append(accuracy_score(
+            clf_mod.predict(X_test_mod), y_test_mod))
+    for i,j in product(range(3,10), ["entropy","gini"]):
+            model=tree.DecisionTreeClassifier(criterion=j, max_depth=i)
+            model=model.fit(X_train_mod,y_train_mod)
+            acc.append(accuracy_score(model.predict(X_test_mod),y_test))
+    del i,j
+    data_modified = pd.DataFrame(data_modified)
+    data_modified[target] = np.r_[y_train, y_test]
+    # data_modified.to_csv("./data/housingPCA.csv")
+
+    return data_modified, accuracy_score(
+            clf.predict(X_test), y_test), max(acc), (len(
+        dataset.columns) - len(data_modified.columns))
+    
+    def booster(dataset,obj):
+    #obj=["reg:linear","multi:softmax "]
+
+        X_train, X_test, y_train, y_test = train_test_split(
+        dataset, y, test_size=0.2, random_state=49)
+        clf = XGBClassifier(objective=obj,learning_rate =0.1,silent=1,alpha = 10)
+        clf.fit(X_train, y_train)
+        return accuracy_score(clf.predict(X_test_mod), y_test_mod)
+        #importance graph
+        #plt.rcParams['figure.figsize'] = [5, 5]
+        #plt.show()
+
+
 
 #dimensionalityPCA("Predict median house value", "./data/housing.csv")
 
