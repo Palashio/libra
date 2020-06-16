@@ -1206,17 +1206,62 @@ client.neural_network_query(self,
                             save_path=os.getcwd())
 ```
 
-Generates/stores with base object an encoding mask of form list ```[int/long, int/long, int/long]``` based on frequency of distinct characters used for sequence to sequence pre-training for natural language generation
+
+Generates feed-forward artificial neural network model used to solve only multilabel classification problem request from written query sent to/in client class instance 
 
 
-Parameters -- instruction_label: `str`
+*Parameters --* 
 
-Acquires a string based of the instruction sent to encode in the form of a mask
+instruction: `str`
+
+String that is the instruction from a written query sent to/in the client class instance
+
+preprocess: True (`bool`)
+
+Option to preprocess the data used by the model (is set by default to true)
+
+callback_mode: "min" (`str`)
+
+String representing type of saving mechanism for multiple epochs of training of model (is set by default to min/epoch iteration of model will be saved only if maximizer function gets increased or in this case the val_loss function is reduced)
+
+drop: None (`str`)
+
+Option to drop any columns during analysis of data (is set by default is set to None)
+
+random_state: 49 (`int`)
+
+Random value assigned that ensures the shuffling of the dataset before applying the test/training split remains the same across multiple runs (is set by default to 49)
+
+test_size: 0.2 (`float`)
+
+Percentage measure of the proportion of the data to include in test split of the dataset (is set by default to 0.2)
+
+epochs: 5 (`int`)
+
+Number of full cycles used for model fitting/training on the training dataset (is set by default to 5)
+
+generate_plots: True (`bool`)
+
+Option to generate all relevant plots for query (is set by default to true)
+
+maximizer: "val_loss" (`str`)
+ 
+String representing type of model optimization function to use (is set by default to val_loss)
+
+save_model: True (`bool`)
+
+Option to store the iterations of the model in memory (is set by default to true)
+
+save_path: os.getcwd() (`None`)
+
+File path in computer directory where artificial neural network model is saved in (is set by default to os.getcwd()/current working directory)
 
 
-Returns -- mask: `[int/long, int/long, int/long]` 
+*Returns --* 
 
-Outputs an list of encoded numerical representation of the instruction text recieved
+None
+
+Executes feed-forward artificial neural network model training/testing and outputs resulting summary/metrics/associated plots
 
 #### regression_query_ann ####
 
@@ -1317,7 +1362,7 @@ File path in computer directory where artificial neural network model is saved i
 
 None
 
-Executes k means clustering model training/testing and outputs resulting summary/metrics/associated plots
+Executes feed-forward artificial neural network model training/testing and outputs resulting summary/metrics/associated plots
 
 #### kmeans_clustering_query ####
 
