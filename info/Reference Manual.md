@@ -1258,7 +1258,6 @@ client.classification_query_ann(self,
                                 test_size=0.2,
                                 epochs=5,
                                 generate_plots=True,
-                                callback_mode='min',
                                 maximizer="val_loss",
                                 save_model=True,
                                 save_path=os.getcwd())
@@ -1281,25 +1280,33 @@ callback_mode: "min" (`str`)
 
 String representing type of saving mechanism for multiple epochs of training of model (is set by default to min/epoch iteration of model will be saved only if maximizer function gets increased or in this case the val_loss function is reduced)
 
-test_size: 0.2 (`float`)
+drop: None (`str`)
 
-Percentage measure of the proportion of the data to include in test split of the dataset (is set by default to 0.2)
+Option to drop any columns during analysis of data (is set by default is set to None)
 
 random_state: 49 (`int`)
 
 Random value assigned that ensures the shuffling of the dataset before applying the test/training split remains the same across multiple runs (is set by default to 49)
 
+test_size: 0.2 (`float`)
+
+Percentage measure of the proportion of the data to include in test split of the dataset (is set by default to 0.2)
+
 epochs: 5 (`int`)
 
 Number of full cycles used for model fitting/training on the training dataset (is set by default to 5)
 
-drop: None (`str`)
-
-Option to drop any columns during analysis of data (is set by default is set to None)
-
 generate_plots: True (`bool`)
 
 Option to generate all relevant plots for query (is set by default to true)
+
+maximizer: "val_loss" (`str`)
+ 
+String representing type of model optimization function to use (is set by default to val_loss)
+
+save_model: True (`bool`)
+
+Option to store the iterations of the model in memory (is set by default to true)
 
 save_path: os.getcwd() (`None`)
 
