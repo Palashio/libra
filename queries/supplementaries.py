@@ -73,7 +73,10 @@ def tune_helper(
     # processing for regression feed forward NN
     if model_to_tune == 'regression_ANN':
         logger("Tuning model hyperparameters")
-        data = models['regression_ANN']['preprocesser'].transform(dataset)
+        dataReader = DataReader(dataset)
+        data = dataReader.data_generator()
+        target = models['regression_ANN']['target']
+        data = models['regression_ANN']['preprocesser'].transform(data.drop(target, axis=1))
         # returned_model = tuneReg(dataset, models[model_to_tune]["target"])
         # models['regression_ANN'] = {'model': returned_model}
         # return returned_model

@@ -335,6 +335,5 @@ newClient = client('./data/housing.csv')
 newClient.neural_network_query("Model median house value", epochs=2)
 newClient.tune('regression_ANN')
 
-
 # newClient = client('./data/landslides_after_rainfall.csv').neural_network_query(instruction='Model distance',
 # drop=['id', 'geolocation', 'source_link', 'source_name'])
