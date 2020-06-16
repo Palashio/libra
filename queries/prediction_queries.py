@@ -1,8 +1,14 @@
 # Making functions in other directories accesible to this file by
-# inserting into sis path
+# inserting into sys path
 import sys
 
-from queries.nlp_queries import predict_text_sentiment, text_classification_query, get_summary, summarization_query
+sys.path.insert(1, './preprocessing')
+sys.path.insert(1, './data_generation')
+sys.path.insert(1, './modeling')
+sys.path.insert(1, './plotting')
+sys.path.insert(1, './queries')
+
+from nlp_queries import predict_text_sentiment, text_classification_query, get_summary, summarization_query
 import os
 import warnings
 from pandas.core.common import SettingWithCopyWarning
@@ -13,11 +19,6 @@ from dimensionality_red_queries import dimensionality_reduc
 from feedforward_nn import regression_ann, classification_ann, convolutional
 from supplementaries import tune_helper, stats
 from classification_models import k_means_clustering, train_svm, nearest_neighbors, decision_tree
-
-sys.path.insert(1, './preprocessing')
-sys.path.insert(1, './data_generation')
-sys.path.insert(1, './modeling')
-sys.path.insert(1, './plotting')
 
 # Importing the T5 modules from huggingface/transformers
 
@@ -340,7 +341,7 @@ class client:
 
 # Easier to comment the one you don't want to run instead of typing them
 # out every time
-newClient = client('./data/housing.csv').stat_analysis()
+# newClient = client('./data/housing.csv').stat_analysis()
 
-# newClient = client('./data/landslides_after_rainfall.csv').neural_network_query(instruction='Model distance',
-# drop=['id', 'geolocation', 'source_link', 'source_name'])
+newClient = client('./data/landslides_after_rainfall.csv').neural_network_query(instruction='Model distance',
+drop=['id', 'geolocation', 'source_link', 'source_name'])
