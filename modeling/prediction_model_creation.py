@@ -1,12 +1,16 @@
+import os
+
 import tensorflow as tf
 import keras
+from keras import Model
+from keras.layers import LSTM, Embedding, TimeDistributed, Concatenate
 from tensorflow.python.keras.layers import Dense, Input
 import numpy as np
 from keras.models import model_from_json
 import os
 
-
 # Creates a regression neural network
+
 def get_keras_model_reg(dataset, i):
     size_max_network = 10
     # base model
@@ -44,13 +48,12 @@ def get_keras_model_reg(dataset, i):
 
 def get_keras_model_class(dataset, i, num_classes):
     size_max_network = 10
-
     # base model
     model = tf.keras.Sequential()
     model.add(
         Dense(
-            dataset.shape[1],
-            input_dim=dataset.shape[1],
+            dataset['train'].shape[1],
+            input_dim=dataset['train'].shape[1],
             kernel_initializer='normal',
             activation='relu'))
     model.add(Dense(64, activation="relu"))

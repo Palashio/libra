@@ -23,13 +23,13 @@ from keras.callbacks import EarlyStopping
 from matplotlib import pyplot
 from grammartree import get_value_instruction
 from data_preprocesser import structured_preprocesser
-from predictionModelCreation import get_keras_model_reg
-from predictionModelCreation import get_keras_model_class
+from prediction_model_creation import get_keras_model_reg
+from prediction_model_creation import get_keras_model_class
 from keras.utils import to_categorical
 from keras.utils import np_utils
 from sklearn.cluster import KMeans
 import matplotlib.pyplot as plt
-from generatePlots import (
+from generate_plots import (
     generateClusteringPlots,
     generateRegressionPlots,
     generateClassificationPlots,
