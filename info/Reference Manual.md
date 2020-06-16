@@ -66,6 +66,7 @@ Table of Contents
     * [len](#__len__)
     * [getitem](#__getitem__)
   * [inference](#inference)
+* [classification_models.py](#classification_models)
 * [dimensionality_red_queries.py](#dimensionality_red_queries)
   * [dimensionality_reduc](#dimensionality_reduc)
   * [dimensionality_RF](#dimensionality_RF)
@@ -968,6 +969,10 @@ Outputs an list of encoded numerical representation of the instruction text reci
 
 ***
 
+## classification_models ##
+
+***
+
 ## dimensionality_red_queries ##
 
 ### logger ###
@@ -1079,6 +1084,18 @@ Acquires a string based of the instruction sent to encode in the form of a mask
 Returns -- mask: `[int/long, int/long, int/long]` 
 
 Outputs an list of encoded numerical representation of the instruction text recieved
+
+***
+
+## feedforward_nn ##
+
+***
+
+## nlp_queries ##
+
+***
+
+## supplementaries ##
 
 ***
 
