@@ -1,5 +1,6 @@
 from tuner import tuneReg, tuneClass, tuneCNN
 import numpy as np
+import os 
 from data_reader import DataReader
 from tabulate import tabulate
 from data_preprocesser import structured_preprocesser, initial_preprocesser
@@ -101,3 +102,11 @@ def stats(dataset=None,
           drop=None,
           column_name=None):
     return
+
+def save(model, save_model, save_path=os.getcwd()):
+    model_json = model.to_json()
+    with open(save_path + "/model" + str(number) + ".json", "w") as json_file:
+        json_file.write(model_json)
+        # serialize weights to HDF5
+        model.save_weights(save_path + "/weights" + str(number) + ".h5")
+        logger("->", "Saved model to disk as model" + str(number))

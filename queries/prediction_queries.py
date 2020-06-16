@@ -2,7 +2,12 @@
 # inserting into sis path
 import sys
 
-from queries.nlp_queries import predict_text_sentiment, text_classification_query, get_summary, summarization_query
+sys.path.insert(1, './preprocessing')
+sys.path.insert(1, './data_generation')
+sys.path.insert(1, './modeling')
+sys.path.insert(1, './plotting')
+
+#from nlp_queries import predict_text_sentiment, text_classification_query, get_summary, summarization_query
 import os
 import warnings
 from pandas.core.common import SettingWithCopyWarning
@@ -14,10 +19,6 @@ from feedforward_nn import regression_ann, classification_ann, convolutional
 from supplementaries import tune_helper, stats
 from classification_models import k_means_clustering, train_svm, nearest_neighbors, decision_tree
 
-sys.path.insert(1, './preprocessing')
-sys.path.insert(1, './data_generation')
-sys.path.insert(1, './modeling')
-sys.path.insert(1, './plotting')
 
 # Importing the T5 modules from huggingface/transformers
 
@@ -99,16 +100,6 @@ class client:
         logger("Getting model...")
         return get_similar_model(model_requested, self.models.keys())
         clearLog()
-
-        # save the model in the current directory
-
-    def save(self, model, save_model, save_path=os.getcwd()):
-        model_json = model.to_json()
-        with open(save_path + "/model" + str(number) + ".json", "w") as json_file:
-            json_file.write(model_json)
-            # serialize weights to HDF5
-            model.save_weights(save_path + str(number) + ".h5")
-            logger("->", "Saved model to disk as model" + str(number))
 
     # param modelKey: string representation of the model to make prediction
     # param data: dataframe version of desired prediction set
@@ -340,7 +331,7 @@ class client:
 
 # Easier to comment the one you don't want to run instead of typing them
 # out every time
-newClient = client('./data/housing.csv').stat_analysis()
+newClient = client('./data/housing.csv').neural_network_query("Model median house value")
 
 # newClient = client('./data/landslides_after_rainfall.csv').neural_network_query(instruction='Model distance',
 # drop=['id', 'geolocation', 'source_link', 'source_name'])
