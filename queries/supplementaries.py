@@ -1,5 +1,6 @@
 from tuner import tuneReg, tuneClass, tuneCNN
 import numpy as np
+import os
 from data_reader import DataReader
 from tabulate import tabulate
 from data_preprocesser import structured_preprocesser, initial_preprocesser
@@ -60,12 +61,18 @@ def logger(instruction, found="", slash=''):
 
 
 def tune_helper(
-    model_to_tune=None,
-    dataset=None,
-    models=None,
-
-
-):
+        model_to_tune=None,
+        dataset=None,
+        models=None,
+        max_layers=10,
+        min_layers=2,
+        min_dense=32,
+        max_dense=512,
+        executions_per_trial=3,
+        max_trials=1,
+        activation='relu',
+        loss='categorical_crossentropy',
+        metrics='accuracy'):
     logger("Getting target model for tuning...")
 
     # checks to see which requested model is in the self.models
@@ -73,15 +80,46 @@ def tune_helper(
     # processing for regression feed forward NN
     if model_to_tune == 'regression_ANN':
         logger("Tuning model hyperparameters")
-        returned_model = tuneReg(dataset, models[model_to_tune]["target"])
+        dataReader = DataReader(dataset)
+        data = dataReader.data_generator()
+        target = models['regression_ANN']['target']
+        target_column = data[models['regression_ANN']['target']]
+        data = models['regression_ANN']['preprocesser'].transform(
+            data.drop(target, axis=1))
+        returned_model = tuneReg(
+            data,
+            target_column,
+            max_layers=max_layers,
+            min_layers=min_layers,
+            min_dense=min_dense,
+            max_dense=max_dense,
+            executions_per_trial=executions_per_trial,
+            max_trials=max_trials)
         models['regression_ANN'] = {'model': returned_model}
         return returned_model
+
         # processing for classification feed forward NN
     if model_to_tune == "classification_ANN":
         logger("Tuning model hyperparameters")
+        dataReader = DataReader(dataset)
+        data = dataReader.data_generator()
+        target = models['classification_ANN']['target']
+        target_column = data[models['classification_ANN']['target']]
+        data = models['classification_ANN']['preprocesser'].transform(
+            data.drop(target, axis=1))
         returned_model = tuneClass(
-            models[model_to_tune]["target"],
-            models[model_to_tune]["num_classes"])
+            data,
+            target_column,
+            models['classification_ANN']['num_classes'],
+            max_layers=max_layers,
+            min_layers=min_layers,
+            min_dense=min_dense,
+            max_dense=max_dense,
+            executions_per_trial=executions_per_trial,
+            max_trials=max_trials,
+            activation=activation,
+            loss=loss,
+            metrics=metrics)
         models['classification_ANN'] = {'model': returned_model}
         return returned_model
         # processing for convolutional NN
@@ -101,3 +139,12 @@ def stats(dataset=None,
           drop=None,
           column_name=None):
     return
+
+
+def save(model, save_model, save_path=os.getcwd()):
+    model_json = model.to_json()
+    with open(save_path + "/model" + str(number) + ".json", "w") as json_file:
+        json_file.write(model_json)
+        # serialize weights to HDF5
+        model.save_weights(save_path + "/weights" + str(number) + ".h5")
+        logger("->", "Saved model to disk as model" + str(number))

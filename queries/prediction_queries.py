@@ -1,4 +1,5 @@
 # Making functions in other directories accesible to this file by
+<<<<<<< HEAD
 # inserting into sys path
 import sys
 
@@ -18,8 +19,32 @@ from grammartree import get_value_instruction
 from dimensionality_red_queries import dimensionality_reduc
 from feedforward_nn import regression_ann, classification_ann, convolutional
 from supplementaries import tune_helper, stats
+=======
+# inserting into sis path
+>>>>>>> ebf776497a94a8d7261c6026452e4d63475c4bc1
 from classification_models import k_means_clustering, train_svm, nearest_neighbors, decision_tree
+from supplementaries import tune_helper, stats
+from feedforward_nn import regression_ann, classification_ann, convolutional
+from dimensionality_red_queries import dimensionality_reduc
+from grammartree import get_value_instruction
+from dataset_labelmatcher import get_similar_column, get_similar_model
+import pandas as pd
+from pandas.core.common import SettingWithCopyWarning
+import warnings
+import os
+import sys
 
+<<<<<<< HEAD
+=======
+sys.path.insert(1, './preprocessing')
+sys.path.insert(1, './data_generation')
+sys.path.insert(1, './modeling')
+sys.path.insert(1, './plotting')
+
+from nlp_queries import predict_text_sentiment, text_classification_query, get_summary, summarization_query
+
+
+>>>>>>> ebf776497a94a8d7261c6026452e4d63475c4bc1
 # Importing the T5 modules from huggingface/transformers
 
 warnings.simplefilter(action='error', category=FutureWarning)
@@ -101,16 +126,6 @@ class client:
         return get_similar_model(model_requested, self.models.keys())
         clearLog()
 
-        # save the model in the current directory
-
-    def save(self, model, save_model, save_path=os.getcwd()):
-        model_json = model.to_json()
-        with open(save_path + "/model" + str(number) + ".json", "w") as json_file:
-            json_file.write(model_json)
-            # serialize weights to HDF5
-            model.save_weights(save_path + str(number) + ".h5")
-            logger("->", "Saved model to disk as model" + str(number))
-
     # param modelKey: string representation of the model to make prediction
     # param data: dataframe version of desired prediction set
     def predict(self, modelKey, data):
@@ -133,7 +148,7 @@ class client:
                              generate_plots=True,
                              callback_mode='min',
                              maximizer="val_loss",
-                             save_model=True,
+                             save_model=False,
                              save_path=os.getcwd()):
 
         data = pd.read_csv(self.dataset)
@@ -213,7 +228,7 @@ class client:
             epochs=5,
             generate_plots=True,
             maximizer="val_loss",
-            save_model=True,
+            save_model=False,
             save_path=os.getcwd()):
 
         self.models['classification_ANN'] = classification_ann(
@@ -292,6 +307,15 @@ class client:
             model_to_tune=model_to_tune,
             dataset=self.dataset,
             models=self.models,
+            max_layers=10,
+            min_layers=2,
+            min_dense=32,
+            max_dense=512,
+            executions_per_trial=3,
+            max_trials=1,
+            activation='relu',
+            loss='categorical_crossentropy',
+            metrics='accuracy'
         )
 
     def stat_analysis(self, column_name="none", drop=None):
@@ -306,7 +330,8 @@ class client:
     def convolutional_query(self, data_path=None, new_folders=True):
 
         # storing values the model dictionary
-        self.models["convolutional_NN"] = convolutional(data_path=data_path, new_folders=new_folders)
+        self.models["convolutional_NN"] = convolutional(
+            data_path=data_path, new_folders=new_folders)
 
     # Sentiment analysis predict wrapper
     def predict_text_sentiment(self, text):
@@ -316,7 +341,8 @@ class client:
     def text_classification_query(self, instruction):
 
         # storing values the model dictionary
-        self.models["Text Classification LSTM"] = text_classification_query(self=self, instruction=instruction)
+        self.models["Text Classification LSTM"] = text_classification_query(
+            self=self, instruction=instruction)
 
     # Document summarization predict wrapper
     def get_summary(self, text):
@@ -330,7 +356,8 @@ class client:
                             epochs=1,
                             generate_plots=True):
 
-        self.models["Document Summarization"] = summarization_query(self=self, instruction=instruction)
+        self.models["Document Summarization"] = summarization_query(
+            self=self, instruction=instruction)
 
     def dimensionality_reducer(self, instruction):
         dimensionality_reduc(instruction, self.dataset)
@@ -341,7 +368,13 @@ class client:
 
 # Easier to comment the one you don't want to run instead of typing them
 # out every time
+<<<<<<< HEAD
 # newClient = client('./data/housing.csv').stat_analysis()
+=======
+newClient = client('./data/housing.csv')
+newClient.neural_network_query("Model ocean proximity", epochs=2)
+newClient.tune('classification_ANN')
+>>>>>>> ebf776497a94a8d7261c6026452e4d63475c4bc1
 
 newClient = client('./data/landslides_after_rainfall.csv').neural_network_query(instruction='Model distance',
 drop=['id', 'geolocation', 'source_link', 'source_name'])
