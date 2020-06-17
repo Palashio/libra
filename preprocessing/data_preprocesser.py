@@ -110,7 +110,6 @@ def structured_preprocesser(data):
 
     test_cols = generate_column_labels(full_pipeline, numeric_columns)
 
-
     # Ternary clause because when running housing.csv,
     # the product of preprocessing is np array, but not when using landslide
     # data... not sure why
@@ -306,32 +305,34 @@ def process_dates(data):
 # Sees if one hot encoding occurred, if not just uses numeric cols
 def generate_column_labels(pipeline, numeric_cols):
     try:
-        encoded_cols = pipeline.named_transformers_['cat']['one_hot_encoder'].get_feature_names()
+        encoded_cols = pipeline.named_transformers_[
+            'cat']['one_hot_encoder'].get_feature_names()
         cols = [*list(numeric_cols), *encoded_cols]
 
-    except:
+    except BaseException:
         cols = list(numeric_cols)
 
     return cols
+
 
 def clustering_preprocessor(data):
     # identifies the categorical and numerical columns
     categorical_columns = data.select_dtypes(exclude=["number"]).columns
     numeric_columns = data.columns[data.dtypes.apply(
         lambda c: np.issubdtype(c, np.number))]
- 
+
     # pipeline for numeric columns
     num_pipeline = Pipeline([
         ('imputer', SimpleImputer(strategy="median")),
         ('std_scaler', StandardScaler()),
     ])
- 
+
     # pipeline for categorical columns
     cat_pipeline = Pipeline([
         ('imputer', SimpleImputer(strategy="constant", fill_value="")),
         ('one_hot_encoder', OneHotEncoder()),
     ])
- 
+
     # combine the two pipelines
     if len(numeric_columns) != 0 and len(categorical_columns) != 0:
         full_pipeline = ColumnTransformer([
@@ -346,9 +347,9 @@ def clustering_preprocessor(data):
         full_pipeline = ColumnTransformer([
             ("num", num_pipeline, numeric_columns),
         ])
- 
+
     data = full_pipeline.fit_transform(data)
- 
+
     new_columns = generate_column_labels(full_pipeline, numeric_columns)
- 
+
     return pd.DataFrame(data, columns=new_columns), full_pipeline

@@ -1,30 +1,26 @@
-import sys 
+from data_reader import DataReader
+from tensorflow.keras.layers import Conv2D, MaxPooling2D, Dense, Flatten, Activation, Dropout
+from kerastuner.tuners import Hyperband
+from kerastuner import HyperModel
+from kerastuner.tuners import RandomSearch
+from tensorflow.keras import layers
+from sklearn import preprocessing
+import kerastuner as kt
+from tensorflow import keras
+import sys
+import pandas as pd
+import numpy as np
+from sklearn.model_selection import train_test_split
+from tensorflow.python.keras.layers import Dense, Input
+import keras
+import tensorflow as tf
+from data_preprocesser import structured_preprocesser, clustering_preprocessor
+import sys
 
 sys.path.insert(1, './preprocessing')
 sys.path.insert(1, './data_generation')
 sys.path.insert(1, './modeling')
 sys.path.insert(1, './plotting')
-
-from data_preprocesser import structured_preprocesser, clustering_preprocessor
-import tensorflow as tf
-import keras
-from tensorflow.python.keras.layers import Dense, Input
-from sklearn.model_selection import train_test_split
-import numpy as np
-import pandas as pd
-import sys
-from tensorflow import keras
-import kerastuner as kt
-from tensorflow.keras import layers
-from kerastuner.tuners import RandomSearch
-from kerastuner import HyperModel
-from kerastuner.tuners import Hyperband
-from tensorflow import keras
-from tensorflow.keras.layers import Conv2D, MaxPooling2D, Dense, Flatten, Activation, Dropout
-from kerastuner.tuners import RandomSearch
-from data_reader import DataReader
-
-
 
 
 # creates hypermodel class for CNN tuning
@@ -133,20 +129,24 @@ class CNNHyperModel(HyperModel):
         return model
 
 
-def tuneReg(data, target):
-    dataReader = DataReader(data)
-    # reads in dataset and processes it
-    data = dataReader.data_generator()
-    data = structured_preprocesser(data)
+def tuneReg(
+        data,
+        target,
+        max_layers=10,
+        min_layers=2,
+        min_dense=32,
+        max_dense=512,
+        executions_per_trial=3,
+        max_trials=1):
     print("entered1")
     # function build model using hyperparameter
 
     def build_model(hp):
         model = keras.Sequential()
-        for i in range(hp.Int('num_layers', 2, 10)):
+        for i in range(hp.Int('num_layers', min_layers, max_layers)):
             model.add(layers.Dense(units=hp.Int('units_' + str(i),
-                                                min_value=32,
-                                                max_value=512,
+                                                min_value=min_dense,
+                                                max_value=max_dense,
                                                 step=32),
                                    activation='relu'))
         model.add(layers.Dense(1, activation='softmax'))
@@ -160,69 +160,79 @@ def tuneReg(data, target):
     tuner = RandomSearch(
         build_model,
         objective='loss',
-        max_trials=1,
-        executions_per_trial=3)
+        max_trials=max_trials,
+        executions_per_trial=executions_per_trial)
 
     # tuner.search_space_summary()
-
-    y = data[target]
-    del data[target]
+    # del data[target]
 
     X_train, X_test, y_train, y_test = train_test_split(
-        data, y, test_size=0.2, random_state=49)
+        data, target, test_size=0.2, random_state=49)
 
     # searches the tuner space defined by hyperparameters (hp) and returns the
     # best model
-    tuner.search(X_train.values, y_train.values,
+    tuner.search(X_train, y_train,
                  epochs=5,
-                 validation_data=(X_test.values, y_test.values),
+                 validation_data=(X_test, y_test),
                  callbacks=[tf.keras.callbacks.TensorBoard('my_dir')])
 
     models = tuner.get_best_models(num_models=1)
-    print(models[0].summary)
     return models[0]
 
 
-def tuneClass(X, y, num_classes):
+def tuneClass(
+        X,
+        y,
+        num_classes,
+        max_layers=10,
+        min_layers=2,
+        min_dense=32,
+        max_dense=512,
+        executions_per_trial=3,
+        max_trials=1,
+        activation='relu',
+        loss='categorical_crossentropy',
+        metrics='accuracy'):
     # function build model using hyperparameter
+    le = preprocessing.LabelEncoder()
+    y = tf.keras.utils.to_categorical(
+        le.fit_transform(y), num_classes=num_classes)
+
     def build_model(hp):
         model = keras.Sequential()
-        for i in range(hp.Int('num_layers', 2, 10)):
+        for i in range(hp.Int('num_layers', min_layers, max_layers)):
             model.add(layers.Dense(units=hp.Int('units_' + str(i),
-                                                min_value=32,
-                                                max_value=512,
+                                                min_value=min_dense,
+                                                max_value=max_dense,
                                                 step=32),
-                                   activation='relu'))
+                                   activation=activation))
         model.add(layers.Dense(num_classes, activation='softmax'))
         model.compile(
             optimizer=keras.optimizers.Adam(
                 hp.Choice('learning_rate', [1e-2, 1e-3, 1e-4])),
-            loss='categorical_crossentropy',
-            metrics=['accuracy'])
+            loss=loss,
+            metrics=[metrics])
         return model
 
     # tuners, establish the object to look through the tuner search space
     tuner = RandomSearch(
         build_model,
         objective='loss',
-        max_trials=5,
-        executions_per_trial=3,
+        max_trials=max_trials,
+        executions_per_trial=executions_per_trial,
         directory='models',
         project_name='class_tuned')
 
     # tuner.search_space_summary()
 
-    y = data[target_class]
-    del data[target_class]
-
     X_train, X_test, y_train, y_test = train_test_split(
-        data, y, test_size=0.2, random_state=49)
+        X, y, test_size=0.2, random_state=49)
 
     # searches the tuner space defined by hyperparameters (hp) and returns the
     # best model
-    tuner.search(X_train.values, y_train.values,
+    tuner.search(X_train, y_train,
                  epochs=5,
-                 validation_data=(X_test.values, y_test.values))
+                 validation_data=(X_test, y_test))
     models = tuner.get_best_models(num_models=1)
     return models[0]
 
