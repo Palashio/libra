@@ -11,6 +11,7 @@ from data_reader import DataReader
 from keras.models import Sequential
 from keras.layers import (Dense, Conv2D, Flatten, Input, MaxPooling2D, )
 import pandas as pd 
+from supplementaries import save
 from keras.preprocessing.image import ImageDataGenerator
 from tensorflow.keras.callbacks import EarlyStopping
 from sklearn.preprocessing import OneHotEncoder, StandardScaler
@@ -202,8 +203,8 @@ def regression_ann(
             for x in range(len(plot_names)):
                 plots[str(plot_names[x])] = init_plots[x]
 
-        # if save_model:
-        #     self.save(final_model, save_model)
+        if save_model:
+            save(final_model, save_model)
         # stores values in the client object models dictionary field
         return {
             'model': final_model,

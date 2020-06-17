@@ -130,13 +130,13 @@ def dimensionality_reduc(
                     list([data_mod, beg_acc, final_acc, y_pred]))
             currSet=data_mod
         finals.append(overall_storage[len(overall_storage) - 1])
-            
+
     logger("Fetching Best Accuracies...")
     accs = []
     print("")
     print("Baseline Accuracy: " + str(finals[0][1]))
     print("----------------------------")
-    for i,element in product(range(len(finals)),finals):
+    for i, element in product(range(len(finals)), finals):
         print("Permutation --> " +
               str(perms[i]) +
               " | Final Accuracy --> " +
@@ -187,20 +187,20 @@ def dimensionality_RF(instruction, dataset, target="", y="", n_features=10):
     datas.append(dataset)
     columns.append([])
 
-    for i,x in product(range(3,10), range(4, len(dataset.columns))):
-            feature_model = RandomForestRegressor(random_state=1, max_depth=i)
-            feature_model.fit(X_train, y_train)
+    for i, x in product(range(3, 10), range(4, len(dataset.columns))):
+        feature_model = RandomForestRegressor(random_state=1, max_depth=i)
+        feature_model.fit(X_train, y_train)
 
-            importances = feature_model.feature_importances_
-            indices = np.argsort(importances)[-x:]
-            columns.append(dataset.columns[indices])
+        importances = feature_model.feature_importances_
+        indices = np.argsort(importances)[-x:]
+        columns.append(dataset.columns[indices])
 
-            X_temp_train = X_train[dataset.columns[indices]]
-            X_temp_test = X_test[dataset.columns[indices]]
+        X_temp_train = X_train[dataset.columns[indices]]
+        X_temp_test = X_test[dataset.columns[indices]]
 
-            val = pd.DataFrame(np.r_[X_temp_train, X_temp_test])
-            val[target] = np.r_[y_train, y_test]
-            datas.append(val)
+        val = pd.DataFrame(np.r_[X_temp_train, X_temp_test])
+        val[target] = np.r_[y_train, y_test]
+        datas.append(val)
 
             vr = tree.DecisionTreeClassifier()
             vr.fit(X_temp_train, y_train)
@@ -309,6 +309,7 @@ def get_last_file():
                 max_file = fname
     return max_file, max_dir, max_mtime
 
+
 def dimensionality_KPCA(instruction, dataset, target="", y=""):
     global currLog
     global counter
@@ -361,7 +362,6 @@ def booster(dataset,y,obj):
     #importance graph
     #plt.rcParams['figure.figsize'] = [5, 5]
     #plt.show()
-
 
 
 #dimensionalityPCA("Predict median house value", "./data/housing.csv")
