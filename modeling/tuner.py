@@ -14,7 +14,6 @@ from kerastuner import HyperModel
 from kerastuner.tuners import Hyperband
 from tensorflow import keras
 from tensorflow.keras.layers import Conv2D, MaxPooling2D, Dense, Flatten, Activation, Dropout
-from kerastuner.tuners import RandomSearch
 from data_reader import DataReader
 
 sys.path.insert(1, './preprocessing')

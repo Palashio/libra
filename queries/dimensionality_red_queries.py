@@ -118,16 +118,16 @@ def dimensionality_reduc(
                 data_mod, beg_acc, final_acc, col_removed = dimensionality_RF(
                     instruction, currSet, target, y)
             elif element == "PCA":
-                data_mod, beg_acc, final_acc, col_removed = dimensionality_PCA(
+                data_mod, beg_acc, final_acc, y_pred = dimensionality_PCA(
                     instruction, currSet, target, y)
             elif element == "KPCA":
-                data_mod, beg_acc, final_acc, col_removed = dimensionality_KPCA(
+                data_mod, beg_acc, final_acc, y_pred = dimensionality_KPCA(
                     instruction, currSet, target, y)
             elif element == "ICA":
-                data_mod, beg_acc, final_acc, col_removed = dimensionality_ICA(
+                data_mod, beg_acc, final_acc, y_pred = dimensionality_ICA(
                     instruction, currSet, target, y)
             overall_storage.append(
-                    list([data_mod, beg_acc, final_acc, col_removed]))
+                    list([data_mod, beg_acc, final_acc, y_pred]))
             currSet=data_mod
         finals.append(overall_storage[len(overall_storage) - 1])
             
@@ -155,23 +155,23 @@ def dimensionality_reduc(
     if inplace:
         data.to_csv(dataset)
 
-
+def data_y( instruction):
+    dataReader = DataReader("./data/" + get_last_file()[0])
+    data = dataReader.data_generator()
+    data.fillna(0, inplace=True)
+    remove = get_similar_column(get_value_instruction(instruction), data)
+    data = structured_preprocesser(data)
+    y = data[remove]
+    del data[remove]
+    le = preprocessing.LabelEncoder()
+    y = le.fit_transform(y)
+    return y
 def dimensionality_RF(instruction, dataset, target="", y="", n_features=10):
     global currLog
     global counter
 
-    dataReader = DataReader("./data/" + get_last_file()[0])
-
     if target == "":
-        data = dataReader.data_generator()
-        data.fillna(0, inplace=True)
-        remove = get_similar_column(get_value_instruction(instruction), data)
-        data = structured_preprocesser(data)
-
-        y = data[remove]
-        del data[remove]
-        le = preprocessing.LabelEncoder()
-        y = le.fit_transform(y)
+        y=data_y(instruction)
 
     X_train, X_test, y_train, y_test = train_test_split(
         dataset, y, test_size=0.2, random_state=49)
@@ -204,7 +204,7 @@ def dimensionality_RF(instruction, dataset, target="", y="", n_features=10):
 
             vr = tree.DecisionTreeClassifier()
             vr.fit(X_temp_train, y_train)
-
+            y_pred=vr.predict()
             accuracy_scores.append(accuracy_score(vr.predict(X_temp_test), y_test))
 
     the_index = accuracy_scores.index(max(accuracy_scores))
@@ -217,17 +217,8 @@ def dimensionality_PCA(instruction, dataset, target="", y=""):
     global currLog
     global counter
 
-    dataReader = DataReader("./data/" + get_last_file()[0])
-
     if target == "":
-        data = dataReader.data_generator()
-        data.fillna(0, inplace=True)
-        remove = get_similar_column(get_value_instruction(instruction), data)
-
-        y = data[remove]
-        del data[remove]
-        le = preprocessing.LabelEncoder()
-        y = le.fit_transform(y)
+        y=data_y(instruction)
     
     #  PCA will hold 92% of the variance
     pca = PCA(0.92)
@@ -244,39 +235,32 @@ def dimensionality_PCA(instruction, dataset, target="", y=""):
 
     clf_mod = tree.DecisionTreeClassifier()
     clf_mod.fit(X_train_mod, y_train_mod)
-    acc=[]
-    acc.append(accuracy_score(
-            clf_mod.predict(X_test_mod), y_test_mod))
+    acc=accuracy_score(
+            clf_mod.predict(X_test_mod), y_test_mod)
+    y_pred=clf_mod.predict(X_test_mod)
     for i,j in product(range(3,10), ["entropy","gini"]):
             model=tree.DecisionTreeClassifier(criterion=j, max_depth=i)
             model=model.fit(X_train_mod,y_train_mod)
-            acc.append(accuracy_score(model.predict(X_test_mod),y_test))
+            if accuracy_score(model.predict(X_test_mod)
+                    ,y_test)>acc:
+                acc=accuracy_score(model.predict(X_test_mod)
+                    ,y_test)
+                y_pred=model.predict(X_test_mod)
     del i,j
     data_modified = pd.DataFrame(data_modified)
-    y_combined = np.r_[y_train, y_test]
-    data_modified[target] = y_combined
+    data_modified[target] = np.r_[y_train, y_test]
     # data_modified.to_csv("./data/housingPCA.csv")
 
     return data_modified, accuracy_score(
-            clf.predict(X_test), y_test), max(acc), (len(
-        dataset.columns) - len(data_modified.columns))
+            clf.predict(X_test), y_test), acc, y_pred)
 
 
 def dimensionality_ICA(instruction, dataset, target="", y=""):
     global currLog
     global counter
 
-    dataReader = DataReader("./data/" + get_last_file()[0])
-
     if target == "":
-        data = dataReader.data_generator()
-        data.fillna(0, inplace=True)
-        remove = get_similar_column(get_value_instruction(instruction), data)
-
-        y = data[remove]
-        del data[remove]
-        le = preprocessing.LabelEncoder()
-        y = le.fit_transform(y)
+        y=data_y(instruction)
 
     pca = FastICA(n_components=len(dataset.columns))
     data_modified = pca.fit_transform(dataset)
@@ -291,21 +275,24 @@ def dimensionality_ICA(instruction, dataset, target="", y=""):
 
     clf_mod = tree.DecisionTreeClassifier()
     clf_mod.fit(X_train_mod, y_train_mod)
-    acc=[]
-    acc.append(accuracy_score(
-            clf_mod.predict(X_test_mod), y_test_mod))
+    acc=accuracy_score(
+            clf_mod.predict(X_test_mod), y_test_mod)
+    y_pred=clf_mod.predict(X_test_mod)
     for i,j in product(range(3,10), ["entropy","gini"]):
             model=tree.DecisionTreeClassifier(criterion=j, max_depth=i)
             model=model.fit(X_train,y_train)
-            acc.append(accuracy_score(model.predict(X_test),y_test))
+            if accuracy_score(model.predict(X_test_mod)
+                    ,y_test)>acc:
+                acc=accuracy_score(model.predict(X_test_mod)
+                    ,y_test)
+                y_pred=model.predict(X_test_mod)
     del i,j
     data_modified = pd.DataFrame(data_modified)
     data_modified[target] = np.r_[y_train, y_test]
     # data_modified.to_csv("./data/housingPCA.csv")
-
+    
     return data_modified, accuracy_score(
-            clf.predict(X_test), y_test), max(acc), (len(
-        dataset.columns) - len(data_modified.columns))
+            clf.predict(X_test), y_test), acc, y_pred)
 
 
 def get_last_file():
@@ -326,17 +313,8 @@ def dimensionality_KPCA(instruction, dataset, target="", y=""):
     global currLog
     global counter
 
-    dataReader = DataReader("./data/" + get_last_file()[0])
-
     if target == "":
-        data = dataReader.data_generator()
-        data.fillna(0, inplace=True)
-        remove = get_similar_column(get_value_instruction(instruction), data)
-
-        y = data[remove]
-        del data[remove]
-        le = preprocessing.LabelEncoder()
-        y = le.fit_transform(y)
+        y=data_y(instruction)
     
     kpca = KernelPCA(n_components=len(dataset.columns),kernel="rbf")
     data_modified = kpca.fit_transform(dataset)
@@ -351,33 +329,38 @@ def dimensionality_KPCA(instruction, dataset, target="", y=""):
 
     clf_mod = tree.DecisionTreeClassifier()
     clf_mod.fit(X_train_mod, y_train_mod)
-    acc=[]
-    acc.append(accuracy_score(
-            clf_mod.predict(X_test_mod), y_test_mod))
+    acc=accuracy_score(
+            clf_mod.predict(X_test_mod), y_test_mod)
+    y_pred=clf_mod.predict(X_test_mod)
     for i,j in product(range(3,10), ["entropy","gini"]):
             model=tree.DecisionTreeClassifier(criterion=j, max_depth=i)
             model=model.fit(X_train_mod,y_train_mod)
-            acc.append(accuracy_score(model.predict(X_test_mod),y_test))
+            if accuracy_score(model.predict(X_test_mod)
+                    ,y_test)>acc:
+                acc=accuracy_score(model.predict(X_test_mod)
+                    ,y_test)
+                y_pred=model.predict(X_test_mod)
     del i,j
     data_modified = pd.DataFrame(data_modified)
     data_modified[target] = np.r_[y_train, y_test]
     # data_modified.to_csv("./data/housingPCA.csv")
 
     return data_modified, accuracy_score(
-            clf.predict(X_test), y_test), max(acc), (len(
-        dataset.columns) - len(data_modified.columns))
+            clf.predict(X_test), y_test), acc, y_pred)
     
-    def booster(dataset,obj):
+def booster(dataset,y,obj):
     #obj=["reg:linear","multi:softmax "]
+    if target == "":
+        y=data_y(instruction)
 
-        X_train, X_test, y_train, y_test = train_test_split(
-        dataset, y, test_size=0.2, random_state=49)
-        clf = XGBClassifier(objective=obj,learning_rate =0.1,silent=1,alpha = 10)
-        clf.fit(X_train, y_train)
-        return accuracy_score(clf.predict(X_test_mod), y_test_mod)
-        #importance graph
-        #plt.rcParams['figure.figsize'] = [5, 5]
-        #plt.show()
+    X_train, X_test, y_train, y_test = train_test_split(
+    dataset, y, test_size=0.2, random_state=49)
+    clf = XGBClassifier(objective=obj,learning_rate =0.1,silent=1,alpha = 10)
+    clf.fit(X_train, y_train)
+    return accuracy_score(clf.predict(X_test_mod), y_test_mod), (clf.predict(X_test_mod))
+    #importance graph
+    #plt.rcParams['figure.figsize'] = [5, 5]
+    #plt.show()
 
 
 
