@@ -15,7 +15,6 @@ from queries.dimensionality_red_queries import logger
 
 
 def predict_text_sentiment(self, text):
-    classes = {0: "Negative", 1: "Positive", 2: "Neutral"}
     sentimentInfo = self.models.get("Text Classification LSTM")
     vocab = sentimentInfo["vocabulary"]
     # Clean up text
@@ -25,7 +24,7 @@ def predict_text_sentiment(self, text):
     text = sequence.pad_sequences(text, sentimentInfo["maxTextLength"])
     model = sentimentInfo["model"]
     prediction = tf.keras.backend.argmax(model.predict(text))
-    return classes.get(tf.keras.backend.get_value(prediction)[0])
+    return sentimentInfo["classes"][tf.keras.backend.get_value(prediction)[0]]
 
 
 # sentiment analysis query
@@ -41,6 +40,7 @@ def text_classification_query(self, instruction,
 
     X, Y = get_target_values(data, instruction, "label")
     Y = np.array(Y)
+    classes = np.unique(Y)
 
     if preprocess:
         logger("Preprocessing data...")
@@ -50,7 +50,7 @@ def text_classification_query(self, instruction,
 
     X = np.array(X)
 
-    model = get_keras_text_class(maxTextLength, 2)
+    model = get_keras_text_class(maxTextLength, len(classes))
 
     X_train, X_test, y_train, y_test = train_test_split(
         X, Y, test_size=test_size, random_state=random_state)
@@ -78,7 +78,7 @@ def text_classification_query(self, instruction,
     logger("Storing information in client object...")
     # storing values the model dictionary
     self.models["Text Classification LSTM"] = {"model": model,
-                                               'num_classes': 2,
+                                               "classes": classes,
                                                "plots": plots,
                                                "target": Y,
                                                "vocabulary": vocab,
@@ -140,7 +140,7 @@ def summarization_query(self, instruction,
 
     tokenizer = T5Tokenizer.from_pretrained("t5-small")
 
-    train_size = 1- test_size
+    train_size = 1 - test_size
     train_dataset = df.sample(
         frac=train_size,
         random_state=SEED).reset_index(
