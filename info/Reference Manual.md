@@ -84,7 +84,6 @@ Table of Contents
   * [class client](#class-client)
     * [init](#__init__-client)
     * [get_models](#get_models)
-    * [save](#save)
     * [predict](#predict)
     * [neural_network_query](#neural_network_query)
     * [regression_query_ann](#regression_query_ann)
@@ -1168,24 +1167,6 @@ Outputs an list of encoded numerical representation of the instruction text reci
 
 ``` python
 client.get_models(self, model_requested)
-```
-
-Generates/stores with base object an encoding mask of form list ```[int/long, int/long, int/long]``` based on frequency of distinct characters used for sequence to sequence pre-training for natural language generation
-
-
-Parameters -- instruction_label: `str`
-
-Acquires a string based of the instruction sent to encode in the form of a mask
-
-
-Returns -- mask: `[int/long, int/long, int/long]` 
-
-Outputs an list of encoded numerical representation of the instruction text recieved
-
-#### save ####
-
-``` python
-client.save(self, model, save_model, save_path = os.getcwd())
 ```
 
 Generates/stores with base object an encoding mask of form list ```[int/long, int/long, int/long]``` based on frequency of distinct characters used for sequence to sequence pre-training for natural language generation
