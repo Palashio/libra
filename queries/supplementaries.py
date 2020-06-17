@@ -7,6 +7,7 @@ from data_preprocesser import structured_preprocesser, initial_preprocesser
 import pandas as pd
 from sklearn.preprocessing import LabelEncoder
 from scipy.spatial.distance import cosine
+import uuid
 
 currLog = ""
 counter = 0
@@ -148,3 +149,6 @@ def save(model, save_model, save_path=os.getcwd()):
         # serialize weights to HDF5
         model.save_weights(save_path + "/weights" + str(number) + ".h5")
         logger("->", "Saved model to disk as model" + str(number))
+
+def generate_id():
+    return str(uuid.uuid4())

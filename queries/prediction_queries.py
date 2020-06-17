@@ -1,7 +1,14 @@
 # Making functions in other directories accesible to this file by
 # inserting into sis path
+
+import sys
+sys.path.insert(1, './preprocessing')
+sys.path.insert(1, './data_generation')
+sys.path.insert(1, './modeling')
+sys.path.insert(1, './plotting')
+
 from classification_models import k_means_clustering, train_svm, nearest_neighbors, decision_tree
-from supplementaries import tune_helper, stats
+from supplementaries import tune_helper, stats, generate_id
 from feedforward_nn import regression_ann, classification_ann, convolutional
 from dimensionality_red_queries import dimensionality_reduc
 from grammartree import get_value_instruction
@@ -10,12 +17,6 @@ import pandas as pd
 from pandas.core.common import SettingWithCopyWarning
 import warnings
 import os
-import sys
-
-sys.path.insert(1, './preprocessing')
-sys.path.insert(1, './data_generation')
-sys.path.insert(1, './modeling')
-sys.path.insert(1, './plotting')
 
 from nlp_queries import predict_text_sentiment, text_classification_query, get_summary, summarization_query
 
@@ -344,8 +345,6 @@ class client:
 # Easier to comment the one you don't want to run instead of typing them
 # out every time
 newClient = client('./data/housing.csv')
-newClient.neural_network_query("Model ocean proximity", epochs=2)
-newClient.tune('classification_ANN')
-
+newClient.neural_network_query("Model the median house value", epochs=2, save_model=False)
 # newClient = client('./data/landslides_after_rainfall.csv').neural_network_query(instruction='Model distance',
 # drop=['id', 'geolocation', 'source_link', 'source_name'])
