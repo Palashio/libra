@@ -8,8 +8,14 @@ from tensorflow.python.client import device_lib
 
 
 class DataReader():
-    def __init__(self, filepath):
+    def __init__(self, filepath, trim, trim_ratio):
         self.filepath = filepath
+        self.trim = trim
+        self.trim_ratio = trim_ratio
+
+    # Sets the trim_ratio to the requested value
+    def set_trim_ratio(self, new_trim_ratio):
+        self.trim_ratio = new_trim_ratio
 
     # Retrieves the dataset's size in MB
     def retrieve_file_size(self):
@@ -44,21 +50,23 @@ class DataReader():
     def is_gpu_available(self):
         return tf.test.gpu_device_name() != ''
     
-    def trim (self, trimming, trim_ratio):
+    # Trims the dataset based off of the technique specified and the ratio of data to be trimmed specified
+    def trim (self):
         if self.retrieve_file_size() >= 0.5:
-            if trimming == 'random':
-                trimmed_df = self.data_generator().sample(frac=trim_ratio)
+            if self.trim == True:
+                trimmed_df = self.data_generator().sample(frac=self.trim_ratio)
                 return trimmed_df
-            elif trimming == 'stratified':
-                return None # ADD STRATIFIED TRIMMING TECHNIQUE
+            elif self.trim == False:
+                return self.data_generator()
         else:
-            return None
+            return "The file size is too small trim!".upper()
 
-    def trim_gpu (self, trim_option, trim_ratio):
+    def trim_gpu (self):
         if self.is_gpu_available() == True:
             return self.data_generator()
         else:
-            if trim_option != 'random' or trim_option != 'stratified':
-                return trim('stratified', 0.10)
+            if self.trim != True and self.trim != False:
+                self.set_trim_ratio(0.20)
+                return trim()
             else:
-                return trim(trim_option, trim_ratio)
+                return trim()
