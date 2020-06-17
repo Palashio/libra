@@ -52,14 +52,11 @@ class DataReader():
     
     # Trims the dataset based off of the technique specified and the ratio of data to be trimmed specified
     def trim (self):
-        if self.retrieve_file_size() >= 0.5:
-            if self.trim == True:
-                trimmed_df = self.data_generator().sample(frac=self.trim_ratio)
-                return trimmed_df
-            elif self.trim == False:
-                return self.data_generator()
-        else:
-            return "The file size is too small trim!".upper()
+        if self.trim == True:
+            trimmed_df = self.data_generator().sample(frac=self.trim_ratio)
+            return trimmed_df
+        elif self.trim == False:
+            return self.data_generator()
 
     def trim_gpu (self):
         if self.is_gpu_available() == True:
