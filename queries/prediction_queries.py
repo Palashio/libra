@@ -17,7 +17,7 @@ sys.path.insert(1, './data_generation')
 sys.path.insert(1, './modeling')
 sys.path.insert(1, './plotting')
 
-#from nlp_queries import predict_text_sentiment, text_classification_query, get_summary, summarization_query
+from nlp_queries import predict_text_sentiment, text_classification_query, get_summary, summarization_query
 
 
 # Importing the T5 modules from huggingface/transformers
