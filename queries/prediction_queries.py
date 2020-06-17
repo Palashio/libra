@@ -1,27 +1,5 @@
 # Making functions in other directories accesible to this file by
-<<<<<<< HEAD
 # inserting into sys path
-import sys
-
-sys.path.insert(1, './preprocessing')
-sys.path.insert(1, './data_generation')
-sys.path.insert(1, './modeling')
-sys.path.insert(1, './plotting')
-sys.path.insert(1, './queries')
-
-from nlp_queries import predict_text_sentiment, text_classification_query, get_summary, summarization_query
-import os
-import warnings
-from pandas.core.common import SettingWithCopyWarning
-import pandas as pd
-from dataset_labelmatcher import get_similar_column, get_similar_model
-from grammartree import get_value_instruction
-from dimensionality_red_queries import dimensionality_reduc
-from feedforward_nn import regression_ann, classification_ann, convolutional
-from supplementaries import tune_helper, stats
-=======
-# inserting into sis path
->>>>>>> ebf776497a94a8d7261c6026452e4d63475c4bc1
 from classification_models import k_means_clustering, train_svm, nearest_neighbors, decision_tree
 from supplementaries import tune_helper, stats
 from feedforward_nn import regression_ann, classification_ann, convolutional
@@ -34,8 +12,6 @@ import warnings
 import os
 import sys
 
-<<<<<<< HEAD
-=======
 sys.path.insert(1, './preprocessing')
 sys.path.insert(1, './data_generation')
 sys.path.insert(1, './modeling')
@@ -44,7 +20,6 @@ sys.path.insert(1, './plotting')
 from nlp_queries import predict_text_sentiment, text_classification_query, get_summary, summarization_query
 
 
->>>>>>> ebf776497a94a8d7261c6026452e4d63475c4bc1
 # Importing the T5 modules from huggingface/transformers
 
 warnings.simplefilter(action='error', category=FutureWarning)
@@ -368,13 +343,9 @@ class client:
 
 # Easier to comment the one you don't want to run instead of typing them
 # out every time
-<<<<<<< HEAD
-# newClient = client('./data/housing.csv').stat_analysis()
-=======
 newClient = client('./data/housing.csv')
 newClient.neural_network_query("Model ocean proximity", epochs=2)
 newClient.tune('classification_ANN')
->>>>>>> ebf776497a94a8d7261c6026452e4d63475c4bc1
 
 newClient = client('./data/landslides_after_rainfall.csv').neural_network_query(instruction='Model distance',
 drop=['id', 'geolocation', 'source_link', 'source_name'])
