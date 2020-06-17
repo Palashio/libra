@@ -12,6 +12,8 @@ Table of Contents
    * [get_similar_model](#get_similar_model)
 * [grammartree.py](#grammartree)
    * [get_value_instruction](#get_value_instruction)
+* [pipeline_sample.py](#pipeline_sample)
+   * [mypreprocessor](#mypreprocessor)
 * [regression_split_functions.py](#regression_split_functions)
    * [initializer](#initializer)
    * [preprocesser](#preprocesser)
@@ -188,6 +190,13 @@ Returns -- mask: `[int/long, int/long, int/long]`
 Outputs an list of encoded numerical representation of the instruction text recieved
 
 ***
+
+## pipeline_sample ##
+
+### mypreprocessor ###
+
+***
+
 
 ## regression_split_functions ##
    
