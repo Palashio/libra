@@ -185,20 +185,15 @@ def image_preprocess(data_path, new_folder=True):
 
     # create new folder containing resized images
     if new_folder:
-        # check if proc_training_set folder exists
-        if os.path.isdir(data_path + "/proc_training_set"):
-            shutil.rmtree(data_path + "/proc_training_set")
-        os.mkdir(data_path + "/proc_training_set")
+        create_folder(data_path, "proc_training_set")
         for class_folder, images in training_dict.items():
             add_resized_images(
                 data_path +
                 "/proc_training_set",
                 class_folder,
                 images)
-        # check if proc_testing_set folder exists
-        if os.path.isdir(data_path + "/proc_testing_set"):
-            shutil.rmtree(data_path + "/proc_testing_set")
-        os.mkdir(data_path + "/proc_testing_set")
+
+        create_folder(data_path, "proc_training_set")
         for class_folder, images in testing_dict.items():
             add_resized_images(
                 data_path +
@@ -234,6 +229,17 @@ def replace_images(data_path, loaded_shaped):
 
     for img_name, img in loaded_shaped.items():
         cv2.imwrite(data_path + "/" + img_name, img)
+
+def create_folder(path, folder_name):
+    folder_name = "/" + folder_name
+    if os.path.isdir(path + folder_name):
+        shutil.rmtree(path + folder_name)
+    os.mkdir(path + folder_name)
+
+def save_image(path, img, img_name, classification):
+    cv2.imwrite(
+        path + "/" + classification + "/" + img_name,
+        img)
 
 
 def process_color_channel(img, height, width):
@@ -353,3 +359,70 @@ def clustering_preprocessor(data):
     new_columns = generate_column_labels(full_pipeline, numeric_columns)
 
     return pd.DataFrame(data, columns=new_columns), full_pipeline
+
+def csv_image_preprocess(csv_file, label, training_ratio=0.8, *data_paths):
+    df = pd.read_csv(csv_file)
+    # get file extension
+    _, file_extension = os.path.splitext(listdir(data_paths[0])[0])
+
+    # select random row to find which column is image path
+    random_row = df.sample()
+    need_file_extension = False
+    image_column = ""
+    while image_column is "":
+        for column, value in random_row.iloc[0].items():
+            if type(value) is str:
+                # add file extension if not included
+                if file_extension not in value:
+                    file = value + file_extension
+                # look through all data_paths for file
+                for data_path in data_paths:
+                    if os.path.exists(data_path + "/" + file):
+                        if file_extension in file:
+                            need_file_extension = True
+                        image_column = column
+                        break
+
+    df = df[[image_column, label]].dropna()
+
+    if need_file_extension:
+        df[image_column] = df[image_column] + file_extension
+    heights = []
+    widths = []
+    classifications = df[label].nunique()
+    image_list = []
+
+    # get the median heights and widths
+    for index, row in df.head().iterrows():
+        for data_path in data_paths:
+            img = cv2.imread(data_path + "/" + row[image_column])
+            if img is not None:
+                break
+        image_list.append(img)
+        heights.append(img.shape[0])
+        widths.append(img.shape[1])
+
+    heights.sort()
+    widths.sort()
+    height = heights[int(len(heights) / 2)]
+    width = widths[int(len(widths) / 2)]
+
+    # create training and testing folders
+    path = os.path.dirname(csv_file)
+    create_folder(path, "proc_training_set")
+    create_folder(path, "proc_testing_set")
+    # create classification folders
+    for classification in df[label].unique():
+        create_folder(path + "/proc_training_set", classification)
+        create_folder(path + "/proc_testing_set", classification)
+
+    # save images into correct folder
+    for index, row in df.head().iterrows():
+        # resize images
+        img = process_color_channel(image_list[index], height, width)
+        if (index / df.shape[0]) < training_ratio:
+            save_image(path + "/proc_training_set", img, "proc_" + row[image_column], row[label])
+        else:
+            save_image(path + "/proc_testing_set", img, "proc_" + row[image_column], row[label])
+
+    return {"num_categories": classifications, "height": height, "width": width}
