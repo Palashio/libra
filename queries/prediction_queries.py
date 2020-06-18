@@ -341,6 +341,38 @@ class client:
     def show_plots(self, model):
         print(self.models[model]['plots'].keys())
 
+    # shows the keys in the models dictionary
+    def model_data(self, model):
+        if model in self.models:
+            data = [key for key in self.models[model].keys()]
+            print(data)
+        else:
+            raise Exception("The requested model has not been applied to the client.")
+
+    # returns all operators applicable to the client's models dictionary
+    def operators(self, model):
+        defined = ['plots', 'accuracy', 'losses']
+        operations = [func + "()" for func in self.models[model].keys() if func in defined]
+        if len(operations) > 0:
+            print(operations)
+        else:
+            raise Exception("There are no built-in operators defined for this model. Please refer to the models dictionary.")
+    
+    # show accuracy scores for client's model
+    def accuracy(self, model):
+        if 'accuracy' in self.models[model].keys():
+            return self.models[model]['accuracy']
+        elif 'cross_val_score' in self.models[model].keys():
+            return {'cross_val_score' : self.models[model]['cross_val_score']}
+        else:
+            raise Exception("Accuracy is not defined for {}".format(model))
+
+    # show losses for client's model
+    def losses(self, model): 
+        if 'losses' in self.models[model].keys():
+            return self.models[model]['losses']
+        else:
+            raise Exception("Losses are not defined for {}".format(model))
 
 # Easier to comment the one you don't want to run instead of typing them
 # out every time
