@@ -4,18 +4,13 @@ import tensorflow as tf
 from tensorflow.python.client import device_lib
 
 # Creates a constructor for the DataReader class to create Pandas DataFrame
-# objects based off of the dataset's file extension
-
-
+# objects based off of the dataset's file extension, user's preference on 
+# random trimming of the dataset, and the proportion of data to be trimmed specified by the user
 class DataReader():
-    def __init__(self, filepath, trim, trim_ratio):
+    def __init__(self, filepath, trim=True, trim_ratio=0.20):
         self.filepath = filepath
         self.trim = trim
         self.trim_ratio = trim_ratio
-
-    # Sets the trim_ratio to the requested value
-    def set_trim_ratio(self, new_trim_ratio):
-        self.trim_ratio = new_trim_ratio
 
     # Retrieves the dataset's size in MB
     def retrieve_file_size(self):
@@ -50,20 +45,19 @@ class DataReader():
     def is_gpu_available(self):
         return tf.test.gpu_device_name() != ''
     
-    # Trims the dataset based off of the technique specified and the ratio of data to be trimmed specified
-    def trim (self):
+    # Trims the dataset based off of user preference and the ratio of data to be trimmed specified
+    def random_trim (self):
         if self.trim == True:
-            trimmed_df = self.data_generator().sample(frac=self.trim_ratio)
+            trimmed_df = self.data_generator().sample(frac=(1.0 - self.trim_ratio))
             return trimmed_df
         elif self.trim == False:
             return self.data_generator()
 
+    # If the device running the program has a GPU, no trimming will occur unles the user specifies so, and vice-versa
     def trim_gpu (self):
-        if self.is_gpu_available() == True:
+        if self.is_gpu_available() == True and self.trim == True:
+            return self.random_trim()
+        elif self.is_gpu_available() == True and self.trim == False:
             return self.data_generator()
         else:
-            if self.trim != True and self.trim != False:
-                self.set_trim_ratio(0.20)
-                return trim()
-            else:
-                return trim()
+            return self.random_trim()
