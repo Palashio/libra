@@ -359,7 +359,7 @@ def classification_ann(instruction,
 
 
 def convolutional(self,
-                read_mode,
+                read_mode="sets",
                 data_paths=None,
                 new_folders=True,
                 csv_file=None,
@@ -373,7 +373,7 @@ def convolutional(self,
     logger("Generating datasets for classes...")
 
     # if image dataset in form of a data folder
-    if read_mode=="set":
+    if read_mode=="sets":
         if data_paths is None:
             data_path = os.getcwd()
         else:
