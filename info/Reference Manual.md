@@ -1172,14 +1172,18 @@ client.get_models(self, model_requested)
 Generates/stores with base object an encoding mask of form list ```[int/long, int/long, int/long]``` based on frequency of distinct characters used for sequence to sequence pre-training for natural language generation
 
 
-Parameters -- instruction_label: `str`
+Parameters -- 
 
-Acquires a string based of the instruction sent to encode in the form of a mask
+model_requested: `str`
+
+String key representation of model which 
 
 
-Returns -- mask: `[int/long, int/long, int/long]` 
+Returns -- 
 
-Outputs an list of encoded numerical representation of the instruction text recieved
+get_similar_model(model_requested, self.models.keys()): `[int/long, int/long, int/long]` 
+
+Retrieves
 
 #### predict ####
 
@@ -1187,17 +1191,24 @@ Outputs an list of encoded numerical representation of the instruction text reci
 client.predict(self, modelKey, data)
 ```
 
-Generates/stores with base object an encoding mask of form list ```[int/long, int/long, int/long]``` based on frequency of distinct characters used for sequence to sequence pre-training for natural language generation
+Generates/stores list of prediction results from model requested from written query sent to/in the client class instance
+
+Parameters -- 
+
+modelKey: `str`
+
+String "key" representation of model that needs to be utilized to make prediction
+
+data
+
+Data of the desired prediction set that is intialzed in the client class instance (is set by default to be in dataframe format)
 
 
-Parameters -- instruction_label: `str`
+Returns -- 
 
-Acquires a string based of the instruction sent to encode in the form of a mask
+predictions: `[str, str,..., str] or [float, float,..., float]` 
 
-
-Returns -- mask: `[int/long, int/long, int/long]` 
-
-Outputs an list of encoded numerical representation of the instruction text recieved
+Retrieves a list of the string or predictions for model associated with key string value depending on activation of interpreter itself dependent on nature of data initialized in client class instance
 
 #### neural_network_query ####
 
@@ -1726,7 +1737,7 @@ Encodes text found in dataset into tokenized sequences for usage by text-related
 
 dataset
 
-Data to be analyzed that is initialized in the client class instance
+Data to be analyzed that is initialized in the client class instance (is set by default to dataframe format)
 
 text: `str`
 
@@ -1752,7 +1763,7 @@ Wrapper function used for repeated caching of standard backend processing/predic
 
 dataset
 
-Data to be analyzed that is initialized in the client class instance
+Data to be analyzed that is initialized in the client class instance (is set by default to dataframe format)
 
 text: `str`
 
