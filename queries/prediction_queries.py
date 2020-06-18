@@ -304,6 +304,7 @@ class client:
         return
 
     def convolutional_query(self,
+                            read_mode,
                             data_paths=None,
                             new_folders=True,
                             csv_file=None,
@@ -313,6 +314,7 @@ class client:
 
         # storing values the model dictionary
         self.models["convolutional_NN"] = convolutional(self,
+            read_mode,
             data_paths=data_paths,
             new_folders=new_folders,
             csv_file=csv_file,

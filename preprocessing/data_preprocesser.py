@@ -179,8 +179,9 @@ def image_preprocess(data_path, new_folder=True):
     return {"num_categories": classification, "height": height, "width": width}
 
 
+# creates a folder with the given folder name and fills the folders
+# with the images given
 def add_resized_images(data_path, folder_name, images):
-
     # create processed folder
     os.mkdir(data_path + "/proc_" + folder_name)
     # add images to processed folder
@@ -194,21 +195,28 @@ def add_resized_images(data_path, folder_name, images):
             img)
 
 
+# writes an image into the given path
 def replace_images(data_path, loaded_shaped):
     for img_name, img in loaded_shaped.items():
         cv2.imwrite(data_path + "/" + img_name, img)
 
+
+# creates a folder in the given path with the given folder name
 def create_folder(path, folder_name):
     folder_name = "/" + folder_name
     if os.path.isdir(path + folder_name):
         shutil.rmtree(path + folder_name)
     os.mkdir(path + folder_name)
 
+
+# saves an image to the given path inside the classification folder
+# specified with the img_name
 def save_image(path, img, img_name, classification):
     cv2.imwrite(
         path + "/" + classification + "/" + img_name,
         img)
 
+# calculates the medians of the given lists of height and widths
 def calculate_medians(heights, widths):
     heights.sort()
     widths.sort()
@@ -216,6 +224,8 @@ def calculate_medians(heights, widths):
     width = widths[int(len(widths) / 2)]
     return height, width
 
+
+# resizes the image with the given height and width
 def process_color_channel(img, height, width):
     chanels = [chanel for chanel in cv2.split(img)]
 
@@ -334,6 +344,9 @@ def clustering_preprocessor(data):
 
     return pd.DataFrame(data, columns=new_columns), full_pipeline
 
+
+# processes a csv_file with containing image paths and creates a testing/training folders
+# with resized images inside the same directory as the csv file
 def csv_image_preprocess(csv_file, data_paths, label, image_column, training_ratio):
     df = pd.read_csv(csv_file)
     # get file extension
@@ -405,7 +418,7 @@ def csv_image_preprocess(csv_file, data_paths, label, image_column, training_rat
         # resize images
         img = process_color_channel(image_list[index], height, width)
         p = "proc_" + (os.path.basename(row[image_column]) if path_included else row[image_column])
-        if (index / df.head(100).shape[0]) < training_ratio:
+        if (index / df.head.shape[0]) < training_ratio:
             save_image(path + "/proc_training_set", img, p, row[label])
         else:
             save_image(path + "/proc_testing_set", img, p, row[label])

@@ -359,6 +359,7 @@ def classification_ann(instruction,
 
 
 def convolutional(self,
+                read_mode,
                 data_paths=None,
                 new_folders=True,
                 csv_file=None,
@@ -370,14 +371,9 @@ def convolutional(self,
     # generates the dataset based on instructions using a selenium query on
     # google chrome
     logger("Generating datasets for classes...")
-    # if image dataset in form of csv
-    if csv_file is not None:
-        processInfo = csv_image_preprocess(csv_file, data_paths, label_column, image_column, training_ratio)
-        training_path = "/proc_training_set"
-        testing_path = "/proc_testing_set"
-        data_path = os.path.dirname(csv_file)
+
     # if image dataset in form of a data folder
-    else:
+    if read_mode=="set":
         if data_paths is None:
             data_path = os.getcwd()
         else:
@@ -390,6 +386,13 @@ def convolutional(self,
         else:
             training_path = "/training_set"
             testing_path = "/testing_set"
+
+    # if image dataset in form of csv
+    elif read_mode=="csv":
+        processInfo = csv_image_preprocess(csv_file, data_paths, label_column, image_column, training_ratio)
+        training_path = "/proc_training_set"
+        testing_path = "/proc_testing_set"
+        data_path = os.path.dirname(csv_file)
 
     input_shape = (processInfo["height"], processInfo["width"], 3)
     input_single = (processInfo["height"], processInfo["width"])
