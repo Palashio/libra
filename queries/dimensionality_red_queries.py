@@ -115,7 +115,7 @@ def dimensionality_reduc(
         currSet = data
         for element in path:
             if element == "RF":
-                data_mod, beg_acc, final_acc, col_removed = dimensionality_RF(
+                data_mod, beg_acc, final_acc, y_pred = dimensionality_RF(
                     instruction, currSet, target, y)
             elif element == "PCA":
                 data_mod, beg_acc, final_acc, y_pred = dimensionality_PCA(
@@ -186,7 +186,7 @@ def dimensionality_RF(instruction, dataset, target="", y="", n_features=10):
     datas = []
     datas.append(dataset)
     columns.append([])
-
+    y_pred=[]
     for i, x in product(range(3, 10), range(4, len(dataset.columns))):
         feature_model = RandomForestRegressor(random_state=1, max_depth=i)
         feature_model.fit(X_train, y_train)
@@ -202,15 +202,15 @@ def dimensionality_RF(instruction, dataset, target="", y="", n_features=10):
         val[target] = np.r_[y_train, y_test]
         datas.append(val)
 
-            vr = tree.DecisionTreeClassifier()
-            vr.fit(X_temp_train, y_train)
-            y_pred=vr.predict()
-            accuracy_scores.append(accuracy_score(vr.predict(X_temp_test), y_test))
+        vr = tree.DecisionTreeClassifier()
+        vr.fit(X_temp_train, y_train)
+        y_pred.append(vr.predict(X_temp_test))
+        accuracy_scores.append(accuracy_score(vr.predict(X_temp_test), y_test))
 
     the_index = accuracy_scores.index(max(accuracy_scores))
 
     return datas[the_index], accuracy_scores[0], max(
-        accuracy_scores), list(columns[the_index])
+        accuracy_scores), y_pred[the_index]
 
 
 def dimensionality_PCA(instruction, dataset, target="", y=""):
@@ -252,7 +252,7 @@ def dimensionality_PCA(instruction, dataset, target="", y=""):
     # data_modified.to_csv("./data/housingPCA.csv")
 
     return data_modified, accuracy_score(
-            clf.predict(X_test), y_test), acc, y_pred)
+            clf.predict(X_test), y_test), acc, y_pred
 
 
 def dimensionality_ICA(instruction, dataset, target="", y=""):
@@ -292,7 +292,7 @@ def dimensionality_ICA(instruction, dataset, target="", y=""):
     # data_modified.to_csv("./data/housingPCA.csv")
     
     return data_modified, accuracy_score(
-            clf.predict(X_test), y_test), acc, y_pred)
+            clf.predict(X_test), y_test), acc, y_pred
 
 
 def get_last_file():
@@ -347,21 +347,7 @@ def dimensionality_KPCA(instruction, dataset, target="", y=""):
     # data_modified.to_csv("./data/housingPCA.csv")
 
     return data_modified, accuracy_score(
-            clf.predict(X_test), y_test), acc, y_pred)
-    
-def booster(dataset,y,obj):
-    #obj=["reg:linear","multi:softmax "]
-    if target == "":
-        y=data_y(instruction)
-
-    X_train, X_test, y_train, y_test = train_test_split(
-    dataset, y, test_size=0.2, random_state=49)
-    clf = XGBClassifier(objective=obj,learning_rate =0.1,silent=1,alpha = 10)
-    clf.fit(X_train, y_train)
-    return accuracy_score(clf.predict(X_test_mod), y_test_mod), (clf.predict(X_test_mod))
-    #importance graph
-    #plt.rcParams['figure.figsize'] = [5, 5]
-    #plt.show()
+            clf.predict(X_test), y_test), acc, y_pred
 
 
 #dimensionalityPCA("Predict median house value", "./data/housing.csv")
