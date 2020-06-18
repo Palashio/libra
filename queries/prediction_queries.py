@@ -1,5 +1,5 @@
 # Making functions in other directories accesible to this file by
-# inserting into sis path
+# inserting into sys path
 
 import sys
 sys.path.insert(1, './preprocessing')
