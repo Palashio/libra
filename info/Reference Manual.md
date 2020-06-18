@@ -1118,14 +1118,26 @@ libra.clearLog()
 Generates/stores with base object an encoding mask of form list ```[int/long, int/long, int/long]``` based on frequency of distinct characters used for sequence to sequence pre-training for natural language generation
 
 
-Parameters -- instruction_label: `str`
+*Parameters --*
 
-Acquires a string based of the instruction sent to encode in the form of a mask
+None
 
 
-Returns -- mask: `[int/long, int/long, int/long]` 
+*Returns --* 
+
+mask: `[int/long, int/long, int/long]` 
 
 Outputs an list of encoded numerical representation of the instruction text recieved
+
+***
+
+### logger ###
+
+``` python
+
+```
+
+***
 
 ### class-client ###
 
@@ -1133,7 +1145,7 @@ Outputs an list of encoded numerical representation of the instruction text reci
 class client()
 ```
 
-A class whose written query methods enable users to apply machine learning techniques for analysis directly to data problems. The list of its methods are provided below.
+A class whose instance enables a "client session" where written query methods allow users to apply machine learning techniques for analysis directly to data problems. The list of its methods are provided below.
 
 #### __init__-client ####
 
