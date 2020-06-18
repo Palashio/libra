@@ -18,6 +18,7 @@ from sklearn.neighbors import KNeighborsClassifier
 from sklearn.model_selection import train_test_split
 from sklearn.model_selection import cross_val_score
 import numpy as np
+from supplementaries import generate_id
 from generate_plots import (generate_clustering_plots,
                            generate_regression_plots,
                            generate_classification_plots)
@@ -132,6 +133,7 @@ def k_means_clustering(dataset= None,
 
         # stores plots and information in the dictionary client model
         return {
+            'id': generate_id(),
             "model": modelStorage[len(modelStorage) - 1],
             "preprocesser": full_pipeline,
             "plots": plots}
@@ -184,6 +186,7 @@ def train_svm(instruction,
         clf.fit(X_train, y_train)
         logger("Storing information in client object...")
         return {
+            'id': generate_id(),
             "model": clf,
             "accuracy_score": accuracy_score(
                 clf.predict(X_test),
@@ -240,6 +243,7 @@ def nearest_neighbors(instruction=None,
         logger("Storing information in client object...")
         knn = models[scores.index(min(scores))]
         return {
+            'id': generate_id(),
             "model": knn, "accuracy_score": scores.index(
                 min(scores)),
             "preprocesser": full_pipeline,
@@ -294,6 +298,7 @@ def decision_tree(instruction,
     clearLog()
 
     return {
+            'id': generate_id(),
             "model": clf,
             "target": remove,
             "accuracy_score": accuracy_score(

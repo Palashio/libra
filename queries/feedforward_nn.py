@@ -11,7 +11,7 @@ from data_reader import DataReader
 from keras.models import Sequential
 from keras.layers import (Dense, Conv2D, Flatten, Input, MaxPooling2D, )
 import pandas as pd 
-from supplementaries import save
+from supplementaries import save, generate_id
 from keras.preprocessing.image import ImageDataGenerator
 from tensorflow.keras.callbacks import EarlyStopping
 from sklearn.preprocessing import OneHotEncoder, StandardScaler
@@ -207,6 +207,7 @@ def regression_ann(
             save(final_model, save_model)
         # stores values in the client object models dictionary field
         return {
+            'id': generate_id(),
             'model': final_model,
             "target": target,
             "plots": plots,
@@ -342,6 +343,7 @@ def classification_ann(instruction,
 
         # stores the values and plots into the object dictionary
         return {
+            'id': generate_id(),
             "model": final_model,
             'num_classes': num_classes,
             "plots": plots,
@@ -431,6 +433,7 @@ def convolutional(data_path=None, new_folders=True):
 
     # storing values the model dictionary
     return {
+        'id': generate_id(),
         "model": model,
         'num_classes': (2 if num_classes == 1 else num_classes),
         'losses': {
