@@ -115,16 +115,16 @@ def dimensionality_reduc(
         currSet = data
         for element in path:
             if element == "RF":
-                data_mod, beg_acc, final_acc, y_pred = dimensionality_RF(
+                data_mod, beg_acc, final_acc, del_cols, y_pred = dimensionality_RF(
                     instruction, currSet, target, y)
             elif element == "PCA":
-                data_mod, beg_acc, final_acc, y_pred = dimensionality_PCA(
+                data_mod, beg_acc, final_acc, del_cols, y_pred = dimensionality_PCA(
                     instruction, currSet, target, y)
             elif element == "KPCA":
-                data_mod, beg_acc, final_acc, y_pred = dimensionality_KPCA(
+                data_mod, beg_acc, final_acc, del_cols, y_pred = dimensionality_KPCA(
                     instruction, currSet, target, y)
             elif element == "ICA":
-                data_mod, beg_acc, final_acc, y_pred = dimensionality_ICA(
+                data_mod, beg_acc, final_acc, del_cols, y_pred = dimensionality_ICA(
                     instruction, currSet, target, y)
             overall_storage.append(
                     list([data_mod, beg_acc, final_acc, y_pred]))
@@ -210,7 +210,7 @@ def dimensionality_RF(instruction, dataset, target="", y="", n_features=10):
     the_index = accuracy_scores.index(max(accuracy_scores))
 
     return datas[the_index], accuracy_scores[0], max(
-        accuracy_scores), y_pred[the_index]
+        accuracy_scores), list(columns[the_index]), y_pred[the_index]
 
 
 def dimensionality_PCA(instruction, dataset, target="", y=""):
@@ -252,7 +252,8 @@ def dimensionality_PCA(instruction, dataset, target="", y=""):
     # data_modified.to_csv("./data/housingPCA.csv")
 
     return data_modified, accuracy_score(
-            clf.predict(X_test), y_test), acc, y_pred
+            clf.predict(X_test), y_test), acc, (len(
+            dataset.columns) - len(data_modified.columns)), y_pred
 
 
 def dimensionality_ICA(instruction, dataset, target="", y=""):
@@ -292,7 +293,8 @@ def dimensionality_ICA(instruction, dataset, target="", y=""):
     # data_modified.to_csv("./data/housingPCA.csv")
     
     return data_modified, accuracy_score(
-            clf.predict(X_test), y_test), acc, y_pred
+            clf.predict(X_test), y_test), acc, (len(
+            dataset.columns) - len(data_modified.columns)), y_pred
 
 
 def get_last_file():
@@ -347,7 +349,8 @@ def dimensionality_KPCA(instruction, dataset, target="", y=""):
     # data_modified.to_csv("./data/housingPCA.csv")
 
     return data_modified, accuracy_score(
-            clf.predict(X_test), y_test), acc, y_pred
+            clf.predict(X_test), y_test), acc, (len(
+            dataset.columns) - len(data_modified.columns)), y_pred
 
 
 #dimensionalityPCA("Predict median house value", "./data/housing.csv")
