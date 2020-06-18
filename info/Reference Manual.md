@@ -1151,17 +1151,22 @@ Outputs an list of encoded numerical representation of the instruction text reci
 client.__init__(self, data)
 ```
 
-Generates/stores with base object an encoding mask of form list ```[int/long, int/long, int/long]``` based on frequency of distinct characters used for sequence to sequence pre-training for natural language generation
+Initializes the client class instance 
 
 
-Parameters -- instruction_label: `str`
+*Parameters --*
 
-Acquires a string based of the instruction sent to encode in the form of a mask
+data: `str`
+
+String representation of the name of the dataset being sought to be analyzed by methods of the client class
 
 
-Returns -- mask: `[int/long, int/long, int/long]` 
+*Returns --*
 
-Outputs an list of encoded numerical representation of the instruction text recieved
+None
+
+Executes the creation of the client class instance in the form of creating the client class object, loading/formatting the assigned data, restoring old models, storing new models, and clearing the log upon exit of class instance
+
 
 #### get_models ####
 
@@ -1169,21 +1174,21 @@ Outputs an list of encoded numerical representation of the instruction text reci
 client.get_models(self, model_requested)
 ```
 
-Generates/stores with base object an encoding mask of form list ```[int/long, int/long, int/long]``` based on frequency of distinct characters used for sequence to sequence pre-training for natural language generation
+Acquires previously defined model based off request from written query sent to/in client class instance
 
 
-Parameters -- 
+*Parameters --*
 
 model_requested: `str`
 
-String key representation of model which 
+String "key" representation of model which was intuited from the instruction found in the written query 
 
 
-Returns -- 
+*Returns --* 
 
-get_similar_model(model_requested, self.models.keys()): `[int/long, int/long, int/long]` 
+get_similar_model(model_requested, self.models.keys())
 
-Retrieves
+Retrieves the model by retrieving the model string key matching one of the supported options in the list of model keys made accessible to the client class instance
 
 #### predict ####
 
@@ -1191,20 +1196,20 @@ Retrieves
 client.predict(self, modelKey, data)
 ```
 
-Generates/stores list of prediction results from model requested from written query sent to/in the client class instance
+Generates/stores list of prediction results from model identified as requested from written query sent to/in the client class instance
 
-Parameters -- 
+*Parameters --*
 
 modelKey: `str`
 
-String "key" representation of model that needs to be utilized to make prediction
+String "key" representation of model that needs to be utilized to make prediction intuited from written query 
 
 data
 
 Data of the desired prediction set that is intialzed in the client class instance (is set by default to be in dataframe format)
 
 
-Returns -- 
+*Returns --*
 
 predictions: `[str, str,..., str] or [float, float,..., float]` 
 
