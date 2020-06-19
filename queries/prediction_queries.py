@@ -302,7 +302,7 @@ class client:
         return
 
     def convolutional_query(self,
-                            read_mode="sets",
+                            read_mode="setwise",
                             data_paths=None,
                             new_folders=True,
                             csv_file=None,
