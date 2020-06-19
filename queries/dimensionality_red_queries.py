@@ -16,7 +16,7 @@ from keras.utils import np_utils
 from keras.utils import to_categorical
 from prediction_model_creation import get_keras_model_class
 from prediction_model_creation import get_keras_model_reg
-from data_preprocesser import structured_preprocesser
+from data_preprocesser import structured_preprocesser, initial_preprocesser
 from grammartree import get_value_instruction
 from matplotlib import pyplot
 from keras.callbacks import EarlyStopping
@@ -213,46 +213,40 @@ def dimensionality_RF(instruction, dataset, target="", y="", n_features=10):
         accuracy_scores), list(columns[the_index])
 
 
-def dimensionality_PCA(instruction, dataset, target="", y=""):
+def dimensionality_PCA(instruction, dataset):
     global currLog
     global counter
 
-    dataReader = DataReader("./data/" + get_last_file()[0])
-
-    if target == "":
-        data = dataReader.data_generator()
-        data.fillna(0, inplace=True)
-        remove = get_similar_column(get_value_instruction(instruction), data)
-
-        y = data[remove]
-        del data[remove]
-        le = preprocessing.LabelEncoder()
-        y = le.fit_transform(y)
-
-    #  PCA will hold 92% of the variance
     pca = PCA(0.92)
-    #pca = PCA(n_components=len(dataset.columns))
-    data_modified = pca.fit_transform(dataset)
 
-    X_train, X_test, y_train, y_test = train_test_split(
-        dataset, y, test_size=0.2, random_state=49)
-    X_train_mod, X_test_mod, y_train_mod, y_test_mod = train_test_split(
-        data_modified, y, test_size=0.2, random_state=49)
+    data, y, target, full_pipeline = initial_preprocesser(dataset, instruction, preprocess=True)
+
+    X_train = data['train']
+    X_test = data['test']
+
+    y_train = y['train']
+    y_test = y['test']
+
+    X_train_mod = pca.fit_transform(X_train)
+    X_test_mod = pca.transform(X_test)
 
     clf = tree.DecisionTreeClassifier()
-    clf.fit(X_train, y_train)
-
     clf_mod = tree.DecisionTreeClassifier()
-    clf_mod.fit(X_train_mod, y_train_mod)
+
+    clf.fit(X_train, y_train)
+    clf_mod.fit(X_train_mod, y_train)
+
     acc = []
     acc.append(accuracy_score(
-        clf_mod.predict(X_test_mod), y_test_mod))
+        clf_mod.predict(X_test_mod), y_test))
     for i, j in product(range(3, 10), ["entropy", "gini"]):
         model = tree.DecisionTreeClassifier(criterion=j, max_depth=i)
-        model = model.fit(X_train_mod, y_train_mod)
+        model = model.fit(X_train_mod, y_train)
         acc.append(accuracy_score(model.predict(X_test_mod), y_test))
     del i, j
-    data_modified = pd.DataFrame(data_modified)
+
+    data_modified = pd.concat([pd.DataFrame(X_train_mod), pd.DataFrame(X_test_mod)], axis=0)
+
     y_combined = np.r_[y_train, y_test]
     data_modified[target] = y_combined
     # data_modified.to_csv("./data/housingPCA.csv")
@@ -389,15 +383,6 @@ def dimensionality_KPCA(instruction, dataset, target="", y=""):
 
 #dimensionalityReduc("Predict ocean_proximity", "./data/housing.csv")
 
-# data = pd.read_csv("./data/housing.csv")
-# data.fillna(0, inplace=True)
-# target = get_similar_column(get_value_instruction("Predict ocean proximity"), data)
+data = pd.read_csv("./data/housing.csv")
 
-# y = data[target]
-# del data[target]
-# le = preprocessing.LabelEncoder()
-# y = le.fit_transform(y)
-
-# data = structured_preprocesser(data)
-
-#dimensionalityICA("Predict ocean proximity", data, "ocean_proximity", y)
+print(dimensionality_PCA("Model ocean proximity", data))

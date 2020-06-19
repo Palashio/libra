@@ -26,7 +26,7 @@ def initial_preprocesser(data, instruction, preprocess):
     # isn't detected
     object_columns = [
         col for col,
-        col_type in data.dtypes.iteritems() if col_type == 'object']
+                col_type in data.dtypes.iteritems() if col_type == 'object']
 
     # Handles dates without timestamps
     for col in object_columns:
@@ -66,7 +66,6 @@ def initial_preprocesser(data, instruction, preprocess):
 
 # Preprocesses the data appropriately for single reg data
 def structured_preprocesser(data):
-
     # Preprocessing for datetime columns
     process_dates(data)
 
@@ -97,7 +96,6 @@ def structured_preprocesser(data):
             ('mca', MCA(n_components=5))
         ])
 
-
     full_pipeline = ColumnTransformer([], remainder="passthrough")
 
     # combine the two pipelines
@@ -105,7 +103,7 @@ def structured_preprocesser(data):
         full_pipeline.transformers.append(("num", num_pipeline, numeric_columns))
 
     if len(categorical_columns) != 0:
-        full_pipeline.transformers.append(("cat", cat_pipeline, categorical_columns)) 
+        full_pipeline.transformers.append(("cat", cat_pipeline, categorical_columns))
 
     train = full_pipeline.fit_transform(data['train'])
 
@@ -128,7 +126,7 @@ def structured_preprocesser(data):
             test,
             np.ndarray) else test),
         columns=test_cols)
-    print(data['train'])
+
     return data, full_pipeline
 
 
@@ -160,7 +158,7 @@ def image_preprocess(data_path, new_folder=True):
                 except BaseException:
                     continue
 
-    classification = int(classification/2)
+    classification = int(classification / 2)
     height, width = calculate_medians(heights, widths)
 
     # resize images
@@ -220,6 +218,7 @@ def save_image(path, img, img_name, classification):
     cv2.imwrite(
         path + "/" + classification + "/" + img_name,
         img)
+
 
 # calculates the medians of the given lists of height and widths
 def calculate_medians(heights, widths):
@@ -283,12 +282,10 @@ def process_color_channel(img, height, width):
 
 
 def process_dates(data):
-
     for df in data.values():
         datetime_cols = df.select_dtypes('datetime64')
 
         for col in datetime_cols:
-
             df[f'{col}_DayOfWeek'] = df[col].dt.day_name()
             df[f'{col}_Year'] = df[col].dt.year
             df[f'{col}_Month'] = df[col].dt.month_name()
@@ -299,23 +296,28 @@ def process_dates(data):
 
 # Sees if one hot encoding occurred, if not just uses numeric cols
 def generate_column_labels(pipeline, numeric_cols):
-    # If mca was used
-    if isinstance(pipeline.named_transformers_['cat'][-1], MCA):
-        encoded_cols = [f'MCA_{x}' for x in range(5)]
-        cols = [*list(numeric_cols), *encoded_cols]
 
-    else:
-        try:
-            encoded_cols = pipeline.named_transformers_[
-                'cat']['one_hot_encoder'].get_feature_names()
+    # Check if one hot encoding was performed
+    if 'cat' in pipeline.named_transformers_:
+        # If mca was used
+        if isinstance(pipeline.named_transformers_['cat'][-1], MCA):
+            encoded_cols = [f'MCA_{x}' for x in range(5)]
             cols = [*list(numeric_cols), *encoded_cols]
 
-        except Exception as error:
-            # For debugging only
-            print(error)
-            cols = list(numeric_cols)
+        else:
+            try:
+                encoded_cols = pipeline.named_transformers_[
+                    'cat']['one_hot_encoder'].get_feature_names()
+                cols = [*list(numeric_cols), *encoded_cols]
 
-    return cols
+            except Exception as error:
+                # For debugging only
+                print(error)
+                cols = list(numeric_cols)
+
+        return cols
+    else:
+        return numeric_cols
 
 
 def clustering_preprocessor(data):
