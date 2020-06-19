@@ -28,7 +28,6 @@ import numpy as np
 
 currLog = ""
 counter = 0
-number = 0
 # current_dir=os.getcw()
 
 # allows for all columns to be displayed when printing()
@@ -63,12 +62,10 @@ def logger(instruction, found="", slash=''):
         else:
             currLog += (" " * 2 * counter) + str(instruction) + str(found)
     else:
-        currLog += (" " * 2 * counter) + "|"
-        currLog += "\n"
+        currLog += (" " * 2 * counter) + "|" + "\n"
         currLog += (" " * 2 * counter) + "|- " + str(instruction) + str(found)
         if instruction == "done...":
-            currLog += "\n"
-            currLog += "\n"
+            currLog += "\n" + "\n"
 
     counter += 1
     if instruction == "->":

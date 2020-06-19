@@ -149,8 +149,7 @@ def dimensionality_reduc(
     print("")
     print("Best Accuracies")
     print("----------------------------")
-    for element in accs:
-        print(element)
+    print(*accs, sep = "\n")
 
     if inplace:
         data.to_csv(dataset)
@@ -170,8 +169,7 @@ def dimensionality_RF(instruction, dataset, target="", y="", n_features=10):
     global currLog
     global counter
 
-    if target == "":
-        y=data_y(instruction)
+    y=data_y(instruction) if target == "" else y
 
     X_train, X_test, y_train, y_test = train_test_split(
         dataset, y, test_size=0.2, random_state=49)
@@ -217,8 +215,7 @@ def dimensionality_PCA(instruction, dataset, target="", y=""):
     global currLog
     global counter
 
-    if target == "":
-        y=data_y(instruction)
+    y=data_y(instruction) if target == "" else y
     
     #  PCA will hold 92% of the variance
     pca = PCA(0.92)

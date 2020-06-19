@@ -17,8 +17,8 @@ def get_target_values(data, instruction, yLabel):
     target = get_similar_column(get_value_instruction(instruction), data)
     X = data[target]
     del data[target]
-    labels = get_similar_column(get_value_instruction(yLabel), data)
-    Y = data[labels]
+    #labels
+    Y = data[get_similar_column(get_value_instruction(yLabel), data)]
     return X, Y
 
 

@@ -23,7 +23,6 @@ from generate_plots import (generate_clustering_plots,
 
 currLog = ""
 counter = 0
-number = 0
 
 def clearLog():
     global currLog

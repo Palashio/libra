@@ -1,5 +1,3 @@
-import os
-
 import tensorflow as tf
 import keras
 from keras import Model
@@ -85,9 +83,9 @@ def get_keras_model_class(dataset, i, num_classes):
 # Sentiment analysis model
 def get_keras_text_class(max_features, num_classes):
     model = tf.keras.models.Sequential()
-    model.add(tf.keras.layers.Embedding(max_features, 128))
-    model.add(tf.keras.layers.LSTM(128, dropout=0.2, recurrent_dropout=0.2))
-    model.add(tf.keras.layers.Dense(num_classes, activation='softmax'))
+    model.add(Embedding(max_features, 128))
+    model.add(LSTM(128, dropout=0.2, recurrent_dropout=0.2))
+    model.add(Dense(num_classes, activation='softmax'))
 
     model.compile(loss='binary_crossentropy',
                   optimizer='adam',
