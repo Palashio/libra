@@ -1128,14 +1128,49 @@ None
 mask: `[int/long, int/long, int/long]` 
 
 Outputs an list of encoded numerical representation of the instruction text recieved
+*Parameters --*
 
+data: `str`
+
+String representation of the name of the dataset being sought to be analyzed by methods of the client class
+
+
+*Returns --*
+
+None
+
+Executes the creation of the client class instance in the form of creating the client class object, loading/formatting the assigned data, restoring old models, storing new models, and clearing the log upon exit of class instance
 ***
 
 ### logger ###
 
 ``` python
-
+libra.logger(instruction, found="", slash='')
 ```
+
+Generates hierarchial display and tracks record of processes in operation upon utilizing a particular method in Libra
+
+
+*Parameters --*
+
+instruction: `str`
+
+String representation of request from written query from methods which can utilize the logger
+
+found: "" (`str`)
+
+String representation of prior processes initiated upon initializing class instance or application (is set by default to ""/blank)
+
+slash: "" (`str`)
+
+String indicator used to structure/organize logger output
+
+
+*Returns --*
+
+None
+
+Executes/updates hierarchial display upon usage of supported method such as a written query
 
 ***
 
