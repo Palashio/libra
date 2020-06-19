@@ -157,7 +157,7 @@ class client:
                     generate_plots=generate_plots,
                     callback_mode=callback_mode,
                     maximizer=maximizer,
-                    drop=None,
+                    drop=drop,
                     save_model=save_model,
                     save_path=save_path)
 
@@ -359,5 +359,5 @@ class client:
 # out every time
 # newClient = client('./data/housing.csv')
 # newClient.neural_network_query("Model the median house value", epochs=2, save_model=False)
-# newClient = client('./data/landslides_after_rainfall.csv').neural_network_query(instruction='Model distance',
-# drop=['id', 'geolocation', 'source_link', 'source_name'])
+newClient = client('./data/landslides_after_rainfall.csv')
+newClient.neural_network_query(instruction='Model distance', drop=['id', 'geolocation', 'source_link', 'source_name'])

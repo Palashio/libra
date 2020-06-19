@@ -8,7 +8,7 @@ from sklearn.compose import ColumnTransformer
 from sklearn.impute import SimpleImputer
 from sklearn.model_selection import train_test_split
 from sklearn.pipeline import Pipeline
-from sklearn.preprocessing import OneHotEncoder, StandardScaler
+from sklearn.preprocessing import OneHotEncoder, StandardScaler, FunctionTransformer
 from tensorflow import keras
 from tensorflow.python.keras.layers import Dense, Input
 from keras.callbacks import EarlyStopping
@@ -18,6 +18,7 @@ from PIL import Image as PImage
 from dataset_labelmatcher import get_similar_column
 from grammartree import get_value_instruction
 import cv2
+from prince.mca import MCA
 
 
 def initial_preprocesser(data, instruction, preprocess):
@@ -82,10 +83,19 @@ def structured_preprocesser(data):
     ])
 
     # pipeline for categorical columns
-    cat_pipeline = Pipeline([
-        ('imputer', SimpleImputer(strategy="constant", fill_value="")),
-        ('one_hot_encoder', OneHotEncoder(handle_unknown='ignore')),
-    ])
+    if len(categorical_columns) < 6:
+        cat_pipeline = Pipeline([
+            ('imputer', SimpleImputer(strategy="constant", fill_value="")),
+            ('one_hot_encoder', OneHotEncoder(handle_unknown='ignore')),
+        ])
+
+    else:
+        cat_pipeline = Pipeline([
+            ('imputer', SimpleImputer(strategy="constant", fill_value="")),
+            ('one_hot_encoder', OneHotEncoder(handle_unknown='ignore')),
+            ('transformer', FunctionTransformer(lambda x: x.todense(), accept_sparse=True)),
+            ('mca', MCA(n_components=5))
+        ])
 
     # combine the two pipelines
     if len(numeric_columns) != 0 and len(categorical_columns) != 0:
@@ -120,10 +130,10 @@ def structured_preprocesser(data):
         columns=train_cols)
     data['test'] = pd.DataFrame(
         (test.toarray() if not isinstance(
-            train,
+            test,
             np.ndarray) else test),
         columns=test_cols)
-
+    print(data['train'])
     return data, full_pipeline
 
 
@@ -294,13 +304,21 @@ def process_dates(data):
 
 # Sees if one hot encoding occurred, if not just uses numeric cols
 def generate_column_labels(pipeline, numeric_cols):
-    try:
-        encoded_cols = pipeline.named_transformers_[
-            'cat']['one_hot_encoder'].get_feature_names()
+    # If mca was used
+    if isinstance(pipeline.named_transformers_['cat'][-1], MCA):
+        encoded_cols = [f'MCA_{x}' for x in range(5)]
         cols = [*list(numeric_cols), *encoded_cols]
 
-    except BaseException:
-        cols = list(numeric_cols)
+    else:
+        try:
+            encoded_cols = pipeline.named_transformers_[
+                'cat']['one_hot_encoder'].get_feature_names()
+            cols = [*list(numeric_cols), *encoded_cols]
+
+        except Exception as error:
+            # For debugging only
+            print(error)
+            cols = list(numeric_cols)
 
     return cols
 
