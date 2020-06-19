@@ -1,3 +1,10 @@
+import sys
+
+sys.path.insert(1, './preprocessing')
+sys.path.insert(1, './data_generation')
+sys.path.insert(1, './modeling')
+sys.path.insert(1, './plotting')
+
 from sklearn.feature_selection import SelectFromModel
 from sklearn import preprocessing, tree
 from itertools import product, permutations
@@ -38,13 +45,6 @@ import tensorflow as tf
 import pandas as pd
 import numpy as np
 import keras
-import sys
-
-sys.path.insert(1, './preprocessing')
-sys.path.insert(1, './data_generation')
-sys.path.insert(1, './modeling')
-sys.path.insert(1, './plotting')
-
 # function imports from other files
 
 
@@ -155,7 +155,7 @@ def dimensionality_reduc(
     if inplace:
         data.to_csv(dataset)
 
-def data_y( instruction):
+def data_y(instruction):
     dataReader = DataReader("./data/" + get_last_file()[0])
     data = dataReader.data_generator()
     data.fillna(0, inplace=True)
@@ -353,7 +353,7 @@ def dimensionality_KPCA(instruction, dataset, target="", y=""):
             dataset.columns) - len(data_modified.columns)), y_pred
 
 
-#dimensionalityPCA("Predict median house value", "./data/housing.csv")
+dimensionality_PCA("Predict median house value", "./data/housing.csv")
 
 #dimensionalityReduc("Predict ocean_proximity", "./data/housing.csv")
 
