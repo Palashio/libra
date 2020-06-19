@@ -81,29 +81,28 @@ def structured_preprocesser(data):
         ('std_scaler', StandardScaler())
     ])
 
-    # pipeline for categorical columns
-    if len(categorical_columns) < 6:
-        cat_pipeline = Pipeline([
-            ('imputer', SimpleImputer(strategy="constant", fill_value="")),
-            ('one_hot_encoder', OneHotEncoder(handle_unknown='ignore')),
-        ])
-
-    else:
-        cat_pipeline = Pipeline([
-            ('imputer', SimpleImputer(strategy="constant", fill_value="")),
-            ('one_hot_encoder', OneHotEncoder(handle_unknown='ignore')),
-            ('transformer', FunctionTransformer(lambda x: x.todense(), accept_sparse=True)),
-            ('mca', MCA(n_components=5))
-        ])
-
     full_pipeline = ColumnTransformer([], remainder="passthrough")
 
-    # combine the two pipelines
     if len(numeric_columns) != 0:
         full_pipeline.transformers.append(("num", num_pipeline, numeric_columns))
 
     if len(categorical_columns) != 0:
-        full_pipeline.transformers.append(("cat", cat_pipeline, categorical_columns))
+        combined = pd.concat([data['train'], data['test']], axis=0)
+
+        if too_many_values(combined[categorical_columns]):
+            cat_pipeline = Pipeline([
+                ('imputer', SimpleImputer(strategy="constant", fill_value="")),
+                ('one_hot_encoder', OneHotEncoder(handle_unknown='ignore')),
+                ('transformer', FunctionTransformer(lambda x: x.todense(), accept_sparse=True)),
+                ('mca', MCA(n_components=5))
+            ])
+        else:
+            cat_pipeline = Pipeline([
+                ('imputer', SimpleImputer(strategy="constant", fill_value="")),
+                ('one_hot_encoder', OneHotEncoder(handle_unknown='ignore'))
+            ])
+
+        full_pipeline.transformers.append(('cat', cat_pipeline, categorical_columns))
 
     train = full_pipeline.fit_transform(data['train'])
 
@@ -296,7 +295,6 @@ def process_dates(data):
 
 # Sees if one hot encoding occurred, if not just uses numeric cols
 def generate_column_labels(pipeline, numeric_cols):
-
     # Check if one hot encoding was performed
     if 'cat' in pipeline.named_transformers_:
         # If mca was used
@@ -439,3 +437,17 @@ def csv_image_preprocess(csv_file, data_paths, label, image_column, training_rat
             save_image(path + "/proc_testing_set", img, p, row[label])
 
     return {"num_categories": classifications, "height": height, "width": width}
+
+
+# Method to calculate how many columns the data set will
+# have after one hot encoding
+# Decides whether MCA is needed or not essentially
+def too_many_values(data):
+    total_unique = 0
+    for col in data:
+
+        if total_unique > 100: return True
+        # Use value_counts() due to same columns having strings and floats
+        total_unique += len(data[col].value_counts())
+
+    return False
