@@ -20,6 +20,7 @@ def get_value_instruction(sent):
     for x in range(len(tags)):
         if "JJ" in tags[x]:
             truth = True
+            break
 
     # when an adjective exists this pipeline is run
     if truth:
@@ -47,7 +48,7 @@ def get_value_instruction(sent):
             pass
 
     # if there's no adjective present you want to run this pipeline
-    if not truth:
+    else:
         try:
             # you iterate through the tags and identify certain parts of speech
             for x in range(len(tags)):

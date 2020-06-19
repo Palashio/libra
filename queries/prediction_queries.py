@@ -68,12 +68,10 @@ def logger(instruction, found="", slash=''):
         else:
             currLog += (" " * 2 * counter) + str(instruction) + str(found)
     else:
-        currLog += (" " * 2 * counter) + "|"
-        currLog += "\n"
+        currLog += (" " * 2 * counter) + "|"+"\n"
         currLog += (" " * 2 * counter) + "|- " + str(instruction) + str(found)
         if instruction == "done...":
-            currLog += "\n"
-            currLog += "\n"
+            currLog += "\n"+"\n"
 
     counter += 1
     if instruction == "->":

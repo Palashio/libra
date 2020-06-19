@@ -9,8 +9,7 @@ sys.path.insert(1, './plotting')
 
 from data_reader import DataReader
 from grammartree import get_value_instruction
-from sklearn import preprocessing, svm
-from sklearn import preprocessing, tree
+from sklearn import preprocessing, svm, tree
 from sklearn.metrics import accuracy_score
 from data_preprocesser import structured_preprocesser, initial_preprocesser, clustering_preprocessor
 from sklearn.cluster import KMeans
@@ -25,7 +24,6 @@ from generate_plots import (generate_clustering_plots,
 
 currLog = ""
 counter = 0
-number = 0
 
 def clearLog():
     global currLog
@@ -52,12 +50,10 @@ def logger(instruction, found="", slash=''):
         else:
             currLog += (" " * 2 * counter) + str(instruction) + str(found)
     else:
-        currLog += (" " * 2 * counter) + "|"
-        currLog += "\n"
+        currLog += (" " * 2 * counter) + "|" + "\n"
         currLog += (" " * 2 * counter) + "|- " + str(instruction) + str(found)
         if instruction == "done...":
-            currLog += "\n"
-            currLog += "\n"
+            currLog += "\n" + "\n"
 
     counter += 1
     if instruction == "->":
