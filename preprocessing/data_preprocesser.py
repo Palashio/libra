@@ -85,20 +85,15 @@ def structured_preprocesser(data):
         ('one_hot_encoder', OneHotEncoder(handle_unknown='ignore')),
     ])
 
+
+    full_pipeline = ColumnTransformer([], remainder="passthrough")
+
     # combine the two pipelines
-    if len(numeric_columns) != 0 and len(categorical_columns) != 0:
-        full_pipeline = ColumnTransformer([
-            ("num", num_pipeline, numeric_columns),
-            ("cat", cat_pipeline, categorical_columns),
-        ], remainder='passthrough')
-    elif len(numeric_columns) == 0:
-        full_pipeline = ColumnTransformer([
-            ("cat", cat_pipeline, categorical_columns),
-        ])
-    else:
-        full_pipeline = ColumnTransformer([
-            ("num", num_pipeline, numeric_columns),
-        ])
+    if len(numeric_columns) != 0:
+        full_pipeline.transformers.append(("num", num_pipeline, numeric_columns))
+
+    if len(categorical_columns) != 0:
+        full_pipeline.transformers.append(("cat", cat_pipeline, categorical_columns)) 
 
     train = full_pipeline.fit_transform(data['train'])
 
