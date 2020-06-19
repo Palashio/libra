@@ -1115,31 +1115,20 @@ Outputs an list of encoded numerical representation of the instruction text reci
 libra.clearLog()
 ```
 
-Generates/stores with base object an encoding mask of form list ```[int/long, int/long, int/long]``` based on frequency of distinct characters used for sequence to sequence pre-training for natural language generation
+Clears the logger hierarchial display of any past record of processes used in Libra session
 
 
 *Parameters --*
 
 None
-
-
-*Returns --* 
-
-mask: `[int/long, int/long, int/long]` 
-
-Outputs an list of encoded numerical representation of the instruction text recieved
-*Parameters --*
-
-data: `str`
-
-String representation of the name of the dataset being sought to be analyzed by methods of the client class
 
 
 *Returns --*
 
 None
 
-Executes the creation of the client class instance in the form of creating the client class object, loading/formatting the assigned data, restoring old models, storing new models, and clearing the log upon exit of class instance
+Instantiates/reassigns the global counter and logger state variable back to 0, refreshing contents of logger
+
 ***
 
 ### logger ###
