@@ -31,8 +31,6 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
 currLog = ""
 counter = 0
-number = 0
-
 
 # # current_dir=os.getcw()
 
