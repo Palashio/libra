@@ -192,7 +192,7 @@ Retrieves the model whose index shares closest similarity via comparision of the
 libra.get_value_instruction(sent)
 ```
 
-Acquires/grammatically parses/reformats (using Textblob) relevant parts of speech for analysis from instruction sent to/in written query into instruction interpretable by 
+Acquires/grammatically parses/reformats (using Textblob) relevant parts of speech for analysis from instruction sent to/in written query into instruction interpretable by other Libra methods
 
 (Note: If an issue ensues in the instruction where the method cannot comprehend the instruction, an error message will appear stating to 'Please try re-typing your sentence') 
 
