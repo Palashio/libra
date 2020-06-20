@@ -80,7 +80,7 @@ Table of Contents
 * [supplementaries.py](#supplementaries)
 * [predictionQueries.py](#predictionQueries)
   * [clearLog](#clearLog)
-  * [logger](#logger)
+  * [logger](#logger-predictionQueries)
   * [class client](#class-client)
     * [init](#__init__-client)
     * [get_models](#get_models)
@@ -1114,7 +1114,7 @@ Instantiates/reassigns the global counter and logger state variable back to 0, r
 
 ***
 
-### logger ###
+### logger-predictionQueries ###
 
 ``` python
 libra.logger(instruction, found="", slash='')
