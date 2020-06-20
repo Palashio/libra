@@ -256,16 +256,16 @@ Generates/stores with base object an encoding mask of form list ```[int/long, in
 
 *Parameters --*
 
-instruction_label: `str`
+params: `{}`
 
-Acquires a string based of the instruction sent to encode in the form of a mask
+Dictionary of parameters of 
 
 
 *Returns --*
 
 params: `{}`
 
-Outputs an list of encoded numerical representation of the instruction text recieved
+Executes
    
 ### preprocesser ###
    
@@ -278,7 +278,7 @@ Generates/stores with base object an encoding mask of form list ```[int/long, in
 
 *Parameters --* 
 
-instruction_label: `str`
+params: `{}`
 
 Acquires a string based of the instruction sent to encode in the form of a mask
 
@@ -287,7 +287,7 @@ Acquires a string based of the instruction sent to encode in the form of a mask
 
 None 
 
-Outputs an list of encoded numerical representation of the instruction text recieved
+Executes
 
 ### instruction_identifier ###
 
@@ -300,7 +300,7 @@ Generates/stores with base object an encoding mask of form list ```[int/long, in
 
 *Parameters --*
 
-instruction_label: `str`
+params: `{}`
 
 Acquires a string based of the instruction sent to encode in the form of a mask
 
@@ -309,7 +309,7 @@ Acquires a string based of the instruction sent to encode in the form of a mask
 
 None
 
-Outputs an list of encoded numerical representation of the instruction text recieved
+Executes
 
 ### set_splitter ###
 
@@ -322,7 +322,7 @@ Generates/stores with base object an encoding mask of form list ```[int/long, in
 
 *Parameters --*
 
-instruction_label: `str`
+params: `{}`
 
 Acquires a string based of the instruction sent to encode in the form of a mask
 
@@ -331,7 +331,7 @@ Acquires a string based of the instruction sent to encode in the form of a mask
 
 None
 
-Outputs an list of encoded numerical representation of the instruction text recieved
+Executes
    
 ### modeler ###
 
@@ -344,7 +344,7 @@ Generates/stores with base object an encoding mask of form list ```[int/long, in
 
 *Parameters --* 
 
-instruction_label: `str`
+params: `{}`
 
 Acquires a string based of the instruction sent to encode in the form of a mask
 
@@ -353,7 +353,7 @@ Acquires a string based of the instruction sent to encode in the form of a mask
 
 None 
 
-Outputs an list of encoded numerical representation of the instruction text recieved
+Executes
    
 ### plotter ###
 
@@ -366,7 +366,7 @@ Generates/stores with base object an encoding mask of form list ```[int/long, in
 
 *Parameters --* 
 
-instruction_label: `str`
+params: `{}`
 
 Acquires a string based of the instruction sent to encode in the form of a mask
 
@@ -375,7 +375,7 @@ Acquires a string based of the instruction sent to encode in the form of a mask
 
 None
 
-Outputs an list of encoded numerical representation of the instruction text recieved
+Executes
 
 ***
 
