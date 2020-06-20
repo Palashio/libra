@@ -224,7 +224,7 @@ def classification_ann(instruction,
             drop=None,
             random_state=49,
             test_size=0.2,
-            epochs=5,
+            epochs=50,
             generate_plots=True,
             maximizer="val_loss",
             save_model=True,
@@ -461,7 +461,7 @@ def convolutional(self,
         validation_data=X_test,
         validation_steps=X_test.n //
         X_test.batch_size,
-        epochs=10)
+        epochs=25)
 
     # storing values the model dictionary
     return {

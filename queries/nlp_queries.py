@@ -32,7 +32,7 @@ def text_classification_query(self, instruction,
                               preprocess=True,
                               test_size=0.2,
                               random_state=49,
-                              epochs=10,
+                              epochs=50,
                               maxTextLength=200,
                               generate_plots=True):
     data = pd.read_csv(self.dataset)
