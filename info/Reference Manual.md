@@ -216,11 +216,35 @@ Retrieves specific strings from written instruction to rearranged instruction us
 
 ### mypreprocessor ###
 
+``` python
+libra.mypreprocessor(model_requested, model_keys)
+```
+
+(For dev use only) Allows for testing of customized feature of preprocessing of dataset 
+
+
+*Parameters --*
+
+instruction: `str`
+
+String representation of the instruction sent in written query
+
+path_to_set: `str`
+
+String representation of name of path location where data is located
+
+
+*Returns --*
+
+None
+
+Implements preprocessing algorithm on basis of defined parameters
+
 ***
 
 
 ## regression_split_functions ##
-   
+
 ### initializer ###
 
 ``` python
