@@ -350,7 +350,7 @@ def dimensionality_KPCA(instruction, dataset, target="", y=""):
             dataset.columns) - len(data_modified.columns)), y_pred
 
 
-dimensionality_PCA("Predict median house value", "./data/housing.csv")
+#dimensionality_PCA("Predict median house value", "./data/housing.csv")
 
 #dimensionalityReduc("Predict ocean_proximity", "./data/housing.csv")
 

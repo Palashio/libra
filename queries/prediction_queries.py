@@ -18,7 +18,7 @@ from pandas.core.common import SettingWithCopyWarning
 import warnings
 import os
 
-from nlp_queries import predict_text_sentiment, text_classification_query, get_summary, summarization_query
+#from nlp_queries import predict_text_sentiment, text_classification_query, get_summary, summarization_query
 
 
 # Importing the T5 modules from huggingface/transformers
@@ -68,7 +68,7 @@ def logger(instruction, found="", slash=''):
         else:
             currLog += (" " * 2 * counter) + str(instruction) + str(found)
     else:
-        currLog += (" " * 2 * counter) + "|"+"\n"
+        currLog += (" " * 2 * counter) + "|" + "\n"
         currLog += (" " * 2 * counter) + "|- " + str(instruction) + str(found)
         if instruction == "done...":
             currLog += "\n"+"\n"
@@ -199,11 +199,13 @@ class client:
             drop=None,
             random_state=49,
             test_size=0.2,
-            epochs=5,
+            epochs=50,
             generate_plots=True,
             maximizer="val_loss",
             save_model=False,
             save_path=os.getcwd()):
+
+        
 
         self.models['classification_ANN'] = classification_ann(
             instruction=instruction,
@@ -355,7 +357,7 @@ class client:
 
 # Easier to comment the one you don't want to run instead of typing them
 # out every time
-# newClient = client('./data/housing.csv')
-# newClient.neural_network_query("Model the median house value", epochs=2, save_model=False)
+newClient = client('./data/housing.csv')
+newClient.decision_tree_query("Model ocean proximity")
 # newClient = client('./data/landslides_after_rainfall.csv').neural_network_query(instruction='Model distance',
 # drop=['id', 'geolocation', 'source_link', 'source_name'])
