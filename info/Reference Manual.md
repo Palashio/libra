@@ -192,17 +192,23 @@ Retrieves the model whose index shares closest similarity via comparision of the
 libra.get_value_instruction(sent)
 ```
 
-Generates/stores with base object an encoding mask of form list ```[int/long, int/long, int/long]``` based on frequency of distinct characters used for sequence to sequence pre-training for natural language generation
+Acquires/grammatically parses/reformats (using Textblob) relevant parts of speech for analysis from instruction sent to/in written query into instruction interpretable by 
+
+(Note: If an issue ensues in the instruction where the method cannot comprehend the instruction, an error message will appear stating to 'Please try re-typing your sentence') 
 
 
-Parameters -- instruction_label: `str`
+*Parameters --*
 
-Acquires a string based of the instruction sent to encode in the form of a mask
+sent: `str`
+
+String representation of the instruction sent via written query
 
 
-Returns -- mask: `[int/long, int/long, int/long]` 
+*Returns --*
 
-Outputs an list of encoded numerical representation of the instruction text recieved
+decoded: `str` 
+
+Retrieves specific strings from written instruction to rearranged instruction usable for subsequent methods
 
 ***
 
