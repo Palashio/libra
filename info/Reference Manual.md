@@ -254,12 +254,16 @@ libra.initializer(params)
 Generates/stores with base object an encoding mask of form list ```[int/long, int/long, int/long]``` based on frequency of distinct characters used for sequence to sequence pre-training for natural language generation
 
 
-Parameters -- instruction_label: `str`
+*Parameters --*
+
+instruction_label: `str`
 
 Acquires a string based of the instruction sent to encode in the form of a mask
 
 
-Returns -- mask: `[int/long, int/long, int/long]` 
+*Returns --*
+
+params: `{}`
 
 Outputs an list of encoded numerical representation of the instruction text recieved
    
@@ -272,12 +276,16 @@ libra.preprocesser(params)
 Generates/stores with base object an encoding mask of form list ```[int/long, int/long, int/long]``` based on frequency of distinct characters used for sequence to sequence pre-training for natural language generation
 
 
-Parameters -- instruction_label: `str`
+*Parameters --* 
+
+instruction_label: `str`
 
 Acquires a string based of the instruction sent to encode in the form of a mask
 
 
-Returns -- mask: `[int/long, int/long, int/long]` 
+*Returns --* 
+
+None 
 
 Outputs an list of encoded numerical representation of the instruction text recieved
 
@@ -290,12 +298,16 @@ libra.instruction_identifier(params)
 Generates/stores with base object an encoding mask of form list ```[int/long, int/long, int/long]``` based on frequency of distinct characters used for sequence to sequence pre-training for natural language generation
 
 
-Parameters -- instruction_label: `str`
+*Parameters --*
+
+instruction_label: `str`
 
 Acquires a string based of the instruction sent to encode in the form of a mask
 
 
-Returns -- mask: `[int/long, int/long, int/long]` 
+*Returns --*
+
+None
 
 Outputs an list of encoded numerical representation of the instruction text recieved
 
@@ -308,12 +320,16 @@ libra.set_splitter(params)
 Generates/stores with base object an encoding mask of form list ```[int/long, int/long, int/long]``` based on frequency of distinct characters used for sequence to sequence pre-training for natural language generation
 
 
-Parameters -- instruction_label: `str`
+*Parameters --*
+
+instruction_label: `str`
 
 Acquires a string based of the instruction sent to encode in the form of a mask
 
 
-Returns -- mask: `[int/long, int/long, int/long]` 
+*Returns --*
+
+None
 
 Outputs an list of encoded numerical representation of the instruction text recieved
    
@@ -326,12 +342,16 @@ libra.modeler(params)
 Generates/stores with base object an encoding mask of form list ```[int/long, int/long, int/long]``` based on frequency of distinct characters used for sequence to sequence pre-training for natural language generation
 
 
-Parameters -- instruction_label: `str`
+*Parameters --* 
+
+instruction_label: `str`
 
 Acquires a string based of the instruction sent to encode in the form of a mask
 
 
-Returns -- mask: `[int/long, int/long, int/long]` 
+*Returns --*
+
+None 
 
 Outputs an list of encoded numerical representation of the instruction text recieved
    
@@ -344,12 +364,16 @@ libra.plotter(params)
 Generates/stores with base object an encoding mask of form list ```[int/long, int/long, int/long]``` based on frequency of distinct characters used for sequence to sequence pre-training for natural language generation
 
 
-Parameters -- instruction_label: `str`
+*Parameters --* 
+
+instruction_label: `str`
 
 Acquires a string based of the instruction sent to encode in the form of a mask
 
 
-Returns -- mask: `[int/long, int/long, int/long]` 
+*Returns --*
+
+None
 
 Outputs an list of encoded numerical representation of the instruction text recieved
 
