@@ -117,18 +117,18 @@ libra.produceMask(instruction_label)
 Generates/stores with base object an encoding mask of form list ```[int/float, int/float, int/float]``` based on frequency of distinct characters used for sequence to sequence pre-training for natural language generation
 
 
-Parameters -- 
+*Parameters --*
 
 instruction_label: `str`
 
-A string based of the instruction sent to encode in the form of a mask
+String based of the instruction sent to encode in the form of a mask
 
 
-Returns -- 
+*Returns --*
 
-mask: `[int/float, int/float, int/float]` 
+mask: `[int/float, int/float, int/float]`
 
-Outputs an list of encoded numerical representation of the instruction text recieved
+Retrieves a list of encoded numerical representation of the instruction text recieved
 
 ### get_similar_column ###
 
@@ -136,17 +136,25 @@ Outputs an list of encoded numerical representation of the instruction text reci
 libra.get_similar_column(instruction, dataset)
 ```
 
-Generates/stores with base object an encoding mask of form list ```[int/long, int/long, int/long]``` based on frequency of distinct characters used for sequence to sequence pre-training for natural language generation
+Identifies/saves the column in dataset whose title shares the most similarity with keyword in instruction sent in written query 
 
 
-Parameters -- instruction_label: `str`
+*Parameters --*
 
-Acquires a string based of the instruction sent to encode in the form of a mask
+instruction: `str`
+
+String representation of the instruction sent in written query
+
+dataset
+
+Data to be analyzed that is selected/sent via written query (is by default set to dataframe format)
 
 
-Returns -- mask: `[int/long, int/long, int/long]` 
+*Returns --*
 
-Outputs an list of encoded numerical representation of the instruction text recieved
+dataset.columns[idx]
+
+Retrieves the column whose index shares closest similarity via comparision of their Levennshtein distance to elements in instruction string  
 
 ### get_similar_model ###
 
@@ -154,17 +162,25 @@ Outputs an list of encoded numerical representation of the instruction text reci
 libra.get_similar_model(model_requested, model_keys)
 ```
 
-Generates/stores with base object an encoding mask of form list ```[int/long, int/long, int/long]``` based on frequency of distinct characters used for sequence to sequence pre-training for natural language generation
+Identifies/saves the model requested in instruction whose title shares the most similarity with models available in Libra 
 
 
-Parameters -- instruction_label: `str`
+*Parameters --* 
 
-Acquires a string based of the instruction sent to encode in the form of a mask
+model_requested: `str`
+
+String representation of name of model parsed from instruction sent in written query
+
+model_keys: `[str, str,..., str]`
+
+List of string "key" representations of models inbuilt/supported in Libra for use 
 
 
-Returns -- mask: `[int/long, int/long, int/long]` 
+*Returns --*
 
-Outputs an list of encoded numerical representation of the instruction text recieved
+model.keys[idx]: `str`
+
+Retrieves the model whose index shares closest similarity via comparision of their Levennshtein distance to that of the model name requested in the instruction string
 
 ***
 
@@ -1167,12 +1183,10 @@ Initializes the client class instance
 
 data: `str`
 
-String representation of the name of the dataset being sought to be analyzed by methods of the client class
+String representation of the name of the file of the dataset being sought to be analyzed by methods of the client class
 
 
-*Returns --*
-
-None
+*ReturString "key" representation of model that needs to be utilized to make prediction intuited from written query None
 
 Executes the creation of the client class instance in the form of creating the client class object, loading/formatting the assigned data, restoring old models, storing new models, and clearing the log upon exit of class instance
 
