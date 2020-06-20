@@ -65,7 +65,7 @@ def logger(instruction, found="", slash=''):
         currLog += (" " * 2 * counter) + "|" + "\n"
         currLog += (" " * 2 * counter) + "|- " + str(instruction) + str(found)
         if instruction == "done...":
-            currLog += "\n" + "\n"
+            currLog += "\n"+"\n"
 
     counter += 1
     if instruction == "->":
@@ -99,7 +99,7 @@ def regression_ann(
             data.drop(drop, axis=1, inplace=True)
 
         data, y, target, full_pipeline = initial_preprocesser(data, instruction, preprocess)
-
+        logger("->", "Target Column Found: {}".format(target))
         X_train = data['train']
         X_test = data['test']
 
@@ -203,6 +203,8 @@ def regression_ann(
         if save_model:
             save(final_model, save_model)
         # stores values in the client object models dictionary field
+        print("")
+        logger("Stored model under 'regression_ANN' key")
         return {
             'id': generate_id(),
             'model': final_model,
@@ -222,11 +224,14 @@ def classification_ann(instruction,
             drop=None,
             random_state=49,
             test_size=0.2,
-            epochs=5,
+            epochs=50,
             generate_plots=True,
             maximizer="val_loss",
             save_model=True,
             save_path=os.getcwd()):
+
+        global currLog
+        logger("reading in dataset...")
 
         dataReader = DataReader(dataset)
         data = dataReader.data_generator()
@@ -236,6 +241,7 @@ def classification_ann(instruction,
 
         data, y, remove, full_pipeline = initial_preprocesser(
             data, instruction, preprocess)
+        logger("->", "Target Column Found: {}".format(remove))
 
         # Needed to make a custom label encoder due to train test split changes
         # Can still be inverse transformed, just a bit of extra work
@@ -261,6 +267,8 @@ def classification_ann(instruction,
         accuracies = []
         model_data = []
 
+        logger("establishing callback function...")
+
         # early stopping callback
         es = EarlyStopping(
             monitor=maximizer,
@@ -270,21 +278,22 @@ def classification_ann(instruction,
 
         i = 0
         model = get_keras_model_class(data, i, num_classes)
-
+        logger("training initial model...")
         history = model.fit(
             X_train, y_train, epochs=epochs, validation_data=(
                 X_test, y_test), callbacks=[es], verbose=0)
 
         model_data.append(model)
         models.append(history)
-        logger("->", "Initial number of layers: " + str(len(model.layers)))
+        logger("->", "Initial number of layers " + str(len(model.layers)))
 
-        logger("->", "Training Loss: " +
+        logger("->", "Training Loss: " + \
                str(history.history['loss'][len(history.history['val_loss']) - 1]), '|')
         logger("->", "Test Loss: " +
                str(history.history['val_loss'][len(history.history['val_loss']) -
                                                1]), '|')
         print("")
+
 
         losses.append(history.history[maximizer]
                       [len(history.history[maximizer]) - 1])
@@ -292,6 +301,7 @@ def classification_ann(instruction,
         # keeps running model and fit functions until the validation loss stops
         # decreasing
         logger("testing number of layers...")
+        print(currLog)
         while (all(x > y for x, y in zip(losses, losses[1:]))):
             model = get_keras_model_class(data, i, num_classes)
             history = model.fit(
@@ -335,8 +345,11 @@ def classification_ann(instruction,
         plots = generate_classification_plots(
             models[len(models) - 1], data, y, model, X_test, y_test)
 
-        # if save_model:
-        #     save(final_model, save_model)
+        if save_model:
+            save(final_model, save_model)
+
+        print("")
+        logger("Stored model under 'classification_ANN' key")
 
         # stores the values and plots into the object dictionary
         return {
@@ -448,7 +461,7 @@ def convolutional(self,
         validation_data=X_test,
         validation_steps=X_test.n //
         X_test.batch_size,
-        epochs=10)
+        epochs=25)
 
     # storing values the model dictionary
     return {
