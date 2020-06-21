@@ -114,6 +114,7 @@ class client:
 
     def neural_network_query(self,
                              instruction,
+                             mca_threshold=None,
                              drop=None,
                              preprocess=True,
                              test_size=0.2,
@@ -136,6 +137,7 @@ class client:
                 maximizer = "val_accuracy"
                 self.classification_query_ann(
                     instruction,
+                    mca_threshold=mca_threshold,
                     preprocess=preprocess,
                     test_size=test_size,
                     random_state=random_state,
@@ -148,6 +150,7 @@ class client:
             else:
                 self.regression_query_ann(
                     instruction,
+                    mca_threshold=mca_threshold,
                     preprocess=preprocess,
                     test_size=test_size,
                     random_state=random_state,
@@ -165,7 +168,7 @@ class client:
             self,
             instruction,
             drop=None,
-            mca=None,
+            mca_threshold=None,
             preprocess=True,
             test_size=0.2,
             random_state=49,
@@ -178,6 +181,7 @@ class client:
 
         self.models['regression_ANN'] = regression_ann(
             instruction=instruction,
+            mca_threshold=.25 if mca_threshold is None else mca_threshold,
             dataset=self.dataset,
             drop=drop,
             preprocess=preprocess,
@@ -195,6 +199,7 @@ class client:
     def classification_query_ann(
             self,
             instruction,
+            mca_threshold=None,
             preprocess=True,
             callback_mode='min',
             drop=None,
@@ -211,6 +216,7 @@ class client:
         self.models['classification_ANN'] = classification_ann(
             instruction=instruction,
             dataset=self.dataset,
+            mca_threshold=.25 if mca_threshold is None else mca_threshold,
             drop=drop,
             preprocess=preprocess,
             test_size=test_size,
