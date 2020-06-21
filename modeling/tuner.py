@@ -292,11 +292,8 @@ def tuneCNN(X, y, num_classes):
 import keras
 from keras import Sequential
 from keras.models import Model
-from keras.layers import Input, Dense, Convolution2D, MaxPooling2D
+from keras.layers import Input, Dense, Convolution2D, MaxPooling2D, Lambda
 from keras.layers import Activation, Dropout, GlobalAveragePooling2D, concatenate
-import numpy as np
-import sys
-sys.path.append('utils/')
 
 import keras
 from keras import optimizers
@@ -306,7 +303,6 @@ from keras.callbacks import ReduceLROnPlateau, EarlyStopping
 from image_preprocessing_ver2 import ImageDataGenerator
 # it outputs y_batch that contains onehot targets and logits
 # logits came from xception
-from keras.layers import Lambda
 from keras.losses import categorical_crossentropy as logloss
 from keras.metrics import categorical_accuracy, top_k_categorical_accuracy
 from keras import backend as K
@@ -388,14 +384,6 @@ def SqueezeNet(weight_decay, image_size=64):
     
     return model
 
-
-model1=SqueezeNet(None)
-# Compiling the CNN
-model=Sequential()
-model.add(model1)
-model.add(Dense(units = 1, activation = 'sigmoid'))
-model.compile(optimizer = 'adam', loss = 'binary_crossentropy', metrics = ['accuracy'])
-
 # Part 2 - Fitting the CNN to the images
 
 train_datagen = ImageDataGenerator(rescale = 1./255,
@@ -419,7 +407,7 @@ val_generator = test_datagen.flow_from_directory('dataset/test_set',
 ###############################################################################
 
 temperature = 5.0
-model = SqueezeNet(weight_decay=1e-4, image_size=299)
+model = SqueezeNet(weight_decay=1e-4, image_size=64)
 
 # remove softmax
 model.layers.pop()
@@ -496,7 +484,7 @@ model.fit_generator(
 
 val_generator_no_shuffle = data_generator.flow_from_directory(
     data_dir + 'val', val_logits,
-    target_size=(299, 299),
+    target_size=(64, 64),
     batch_size=64, shuffle=False
 )
 print(model.evaluate_generator(val_generator_no_shuffle, 80))
