@@ -103,5 +103,9 @@
 #    y_pred=clf.predict(X_test)
 #    return accuracy_score(y_pred, y_test), y_pred 
 #    #importance graph
-#    #plt.rcParams['figure.figsize'] = [5, 5]
-#    #plt.show()
+#   feature_important = model.get_booster().get_score(importance_type='weight')
+#   keys = list(feature_important.keys())
+#   values = list(feature_important.values())
+#
+#   data = pd.DataFrame(data=values, index=keys, columns=["score"]).sort_values(by = "score", ascending=False)
+#   data.plot(kind='barh')

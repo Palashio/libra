@@ -91,6 +91,7 @@ def regression_ann(
             save_path=os.getcwd()):
 
         global currLog
+        global counter
         logger("Reading in dataset...")
 
         dataReader = DataReader(dataset)
@@ -146,7 +147,7 @@ def regression_ann(
         col_name = [["Initial number of layers ","Training Loss ","Test Loss "]]
         col_width = max(len(word) for row in col_name for word in row) + 2
         for row in col_name:
-            print( "".join(word.ljust(col_width) for word in row))
+            print( (" " * 2 * counter)+"".join(word.ljust(col_width) for word in row))
         values=[]
         values.append(str(len(model.layers))) 
         values.append(str(history.history['loss'][len(history.history['val_loss']) -
@@ -156,7 +157,7 @@ def regression_ann(
         datax=[]
         datax.append(values)
         for row in datax:
-            print( "".join(word.ljust(col_width) for word in row))
+            print((" " * 2 * counter)+ "".join(word.ljust(col_width) for word in row))
         losses.append(history.history[maximizer]
                       [len(history.history[maximizer]) - 1])
 
@@ -178,7 +179,7 @@ def regression_ann(
             col_name = [["Current number of layers","Training Loss","Test Loss"]]
             col_width = max(len(word) for row in col_name for word in row) + 2
             for row in col_name:
-                print( "".join(word.ljust(col_width) for word in row))
+                print((" " * 2 * counter)+ "".join(word.ljust(col_width) for word in row))
             values=[]
             datax=[]
             values.append(str(len(model.layers)))
@@ -188,7 +189,7 @@ def regression_ann(
                                                    1]))
             datax.append(values)
             for row in datax:
-                print( "".join(word.ljust(col_width) for word in row))
+                print((" " * 2 * counter)+ "".join(word.ljust(col_width) for word in row))
             del values,datax
             losses.append(history.history[maximizer]
                           [len(history.history[maximizer]) - 1])
@@ -302,7 +303,7 @@ def classification_ann(instruction,
         col_name = [["Initial number of layers","Training Loss","Test Loss"]]
         col_width = max(len(word) for row in col_name for word in row) + 2  # padding
         for row in col_name:
-            print( "".join(word.ljust(col_width) for word in row))
+            print((" " * 2 * counter)+ "".join(word.ljust(col_width) for word in row))
         values=[]
         values.append(str(len(model.layers))) 
         values.append(str(history.history['loss'][len(history.history['val_loss']) -
@@ -312,7 +313,7 @@ def classification_ann(instruction,
         datax=[]
         datax.append(values)
         for row in datax:
-            print( "".join(word.ljust(col_width) for word in row))
+            print((" " * 2 * counter)+ "".join(word.ljust(col_width) for word in row))
         del values, datax
         losses.append(history.history[maximizer]
                       [len(history.history[maximizer]) - 1])
@@ -336,7 +337,7 @@ def classification_ann(instruction,
             col_name = [["Current number of layers","Training Loss","Test Loss"]]
             col_width = max(len(word) for row in col_name for word in row) + 2
             for row in col_name:
-                print( "".join(word.ljust(col_width) for word in row))
+                print((" " * 2 * counter)+ "".join(word.ljust(col_width) for word in row))
             values=[]
             values.append(str(len(model.layers))) 
             values.append(str(history.history['loss'][len(history.history['val_loss']) -
@@ -346,7 +347,7 @@ def classification_ann(instruction,
             datax=[]
             datax.append(values)
             for row in datax:
-                print( "".join(word.ljust(col_width) for word in row))
+                print((" " * 2 * counter)+ "".join(word.ljust(col_width) for word in row))
             losses.append(history.history[maximizer]
                           [len(history.history[maximizer]) - 1])
             accuracies.append(history.history['val_accuracy']
