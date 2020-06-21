@@ -69,7 +69,7 @@ def logger(instruction, found="", slash=''):
             currLog += "\n"+"\n"
 
     counter += 1
-    if slasj == "|":
+    if slash == "|":
         print(currLog, end="")
     else:
         print(currLog)
