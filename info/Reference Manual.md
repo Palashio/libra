@@ -417,17 +417,29 @@ Retrieves final regression neural network model with a rectified linear unit act
 libra.get_keras_model_class(dataset, i, num_classes)
 ```
 
-Generates/stores with base object an encoding mask of form list ```[int/long, int/long, int/long]``` based on frequency of distinct characters used for sequence to sequence pre-training for natural language generation
+Constructs a classification neural network that uses rectified linear unit activation function and a normal distribution for its initial weight
 
 
-Parameters -- instruction_label: `str`
+*Parameters --* 
 
-Acquires a string based of the instruction sent to encode in the form of a mask
+dataset
+
+Data to be analyzed that is selected/sent via written query (is by default set to dataframe format)
+
+i: `int`
+
+Integer number of additional layers used after creation of baseline classification model
+
+num_classes: `int`
+
+Integer number of classes associated with data for classification model
 
 
-Returns -- mask: `[int/long, int/long, int/long]` 
+*Returns --*
 
-Outputs an list of encoded numerical representation of the instruction text recieved
+model 
+
+Retrieves final classification neural network model with a rectified linear unit activation function and normal kernel initializer with softmax activation function outer layer compiled using a categorical cross-entropy loss function and adaptive first/second moment stochastic gradient descent optimizer
    
 ### get_keras_text_class ###
 
