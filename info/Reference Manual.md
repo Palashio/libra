@@ -391,7 +391,7 @@ Executes generateRegressionPlots method to create all plots displaying the state
 libra.get_keras_model_reg(dataset, i)
 ```
 
-Generates/stores with base object an encoding mask of form list ```[int/long, int/long, int/long]``` based on frequency of distinct characters used for sequence to sequence pre-training for natural language generation
+Constructs a regression neural network that uses rectified linear unit activation function and a normal distribution for its initial weight
 
 
 *Parameters --* 
@@ -402,14 +402,14 @@ Data to be analyzed that is selected/sent via written query (is by default set t
 
 i: `int`
 
-Number of layer
+Number of additional layers used after creation of baseline regression model
 
 
 *Returns --*
 
 model 
 
-Outputs an list of encoded numerical representation of the instruction text recieved
+Retrieves final regression neural network model with a rectified linear unit activation function and normal kernel initializer compiled using a mean square error loss function and adaptive first/second moment stochastic gradient descent optimizer
 
 ### get_keras_model_class ###
 
