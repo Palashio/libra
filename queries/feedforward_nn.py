@@ -28,6 +28,7 @@ import numpy as np
 
 currLog = ""
 counter = 0
+number = 0
 # current_dir=os.getcw()
 
 # allows for all columns to be displayed when printing()
@@ -76,6 +77,7 @@ def logger(instruction, found="", slash=''):
 
 def regression_ann(
             instruction,
+            mca_threshold=None,
             dataset = None,
             drop=None,
             preprocess=True,
@@ -98,7 +100,7 @@ def regression_ann(
         if drop is not None:
             data.drop(drop, axis=1, inplace=True)
 
-        data, y, target, full_pipeline = initial_preprocesser(data, instruction, preprocess)
+        data, y, target, full_pipeline = initial_preprocesser(data, instruction, preprocess, mca_threshold)
         logger("->", "Target Column Found: {}".format(target))
         X_train = data['train']
         X_test = data['test']
@@ -219,6 +221,7 @@ def regression_ann(
 
 def classification_ann(instruction,
             dataset=None,
+            mca_threshold=None,
             preprocess=True,
             callback_mode='min',
             drop=None,
@@ -240,7 +243,7 @@ def classification_ann(instruction,
             data.drop(drop, axis=1, inplace=True)
 
         data, y, remove, full_pipeline = initial_preprocesser(
-            data, instruction, preprocess)
+            data, instruction, preprocess, mca_threshold)
         logger("->", "Target Column Found: {}".format(remove))
 
         # Needed to make a custom label encoder due to train test split changes
@@ -301,7 +304,6 @@ def classification_ann(instruction,
         # keeps running model and fit functions until the validation loss stops
         # decreasing
         logger("testing number of layers...")
-        print(currLog)
         while (all(x > y for x, y in zip(losses, losses[1:]))):
             model = get_keras_model_class(data, i, num_classes)
             history = model.fit(

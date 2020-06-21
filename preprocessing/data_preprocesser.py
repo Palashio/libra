@@ -1,5 +1,6 @@
 import keras
 import os
+import shutil
 import numpy as np
 import pandas as pd
 import tensorflow as tf
@@ -7,7 +8,7 @@ from sklearn.compose import ColumnTransformer
 from sklearn.impute import SimpleImputer
 from sklearn.model_selection import train_test_split
 from sklearn.pipeline import Pipeline
-from sklearn.preprocessing import OneHotEncoder, StandardScaler
+from sklearn.preprocessing import OneHotEncoder, StandardScaler, FunctionTransformer
 from tensorflow import keras
 from tensorflow.python.keras.layers import Dense, Input
 from keras.callbacks import EarlyStopping
@@ -16,14 +17,16 @@ from os import listdir
 from PIL import Image as PImage
 from dataset_labelmatcher import get_similar_column
 from grammartree import get_value_instruction
+import cv2
+from prince.mca import MCA
 
 
-def initial_preprocesser(data, instruction, preprocess):
+def initial_preprocesser(data, instruction, preprocess, mca_threshold):
     # Scans for object columns just in case we have a datetime column that
     # isn't detected
     object_columns = [
         col for col,
-        col_type in data.dtypes.iteritems() if col_type == 'object']
+                col_type in data.dtypes.iteritems() if col_type == 'object']
 
     # Handles dates without timestamps
     for col in object_columns:
@@ -52,7 +55,7 @@ def initial_preprocesser(data, instruction, preprocess):
     # preprocess the dataset
     full_pipeline = None
     if preprocess:
-        data, full_pipeline = structured_preprocesser(data)
+        data, full_pipeline = structured_preprocesser(data, mca_threshold)
     else:
         data.fillna(0, inplace=True)
 
@@ -62,8 +65,7 @@ def initial_preprocesser(data, instruction, preprocess):
 
 
 # Preprocesses the data appropriately for single reg data
-def structured_preprocesser(data):
-
+def structured_preprocesser(data, mca_threshold):
     # Preprocessing for datetime columns
     process_dates(data)
 
@@ -79,21 +81,30 @@ def structured_preprocesser(data):
         ('std_scaler', StandardScaler())
     ])
 
-    # pipeline for categorical columns
-    cat_pipeline = Pipeline([
-        ('imputer', SimpleImputer(strategy="constant", fill_value="")),
-        ('one_hot_encoder', OneHotEncoder(handle_unknown='ignore')),
-    ])
-
-
     full_pipeline = ColumnTransformer([], remainder="passthrough")
 
-    # combine the two pipelines
     if len(numeric_columns) != 0:
         full_pipeline.transformers.append(("num", num_pipeline, numeric_columns))
 
     if len(categorical_columns) != 0:
-        full_pipeline.transformers.append(("cat", cat_pipeline, categorical_columns)) 
+        combined = pd.concat([data['train'], data['test']], axis=0)
+
+        mca_threshold = combined.shape[0]*.25 if mca_threshold is None else combined.shape[0] * mca_threshold
+
+        if too_many_values(combined[categorical_columns], mca_threshold):
+            cat_pipeline = Pipeline([
+                ('imputer', SimpleImputer(strategy="constant", fill_value="")),
+                ('one_hot_encoder', OneHotEncoder(handle_unknown='ignore')),
+                ('transformer', FunctionTransformer(lambda x: x.todense(), accept_sparse=True)),
+                ('mca', MCA(n_components=5))
+            ])
+        else:
+            cat_pipeline = Pipeline([
+                ('imputer', SimpleImputer(strategy="constant", fill_value="")),
+                ('one_hot_encoder', OneHotEncoder(handle_unknown='ignore'))
+            ])
+
+        full_pipeline.transformers.append(('cat', cat_pipeline, categorical_columns))
 
     train = full_pipeline.fit_transform(data['train'])
 
@@ -113,7 +124,7 @@ def structured_preprocesser(data):
         columns=train_cols)
     data['test'] = pd.DataFrame(
         (test.toarray() if not isinstance(
-            train,
+            test,
             np.ndarray) else test),
         columns=test_cols)
 
@@ -121,12 +132,10 @@ def structured_preprocesser(data):
 
 
 def process_dates(data):
-
     for df in data.values():
         datetime_cols = df.select_dtypes('datetime64')
 
         for col in datetime_cols:
-
             df[f'{col}_DayOfWeek'] = df[col].dt.day_name()
             df[f'{col}_Year'] = df[col].dt.year
             df[f'{col}_Month'] = df[col].dt.month_name()
@@ -137,15 +146,27 @@ def process_dates(data):
 
 # Sees if one hot encoding occurred, if not just uses numeric cols
 def generate_column_labels(pipeline, numeric_cols):
-    try:
-        encoded_cols = pipeline.named_transformers_[
-            'cat']['one_hot_encoder'].get_feature_names()
-        cols = [*list(numeric_cols), *encoded_cols]
+    # Check if one hot encoding was performed
+    if 'cat' in pipeline.named_transformers_:
+        # If mca was used
+        if isinstance(pipeline.named_transformers_['cat'][-1], MCA):
+            encoded_cols = [f'MCA_{x}' for x in range(5)]
+            cols = [*list(numeric_cols), *encoded_cols]
 
-    except BaseException:
-        cols = list(numeric_cols)
+        else:
+            try:
+                encoded_cols = pipeline.named_transformers_[
+                    'cat']['one_hot_encoder'].get_feature_names()
+                cols = [*list(numeric_cols), *encoded_cols]
 
-    return cols
+            except Exception as error:
+                # For debugging only
+                print(error)
+                cols = list(numeric_cols)
+
+        return cols
+    else:
+        return numeric_cols
 
 
 def clustering_preprocessor(data):
@@ -186,3 +207,19 @@ def clustering_preprocessor(data):
     new_columns = generate_column_labels(full_pipeline, numeric_columns)
 
     return pd.DataFrame(data, columns=new_columns), full_pipeline
+
+
+# Method to calculate how many columns the data set will
+# have after one hot encoding
+# Decides whether MCA is needed or not essentially
+# mca_threshold is the len of the dataset * .25 to calculate the proportion of
+# when to apply MCA
+def too_many_values(data, mca_threshold):
+    total_unique = 0
+    for col in data:
+
+        if total_unique > mca_threshold: return True
+        # Use value_counts() due to same columns having strings and floats
+        total_unique += len(data[col].value_counts())
+
+    return False
