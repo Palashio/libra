@@ -18,7 +18,7 @@ from pandas.core.common import SettingWithCopyWarning
 import warnings
 import os
 
-#from nlp_queries import predict_text_sentiment, text_classification_query, get_summary, summarization_query
+from nlp_queries import predict_text_sentiment, text_classification_query, get_summary, summarization_query
 
 
 # Importing the T5 modules from huggingface/transformers
@@ -114,6 +114,7 @@ class client:
 
     def neural_network_query(self,
                              instruction,
+                             mca_threshold=None,
                              drop=None,
                              preprocess=True,
                              test_size=0.2,
@@ -136,6 +137,7 @@ class client:
                 maximizer = "val_accuracy"
                 self.classification_query_ann(
                     instruction,
+                    mca_threshold=mca_threshold,
                     preprocess=preprocess,
                     test_size=test_size,
                     random_state=random_state,
@@ -148,6 +150,7 @@ class client:
             else:
                 self.regression_query_ann(
                     instruction,
+                    mca_threshold=mca_threshold,
                     preprocess=preprocess,
                     test_size=test_size,
                     random_state=random_state,
@@ -155,7 +158,7 @@ class client:
                     generate_plots=generate_plots,
                     callback_mode=callback_mode,
                     maximizer=maximizer,
-                    drop=None,
+                    drop=drop,
                     save_model=save_model,
                     save_path=save_path)
 
@@ -165,6 +168,7 @@ class client:
             self,
             instruction,
             drop=None,
+            mca_threshold=None,
             preprocess=True,
             test_size=0.2,
             random_state=49,
@@ -177,6 +181,7 @@ class client:
 
         self.models['regression_ANN'] = regression_ann(
             instruction=instruction,
+            mca_threshold=.25 if mca_threshold is None else mca_threshold,
             dataset=self.dataset,
             drop=drop,
             preprocess=preprocess,
@@ -194,6 +199,7 @@ class client:
     def classification_query_ann(
             self,
             instruction,
+            mca_threshold=None,
             preprocess=True,
             callback_mode='min',
             drop=None,
@@ -205,11 +211,12 @@ class client:
             save_model=False,
             save_path=os.getcwd()):
 
-        
+
 
         self.models['classification_ANN'] = classification_ann(
             instruction=instruction,
             dataset=self.dataset,
+            mca_threshold=.25 if mca_threshold is None else mca_threshold,
             drop=drop,
             preprocess=preprocess,
             test_size=test_size,
@@ -370,7 +377,7 @@ class client:
             print(operations)
         else:
             raise Exception("There are no built-in operators defined for this model. Please refer to the models dictionary.")
-    
+
     # show accuracy scores for client's model
     def accuracy(self, model):
         if 'accuracy' in self.models[model].keys():
@@ -381,7 +388,7 @@ class client:
             raise Exception("Accuracy is not defined for {}".format(model))
 
     # show losses for client's model
-    def losses(self, model): 
+    def losses(self, model):
         if 'losses' in self.models[model].keys():
             return self.models[model]['losses']
         else:
@@ -389,7 +396,7 @@ class client:
 
 # Easier to comment the one you don't want to run instead of typing them
 # out every time
-newClient = client('./data/housing.csv')
-newClient.decision_tree_query("Model ocean proximity")
-# newClient = client('./data/landslides_after_rainfall.csv').neural_network_query(instruction='Model distance',
-# drop=['id', 'geolocation', 'source_link', 'source_name'])
+# newClient = client('./data/housing.csv')
+# newClient.neural_network_query("Model the median house value", epochs=2, save_model=False)
+newClient = client('./data/landslides_after_rainfall.csv')
+newClient.neural_network_query(instruction='Model distance', drop=['id', 'geolocation', 'source_link', 'source_name'])
