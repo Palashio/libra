@@ -1,6 +1,7 @@
 # Libra Reference Manual  
 
 Libra is an open source deep learning API that provides a toolkit of intuitive and easily accessible machine learning methods, enabling users to streamline their data science workflows. The reference manual contains a detailed description of the Libra API. This reference delineates each of the methods avaiable for use, explaining how one can utilize them as well their respective parameters. The manual assumes that you have a baseline comprehension of some of the key concepts in machine learning. The reference is organized mainly in terms of location in the code where the method was defined as well as in accordance with OOP hierarchy, with a class introduced first and then its methods appearing underneath.
+
 ***
 
 Table of Contents
@@ -251,21 +252,20 @@ Implements preprocessing algorithm on basis of defined parameters
 libra.initializer(params)
 ```
 
-Generates/stores with base object an encoding mask of form list ```[int/long, int/long, int/long]``` based on frequency of distinct characters used for sequence to sequence pre-training for natural language generation
-
+Initializes the data pipeline with given set of data for backend regression based modelling tasks 
 
 *Parameters --*
 
 params: `{}`
 
-Dictionary of parameters of 
+Dictionary of parameters for regression task data pipeline 
 
 
 *Returns --*
 
 params: `{}`
 
-Executes
+Retrieves dictionary of parameters revised after reading in data, removing data of any incomplete observations, and initializing the data parameter with inputted set of data
    
 ### preprocesser ###
    
@@ -273,21 +273,21 @@ Executes
 libra.preprocesser(params)
 ```
 
-Generates/stores with base object an encoding mask of form list ```[int/long, int/long, int/long]``` based on frequency of distinct characters used for sequence to sequence pre-training for natural language generation
+Implements preprocessing code defined in structured_preprocessor method to data earlier initialized in data pipeline parameters dictionary for regression based tasks
 
 
 *Parameters --* 
 
 params: `{}`
 
-Acquires a string based of the instruction sent to encode in the form of a mask
+Dictionary of parameters for regression task data pipeline
 
 
 *Returns --* 
 
-None 
+None
 
-Executes
+Executes structured_preprocesser method which preprocesses data by categorizing/labelling/transforming data into format computable for regression model
 
 ### instruction_identifier ###
 
@@ -295,21 +295,21 @@ Executes
 libra.instruction_identifier(params)
 ```
 
-Generates/stores with base object an encoding mask of form list ```[int/long, int/long, int/long]``` based on frequency of distinct characters used for sequence to sequence pre-training for natural language generation
+Employs usage of both get_similar_colummn and get_value_instruction methods to identify appropriate column and specific regression task type for analysis using initialized data pipeline parameters dictionary 
 
 
 *Parameters --*
 
 params: `{}`
 
-Acquires a string based of the instruction sent to encode in the form of a mask
+Dictionary of parameters for regression task data pipeline
 
 
 *Returns --*
 
 None
 
-Executes
+Executes both get_similar_column and get_value_instruction methods to determine column and task type for regression analysis and updates y parameter in initialized data pipeline parameters dictionary
 
 ### set_splitter ###
 
@@ -317,21 +317,21 @@ Executes
 libra.set_splitter(params)
 ```
 
-Generates/stores with base object an encoding mask of form list ```[int/long, int/long, int/long]``` based on frequency of distinct characters used for sequence to sequence pre-training for natural language generation
+Generates/stores training/testing segments of data for both class and target variable in initialized data pipeline parameters dictionary
 
 
 *Parameters --*
 
 params: `{}`
 
-Acquires a string based of the instruction sent to encode in the form of a mask
+Dictionary of parameters for regression task data pipeline 
 
 
 *Returns --*
 
 None
 
-Executes
+Executes training testing splitting method based on scikit-learn functionality to construct/store seperate training and testing dataset in dictionary of parameters for regression task data pipeline
    
 ### modeler ###
 
@@ -339,21 +339,21 @@ Executes
 libra.modeler(params)
 ```
 
-Generates/stores with base object an encoding mask of form list ```[int/long, int/long, int/long]``` based on frequency of distinct characters used for sequence to sequence pre-training for natural language generation
+Develops/stores regression neural network model for analysis through application of get_keras_model_reg method as a parameter in regression data pipeline parameters dictionary 
 
 
 *Parameters --* 
 
 params: `{}`
 
-Acquires a string based of the instruction sent to encode in the form of a mask
+Dictionary of parameters for regression task data pipeline
 
 
 *Returns --*
 
 None 
 
-Executes
+Executes get_keras_model_reg method to develop regression neural network that is fitted and rerun with number of layers until validation loss is maximized with history of iteration of models and associated validation loss metrics assigned to models and losses parameters of the regression data pipeline parameters dictionary
    
 ### plotter ###
 
@@ -361,21 +361,21 @@ Executes
 libra.plotter(params)
 ```
 
-Generates/stores with base object an encoding mask of form list ```[int/long, int/long, int/long]``` based on frequency of distinct characters used for sequence to sequence pre-training for natural language generation
+Generates all plots affiliated with regression neural network model using generateRegressionPlots method and stores them in initialized data pipeline parameters dictionary
 
 
 *Parameters --* 
 
 params: `{}`
 
-Acquires a string based of the instruction sent to encode in the form of a mask
+Dictionary of parameters for regression task data pipeline
 
 
 *Returns --*
 
 None
 
-Executes
+Executes generateRegressionPlots method to create all plots displaying the state of the various previous model iterations that is assigned to the plots parameter of the regression data pipeline parameters dictionary
 
 ***
 
@@ -390,12 +390,20 @@ libra.get_keras_model_reg(dataset, i)
 Generates/stores with base object an encoding mask of form list ```[int/long, int/long, int/long]``` based on frequency of distinct characters used for sequence to sequence pre-training for natural language generation
 
 
-Parameters -- instruction_label: `str`
+*Parameters --* 
 
-Acquires a string based of the instruction sent to encode in the form of a mask
+dataset
+
+Data to be analyzed that is selected/sent via written query (is by default set to dataframe format)
+
+i: `int`
+
+Number of layer
 
 
-Returns -- mask: `[int/long, int/long, int/long]` 
+*Returns --*
+
+model 
 
 Outputs an list of encoded numerical representation of the instruction text recieved
 
