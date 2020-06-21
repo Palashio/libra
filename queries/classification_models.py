@@ -9,7 +9,8 @@ sys.path.insert(1, './plotting')
 
 from data_reader import DataReader
 from grammartree import get_value_instruction
-from sklearn import preprocessing, svm, tree
+from sklearn import preprocessing, svm
+from sklearn import preprocessing, tree
 from sklearn.metrics import accuracy_score
 from data_preprocesser import structured_preprocesser, initial_preprocesser, clustering_preprocessor
 from sklearn.cluster import KMeans
@@ -23,10 +24,11 @@ from generate_plots import (generate_clustering_plots,
                            generate_classification_plots)
 
 import warnings
-warnings.filterwarnings("ignore", category=UserWarning) 
+warnings.filterwarnings("ignore", category=UserWarning)
 
 currLog = ""
 counter = 0
+number = 0
 
 def clearLog():
     global currLog
@@ -70,7 +72,7 @@ def k_means_clustering(dataset= None,
             generate_plots=True,
             drop=None,
             base_clusters=1):
-        logger("reading dataset...")
+        logger("Reading dataset...")
         # loads dataset and replaces n/a with zero
         # data = pd.read_csv(self.dataset)
 
@@ -147,6 +149,7 @@ def train_svm(instruction,
             test_size=0.2,
             kernel='linear',
             preprocess=True,
+            mca_threshold=None,
             drop=None,
             cross_val_size=0.3):
 
@@ -160,7 +163,7 @@ def train_svm(instruction,
         if drop is not None:
             data.drop(drop, axis=1, inplace=True)
 
-        data, y, target, full_pipeline = initial_preprocesser(data, instruction, preprocess)
+        data, y, target, full_pipeline = initial_preprocesser(data, instruction, preprocess, mca_threshold)
         logger("->", "Target Column Found: {}".format(target))
 
 
@@ -198,7 +201,9 @@ def train_svm(instruction,
         return {
             'id': generate_id(),
             "model": clf,
-            "accuracy_score": score,
+            "accuracy_score": accuracy_score(
+                clf.predict(X_test),
+                y_test),
             "target": target,
             "preprocesser": full_pipeline,
             "interpreter": label_mappings,
@@ -210,7 +215,8 @@ def train_svm(instruction,
 
 
 def nearest_neighbors(instruction=None,
-            dataset = None, 
+            dataset = None,
+            mca_threshold=None,
             preprocess=True,
             drop=None,
             min_neighbors=3,
@@ -223,7 +229,7 @@ def nearest_neighbors(instruction=None,
         if drop is not None:
             data.drop(drop, axis=1, inplace=True)
         data, y, remove, full_pipeline = initial_preprocesser(
-            data, instruction, preprocess)
+            data, instruction, preprocess, mca_threshold)
         logger("->", "Target Column Found: {}".format(remove))
         X_train = data['train']
         y_train = y['train']
@@ -264,6 +270,7 @@ def nearest_neighbors(instruction=None,
 def decision_tree(instruction,
             dataset=None,
             preprocess=True,
+            mca_threshold=None,
             test_size=0.2,
             drop=None):
     logger("Reading in dataset....")
@@ -275,7 +282,7 @@ def decision_tree(instruction,
         data.drop(drop, axis=1, inplace=True)
 
     data, y, remove, full_pipeline = initial_preprocesser(
-        data, instruction, preprocess)
+        data, instruction, preprocess, mca_threshold)
     logger("->", "Target Column Found: {}".format(remove))
 
     X_train = data['train']

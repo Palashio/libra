@@ -2,6 +2,9 @@
 # inserting into sys path
 
 import sys
+
+from nlp_queries import image_caption_query, generate_caption
+
 sys.path.insert(1, './preprocessing')
 sys.path.insert(1, './data_generation')
 sys.path.insert(1, './modeling')
@@ -18,7 +21,8 @@ from pandas.core.common import SettingWithCopyWarning
 import warnings
 import os
 
-#from nlp_queries import predict_text_sentiment, text_classification_query, get_summary, summarization_query
+from nlp_queries import predict_text_sentiment, text_classification_query, get_summary, summarization_query
+
 
 
 # Importing the T5 modules from huggingface/transformers
@@ -69,7 +73,7 @@ def logger(instruction, found="", slash=''):
         currLog += (" " * 2 * counter) + "|" + "\n"
         currLog += (" " * 2 * counter) + "|- " + str(instruction) + str(found)
         if instruction == "done...":
-            currLog += "\n"+"\n"
+            currLog += "\n" + "\n"
 
     counter += 1
     if instruction == "->":
@@ -112,6 +116,7 @@ class client:
 
     def neural_network_query(self,
                              instruction,
+                             mca_threshold=None,
                              drop=None,
                              preprocess=True,
                              test_size=0.2,
@@ -134,6 +139,7 @@ class client:
                 maximizer = "val_accuracy"
                 self.classification_query_ann(
                     instruction,
+                    mca_threshold=mca_threshold,
                     preprocess=preprocess,
                     test_size=test_size,
                     random_state=random_state,
@@ -146,6 +152,7 @@ class client:
             else:
                 self.regression_query_ann(
                     instruction,
+                    mca_threshold=mca_threshold,
                     preprocess=preprocess,
                     test_size=test_size,
                     random_state=random_state,
@@ -153,7 +160,7 @@ class client:
                     generate_plots=generate_plots,
                     callback_mode=callback_mode,
                     maximizer=maximizer,
-                    drop=None,
+                    drop=drop,
                     save_model=save_model,
                     save_path=save_path)
 
@@ -163,6 +170,7 @@ class client:
             self,
             instruction,
             drop=None,
+            mca_threshold=None,
             preprocess=True,
             test_size=0.2,
             random_state=49,
@@ -175,6 +183,7 @@ class client:
 
         self.models['regression_ANN'] = regression_ann(
             instruction=instruction,
+            mca_threshold=.25 if mca_threshold is None else mca_threshold,
             dataset=self.dataset,
             drop=drop,
             preprocess=preprocess,
@@ -192,6 +201,7 @@ class client:
     def classification_query_ann(
             self,
             instruction,
+            mca_threshold=None,
             preprocess=True,
             callback_mode='min',
             drop=None,
@@ -203,11 +213,10 @@ class client:
             save_model=False,
             save_path=os.getcwd()):
 
-        
-
         self.models['classification_ANN'] = classification_ann(
             instruction=instruction,
             dataset=self.dataset,
+            mca_threshold=.25 if mca_threshold is None else mca_threshold,
             drop=drop,
             preprocess=preprocess,
             test_size=test_size,
@@ -312,13 +321,13 @@ class client:
 
         # storing values the model dictionary
         self.models["convolutional_NN"] = convolutional(self,
-            read_mode=read_mode,
-            data_paths=data_paths,
-            new_folders=new_folders,
-            csv_file=csv_file,
-            label_column=label_column,
-            image_column=image_column,
-            training_ratio=training_ratio)
+                                                        read_mode=read_mode,
+                                                        data_paths=data_paths,
+                                                        new_folders=new_folders,
+                                                        csv_file=csv_file,
+                                                        label_column=label_column,
+                                                        image_column=image_column,
+                                                        training_ratio=training_ratio)
 
     # Sentiment analysis predict wrapper
     def predict_text_sentiment(self, text):
@@ -346,16 +355,65 @@ class client:
         self.models["Document Summarization"] = summarization_query(
             self=self, instruction=instruction)
 
+    # Image caption prediction
+    def generate_caption(self, image):
+        caption = generate_caption(self=self, image=image)
+        return ' '.join(caption[:len(caption) - 1])
+
+    # Image Caption query
+    def image_caption_query(self, instruction, epochs, random_state,
+                            preprocess=True,
+                            generate_plots=True):
+        self.models["Image Caption"] = image_caption_query(
+            self=self, epochs=epochs, instruction=instruction, random_state=random_state, preprocess=preprocess,
+            generate_plots=generate_plots)
+
     def dimensionality_reducer(self, instruction):
         dimensionality_reduc(instruction, self.dataset)
 
     def show_plots(self, model):
         print(self.models[model]['plots'].keys())
 
+    # shows the keys in the models dictionary
+    def model_data(self, model):
+        if model in self.models:
+            data = [key for key in self.models[model].keys()]
+            print(data)
+        else:
+            raise Exception("The requested model has not been applied to the client.")
+
+    # returns all operators applicable to the client's models dictionary
+    def operators(self, model):
+        defined = ['plots', 'accuracy', 'losses']
+        operations = [func + "()" for func in self.models[model].keys() if func in defined]
+        if len(operations) > 0:
+            print(operations)
+        else:
+            raise Exception(
+                "There are no built-in operators defined for this model. Please refer to the models dictionary.")
+
+
+    # show accuracy scores for client's model
+    def accuracy(self, model):
+        if 'accuracy' in self.models[model].keys():
+            return self.models[model]['accuracy']
+        elif 'cross_val_score' in self.models[model].keys():
+            return {'cross_val_score': self.models[model]['cross_val_score']}
+        else:
+            raise Exception("Accuracy is not defined for {}".format(model))
+
+    # show losses for client's model
+    def losses(self, model):
+        if 'losses' in self.models[model].keys():
+            return self.models[model]['losses']
+        else:
+            raise Exception("Losses are not defined for {}".format(model))
+
 
 # Easier to comment the one you don't want to run instead of typing them
 # out every time
-newClient = client('./data/housing.csv')
-newClient.decision_tree_query("Model ocean proximity")
+
+#newClient = client('./data/housing.csv')
+#newClient.decision_tree_query("Model ocean proximity")
 # newClient = client('./data/landslides_after_rainfall.csv').neural_network_query(instruction='Model distance',
 # drop=['id', 'geolocation', 'source_link', 'source_name'])
