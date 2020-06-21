@@ -6,7 +6,7 @@ sys.path.insert(1, './data_generation')
 sys.path.insert(1, './modeling')
 sys.path.insert(1, './plotting')
 
-from data_preprocesser import image_preprocess, add_resized_images, replace_images, process_color_channel, csv_image_preprocess
+from image_preprocesser import setwise_preprocessing, pathwise_preprocessing, classwise_preprocessing
 from data_reader import DataReader
 from keras.models import Sequential
 from keras.layers import (Dense, Conv2D, Flatten, Input, MaxPooling2D, )
@@ -63,12 +63,10 @@ def logger(instruction, found="", slash=''):
         else:
             currLog += (" " * 2 * counter) + str(instruction) + str(found)
     else:
-        currLog += (" " * 2 * counter) + "|"
-        currLog += "\n"
+        currLog += (" " * 2 * counter) + "|" + "\n"
         currLog += (" " * 2 * counter) + "|- " + str(instruction) + str(found)
         if instruction == "done...":
-            currLog += "\n"
-            currLog += "\n"
+            currLog += "\n"+"\n"
 
     counter += 1
     if instruction == "->":
@@ -103,7 +101,7 @@ def regression_ann(
             data.drop(drop, axis=1, inplace=True)
 
         data, y, target, full_pipeline = initial_preprocesser(data, instruction, preprocess, mca_threshold)
-
+        logger("->", "Target Column Found: {}".format(target))
         X_train = data['train']
         X_test = data['test']
 
@@ -207,6 +205,8 @@ def regression_ann(
         if save_model:
             save(final_model, save_model)
         # stores values in the client object models dictionary field
+        print("")
+        logger("Stored model under 'regression_ANN' key")
         return {
             'id': generate_id(),
             'model': final_model,
@@ -227,11 +227,14 @@ def classification_ann(instruction,
             drop=None,
             random_state=49,
             test_size=0.2,
-            epochs=5,
+            epochs=50,
             generate_plots=True,
             maximizer="val_loss",
             save_model=True,
             save_path=os.getcwd()):
+
+        global currLog
+        logger("reading in dataset...")
 
         dataReader = DataReader(dataset)
         data = dataReader.data_generator()
@@ -241,6 +244,7 @@ def classification_ann(instruction,
 
         data, y, remove, full_pipeline = initial_preprocesser(
             data, instruction, preprocess, mca_threshold)
+        logger("->", "Target Column Found: {}".format(remove))
 
         # Needed to make a custom label encoder due to train test split changes
         # Can still be inverse transformed, just a bit of extra work
@@ -266,6 +270,8 @@ def classification_ann(instruction,
         accuracies = []
         model_data = []
 
+        logger("establishing callback function...")
+
         # early stopping callback
         es = EarlyStopping(
             monitor=maximizer,
@@ -275,21 +281,22 @@ def classification_ann(instruction,
 
         i = 0
         model = get_keras_model_class(data, i, num_classes)
-
+        logger("training initial model...")
         history = model.fit(
             X_train, y_train, epochs=epochs, validation_data=(
                 X_test, y_test), callbacks=[es], verbose=0)
 
         model_data.append(model)
         models.append(history)
-        logger("->", "Initial number of layers: " + str(len(model.layers)))
+        logger("->", "Initial number of layers " + str(len(model.layers)))
 
-        logger("->", "Training Loss: " +
+        logger("->", "Training Loss: " + \
                str(history.history['loss'][len(history.history['val_loss']) - 1]), '|')
         logger("->", "Test Loss: " +
                str(history.history['val_loss'][len(history.history['val_loss']) -
                                                1]), '|')
         print("")
+
 
         losses.append(history.history[maximizer]
                       [len(history.history[maximizer]) - 1])
@@ -340,8 +347,11 @@ def classification_ann(instruction,
         plots = generate_classification_plots(
             models[len(models) - 1], data, y, model, X_test, y_test)
 
-        # if save_model:
-        #     save(final_model, save_model)
+        if save_model:
+            save(final_model, save_model)
+
+        print("")
+        logger("Stored model under 'classification_ANN' key")
 
         # stores the values and plots into the object dictionary
         return {
@@ -361,7 +371,7 @@ def classification_ann(instruction,
 
 
 def convolutional(self,
-                read_mode="sets",
+                read_mode="setwise",
                 data_paths=None,
                 new_folders=True,
                 csv_file=None,
@@ -375,26 +385,29 @@ def convolutional(self,
     logger("Generating datasets for classes...")
 
     # if image dataset in form of a data folder
-    if read_mode=="sets":
+    training_path = "/proc_training_set"
+    testing_path = "/proc_testing_set"
+
+    if read_mode=="setwise":
         if data_paths is None:
             data_path = os.getcwd()
         else:
             data_path = data_paths
         # process images
-        processInfo = image_preprocess(data_paths, new_folders)
-        if new_folders:
-            training_path = "/proc_training_set"
-            testing_path = "/proc_testing_set"
-        else:
+        processInfo = setwise_preprocessing(data_paths, new_folders)
+        if not new_folders:
             training_path = "/training_set"
             testing_path = "/testing_set"
 
     # if image dataset in form of csv
-    elif read_mode=="csv":
-        processInfo = csv_image_preprocess(csv_file, data_paths, label_column, image_column, training_ratio)
-        training_path = "/proc_training_set"
-        testing_path = "/proc_testing_set"
+    elif read_mode=="pathwise":
+        processInfo = pathwise_preprocessing(csv_file, data_paths, label_column, image_column, training_ratio)
         data_path = os.path.dirname(csv_file)
+
+    # if image dataset in form of one folder containing class folders
+    elif read_mode=="classwise":
+        processInfo = classwise_preprocessing(data_paths, training_ratio)
+        data_path = data_paths
 
     input_shape = (processInfo["height"], processInfo["width"], 3)
     input_single = (processInfo["height"], processInfo["width"])
@@ -450,7 +463,7 @@ def convolutional(self,
         validation_data=X_test,
         validation_steps=X_test.n //
         X_test.batch_size,
-        epochs=10)
+        epochs=25)
 
     # storing values the model dictionary
     return {

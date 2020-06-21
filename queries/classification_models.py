@@ -23,6 +23,9 @@ from generate_plots import (generate_clustering_plots,
                            generate_regression_plots,
                            generate_classification_plots)
 
+import warnings
+warnings.filterwarnings("ignore", category=UserWarning)
+
 currLog = ""
 counter = 0
 number = 0
@@ -52,12 +55,10 @@ def logger(instruction, found="", slash=''):
         else:
             currLog += (" " * 2 * counter) + str(instruction) + str(found)
     else:
-        currLog += (" " * 2 * counter) + "|"
-        currLog += "\n"
+        currLog += (" " * 2 * counter) + "|" + "\n"
         currLog += (" " * 2 * counter) + "|- " + str(instruction) + str(found)
         if instruction == "done...":
-            currLog += "\n"
-            currLog += "\n"
+            currLog += "\n" + "\n"
 
     counter += 1
     if instruction == "->":
@@ -119,8 +120,8 @@ def k_means_clustering(dataset= None,
             if i > 3 and inertiaStor[len(
                     inertiaStor) - 2] - 1000 <= inertiaStor[len(inertiaStor) - 1]:
                 break
-
         # generates the clustering plots approiately
+        logger("->", "Optimal number of clusters found: {}".format(i))
         if generate_plots:
             logger("Generating plots and storing in model")
             init_plots, plot_names = generate_clustering_plots(
@@ -130,6 +131,9 @@ def k_means_clustering(dataset= None,
 
             for x in range(len(plot_names)):
                 plots[str(plot_names[x])] = init_plots[x]
+
+        print("")
+        logger("Stored model under 'k_means_clustering' key")
 
         # stores plots and information in the dictionary client model
         return {
@@ -145,7 +149,6 @@ def train_svm(instruction,
             test_size=0.2,
             kernel='linear',
             preprocess=True,
-            mca_threshold=None,
             drop=None,
             cross_val_size=0.3):
 
@@ -159,7 +162,8 @@ def train_svm(instruction,
         if drop is not None:
             data.drop(drop, axis=1, inplace=True)
 
-        data, y, target, full_pipeline = initial_preprocesser(data, instruction, preprocess, mca_threshold)
+        data, y, target, full_pipeline = initial_preprocesser(data, instruction, preprocess)
+        logger("->", "Target Column Found: {}".format(target))
 
 
         X_train = data['train']
@@ -185,7 +189,14 @@ def train_svm(instruction,
         logger("Fitting Support Vector Machine")
         clf = svm.SVC(kernel=kernel)
         clf.fit(X_train, y_train)
-        logger("Storing information in client object...")
+
+        score = accuracy_score(
+                clf.predict(X_test),
+                y_test)
+
+        logger("->", "Accuracy found on testing set: {}".format(score))
+
+        logger("Stored model under 'svm' key")
         return {
             'id': generate_id(),
             "model": clf,
@@ -218,6 +229,7 @@ def nearest_neighbors(instruction=None,
             data.drop(drop, axis=1, inplace=True)
         data, y, remove, full_pipeline = initial_preprocesser(
             data, instruction, preprocess, mca_threshold)
+        logger("->", "Target Column Found: {}".format(remove))
         X_train = data['train']
         y_train = y['train']
         X_test = data['test']
@@ -242,7 +254,7 @@ def nearest_neighbors(instruction=None,
             knn.fit(X_train, y_train)
             models.append(knn)
             scores.append(accuracy_score(knn.predict(X_test), y_test))
-        logger("Storing information in client object...")
+        logger("Stored model under 'nearest_neighbors' key")
         knn = models[scores.index(min(scores))]
         return {
             'id': generate_id(),
@@ -270,6 +282,7 @@ def decision_tree(instruction,
 
     data, y, remove, full_pipeline = initial_preprocesser(
         data, instruction, preprocess, mca_threshold)
+    logger("->", "Target Column Found: {}".format(remove))
 
     X_train = data['train']
     y_train = y['train']
@@ -296,7 +309,12 @@ def decision_tree(instruction,
     clf = tree.DecisionTreeClassifier()
     clf = clf.fit(X_train, y_train)
 
-    logger("Storing information in client object...")
+    score = accuracy_score(
+                clf.predict(X_test),
+                y_test)
+    logger("->", "Score found on testing set: {}".format(score))
+    print("")
+    logger("Stored model under 'decision_tree' key")
 
     clearLog()
 
@@ -304,9 +322,7 @@ def decision_tree(instruction,
             'id': generate_id(),
             "model": clf,
             "target": remove,
-            "accuracy_score": accuracy_score(
-                clf.predict(X_test),
-                y_test),
+            "accuracy_score": score,
             "preprocesser": full_pipeline,
             "interpeter": label_mappings,
             "cross_val_score": cross_val_score(

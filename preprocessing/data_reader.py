@@ -34,6 +34,7 @@ class DataReader():
                     df[data] = df[data].astype(float)
         elif self.retrieve_extension() == '.json':
             df = pd.read_json(self.filepath)
+
         return df
     
     # Returns a list of available GPUs on the current device
@@ -47,11 +48,13 @@ class DataReader():
     
     # Trims the dataset based off of user preference and the ratio of data to be trimmed specified
     def random_trim (self):
-        if self.trim == True:
+        if self.trim == True and self.is_gpu_available():
             trimmed_df = self.data_generator().sample(frac=(1.0 - self.trim_ratio))
             return trimmed_df
         elif self.trim == False:
             return self.data_generator()
+    # def stratified_strim(self):
+    #     if
 
     # If the device running the program has a GPU, no trimming will occur unles the user specifies so, and vice-versa
     def trim_gpu (self):
@@ -61,3 +64,10 @@ class DataReader():
             return self.data_generator()
         else:
             return self.random_trim()
+
+# print(len(pd.read_csv("./data/housing.csv")))
+
+# dataReader = DataReader("./data/housing.csv", trim=True)
+# data = dataReader.data_generator()
+
+# print(len(data))

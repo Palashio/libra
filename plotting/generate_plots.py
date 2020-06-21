@@ -2,12 +2,14 @@ import sys
 
 import matplotlib.pyplot as plt
 import seaborn as sns
+import warnings
 
 sys.path.insert(1, './preprocessing')
 sys.path.insert(1, './data_generation')
 sys.path.insert(1, './modeling')
 sys.path.insert(1, './plotting')
 
+warnings.filterwarnings("ignore", category=RuntimeWarning) 
 
 # generates all of the plots in clustering
 
@@ -23,7 +25,6 @@ def generate_clustering_plots(kmeans, dataPandas, dataset):
                         c=kmeans.labels_, cmap='rainbow')
             plt.xlabel(str(dataPandas.columns[x]))
             plt.ylabel(str(dataPandas.columns[y]))
-            plt.show()
             plots.append(img)
             plot_names.append(
                 dataPandas.columns[x] +

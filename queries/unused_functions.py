@@ -89,3 +89,19 @@
 #     print("Dataset Description")
 #     print("-------------------------")
 #     print(pdtabulate(data[column_name]).describe())
+
+
+#def booster(instruction,dataset,y,target="",obj):
+#    #obj=["reg:linear","multi:softmax "]
+#    if target == "":
+#        y=data_y(instruction)
+#
+#    X_train, X_test, y_train, y_test = train_test_split(
+#    dataset, y, test_size=0.2, random_state=49)
+#    clf = XGBClassifier(objective=obj,learning_rate =0.1,silent=1,alpha = 10)
+#    clf.fit(X_train, y_train)
+#    y_pred=clf.predict(X_test)
+#    return accuracy_score(y_pred, y_test), y_pred 
+#    #importance graph
+#    #plt.rcParams['figure.figsize'] = [5, 5]
+#    #plt.show()

@@ -159,7 +159,7 @@ def image_preprocess(data_path, new_folder=True):
                 except BaseException:
                     continue
 
-    classification = int(classification / 2)
+    classification = int(classification/2)
     height, width = calculate_medians(heights, widths)
 
     # resize images
@@ -219,7 +219,6 @@ def save_image(path, img, img_name, classification):
     cv2.imwrite(
         path + "/" + classification + "/" + img_name,
         img)
-
 
 # calculates the medians of the given lists of height and widths
 def calculate_medians(heights, widths):
@@ -358,88 +357,6 @@ def clustering_preprocessor(data):
     new_columns = generate_column_labels(full_pipeline, numeric_columns)
 
     return pd.DataFrame(data, columns=new_columns), full_pipeline
-
-
-# processes a csv_file with containing image paths and creates a testing/training folders
-# with resized images inside the same directory as the csv file
-def csv_image_preprocess(csv_file, data_paths, label, image_column, training_ratio):
-    df = pd.read_csv(csv_file)
-    # get file extension
-    _, file_extension = os.path.splitext(listdir(data_paths[0])[0])
-
-    # select random row to find which column is image path
-    random_row = df.sample()
-    need_file_extension = False
-    path_included = False
-
-    while image_column is None:
-        for column, value in random_row.iloc[0].items():
-            if type(value) is str:
-                # add file extension if not included
-                if file_extension not in value:
-                    file = value + file_extension
-                # look through all data_paths for file
-                for data_path in data_paths:
-                    if os.path.exists(data_path + "/" + file):
-                        if file_extension in file:
-                            need_file_extension = True
-                        image_column = column
-                        break
-                    elif os.path.exists(file):
-                        path_included = True
-                        if file_extension in file:
-                            need_file_extension = True
-                        image_column = column
-                        break
-    else:
-        if file_extension not in df.iloc[0][image_column]:
-            need_file_extension = True
-        if os.path.exists(df.iloc[0][image_column]):
-            path_included = True
-
-    df = df[[image_column, label]].dropna()
-
-    if need_file_extension:
-        df[image_column] = df[image_column] + file_extension
-    heights = []
-    widths = []
-    classifications = df[label].nunique()
-    image_list = []
-
-    # get the median heights and widths
-    for index, row in df.iterrows():
-        for data_path in data_paths:
-            p = row[image_column] if path_included else data_path + "/" + row[image_column]
-            img = cv2.imread(p)
-            if img is not None:
-                break
-        image_list.append(img)
-        heights.append(img.shape[0])
-        widths.append(img.shape[1])
-
-    height, width = calculate_medians(heights, widths)
-
-    # create training and testing folders
-    path = os.path.dirname(csv_file)
-    create_folder(path, "proc_training_set")
-    create_folder(path, "proc_testing_set")
-    # create classification folders
-    for classification in df[label].unique():
-        create_folder(path + "/proc_training_set", classification)
-        create_folder(path + "/proc_testing_set", classification)
-
-    # save images into correct folder
-    for index, row in df.iterrows():
-        # resize images
-        img = process_color_channel(image_list[index], height, width)
-        p = "proc_" + (os.path.basename(row[image_column]) if path_included else row[image_column])
-        if (index / df.head.shape[0]) < training_ratio:
-            save_image(path + "/proc_training_set", img, p, row[label])
-        else:
-            save_image(path + "/proc_testing_set", img, p, row[label])
-
-    return {"num_categories": classifications, "height": height, "width": width}
-
 
 # Method to calculate how many columns the data set will
 # have after one hot encoding
