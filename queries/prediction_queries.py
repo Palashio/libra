@@ -2,6 +2,9 @@
 # inserting into sys path
 
 import sys
+
+from nlp_queries import image_caption_query, generate_caption
+
 sys.path.insert(1, './preprocessing')
 sys.path.insert(1, './data_generation')
 sys.path.insert(1, './modeling')
@@ -19,6 +22,7 @@ import warnings
 import os
 
 from nlp_queries import predict_text_sentiment, text_classification_query, get_summary, summarization_query
+
 
 
 # Importing the T5 modules from huggingface/transformers
@@ -71,7 +75,7 @@ def logger(instruction, found="", slash=''):
         currLog += (" " * 2 * counter) + "|" + "\n"
         currLog += (" " * 2 * counter) + "|- " + str(instruction) + str(found)
         if instruction == "done...":
-            currLog += "\n"+"\n"
+            currLog += "\n" + "\n"
 
     counter += 1
     if instruction == "->":
@@ -211,8 +215,6 @@ class client:
             save_model=False,
             save_path=os.getcwd()):
 
-
-
         self.models['classification_ANN'] = classification_ann(
             instruction=instruction,
             dataset=self.dataset,
@@ -321,13 +323,13 @@ class client:
 
         # storing values the model dictionary
         self.models["convolutional_NN"] = convolutional(self,
-            read_mode=read_mode,
-            data_paths=data_paths,
-            new_folders=new_folders,
-            csv_file=csv_file,
-            label_column=label_column,
-            image_column=image_column,
-            training_ratio=training_ratio)
+                                                        read_mode=read_mode,
+                                                        data_paths=data_paths,
+                                                        new_folders=new_folders,
+                                                        csv_file=csv_file,
+                                                        label_column=label_column,
+                                                        image_column=image_column,
+                                                        training_ratio=training_ratio)
 
     # Sentiment analysis predict wrapper
     def predict_text_sentiment(self, text):
@@ -355,6 +357,19 @@ class client:
         self.models["Document Summarization"] = summarization_query(
             self=self, instruction=instruction)
 
+    # Image caption prediction
+    def generate_caption(self, image):
+        caption = generate_caption(self=self, image=image)
+        return ' '.join(caption[:len(caption) - 1])
+
+    # Image Caption query
+    def image_caption_query(self, instruction, epochs, random_state,
+                            preprocess=True,
+                            generate_plots=True):
+        self.models["Image Caption"] = image_caption_query(
+            self=self, epochs=epochs, instruction=instruction, random_state=random_state, preprocess=preprocess,
+            generate_plots=generate_plots)
+
     def dimensionality_reducer(self, instruction):
         dimensionality_reduc(instruction, self.dataset)
 
@@ -376,14 +391,16 @@ class client:
         if len(operations) > 0:
             print(operations)
         else:
-            raise Exception("There are no built-in operators defined for this model. Please refer to the models dictionary.")
+            raise Exception(
+                "There are no built-in operators defined for this model. Please refer to the models dictionary.")
+
 
     # show accuracy scores for client's model
     def accuracy(self, model):
         if 'accuracy' in self.models[model].keys():
             return self.models[model]['accuracy']
         elif 'cross_val_score' in self.models[model].keys():
-            return {'cross_val_score' : self.models[model]['cross_val_score']}
+            return {'cross_val_score': self.models[model]['cross_val_score']}
         else:
             raise Exception("Accuracy is not defined for {}".format(model))
 
@@ -394,9 +411,11 @@ class client:
         else:
             raise Exception("Losses are not defined for {}".format(model))
 
+
 # Easier to comment the one you don't want to run instead of typing them
 # out every time
-# newClient = client('./data/housing.csv')
-# newClient.neural_network_query("Model the median house value", epochs=2, save_model=False)
-newClient = client('./data/landslides_after_rainfall.csv')
-newClient.neural_network_query(instruction='Model distance', drop=['id', 'geolocation', 'source_link', 'source_name'])
+
+#newClient = client('./data/housing.csv')
+#newClient.decision_tree_query("Model ocean proximity")
+# newClient = client('./data/landslides_after_rainfall.csv').neural_network_query(instruction='Model distance',
+# drop=['id', 'geolocation', 'source_link', 'source_name'])
