@@ -149,6 +149,7 @@ def train_svm(instruction,
             test_size=0.2,
             kernel='linear',
             preprocess=True,
+            mca_threshold=None,
             drop=None,
             cross_val_size=0.3):
 
@@ -162,7 +163,7 @@ def train_svm(instruction,
         if drop is not None:
             data.drop(drop, axis=1, inplace=True)
 
-        data, y, target, full_pipeline = initial_preprocesser(data, instruction, preprocess)
+        data, y, target, full_pipeline = initial_preprocesser(data, instruction, preprocess, mca_threshold)
         logger("->", "Target Column Found: {}".format(target))
 
 
