@@ -145,6 +145,7 @@ def train_svm(instruction,
             test_size=0.2,
             kernel='linear',
             preprocess=True,
+            mca_threshold=None,
             drop=None,
             cross_val_size=0.3):
 
@@ -158,7 +159,7 @@ def train_svm(instruction,
         if drop is not None:
             data.drop(drop, axis=1, inplace=True)
 
-        data, y, target, full_pipeline = initial_preprocesser(data, instruction, preprocess)
+        data, y, target, full_pipeline = initial_preprocesser(data, instruction, preprocess, mca_threshold)
 
 
         X_train = data['train']
@@ -202,7 +203,8 @@ def train_svm(instruction,
 
 
 def nearest_neighbors(instruction=None,
-            dataset = None, 
+            dataset = None,
+            mca_threshold=None,
             preprocess=True,
             drop=None,
             min_neighbors=3,
@@ -215,7 +217,7 @@ def nearest_neighbors(instruction=None,
         if drop is not None:
             data.drop(drop, axis=1, inplace=True)
         data, y, remove, full_pipeline = initial_preprocesser(
-            data, instruction, preprocess)
+            data, instruction, preprocess, mca_threshold)
         X_train = data['train']
         y_train = y['train']
         X_test = data['test']
@@ -255,6 +257,7 @@ def nearest_neighbors(instruction=None,
 def decision_tree(instruction,
             dataset=None,
             preprocess=True,
+            mca_threshold=None,
             test_size=0.2,
             drop=None):
     logger("Reading in dataset....")
@@ -266,7 +269,7 @@ def decision_tree(instruction,
         data.drop(drop, axis=1, inplace=True)
 
     data, y, remove, full_pipeline = initial_preprocesser(
-        data, instruction, preprocess)
+        data, instruction, preprocess, mca_threshold)
 
     X_train = data['train']
     y_train = y['train']

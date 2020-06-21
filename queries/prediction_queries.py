@@ -167,6 +167,7 @@ class client:
             self,
             instruction,
             drop=None,
+            mca=None,
             preprocess=True,
             test_size=0.2,
             random_state=49,

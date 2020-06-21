@@ -21,7 +21,7 @@ import cv2
 from prince.mca import MCA
 
 
-def initial_preprocesser(data, instruction, preprocess):
+def initial_preprocesser(data, instruction, preprocess, mca_threshold):
     # Scans for object columns just in case we have a datetime column that
     # isn't detected
     object_columns = [
@@ -55,7 +55,7 @@ def initial_preprocesser(data, instruction, preprocess):
     # preprocess the dataset
     full_pipeline = None
     if preprocess:
-        data, full_pipeline = structured_preprocesser(data)
+        data, full_pipeline = structured_preprocesser(data, mca_threshold)
     else:
         data.fillna(0, inplace=True)
 
@@ -65,7 +65,7 @@ def initial_preprocesser(data, instruction, preprocess):
 
 
 # Preprocesses the data appropriately for single reg data
-def structured_preprocesser(data):
+def structured_preprocesser(data, mca_threshold):
     # Preprocessing for datetime columns
     process_dates(data)
 
@@ -89,7 +89,9 @@ def structured_preprocesser(data):
     if len(categorical_columns) != 0:
         combined = pd.concat([data['train'], data['test']], axis=0)
 
-        if too_many_values(combined[categorical_columns], combined.shape[0]*.25):
+        mca_threshold = combined.shape[0]*.25 if mca_threshold is None else combined.shape[0] * mca_threshold
+
+        if too_many_values(combined[categorical_columns], mca_threshold):
             cat_pipeline = Pipeline([
                 ('imputer', SimpleImputer(strategy="constant", fill_value="")),
                 ('one_hot_encoder', OneHotEncoder(handle_unknown='ignore')),
