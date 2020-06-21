@@ -14,10 +14,10 @@ from image_preprocessing_ver2 import ImageDataGenerator
 # logits came from xception
 from keras.losses import categorical_crossentropy as logloss
 from keras.metrics import categorical_accuracy, top_k_categorical_accuracy
-from keras import backend as K
+from keras import backend
 
-import matplotlib.pyplot as plt
-
+temperature, lambda_const = 5.0, 0.2
+num_classes=2
 
 def networkmodule(module_name, x, compress, expand, weight_decay=None, trainable=False):
     #weight_decay=1e-4
@@ -94,6 +94,46 @@ def SqueezeNet(weight_decay, image_size=64):
     return model
 
 # Part 2 - Fitting the CNN to the images
+def knowledge_distillation_loss(y_true, y_pred, lambda_const,num_classes):    
+    
+    # split in 
+    #    onehot hard true targets
+    #    logits from xception
+    y_true, logits = y_true[:, :num_classes], y_true[:, num_classes:]
+    
+    # convert logits to soft targets
+    y_soft = backend.softmax(logits/temperature)
+    
+    # split in 
+    #    usual output probabilities
+    #    probabilities made softer with temperature
+    y_pred, y_pred_soft = y_pred[:, :num_classes], y_pred[:, num_classes:]    
+    
+    return lambda_const*logloss(y_true, y_pred) + logloss(y_soft, y_pred_soft)
+
+def accuracy(y_true, y_pred):
+    y_true = y_true[:, :num_classes]
+    y_pred = y_pred[:, :num_classes]
+    return categorical_accuracy(y_true, y_pred)
+
+
+def top_5_accuracy(y_true, y_pred):
+    y_true = y_true[:, :num_classes]
+    y_pred = y_pred[:, :num_classes]
+    return top_k_categorical_accuracy(y_true, y_pred)
+
+def categorical_crossentropy(y_true, y_pred):
+    y_true = y_true[:, :num_classes]
+    y_pred = y_pred[:, :num_classes]
+    return logloss(y_true, y_pred)
+
+
+# logloss with only soft probabilities and targets
+def soft_logloss(y_true, y_pred):     
+    logits = y_true[:, num_classes:]
+    y_soft = backend.softmax(logits/temperature)
+    y_pred_soft = y_pred[:, num_classes:]    
+    return logloss(y_soft, y_pred_soft)
 
 train_datagen = ImageDataGenerator(rescale = 1./255,
                                    shear_range = 0.2,
@@ -113,9 +153,6 @@ val_generator = test_datagen.flow_from_directory('dataset/test_set',
                                             class_mode = 'binary')
 
 
-###############################################################################
-
-temperature = 5.0
 model = SqueezeNet(weight_decay=1e-4, image_size=64)
 
 # remove softmax
@@ -133,52 +170,9 @@ output = concatenate([probabilities, probabilities_T])
 model = Model(model.input, output)
 # now model outputs 512 dimensional vectors
 
-def knowledge_distillation_loss(y_true, y_pred, lambda_const):    
-    
-    # split in 
-    #    onehot hard true targets
-    #    logits from xception
-    y_true, logits = y_true[:, :256], y_true[:, 256:]
-    
-    # convert logits to soft targets
-    y_soft = K.softmax(logits/temperature)
-    
-    # split in 
-    #    usual output probabilities
-    #    probabilities made softer with temperature
-    y_pred, y_pred_soft = y_pred[:, :256], y_pred[:, 256:]    
-    
-    return lambda_const*logloss(y_true, y_pred) + logloss(y_soft, y_pred_soft)
-
-def accuracy(y_true, y_pred):
-    y_true = y_true[:, :256]
-    y_pred = y_pred[:, :256]
-    return categorical_accuracy(y_true, y_pred)
-
-
-def top_5_accuracy(y_true, y_pred):
-    y_true = y_true[:, :256]
-    y_pred = y_pred[:, :256]
-    return top_k_categorical_accuracy(y_true, y_pred)
-
-def categorical_crossentropy(y_true, y_pred):
-    y_true = y_true[:, :256]
-    y_pred = y_pred[:, :256]
-    return logloss(y_true, y_pred)
-
-
-# logloss with only soft probabilities and targets
-def soft_logloss(y_true, y_pred):     
-    logits = y_true[:, 256:]
-    y_soft = K.softmax(logits/temperature)
-    y_pred_soft = y_pred[:, 256:]    
-    return logloss(y_soft, y_pred_soft)
-
-lambda_const = 0.2
-
 model.compile(
     optimizer=optimizers.SGD(lr=1e-2, momentum=0.9, nesterov=True), 
-    loss=lambda y_true, y_pred: knowledge_distillation_loss(y_true, y_pred, lambda_const), 
+    loss=lambda y_true, y_pred: knowledge_distillation_loss(y_true, y_pred, lambda_const,num_classes), 
     metrics=[accuracy, top_5_accuracy, categorical_crossentropy, soft_logloss]
 )
 model.fit_generator(
@@ -191,9 +185,29 @@ model.fit_generator(
     validation_data=val_generator, validation_steps=80, workers=4
 )
 
-val_generator_no_shuffle = data_generator.flow_from_directory(
-    data_dir + 'val', val_logits,
-    target_size=(64, 64),
-    batch_size=64, shuffle=False
-)
-print(model.evaluate_generator(val_generator_no_shuffle, 80))
+
+'''
+def num_():
+    training_path = "/proc_training_set"
+    testing_path = "/proc_testing_set"
+
+    if read_mode=="setwise":
+        if data_paths is None:
+            data_path = os.getcwd()
+        else:
+            data_path = data_paths
+        # process images
+        processInfo = setwise_preprocessing(data_paths, new_folders)
+
+    # if image dataset in form of csv
+    elif read_mode=="pathwise":
+        processInfo = pathwise_preprocessing(csv_file, data_paths, label_column, image_column, training_ratio)
+        data_path = os.path.dirname(csv_file)
+
+    # if image dataset in form of one folder containing class folders
+    elif read_mode=="classwise":
+        processInfo = classwise_preprocessing(data_paths, training_ratio)
+        data_path = data_paths
+
+    num_classes = processInfo["num_categories"]
+'''
