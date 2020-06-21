@@ -116,6 +116,7 @@ class client:
 
     def neural_network_query(self,
                              instruction,
+                             mca_threshold=None,
                              drop=None,
                              preprocess=True,
                              test_size=0.2,
@@ -138,6 +139,7 @@ class client:
                 maximizer = "val_accuracy"
                 self.classification_query_ann(
                     instruction,
+                    mca_threshold=mca_threshold
                     preprocess=preprocess,
                     test_size=test_size,
                     random_state=random_state,
@@ -150,6 +152,7 @@ class client:
             else:
                 self.regression_query_ann(
                     instruction,
+                    mca_threshold=mca_threshold,
                     preprocess=preprocess,
                     test_size=test_size,
                     random_state=random_state,
