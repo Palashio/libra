@@ -1,5 +1,13 @@
 import numpy as np
 import tensorflow as tf
+import os
+
+
+def get_path_column(df):
+    for row, col in zip(df.iterrows(), df.columns):
+        for entry in row[1]:
+            if os.path.exists(entry):
+                return col
 
 
 def load_image(image_path):
@@ -100,7 +108,7 @@ class RNN_Decoder(tf.keras.Model):
         return tf.zeros((batch_size, self.units))
 
 
-def generate_caption(image, decoder, encoder, tokenizer, image_features_extract_model, max_length=500):
+def generate_caption_helper(image, decoder, encoder, tokenizer, image_features_extract_model, max_length=500):
     hidden = decoder.reset_state(batch_size=1)
 
     temp_input = tf.expand_dims(load_image(image)[0], 0)

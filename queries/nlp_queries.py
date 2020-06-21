@@ -16,7 +16,8 @@ from modeling.prediction_model_creation import get_keras_text_class
 from plotting.generate_plots import generate_classification_plots
 from preprocessing.NLP_preprocessing import get_target_values, text_clean_up, lemmatize_text, encode_text
 from preprocessing.huggingface_model_finetune_helper import CustomDataset, train, inference
-from preprocessing.image_caption_helpers import load_image, map_func, CNN_Encoder, RNN_Decoder, generate_caption
+from preprocessing.image_caption_helpers import load_image, map_func, CNN_Encoder, RNN_Decoder, get_path_column, \
+    generate_caption_helper
 from queries.dimensionality_red_queries import logger
 
 
@@ -178,21 +179,24 @@ def summarization_query(self, instruction,
     return self.models["Document Summarization"]
 
 
-def get_caption(self, image):
+def generate_caption(self, image):
     modelInfo = self.models.get("Image Caption")
     decoder = modelInfo['decoder']
     encoder = modelInfo['encoder']
     tokenizer = modelInfo['tokenizer']
     image_features_extract_model = modelInfo['feature_extraction']
-    return generate_caption(image, decoder, encoder, tokenizer, image_features_extract_model)
+    return generate_caption_helper(image, decoder, encoder, tokenizer, image_features_extract_model)
 
 
 # Image Caption Generation query
 def image_caption_query(self, instruction,
+                        epochs,
                         preprocess=True,
-                        epochs=20,
                         random_state=49,
-                        generate_plots=True):
+                        generate_plots=False):
+    np.random.seed(random_state)
+    tf.random.set_seed(random_state)
+
     df = pd.read_csv(self.dataset)
     df.fillna(0, inplace=True)
 
@@ -200,11 +204,12 @@ def image_caption_query(self, instruction,
 
     train_captions = []
     img_name_vector = []
-    x = get_similar_column(get_value_instruction(instruction), df)
-    y = get_similar_column(get_value_instruction("caption"), df)
+    y = get_similar_column(get_value_instruction(instruction), df)
+    x = get_path_column(df)
 
     for row in df.iterrows():
-        caption = '<start> ' + row[1][y] + ' <end>'
+        if preprocess:
+            caption = '<start> ' + row[1][y] + ' <end>'
         image_id = row[1][x]
         image_path = image_id
 
@@ -238,12 +243,10 @@ def image_caption_query(self, instruction,
                                                       oov_token="<unk>",
                                                       filters='!"#$%&()*+.,-/:;=?@[\]^_`{|}~ ')
     tokenizer.fit_on_texts(train_captions)
-    train_seqs = tokenizer.texts_to_sequences(train_captions)
     tokenizer.word_index['<pad>'] = 0
     tokenizer.index_word[0] = '<pad>'
     train_seqs = tokenizer.texts_to_sequences(train_captions)
     cap_vector = tf.keras.preprocessing.sequence.pad_sequences(train_seqs, padding='post')
-    max_length = 500
 
     BATCH_SIZE = 1
     BUFFER_SIZE = 1000
@@ -313,7 +316,7 @@ def image_caption_query(self, instruction,
 
     logger("Training model...")
 
-    for epoch in range(20):
+    for epoch in range(epochs):
         total_loss = 0
 
         for (batch, (img_tensor, target)) in enumerate(dataset):
@@ -326,9 +329,9 @@ def image_caption_query(self, instruction,
     logger("Storing information in client object...")
 
     dir_name = os.path.dirname(img_name_vector[0])
-    test = os.listdir(dir_name)
+    files = os.listdir(dir_name)
 
-    for item in test:
+    for item in files:
         if item.endswith(".npy"):
             os.remove(os.path.join(dir_name, item))
 
@@ -336,6 +339,9 @@ def image_caption_query(self, instruction,
         "decoder": decoder,
         "encoder": encoder,
         "tokenizer": tokenizer,
-        "feature_extraction": image_features_extract_model
+        "feature_extraction": image_features_extract_model,
+        'losses': {
+            'training_loss': total_loss
+        }
     }
     return self.models["Image Caption"]

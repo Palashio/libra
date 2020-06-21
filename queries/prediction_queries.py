@@ -3,7 +3,7 @@
 
 import sys
 
-from nlp_queries import get_caption, image_caption_query
+from nlp_queries import image_caption_query, generate_caption
 
 sys.path.insert(1, './preprocessing')
 sys.path.insert(1, './data_generation')
@@ -350,17 +350,17 @@ class client:
             self=self, instruction=instruction)
 
     # Image caption prediction
-    def get_caption(self, image):
-        caption = get_caption(self=self, image=image)
-        return ' '.join(caption[:len(caption)-1])
+    def generate_caption(self, image):
+        caption = generate_caption(self=self, image=image)
+        return ' '.join(caption[:len(caption) - 1])
 
     # Image Caption query
-    def image_caption_query(self, instruction,
+    def image_caption_query(self, instruction, epochs, random_state,
                             preprocess=True,
-                            random_state=49,
                             generate_plots=True):
         self.models["Image Caption"] = image_caption_query(
-            self=self, instruction=instruction)
+            self=self, epochs=epochs, instruction=instruction, random_state=random_state, preprocess=preprocess,
+            generate_plots=generate_plots)
 
     def dimensionality_reducer(self, instruction):
         dimensionality_reduc(instruction, self.dataset)
@@ -405,11 +405,7 @@ class client:
 
 # Easier to comment the one you don't want to run instead of typing them
 # out every time
-# newClient = client('./data/housing.csv')
-# newClient.decision_tree_query("Model ocean proximity")
+newClient = client('./data/housing.csv')
+newClient.decision_tree_query("Model ocean proximity")
 # newClient = client('./data/landslides_after_rainfall.csv').neural_network_query(instruction='Model distance',
 # drop=['id', 'geolocation', 'source_link', 'source_name'])
-
-newClient = client('/Users/anasawadalla/PycharmProjects/libra/data/image-caption.csv')
-newClient.image_caption_query("image-id")
-print(newClient.get_caption("/Users/anasawadalla/PycharmProjects/libra/data/image_caption_pics/1.png"))
