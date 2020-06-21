@@ -89,7 +89,7 @@ def structured_preprocesser(data):
     if len(categorical_columns) != 0:
         combined = pd.concat([data['train'], data['test']], axis=0)
 
-        if too_many_values(combined[categorical_columns]):
+        if too_many_values(combined[categorical_columns], combined.shape[0]*.25):
             cat_pipeline = Pipeline([
                 ('imputer', SimpleImputer(strategy="constant", fill_value="")),
                 ('one_hot_encoder', OneHotEncoder(handle_unknown='ignore')),
@@ -442,11 +442,13 @@ def csv_image_preprocess(csv_file, data_paths, label, image_column, training_rat
 # Method to calculate how many columns the data set will
 # have after one hot encoding
 # Decides whether MCA is needed or not essentially
-def too_many_values(data):
+# mca_threshold is the len of the dataset * .25 to calculate the proportion of
+# when to apply MCA
+def too_many_values(data, mca_threshold):
     total_unique = 0
     for col in data:
 
-        if total_unique > 100: return True
+        if total_unique > mca_threshold: return True
         # Use value_counts() due to same columns having strings and floats
         total_unique += len(data[col].value_counts())
 
