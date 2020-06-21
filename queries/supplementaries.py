@@ -46,15 +46,13 @@ def logger(instruction, found="", slash=''):
         else:
             currLog += (" " * 2 * counter) + str(instruction) + str(found)
     else:
-        currLog += (" " * 2 * counter) + "|"
-        currLog += "\n"
+        #currLog += (" " * 2 * counter) + "|" + "\n"
         currLog += (" " * 2 * counter) + "|- " + str(instruction) + str(found)
         if instruction == "done...":
-            currLog += "\n"
-            currLog += "\n"
+            currLog += "\n"+ "\n"
 
     counter += 1
-    if instruction == "->":
+    if instruction == "|":
         print(currLog, end="")
     else:
         print(currLog)
@@ -80,7 +78,7 @@ def tune_helper(
 
     # processing for regression feed forward NN
     if model_to_tune == 'regression_ANN':
-        logger("Tuning model hyperparameters")
+        logger("Tuning model hyperparameters...")
         dataReader = DataReader(dataset)
         data = dataReader.data_generator()
         target = models['regression_ANN']['target']
@@ -101,7 +99,7 @@ def tune_helper(
 
         # processing for classification feed forward NN
     if model_to_tune == "classification_ANN":
-        logger("Tuning model hyperparameters")
+        logger("Tuning model hyperparameters...")
         dataReader = DataReader(dataset)
         data = dataReader.data_generator()
         target = models['classification_ANN']['target']
@@ -125,7 +123,7 @@ def tune_helper(
         return returned_model
         # processing for convolutional NN
     if model_to_tune == "convolutional_NN":
-        logger("Tuning model hyperparameters")
+        logger("Tuning model hyperparameters...")
         X = models['convolutional_NN']["X"]
         y = models['convolutional_NN']["y"]
         model = tuneCNN(

@@ -55,13 +55,13 @@ def logger(instruction, found="", slash=''):
         else:
             currLog += (" " * 2 * counter) + str(instruction) + str(found)
     else:
-        currLog += (" " * 2 * counter) + "|" + "\n"
+        #currLog += (" " * 2 * counter) + "|" + "\n"
         currLog += (" " * 2 * counter) + "|- " + str(instruction) + str(found)
         if instruction == "done...":
             currLog += "\n" + "\n"
 
     counter += 1
-    if instruction == "->":
+    if instruction == "|":
         print(currLog, end="")
     else:
         print(currLog)
@@ -122,6 +122,7 @@ def k_means_clustering(dataset= None,
                 break
         # generates the clustering plots approiately
         logger("->", "Optimal number of clusters found: {}".format(i))
+
         if generate_plots:
             logger("Generating plots and storing in model")
             init_plots, plot_names = generate_clustering_plots(
@@ -132,7 +133,6 @@ def k_means_clustering(dataset= None,
             for x in range(len(plot_names)):
                 plots[str(plot_names[x])] = init_plots[x]
 
-        print("")
         logger("Stored model under 'k_means_clustering' key")
 
         # stores plots and information in the dictionary client model
@@ -187,7 +187,7 @@ def train_svm(instruction,
 
 
         # Fitting to SVM and storing in the model dictionary
-        logger("Fitting Support Vector Machine")
+        logger("Fitting Support Vector Machine...")
         clf = svm.SVC(kernel=kernel)
         clf.fit(X_train, y_train)
 
@@ -197,7 +197,7 @@ def train_svm(instruction,
 
         logger("->", "Accuracy found on testing set: {}".format(score))
 
-        logger("Stored model under 'svm' key")
+        logger('->',"Stored model under 'svm' key")
         return {
             'id': generate_id(),
             "model": clf,
@@ -314,7 +314,6 @@ def decision_tree(instruction,
                 clf.predict(X_test),
                 y_test)
     logger("->", "Score found on testing set: {}".format(score))
-    print("")
     logger("Stored model under 'decision_tree' key")
 
     clearLog()

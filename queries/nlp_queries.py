@@ -20,7 +20,6 @@ from preprocessing.image_caption_helpers import load_image, map_func, CNN_Encode
     generate_caption_helper
 from queries.dimensionality_red_queries import logger
 
-
 def predict_text_sentiment(self, text):
     sentimentInfo = self.models.get("Text Classification LSTM")
     vocab = sentimentInfo["vocabulary"]
@@ -73,7 +72,7 @@ def text_classification_query(self, instruction,
     score, acc = model.evaluate(X_test, y_test,
                                 batch_size=32)
 
-    logger("Test accuracy:" + str(acc))
+    logger("->","Test accuracy:" + str(acc))
 
     if generate_plots:
         # generates appropriate classification plots by feeding all
@@ -168,7 +167,7 @@ def summarization_query(self, instruction,
     optimizer = torch.optim.Adam(
         params=model.parameters(), lr=LEARNING_RATE)
 
-    logger('Initiating Fine-Tuning for the model on your dataset')
+    logger('Initiating Fine-Tuning for the model on your dataset...')
 
     for epoch in range(TRAIN_EPOCHS):
         train(epoch, tokenizer, model, device, training_loader, optimizer)

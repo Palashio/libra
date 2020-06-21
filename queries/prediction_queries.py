@@ -90,7 +90,7 @@ class client:
     def __init__(self, data):
         logger("creating object...")
         self.dataset = data
-        logger("loading dataset...")
+        logger("Loading dataset...")
         self.models = {}
         self.old_models = {}
         logger("done...")
