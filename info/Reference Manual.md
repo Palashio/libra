@@ -718,6 +718,9 @@ loss='categorical_crossentropy' (`str`)
 
 String representation of the type of loss function used by the model (is set by default to 'categorical_crossentropy', or categorical cross-entropy loss function that measures model based of logarithmic loss)
 
+metrics='accuracy' (`str`)
+
+String representation of the type of predictive metric used to assess the performance of the model (is set by default to 'accuracy', or the accuracy classification score)
 
 
 *Returns --* 
