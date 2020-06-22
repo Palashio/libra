@@ -1,6 +1,6 @@
 # Libra Reference Manual  
 
-Libra is an open source deep learning API that provides a toolkit of intuitive and easily accessible machine learning methods, enabling users to streamline their data science workflows. The reference manual contains a detailed description of the Libra API. This reference delineates each of the methods avaiable for use, explaining how one can utilize them as well their respective parameters. The manual assumes that you have a baseline comprehension of some of the key concepts in machine learning. The reference is organized mainly in terms of location in the code where the method was defined as well as in accordance with OOP hierarchy, with a class introduced first and then its methods appearing underneath.
+Libra is an open source deep learning API that provides a toolkit of intuitive and easily accessible machine learning methods, enabling users to streamline their data science workflows. The reference manual contains a detailed description of the Libra API. This reference delineates each of the methods avaiable for use, explaining how one can utilize them as well their respective parameters. The manual assumes that you have a baseline comprehension of some of the key concepts in machine learning. The reference is organized mainly in terms of location in the code where the method was defined as well as in accordance with OOP hierarchy, with a class introduced first and then its methods appearing underneath. Note that work on this manual is still in progress, and certain methods are due to recieve revised documentation in future updates.
 
 ***
 
@@ -52,16 +52,20 @@ Table of Contents
   * [fix_slang](#fix_slang)
 * [data_preprocesser.py](#data_preprocesser)
   * [initial_preprocesser](#initial_preprocesser)
-  * [structured_preprocesser](#structured_preprocesser)
-  * [image_preprocess](#image_preprocess)
-  * [processColorChanel](#processColorChanel)  
+  * [structured_preprocesser](#structured_preprocesser)  
   * [process_dates](#process_dates)
   * [generate_column_labels](#generate_column_labels)
+  * [clustering_preprocessing](#clustering_preprocessing)
+  * [too_many_values](#too_many_values)
 * [data_reader.py](#data_reader)
   * [class DataReader](#class-DataReader)
     * [init](#__init__-DataReader)
     * [retrieve_extension](#retrieve_extension)
     * [data_generator](#data_generator)
+    * [get_available_gpus](#get_available_gpus)
+    * [is_gpu_available](#is_gpu_available)
+    * [random_trim](#random_trim)
+    * [trim_gpu](#trim_gpu)
 * [huggingfaceModelRetrainHelper.py](#huggingfaceModelRetrainHelper)
   * [train](#train)
   * [class CustomDataset](#class-CustomDataset)
@@ -69,6 +73,32 @@ Table of Contents
     * [len](#__len__)
     * [getitem](#__getitem__)
   * [inference](#inference)
+* [image_caption_helpers.py](#image_caption_helpers)
+  * [get_path_column](#get_path_column)
+  * [load_image](#load_image)
+  * [map_func](#map_func)
+  * [class BahdanauAttention](#class-BahdanauAttention)
+    * [init](#__init__-BahdanauAttention)
+    * [call](#call-BahdanauAttention)
+  * [class CNN_Encoder](#class-CNN_Encoder)
+    * [init](#__init__-CNN_Encoder)
+    * [call](#call-CNN_Encoder)
+  * [class CNN_Encoder](#class-CNN_Encoder)
+    * [init](#__init__-RNN_Decoder)
+    * [call](#call-RNN_Decoder)
+    * [reset_state](#reset_state)
+  * [generate_caption_helper](#generate_caption_helper)
+* [image_preprocesser.py](#image_preprocesser)
+  * [setwise_preprocessing](#setwise_preprocessing)
+  * [pathwise_preprocessing](#pathwise_preprocessing)
+  * [classwise_preprocessing](#classwise_preprocessing)
+  * [process_class_folders](#process_class_folders)
+  * [add_resized_images](#add_resized_images)
+  * [replace_images](#replace_images)
+  * [create_folder](#create_folder)
+  * [save_image](#save_image)
+  * [calculate_medians](#calculate_medians)
+  * [process_color_channel](#process_color_channel)
 * [classification_models.py](#classification_models)
 * [dimensionality_red_queries.py](#dimensionality_red_queries)
   * [dimensionality_reduc](#dimensionality_reduc)
@@ -774,13 +804,13 @@ Generates/stores all relevant plots for clustering models
 
 *Parameters --*
 
-kmeans: `str`
+Retrieves list containing all the saved generated plotskmeans
 
-Acquires a string based of the instruction sent to encode in the form of a mask
+Options specifying the type of kmeans clustering technique used by the model 
 
 dataPandas
 
-The
+Name of inbuilt Pandas dataframe acquiring data from dataset specifically used to store x and y axes for plotting
 
 dataset
 
@@ -789,9 +819,13 @@ Data to be analyzed that is selected/sent via written query (is by default set t
 
 *Returns --* 
 
-mask: `[int/long, int/long, int/long]` 
+plots: `[]`
 
-Outputs an list of encoded numerical representation of the instruction text recieved
+Retrieves list containing all the saved generated plots
+
+plot_names: `[str, str,..., str]`
+
+Retrieves list of string representation or label names for plots generated 
 
 ### generate_regression_plots ###
 
@@ -802,14 +836,28 @@ libra.generate_regression_plots(history, data, label)
 Generates/stores all relevant plots for regression models
 
 
-Parameters -- instruction_label: `str`
+*Parameters --*
 
-Acquires a string based of the instruction sent to encode in the form of a mask
+history
+
+History of past model iterations/results from regression model being plotted
+
+data
+
+Data selected and sent via written query to instance by user to be analyzed (is set by default to have dataframe format)
+
+label: `[str, str]`
+
+String representation of labels used for names for x/y axes of plots generated
 
 
-Returns -- mask: `[int/long, int/long, int/long]` 
+plots: `[]`
 
-Outputs an list of encoded numerical representation of the instruction text recieved
+Retrieves list containing all the saved generated plots
+
+plot_names: `[str, str,..., str]`
+
+Retrieves list of string representation or label names for plots generated 
 
 ### generate_classification_plots ###
 
@@ -820,14 +868,38 @@ libra.generate_classification_plots(history, data, label, model, X_test, y_test)
 Generates/stores all relevant plots for classification models
 
 
-Parameters -- instruction_label: `str`
+*Parameters --*
 
-Acquires a string based of the instruction sent to encode in the form of a mask
+history
+
+History of past model iterations/results from classification model being plotted
+
+data
+
+Data selected and sent via written query to instance by user to be analyzed (is set by default to have dataframe format)
+
+label: `[str, str]`
+
+String representation of labels used for names for x/y axes of plots generated
+
+model: `obj`
+
+Classification model object being plotted
+
+X_test
+
+Test variable/vector of input features in data for classification model analysis
+
+y_test
+
+Test prediction variable/vector of classes in data for classification model analysis 
 
 
-Returns -- mask: `[int/long, int/long, int/long]` 
+*Returns --* 
 
-Outputs an list of encoded numerical representation of the instruction text recieved
+return_plots: `{}`
+
+Retrieves dictionary of dynamically fitting compilation of plots with key of plot names
 
 ### generate_classification_together ###
 
@@ -835,17 +907,41 @@ Outputs an list of encoded numerical representation of the instruction text reci
 libra.generate_regression_plots(history, data, model, X_test, y_test)
 ```
 
-Generates/stores plots for loss validation function and accuracy score for classification models on the same pane
+Generates/stores validation loss and accuracy score plots for classification models side-by-side in same pane
 
 
-Parameters -- instruction_label: `str`
+*Parameters --*
 
-Acquires a string based of the instruction sent to encode in the form of a mask
+history
+
+History of past model iterations/results from classification model being plotted
+
+data
+
+Data selected and sent via written query to instance by user to be analyzed (is set by default to have dataframe format)
+
+label: `[str, str]`
+
+String representation of labels used for names for x/y axes of plots generated
+
+model: `obj`
+
+Classification model object being plotted
+
+X_test
+
+Test variable/vector of input features in data for classification model analysis
+
+y_test
+
+Test prediction variable/vector of classes in data for classification model analysis 
 
 
-Returns -- mask: `[int/long, int/long, int/long]` 
+*Returns --* 
 
-Outputs an list of encoded numerical representation of the instruction text recieved
+None
+
+Executes code to output plot pane where graph depicting loss validation appears above and graph depicting score accuracy appears below
 
 ### plot_loss ###
 
@@ -856,33 +952,45 @@ libra.plot_loss(history)
 Generates/stores validation loss plot for any given machine learning technique model
 
 
-Parameters -- instruction_label: `str`
+*Parameters --* 
 
-Acquires a string based of the instruction sent to encode in the form of a mask
+history
+
+History of past model iterations/results from classification model being plotted
 
 
-Returns -- mask: `[int/long, int/long, int/long]` 
+*Returns -- *
 
-Outputs an list of encoded numerical representation of the instruction text recieved
+img: `Figure` 
+
+Retrieves model loss figure which has x/y axes of validation loss/epoch measured across both training and testing datasets
 
 ### plot_corr ###
 
 
 ``` python
-libra.plot_corr(data, data, col=[])
+libra.plot_corr(data, col=[])
 ```
 
-Generates/stores validation loss plot for any given machine learning technique model
+Generates/stores correlation plot for any columns available in dataset for analysis
 
 
-Parameters -- instruction_label: `str`
+*Parameters --*
 
-Acquires a string based of the instruction sent to encode in the form of a mask
+data
+
+Data selected and sent via written query to instance by user to be analyzed (is set by default to have dataframe format)
+
+col=`[]` (`[str, str,..., str]`)
+
+List of string representation of names of columns where correlation is being sougth (is set by default to an empty plot, which assumes creation of plot checking correlation between all variables)
 
 
-Returns -- mask: `[int/long, int/long, int/long]` 
+*Returns --*
 
-Outputs an list of encoded numerical representation of the instruction text recieved
+img: `Figure` 
+
+Retrieves square correlation heatmap figure shaded in accordance with strength of correlation coefficient relating two variables
 
 ### plot_acc ###
 
@@ -893,14 +1001,18 @@ libra.plot_acc(history)
 Generates/stores accuracy plot for any given machine learning technique model
 
 
-Parameters -- instruction_label: `str`
+*Parameters --* 
 
-Acquires a string based of the instruction sent to encode in the form of a mask
+history
+
+History of past model iterations/results from classification model being plotted
 
 
-Returns -- mask: `[int/long, int/long, int/long]` 
+*Returns -- *
 
-Outputs an list of encoded numerical representation of the instruction text recieved
+img: `Figure` 
+
+Retrieves model accuracy figure which has x/y axes of accuracy score/epoch measured across both training and testing datasets
 
 ***
 
@@ -912,36 +1024,11 @@ Outputs an list of encoded numerical representation of the instruction text reci
 libra.get_target_values(data, instruction, yLabel)
 ```
 
-Generates/stores with base object an encoding mask of form list ```[int/long, int/long, int/long]``` based on frequency of distinct characters used for sequence to sequence pre-training for natural language generation
-
-
-Parameters -- instruction_label: `str`
-
-Acquires a string based of the instruction sent to encode in the form of a mask
-
-
-Returns -- mask: `[int/long, int/long, int/long]` 
-
-Outputs an list of encoded numerical representation of the instruction text recieved
-
 ### lemmatize_text ###
 
 ``` python
 libra.lemmatize_text(dataset)
 ```
-
-Generates/stores with base object an encoding mask of form list ```[int/long, int/long, int/long]``` based on frequency of distinct characters used for sequence to sequence pre-training for natural language generation
-
-
-Parameters -- instruction_label: `str`
-
-Acquires a string based of the instruction sent to encode in the form of a mask
-
-
-Returns -- mask: `[int/long, int/long, int/long]` 
-
-Outputs an list of encoded numerical representation of the instruction text recieved
-
 
 ### tokenize_text ###
 
@@ -949,53 +1036,17 @@ Outputs an list of encoded numerical representation of the instruction text reci
 libra.tokenize_text(dataset)
 ```
 
-Generates/stores with base object an encoding mask of form list ```[int/long, int/long, int/long]``` based on frequency of distinct characters used for sequence to sequence pre-training for natural language generation
-
-
-Parameters -- instruction_label: `str`
-
-Acquires a string based of the instruction sent to encode in the form of a mask
-
-
-Returns -- mask: `[int/long, int/long, int/long]` 
-
-Outputs an list of encoded numerical representation of the instruction text recieved
-
 ### text_clean_up ###
 
 ``` python
 libra.text_clean_up(dataset)
 ```
 
-Generates/stores with base object an encoding mask of form list ```[int/long, int/long, int/long]``` based on frequency of distinct characters used for sequence to sequence pre-training for natural language generation
-
-
-Parameters -- instruction_label: `str`
-
-Acquires a string based of the instruction sent to encode in the form of a mask
-
-
-Returns -- mask: `[int/long, int/long, int/long]` 
-
-Outputs an list of encoded numerical representation of the instruction text recieved
-
 ### fix_slang ###
 
 ``` python
 libra.fix_slang(text)
 ```
-
-Generates/stores with base object an encoding mask of form list ```[int/long, int/long, int/long]``` based on frequency of distinct characters used for sequence to sequence pre-training for natural language generation
-
-
-Parameters -- instruction_label: `str`
-
-Acquires a string based of the instruction sent to encode in the form of a mask
-
-
-Returns -- mask: `[int/long, int/long, int/long]` 
-
-Outputs an list of encoded numerical representation of the instruction text recieved
 
 ***
 
@@ -1007,85 +1058,11 @@ Outputs an list of encoded numerical representation of the instruction text reci
 libra.initial_preprocesser(data, instruction, preprocess)
 ```
 
-Generates/stores with base object an encoding mask of form list ```[int/long, int/long, int/long]``` based on frequency of distinct characters used for sequence to sequence pre-training for natural language generation
-
-
-Parameters -- instruction_label: `str`
-
-Acquires a string based of the instruction sent to encode in the form of a mask
-
-
-Returns -- mask: `[int/long, int/long, int/long]` 
-
-Outputs an list of encoded numerical representation of the instruction text recieved
-
 ### structured_preprocesser ###
 
 ``` python
 libra.structured_preprocesser(data)
 ```
-
-Generates/stores with base object an encoding mask of form list ```[int/long, int/long, int/long]``` based on frequency of distinct characters used for sequence to sequence pre-training for natural language generation
-
-
-Parameters -- instruction_label: `str`
-
-Acquires a string based of the instruction sent to encode in the form of a mask
-
-
-Returns -- mask: `[int/long, int/long, int/long]` 
-
-Outputs an list of encoded numerical representation of the instruction text recieved
-
-### image_preprocess ###
-
-``` python
-libra.image_preprocess(data_path)
-```
-
-Generates/stores with base object an encoding mask of form list ```[int/long, int/long, int/long]``` based on frequency of distinct characters used for sequence to sequence pre-training for natural language generation
-
-
-Parameters -- instruction_label: `str`
-
-Acquires a string based of the instruction sent to encode in the form of a mask
-
-
-Returns -- mask: `[int/long, int/long, int/long]` 
-
-Outputs an list of encoded numerical representation of the instruction text recieved
-
-``` python
-libra.process_dates(data)
-```
-
-Generates/stores with base object an encoding mask of form list ```[int/long, int/long, int/long]``` based on frequency of distinct characters used for sequence to sequence pre-training for natural language generation
-
-
-Parameters -- instruction_label: `str`
-
-Acquires a string based of the instruction sent to encode in the form of a mask
-
-
-Returns -- mask: `[int/long, int/long, int/long]` 
-
-Outputs an list of encoded numerical representation of the instruction text recieved### processColorChanel ###
-
-``` python
-libra.generate_regression_plots(history, data, label)
-```
-
-Generates/stores with base object an encoding mask of form list ```[int/long, int/long, int/long]``` based on frequency of distinct characters used for sequence to sequence pre-training for natural language generation
-
-
-Parameters -- instruction_label: `str`
-
-Acquires a string based of the instruction sent to encode in the form of a mask
-
-
-Returns -- mask: `[int/long, int/long, int/long]` 
-
-Outputs an list of encoded numerical representation of the instruction text recieved
 
 ### process_dates ###
 
@@ -1093,35 +1070,23 @@ Outputs an list of encoded numerical representation of the instruction text reci
 libra.process_dates(data)
 ```
 
-Generates/stores with base object an encoding mask of form list ```[int/long, int/long, int/long]``` based on frequency of distinct characters used for sequence to sequence pre-training for natural language generation
-
-
-Parameters -- instruction_label: `str`
-
-Acquires a string based of the instruction sent to encode in the form of a mask
-
-
-Returns -- mask: `[int/long, int/long, int/long]` 
-
-Outputs an list of encoded numerical representation of the instruction text recieved
-
 ### generate_column_labels ###
 
 ``` python
 libra.generate_column_labels(pipeline, numeric_cols)
 ```
 
-Generates/stores with base object an encoding mask of form list ```[int/long, int/long, int/long]``` based on frequency of distinct characters used for sequence to sequence pre-training for natural language generation
+### clustering_preprocessor ###
 
+``` python
+libra.clustering_preprocessor(data)
+```
 
-Parameters -- instruction_label: `str`
+### too_many_values ###
 
-Acquires a string based of the instruction sent to encode in the form of a mask
-
-
-Returns -- mask: `[int/long, int/long, int/long]` 
-
-Outputs an list of encoded numerical representation of the instruction text recieved
+```python
+libra.too_many_values(data, mca_threshold)
+```
 
 ***
 
@@ -1132,18 +1097,6 @@ Outputs an list of encoded numerical representation of the instruction text reci
 ``` python
 class DataReader()
 ```
-
-Generates/stores with base object an encoding mask of form list ```[int/long, int/long, int/long]``` based on frequency of distinct characters used for sequence to sequence pre-training for natural language generation
-
-
-Parameters -- instruction_label: `str`
-
-Acquires a string based of the instruction sent to encode in the form of a mask
-
-
-Returns -- mask: `[int/long, int/long, int/long]` 
-
-Outputs an list of encoded numerical representation of the instruction text recieved
     
 #### __init__-DataReader ####
 
@@ -1151,35 +1104,11 @@ Outputs an list of encoded numerical representation of the instruction text reci
 DataReader.__init__(self, filepath)
 ```
 
-Generates/stores with base object an encoding mask of form list ```[int/long, int/long, int/long]``` based on frequency of distinct characters used for sequence to sequence pre-training for natural language generation
-
-
-Parameters -- instruction_label: `str`
-
-Acquires a string based of the instruction sent to encode in the form of a mask
-
-
-Returns -- mask: `[int/long, int/long, int/long]` 
-
-Outputs an list of encoded numerical representation of the instruction text recieved
-
 #### retrieve_extension ####
 
 ``` python
 DataReader.retrieve_extension(self)
 ```
-
-Generates/stores with base object an encoding mask of form list ```[int/long, int/long, int/long]``` based on frequency of distinct characters used for sequence to sequence pre-training for natural language generation
-
-
-Parameters -- instruction_label: `str`
-
-Acquires a string based of the instruction sent to encode in the form of a mask
-
-
-Returns -- mask: `[int/long, int/long, int/long]` 
-
-Outputs an list of encoded numerical representation of the instruction text recieved
     
 #### data_generator ####
 
@@ -1187,17 +1116,29 @@ Outputs an list of encoded numerical representation of the instruction text reci
 DataReader.data_generator(self)
 ```
 
-Generates/stores with base object an encoding mask of form list ```[int/long, int/long, int/long]``` based on frequency of distinct characters used for sequence to sequence pre-training for natural language generation
+#### get_available_gpus ####
 
+``` python
+DataReader.get_available_gpus(self)
+```
 
-Parameters -- instruction_label: `str`
+#### is_gpu_available ####
 
-Acquires a string based of the instruction sent to encode in the form of a mask
+``` python
+DataReader.is_gpu_available(self)
+```
 
+#### random_trim ####
 
-Returns -- mask: `[int/long, int/long, int/long]` 
+``` python
+DataReader.random_trim(self)
+```
 
-Outputs an list of encoded numerical representation of the instruction text recieved
+#### trim_gpu ####
+
+``` python
+DataReader.trim_gpu(self)
+```
 
 ***
 
@@ -1213,7 +1154,154 @@ Outputs an list of encoded numerical representation of the instruction text reci
 
 #### __getitem__ ####
 
-###  ###
+### inference ###
+
+***
+
+
+## image_caption_helpers ##
+
+### get_path_column ###
+
+```python
+libra.get_path_column(df)
+```
+
+### load_image ###
+
+```python
+libra.load_image(image_path)
+```
+
+### map_func ###
+
+```python
+libra.map_func(img_name, cap)
+```
+
+### class-BahdanauAttention ###
+
+``` python
+class BahdanauAttention()
+```
+    
+#### __init__-BahdanauAttention ####
+
+``` python
+BahdanauAttention.__init__(self, units)
+```
+
+#### call-BahdanauAttention ####
+
+``` python
+BahdanauAttention.call(self, features, hidden)
+```
+    
+### class-CNN_Encoder ###
+
+``` python
+class CNN_Encoder()
+```
+
+#### __init__-CNN_Encoder ####
+
+``` python
+CNN_Encoder.__init__(self, embedding_dim)
+```
+
+#### call-CNN_Encoder ####
+
+``` python
+CNN_Encoder.call(self)
+```
+
+### RNN_Decoder ###
+
+``` python
+class RNN_Decoder()
+```
+
+#### __init__-RNN_Encoder ####
+
+``` python
+RNN_Decoder.__init__(self, embedding_dim, units, vocab_size)
+```
+
+#### call-RNN_Encoder ####
+
+``` python
+RNN_Decoder.call(self, x, features, hidden)
+```
+
+#### reset_state ####
+
+``` python
+RNN_Decoder.reset_state(self, batch_size)
+```
+
+### generate_caption_helper ###
+
+```python
+libra.generate_caption_helper(image, decoder, encoder, tokenizer, image_features_extract_model, max_length=500)
+```
+
+***
+
+## image_preprocesser ##
+
+### setwise_preprocessing ###
+
+``` python
+libra.setwise_preprocessing(data_path, new_folder=True)
+```
+
+### setwise_preprocessing ###
+
+``` python
+libra.pathwise_preprocessing(csv_file, dath_paths, label, image_column, training_ratio)
+```
+
+### setwise_preprocessing ###
+
+``` python
+libra.classwise_preprocessing(data_path, training_ratio)
+```
+
+### process_class_folders ###
+
+``` python
+libra.process_class_folder(data_path)
+```
+
+### replace_images ###
+
+``` python
+libra.replace_images(data_path, loaded_shape)
+```
+
+### create_folder ###
+
+``` python
+libra.create_folder(path, folder_name)
+```
+
+### save_image ###
+
+``` python
+libra.save_image(path, img, img_name, classification)
+```
+
+### calculate_medians ###
+
+``` python
+libra.calculate_medians(heights, widths)
+```
+
+### process_color_channel ###
+
+``` python
+libra.process_color_channel(img, height, width)
+```
 
 ***
 
@@ -1229,36 +1317,11 @@ Outputs an list of encoded numerical representation of the instruction text reci
 libra.dimensionality_reduc(instruction, dataset, arr = ["RF", "PCA", "ICA"], inplace = True)
 ```
 
-Generates/stores with base object an encoding mask of form list ```[int/long, int/long, int/long]``` based on frequency of distinct characters used for sequence to sequence pre-training for natural language generation
-
-
-Parameters -- instruction_label: `str`
-
-Acquires a string based of the instruction sent to encode in the form of a mask
-
-
-Returns -- mask: `[int/long, int/long, int/long]` 
-
-Outputs an list of encoded numerical representation of the instruction text recieved
-
-
 ### dimensionality_RF ###
 
 ``` python
 libra.dimensionality_RF(instruction, dataset, target="", y="", n_features=10)
 ```
-
-Generates/stores with base object an encoding mask of form list ```[int/long, int/long, int/long]``` based on frequency of distinct characters used for sequence to sequence pre-training for natural language generation
-
-
-Parameters -- instruction_label: `str`
-
-Acquires a string based of the instruction sent to encode in the form of a mask
-
-
-Returns -- mask: `[int/long, int/long, int/long]` 
-
-Outputs an list of encoded numerical representation of the instruction text recieved
 
 ### dimensionality_PCA ###
 
@@ -1266,55 +1329,17 @@ Outputs an list of encoded numerical representation of the instruction text reci
 libra.dimensionality_PCA(instruction, dataset, target="", y="", n_components=10)
 ```
 
-Generates/stores with base object an encoding mask of form list ```[int/long, int/long, int/long]``` based on frequency of distinct characters used for sequence to sequence pre-training for natural language generation
-
-
-Parameters -- instruction_label: `str`
-
-Acquires a string based of the instruction sent to encode in the form of a mask
-
-
-Returns -- mask: `[int/long, int/long, int/long]` 
-
-Outputs an list of encoded numerical representation of the instruction text recieved
-
-
 ### dimensionality_ICA ###
 
 ``` python
 libra.dimensionality_ICA(instruction, dataset, target="", y="")
 ```
 
-Generates/stores with base object an encoding mask of form list ```[int/long, int/long, int/long]``` based on frequency of distinct characters used for sequence to sequence pre-training for natural language generation
-
-
-Parameters -- instruction_label: `str`
-
-Acquires a string based of the instruction sent to encode in the form of a mask
-
-
-Returns -- mask: `[int/long, int/long, int/long]` 
-
-Outputs an list of encoded numerical representation of the instruction text recieved
-
-
 ### get_last_file ###
 
 ``` python
 libra.get_last_file()
 ```
-
-Generates/stores with base object an encoding mask of form list ```[int/long, int/long, int/long]``` based on frequency of distinct characters used for sequence to sequence pre-training for natural language generation
-
-
-Parameters -- instruction_label: `str`
-
-Acquires a string based of the instruction sent to encode in the form of a mask
-
-
-Returns -- mask: `[int/long, int/long, int/long]` 
-
-Outputs an list of encoded numerical representation of the instruction text recieved
 
 ***
 
@@ -2195,7 +2220,7 @@ Model selected based of the query written in the class client instance
 
 None 
 
-Simply prints all the plots as the output of using the method
+Simply prints all the plots present in the client class instance as the output
 
 #### model_data ####
 
@@ -2203,7 +2228,7 @@ Simply prints all the plots as the output of using the method
 client.show_plots(self, model)
 ```
 
-Displays all plots generated by the model chosen based from the queries written in the client class instance
+Displays all model keys visible in the model dictionary established in the client class instance
 
 
 *Parameters --* 
@@ -2217,7 +2242,7 @@ Model selected based of the query written in the class client instance
 
 None 
 
-Simply prints all the plots as the output of using the method
+Simply prints out the list of model keys present in the model dictionary during client class instance
 
 #### operators ####
 
@@ -2225,7 +2250,7 @@ Simply prints all the plots as the output of using the method
 client.operators(self, model)
 ```
 
-Displays all plots generated by the model chosen based from the queries written in the client class instance
+Displays all operators applicable to the model dictionary established in the client class instance
 
 
 *Parameters --* 
@@ -2239,7 +2264,7 @@ Model selected based of the query written in the class client instance
 
 None 
 
-Simply prints all the plots as the output of using the method
+Simply prints out the list of all operators defined and built-in for the models in the model dictionary in the client class instance 
 
 #### accuracy ####
 
@@ -2247,7 +2272,7 @@ Simply prints all the plots as the output of using the method
 client.accuracy(self, model)
 ```
 
-Displays all plots generated by the model chosen based from the queries written in the client class instance
+Displays all accuracy scores for the model chosen based from the queries written in the client class instance
 
 
 *Parameters --* 
@@ -2259,9 +2284,13 @@ Model selected based of the query written in the class client instance
 
 *Returns --* 
 
-None 
+`self.models[model]['accuracy']`: `float`
 
-Simply prints all the plots as the output of using the method
+Retrieves float value representing accuracy performance metric score for model
+
+`{cross_val_score: self.models[model]['cross_val_score']}`: `float`
+
+Retrieves float value representing cross_validation performance metric score for model
 
 
 #### losses ####
@@ -2270,7 +2299,7 @@ Simply prints all the plots as the output of using the method
 client.losses(self, model)
 ```
 
-Displays all plots generated by the model chosen based from the queries written in the client class instance
+Displays all loss validation metrics for the model chosen based from the queries written in the client class instance
 
 
 *Parameters --* 
@@ -2282,9 +2311,9 @@ Model selected based of the query written in the class client instance
 
 *Returns --* 
 
-None 
+`self.models[model]['losses']`: float
 
-Simply prints all the plots as the output of using the method
+Retrieves float value representing loss validation function performance metrics for model
 
 
 
