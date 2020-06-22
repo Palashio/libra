@@ -769,15 +769,27 @@ Retrieves best model by searching in hyperparameter defined tuner space from gen
 libra.generate_clustering_plots(kmeans, dataPandas, dataset)
 ```
 
-Generates/stores with base object an encoding mask of form list ```[int/long, int/long, int/long]``` based on frequency of distinct characters used for sequence to sequence pre-training for natural language generation
+Generates/stores all relevant plots for clustering models
 
 
-Parameters -- instruction_label: `str`
+*Parameters --*
+
+kmeans: `str`
 
 Acquires a string based of the instruction sent to encode in the form of a mask
 
+dataPandas
 
-Returns -- mask: `[int/long, int/long, int/long]` 
+The
+
+dataset
+
+Data to be analyzed that is selected/sent via written query (is by default set to dataframe format)
+
+
+*Returns --* 
+
+mask: `[int/long, int/long, int/long]` 
 
 Outputs an list of encoded numerical representation of the instruction text recieved
 
@@ -787,7 +799,7 @@ Outputs an list of encoded numerical representation of the instruction text reci
 libra.generate_regression_plots(history, data, label)
 ```
 
-Generates/stores with base object an encoding mask of form list ```[int/long, int/long, int/long]``` based on frequency of distinct characters used for sequence to sequence pre-training for natural language generation
+Generates/stores all relevant plots for regression models
 
 
 Parameters -- instruction_label: `str`
@@ -805,7 +817,7 @@ Outputs an list of encoded numerical representation of the instruction text reci
 libra.generate_classification_plots(history, data, label, model, X_test, y_test)
 ```
 
-Generates/stores with base object an encoding mask of form list ```[int/long, int/long, int/long]``` based on frequency of distinct characters used for sequence to sequence pre-training for natural language generation
+Generates/stores all relevant plots for classification models
 
 
 Parameters -- instruction_label: `str`
@@ -823,7 +835,7 @@ Outputs an list of encoded numerical representation of the instruction text reci
 libra.generate_regression_plots(history, data, model, X_test, y_test)
 ```
 
-Generates/stores with base object an encoding mask of form list ```[int/long, int/long, int/long]``` based on frequency of distinct characters used for sequence to sequence pre-training for natural language generation
+Generates/stores plots for loss validation function and accuracy score for classification models on the same pane
 
 
 Parameters -- instruction_label: `str`
@@ -841,7 +853,7 @@ Outputs an list of encoded numerical representation of the instruction text reci
 libra.plot_loss(history)
 ```
 
-Generates/stores with base object an encoding mask of form list ```[int/long, int/long, int/long]``` based on frequency of distinct characters used for sequence to sequence pre-training for natural language generation
+Generates/stores validation loss plot for any given machine learning technique model
 
 
 Parameters -- instruction_label: `str`
@@ -860,7 +872,7 @@ Outputs an list of encoded numerical representation of the instruction text reci
 libra.plot_corr(data, data, col=[])
 ```
 
-Generates/stores with base object an encoding mask of form list ```[int/long, int/long, int/long]``` based on frequency of distinct characters used for sequence to sequence pre-training for natural language generation
+Generates/stores validation loss plot for any given machine learning technique model
 
 
 Parameters -- instruction_label: `str`
@@ -878,7 +890,7 @@ Outputs an list of encoded numerical representation of the instruction text reci
 libra.plot_acc(history)
 ```
 
-Generates/stores with base object an encoding mask of form list ```[int/long, int/long, int/long]``` based on frequency of distinct characters used for sequence to sequence pre-training for natural language generation
+Generates/stores accuracy plot for any given machine learning technique model
 
 
 Parameters -- instruction_label: `str`
