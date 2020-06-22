@@ -519,17 +519,7 @@ Retrieves model with initialized weights that was stored in json formatted file 
 class CNNHyperModel(HyperModel)
 ```
 
-Generates/stores with base object an encoding mask of form list ```[int/long, int/long, int/long]``` based on frequency of distinct characters used for sequence to sequence pre-training for natural language generation
-
-
-Parameters -- instruction_label: `str`
-
-Acquires a string based of the instruction sent to encode in the form of a mask
-
-
-Returns -- mask: `[int/long, int/long, int/long]` 
-
-Outputs an list of encoded numerical representation of the instruction text recieved
+A class whose instance enables the hyperparameter tuning of an inputted convolutional neural network. The list of its methods are provided below.
 
 #### __init__-CNNHyperModel ####
 
