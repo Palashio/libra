@@ -553,35 +553,78 @@ Executes code to initialize convolutional neural network hypermodel with paramet
 CNNHyperModel.build(self, hp)
 ```
 
-Generates/stores with base object an encoding mask of form list ```[int/long, int/long, int/long]``` based on frequency of distinct characters used for sequence to sequence pre-training for natural language generation
+Generates/stores different layers of model with a selection of parameters which the model selects to use during runtime that are optimal
 
 
-Parameters -- instruction_label: `str`
+*Parameters --*
 
-Acquires a string based of the instruction sent to encode in the form of a mask
+hp: `{}`
+
+Dictionary of hyperparameter options 
 
 
-Returns -- mask: `[int/long, int/long, int/long]` 
+*Returns --* 
 
-Outputs an list of encoded numerical representation of the instruction text recieved
+model
+
+Retrieves convolutional neural network hypermodel with numerous inbuilt options per parameter enabled (activation function choices can be rectified linear unit/tahn/sigmoid based, etc.) to choose upon startup, categorical cross-entropy loss function, logarithmic based sampling, adaptive first/second moment stochastic gradient descent optimization, and relevant accuracy metrics
 
 ### tuneReg ###
 
 ``` python
-libra.tuneReg(data, target)
+libra.tuneReg(data, 
+              target, 
+              max_layers=10, 
+              min_layers=2, 
+              min_dense=2, 
+              max_dense=512, 
+              executions_per_trial=3,
+              max_trials=1)
 ```
 
-Generates/stores with base object an encoding mask of form list ```[int/long, int/long, int/long]``` based on frequency of distinct characters used for sequence to sequence pre-training for natural language generation
+Performs automatic tuning of prior defined hyperparameters varying range of layers and number of units in dense layers across selected trials
 
 
-Parameters -- instruction_label: `str`
+*Parameters --*
 
-Acquires a string based of the instruction sent to encode in the form of a mask
+data
+
+Data selected and sent via written query by user to be analyzed 
+
+target
+
+Integer number
+
+max_layers=10 (`int`)
+
+Integer number 
+
+min_layers=2 (`int`)
+
+Integer number
+
+min_dense=2 (`int`)
+
+Integer number
+
+max_dense=512 (`int`)
+
+Integer number
+
+executions_per_trial=3 (`int`)
+
+Integer number
+
+max_trials=1 (`int`)
+
+Integer number
 
 
-Returns -- mask: `[int/long, int/long, int/long]` 
+*Returns --* 
 
-Outputs an list of encoded numerical representation of the instruction text recieved
+None 
+
+Executes code to generate scenarios tune hyperparameters of convolutional neural network model and determine ideal number of layers based upon target function value and notifies user of tuning
 
 ### build_model ###
 
@@ -1271,12 +1314,14 @@ Initializes the client class instance
 
 *Parameters --*
 
-data: `str`
+data
 
-String representation of the name of the file of the dataset being sought to be analyzed by methods of the client class
+Data selected and sent via written query by user to be analyzed by methods of the client class
 
 
-*ReturString "key" representation of model that needs to be utilized to make prediction intuited from written query None
+*Returns*
+
+None
 
 Executes the creation of the client class instance in the form of creating the client class object, loading/formatting the assigned data, restoring old models, storing new models, and clearing the log upon exit of class instance
 
