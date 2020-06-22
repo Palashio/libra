@@ -136,6 +136,7 @@ def soft_logloss(y_true, y_pred):
     return logloss(y_soft, y_pred_soft)
 
 def get_snet_layer():
+    """
     train_datagen = ImageDataGenerator(rescale = 1./255,
                                        shear_range = 0.2,
                                        zoom_range = 0.2,
@@ -152,7 +153,7 @@ def get_snet_layer():
                                                 target_size = (64, 64),
                                                 batch_size = 32,
                                                 class_mode = 'binary')
-
+    """
 
     model = SqueezeNet(weight_decay=1e-4, image_size=64)
 
@@ -186,6 +187,9 @@ def get_snet_layer():
     )
     """
     return model
+
+#########################################################################################
+#########################################################################################
 #########################################################################################
 
 
