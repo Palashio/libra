@@ -197,7 +197,7 @@ def regression_ann(
 
         final_model = model_data[losses.index(min(losses))]
         final_hist = models[losses.index(min(losses))]
-
+        print("")
         logger('->', "Best number of layers found: " +
                str(len(final_model.layers)))
 
@@ -356,7 +356,7 @@ def classification_ann(instruction,
 
         final_model = model_data[losses.index(min(losses))]
         final_hist = models[losses.index(min(losses))]
-
+        print("")
         logger('->', "Best number of layers found: " +
                str(len(final_model.layers)))
         logger('->', "Training Accuracy: " + str(final_hist.history['accuracy']
