@@ -184,20 +184,26 @@ def process_class_folders(data_path):
     for class_folder in os.listdir(data_path):
         if not os.path.isdir(data_path + "/" + class_folder) or class_folder in avoid_directories:
             continue
-        img_dict[class_folder] = {}
-        num_classifications += 1
+
+        folder_dict = {}
+        folder_height = []
+        folder_width = []
+
         for image in os.listdir(data_path + "/" + class_folder):
             try:
                 if image == ".DS_Store":
                     continue
                 img = cv2.imread(data_path + "/" + class_folder + "/" + image)
-                heights.append(img.shape[0])
-                widths.append(img.shape[1])
-                img_dict[class_folder][image] = img
+                folder_height.append(img.shape[0])
+                folder_width.append(img.shape[1])
+                folder_dict[image] = img
             except BaseException:
-                del img_dict[class_folder]
-                num_classifications -= 1
                 break
+        else:
+            heights += folder_height
+            widths += folder_width
+            img_dict[class_folder] = folder_dict
+            num_classifications += 1
 
     return [heights, widths, num_classifications, img_dict]
 
