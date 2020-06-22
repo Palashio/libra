@@ -135,79 +135,67 @@ def soft_logloss(y_true, y_pred):
     y_pred_soft = y_pred[:, num_classes:]    
     return logloss(y_soft, y_pred_soft)
 
-train_datagen = ImageDataGenerator(rescale = 1./255,
-                                   shear_range = 0.2,
-                                   zoom_range = 0.2,
-                                   horizontal_flip = True)
+def get_snet_layer():
+    train_datagen = ImageDataGenerator(rescale = 1./255,
+                                       shear_range = 0.2,
+                                       zoom_range = 0.2,
+                                       horizontal_flip = True)
 
-test_datagen = ImageDataGenerator(rescale = 1./255)
+    test_datagen = ImageDataGenerator(rescale = 1./255)
 
-train_generator = train_datagen.flow_from_directory('dataset/training_set',
-                                                 target_size = (64, 64),
-                                                 batch_size = 32,
-                                                 class_mode = 'binary')
+    train_generator = train_datagen.flow_from_directory('dataset/training_set',
+                                                     target_size = (64, 64),
+                                                     batch_size = 32,
+                                                     class_mode = 'binary')
 
-val_generator = test_datagen.flow_from_directory('dataset/test_set',
-                                            target_size = (64, 64),
-                                            batch_size = 32,
-                                            class_mode = 'binary')
-
-
-model = SqueezeNet(weight_decay=1e-4, image_size=64)
-
-# remove softmax
-model.layers.pop()
-
-# usual probabilities
-logits = model.layers[-1].output
-probabilities = Activation('softmax')(logits)
-
-# softed probabilities
-logits_T = Lambda(lambda x: x/temperature)(logits)
-probabilities_T = Activation('softmax')(logits_T)
-
-output = concatenate([probabilities, probabilities_T])
-model = Model(model.input, output)
-# now model outputs 512 dimensional vectors
-
-model.compile(
-    optimizer=optimizers.SGD(lr=1e-2, momentum=0.9, nesterov=True), 
-    loss=lambda y_true, y_pred: knowledge_distillation_loss(y_true, y_pred, lambda_const,num_classes), 
-    metrics=[accuracy, top_5_accuracy, categorical_crossentropy, soft_logloss]
-)
-model.fit_generator(
-    train_generator, 
-    steps_per_epoch=400, epochs=30, verbose=1,
-    callbacks=[
-        EarlyStopping(monitor='val_accuracy', patience=4, min_delta=0.01),
-        ReduceLROnPlateau(monitor='val_accuracy', factor=0.1, patience=2, epsilon=0.007)
-    ],
-    validation_data=val_generator, validation_steps=80, workers=4
-)
+    val_generator = test_datagen.flow_from_directory('dataset/test_set',
+                                                target_size = (64, 64),
+                                                batch_size = 32,
+                                                class_mode = 'binary')
 
 
-'''
-def num_():
-    training_path = "/proc_training_set"
-    testing_path = "/proc_testing_set"
+    model = SqueezeNet(weight_decay=1e-4, image_size=64)
 
-    if read_mode=="setwise":
-        if data_paths is None:
-            data_path = os.getcwd()
-        else:
-            data_path = data_paths
-        # process images
-        processInfo = setwise_preprocessing(data_paths, new_folders)
+    # remove softmax
+    model.layers.pop()
 
-    # if image dataset in form of csv
-    elif read_mode=="pathwise":
-        processInfo = pathwise_preprocessing(csv_file, data_paths, label_column, image_column, training_ratio)
-        data_path = os.path.dirname(csv_file)
+    # usual probabilities
+    logits = model.layers[-1].output
+    probabilities = Activation('softmax')(logits)
 
-    # if image dataset in form of one folder containing class folders
-    elif read_mode=="classwise":
-        processInfo = classwise_preprocessing(data_paths, training_ratio)
-        data_path = data_paths
+    # softed probabilities
+    logits_T = Lambda(lambda x: x/temperature)(logits)
+    probabilities_T = Activation('softmax')(logits_T)
 
-    num_classes = processInfo["num_categories"]
-'''
+    output = concatenate([probabilities, probabilities_T])
+    model = Model(model.input, output)
+    """
+    model.compile(
+        optimizer=optimizers.SGD(lr=1e-2, momentum=0.9, nesterov=True), 
+        loss=lambda y_true, y_pred: knowledge_distillation_loss(y_true, y_pred, lambda_const), 
+        metrics=[accuracy, top_5_accuracy, categorical_crossentropy, soft_logloss]
+    )
+    model.fit_generator(
+        train_generator, 
+        steps_per_epoch=40, epochs=3,verbose=1,
+        callbacks=[
+            EarlyStopping(monitor='val_accuracy', patience=4, min_delta=0.01),
+            ReduceLROnPlateau(monitor='val_accuracy', factor=0.1, patience=2, epsilon=0.007)
+        ],
+        validation_data=val_generator, validation_steps=80, workers=4
+    )
+    """
+    return model
+#########################################################################################
+
+
+from keras_squeezenet import SqueezeNet
+def get_snet_layer(num_outputs=2):
+    model = SqueezeNet()
+    x = model.get_layer('drop9').output
+    x = Convolution2D(num_outputs, (1, 1), padding='valid', name='conv10')(x)
+    x = Activation('relu', name='relu_conv10')(x)
+    x = GlobalAveragePooling2D()(x)
+    out = Activation('softmax', name='loss')(x)
+    model = Model(inputs=model.input, outputs=out)
+    return model
