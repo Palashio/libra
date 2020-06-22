@@ -624,7 +624,7 @@ Integer number of hyperparameter combinations that are tested by the tuner (is s
 
 models[0]: `obj`
 
-Retrieves best model from generated scenario models used while tuning hyperparameters of regression neural network model
+Retrieves best model by searching in hyperparameter defined tuner space from generated scenario models used while tuning hyperparameters of regression neural network model
 
 ### build_model ###
 
@@ -719,11 +719,12 @@ loss='categorical_crossentropy' (`str`)
 String representation of the type of loss function used by the model (is set by default to 'categorical_crossentropy', or categorical cross-entropy loss function that measures model based of logarithmic loss)
 
 
+
 *Returns --* 
 
 models[0]: `obj`
 
-Retrieves best model from generated scenario models used while tuning hyperparameters of classification neural network model
+Retrieves best model by searching in hyperparameter defined tuner space from generated scenario models used while tuning hyperparameters of classification neural network model
 
 ### tuneCNN ###  
 
