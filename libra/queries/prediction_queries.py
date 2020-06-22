@@ -417,5 +417,5 @@ class client:
 
 #newClient = client('./data/housing.csv')
 #newClient.decision_tree_query("Model ocean proximity")
-# newClient = client('./data/landslides_after_rainfall.csv').neural_network_query(instruction='Model distance',
-# drop=['id', 'geolocation', 'source_link', 'source_name'])
+newClient = client('./libra/data/structured_data/landslides_after_rainfall.csv').neural_network_query(instruction='Model distance',
+drop=['id', 'geolocation', 'source_link', 'source_name'])

@@ -18,7 +18,7 @@ from PIL import Image as PImage
 from dataset_labelmatcher import get_similar_column
 from grammartree import get_value_instruction
 import cv2
-from prince.mca import MCA
+from prince.ca import CA
 
 
 def initial_preprocesser(data, instruction, preprocess, mca_threshold):
@@ -95,8 +95,8 @@ def structured_preprocesser(data, mca_threshold):
             cat_pipeline = Pipeline([
                 ('imputer', SimpleImputer(strategy="constant", fill_value="")),
                 ('one_hot_encoder', OneHotEncoder(handle_unknown='ignore')),
-                ('transformer', FunctionTransformer(lambda x: x.todense(), accept_sparse=True)),
-                ('mca', MCA(n_components=5))
+                ('transformer', FunctionTransformer(lambda x: x.toarray(), accept_sparse=True)),
+                ('mca', CA(n_components=-1))
             ])
         else:
             cat_pipeline = Pipeline([
@@ -149,8 +149,9 @@ def generate_column_labels(pipeline, numeric_cols):
     # Check if one hot encoding was performed
     if 'cat' in pipeline.named_transformers_:
         # If mca was used
-        if isinstance(pipeline.named_transformers_['cat'][-1], MCA):
-            encoded_cols = [f'MCA_{x}' for x in range(5)]
+        if isinstance(pipeline.named_transformers_['cat'][-1], CA):
+            ca = pipeline.named_transformers_['cat'][-1]
+            encoded_cols = [f'CA_{x}' for x in range(len(ca.eigenvalues_))]
             cols = [*list(numeric_cols), *encoded_cols]
 
         else:
