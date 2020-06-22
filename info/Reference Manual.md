@@ -527,17 +527,25 @@ A class whose instance enables the hyperparameter tuning of an inputted convolut
 CNNHyperModel.__init__(self, input_shape, num_classes)
 ```
 
-Generates/stores with base object an encoding mask of form list ```[int/long, int/long, int/long]``` based on frequency of distinct characters used for sequence to sequence pre-training for natural language generation
+Initializes the hyperparameter model class for convolutional neural network tuning 
 
 
-Parameters -- instruction_label: `str`
+*Parameters --*
 
-Acquires a string based of the instruction sent to encode in the form of a mask
+input_shape: `numpy.array`
+
+Array of dimensional shape needed to fit data into the convolutional neural network model (is assumed to be of a 4-D variety)
+
+num_classes: `int`
+
+Integer number of classes associated with data for convolutional neural network hyperparameter model
 
 
-Returns -- mask: `[int/long, int/long, int/long]` 
+*Returns --*
 
-Outputs an list of encoded numerical representation of the instruction text recieved
+None
+
+Executes code to initialize convolutional neural network hypermodel with parameters of an initial input structure and number of classes for analysis
 
 #### build ####
 
