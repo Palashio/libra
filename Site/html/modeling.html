@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<head>
+    <meta charset = "utf-8">
+    <title>About Libra</title>
+    
+    <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+
+    <!-- jQuery library -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    
+    <link href="../css/api.css" rel="stylesheet" type="text/css">
+</head>
+<body>
+    <div id="side-nav">
+        <a link href = "landing.html" class= "nav">
+            <img src = "../resources/libra-logo.png" id="icon">
+        </a>
+        <ul class="nav">
+            <li><a class="nav-tab" href="about.html">About</a></li>
+            
+            <li><a class="nav-tab" href="started.html">Getting Started</a></li> 
+            
+            <li><a class="nav-tab" href="devGuides.html">Developer Guides</a></li>
+                <li class="dropdown-item">Providing Instructions to Libra</li>   
+            
+            <li class="nav-tab selected" href="modeling.html">Modeling Queries</li>
+                <li class="dropdown-item selected">Neural Network</li>
+                <li class="dropdown-item selected">Single Regression</li>
+                <li class="dropdown-item selected">Classification</li>
+                <li class="dropdown-item selected">Convolutional Neural Network</li>
+                <li class="dropdown-item selected">K Mans Clustering</li>
+                <li class="dropdown-item selected">Nearest Neighbors</li>
+                <li class="dropdown-item selected">Support Vector Machines</li>
+                <li class="dropdown-item selected">Decision Tree</li>
+            
+            <li><a class="nav-tab" href="dataset.html">Dataset-Related Queries</a></li>
+                <li class="dropdown-item">Dimensionality Reduction Pipeline</li>
+                <li class="dropdown-item">Random Forest Feature Importances</li>
+                <li class="dropdown-item">Principal Component Analysis</li>
+                <li class="dropdown-item">Independent Component Analysis</li>
+        </ul>
+    </div>
+    <div id="nav-bar">Modeling Queries</div>
+        <div id="content">
+            <div class="box">
+                <h2 id="title1">Title goes here</h2>
+                <p>type the actual documention in p elements, and you can format <strong>bold</strong> words with the strong tag.
+                    You can also make these small code snippets: <code>someMethodName()</code> with the code tag, and links with the "a" tag: <a href="https://www.google.com">Click to go to google</a>.
+                    Links can go to other websites or even pages within the same site.
+                <p>Here is the <code>method()</code> use description:</p>
+
+                <pre><code>import some library
+do some code
+return 0;
+            you get the point</code></pre>
+                <p>You can make these code boxes with the pre tag around a code tag. Keep in mind line indentation will count, as you can see in the 4th line of code</p>
+                <br>
+                <p>And here is a table formatted with css that you can put stuff into:</p>
+                
+                <table style="width:100%">
+                    <tr>
+                        <td colspan="2">Example table</td>
+                    </tr>
+                    <tr>
+                        <td>value</td>
+                        <td>A 4-D Tensor of type float. It needs to be in the default NHWC format. Its shape is [batch, in_height, in_width, in_channels].</td>
+                    </tr>
+                    <tr>
+                        <td>filters</td>
+                        <td>A 4-D Tensor with the same type as value and shape [filter_height, filter_width, out_channels, in_channels]. filters' in_channels dimension must match that of value. Atrous convolution is equivalent to standard convolution with upsampled filters with effective height filter_height + (filter_height - 1) * (rate - 1) and effective width filter_width + (filter_width - 1) * (rate - 1), produced by inserting rate - 1 zeros along consecutive elements across the filters' spatial dimensions.</td>
+                    </tr>
+                    <tr>
+                        <td>Hotel</td>
+                        <td>Trivago</td>
+                    </tr>
+                </table>
+            </div>
+            <div class="box">
+                <h2 id="title2">Another title goes here</h2>
+                <p>make sure to put a div element with the class box outside of each method description</p>
+            </div>
+    </div>
+</body>
