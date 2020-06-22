@@ -646,7 +646,7 @@ Dictionary of hyperparameter options
 
 model: `obj`
 
-Retrieves the model built using the hyperparameters defined in the dictionary of hyperparameter options
+Retrieves baseline neural network model optimized using adaptive first/second moment stochastic gradient descent method with outer dense softmax layer 
 
 ### tuneClass ###
 
@@ -735,17 +735,29 @@ Retrieves best model by searching in hyperparameter defined tuner space from gen
 libra.tuneCNN(X, y, num_classes)
 ```
 
-Generates/stores with base object an encoding mask of form list ```[int/long, int/long, int/long]``` based on frequency of distinct characters used for sequence to sequence pre-training for natural language generation
+Performs automatic tuning of prior defined hyperparameters to find optimal convolutional neural network model
 
 
-Parameters -- instruction_label: `str`
+*Parameters --*
 
-Acquires a string based of the instruction sent to encode in the form of a mask
+X
+
+Variable/vector of input features in data for classification neural network model analysis
+
+y
+
+Prediction variable/vector of classes in data for classification neural network model analysis 
+
+num_classes: `int`
+
+Integer number of classes associated with data for classification model
 
 
-Returns -- mask: `[int/long, int/long, int/long]` 
+Returns -- 
 
-Outputs an list of encoded numerical representation of the instruction text recieved
+`tuner.get_best_models(1)[0]`: `obj` 
+
+Retrieves best model by searching in hyperparameter defined tuner space from generated scenario models used while tuning hyperparameters of convolutional neural network model
 
 ***
 
