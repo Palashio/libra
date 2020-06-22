@@ -519,7 +519,7 @@ Retrieves model with initialized weights that was stored in json formatted file 
 class CNNHyperModel(HyperModel)
 ```
 
-A class whose instance enables the hyperparameter tuning of an inputted convolutional neural network. The list of its methods are provided below.
+A class whose Hypermodel object instance enables the hyperparameter tuning of an inputted neural network. The list of its methods are provided below.
 
 #### __init__-CNNHyperModel ####
 
@@ -527,14 +527,14 @@ A class whose instance enables the hyperparameter tuning of an inputted convolut
 CNNHyperModel.__init__(self, input_shape, num_classes)
 ```
 
-Initializes the hyperparameter model class for convolutional neural network tuning 
+Initializes the hyperparameter model class for neural network tuning 
 
 
 *Parameters --*
 
 input_shape: `numpy.array`
 
-Array of dimensional shape needed to fit data into the convolutional neural network model (is assumed to be of a 4-D variety)
+Array of dimensional shape needed to fit data into the neural network model (is assumed to be of a 4-D variety)
 
 num_classes: `int`
 
@@ -545,7 +545,7 @@ Integer number of classes associated with data for convolutional neural network 
 
 None
 
-Executes code to initialize convolutional neural network hypermodel with parameters of an initial input structure and number of classes for analysis
+Executes code to initialize neural network hypermodel with parameters of an initial input structure and number of classes for analysis
 
 #### build ####
 
@@ -553,7 +553,7 @@ Executes code to initialize convolutional neural network hypermodel with paramet
 CNNHyperModel.build(self, hp)
 ```
 
-Generates/stores different layers of model with a selection of parameters which the model selects to use during runtime that are optimal
+Generates/stores different layers of neural network model with a selection of parameters which the model selects to use during runtime that are optimal
 
 
 *Parameters --*
@@ -567,7 +567,7 @@ Dictionary of hyperparameter options
 
 model
 
-Retrieves convolutional neural network hypermodel with numerous inbuilt options per parameter enabled (activation function choices can be rectified linear unit/tahn/sigmoid based, etc.) to choose upon startup, categorical cross-entropy loss function, logarithmic based sampling, adaptive first/second moment stochastic gradient descent optimization, and relevant accuracy metrics
+Retrieves neural network hypermodel with numerous inbuilt options per parameter enabled (activation function choices can be rectified linear unit/tahn/sigmoid based, etc.) to choose upon startup, categorical cross-entropy loss function, logarithmic based sampling, adaptive first/second moment stochastic gradient descent optimization, and relevant accuracy metrics
 
 ### tuneReg ###
 
@@ -582,7 +582,7 @@ libra.tuneReg(data,
               max_trials=1)
 ```
 
-Performs automatic tuning of prior defined hyperparameters varying range of layers and number of units in dense layers across selected trials
+Performs automatic tuning of prior defined hyperparameters varying range of layers and number of units in dense layers across selected trials for optimizing regression neural network
 
 
 *Parameters --*
@@ -593,31 +593,31 @@ Data selected and sent via written query by user to be analyzed
 
 target
 
-Integer number
+Target variable of analysis the model seeks to optimize (also known as hyperparameter metric)
 
 max_layers=10 (`int`)
 
-Integer number 
+Integer maximum number of layers composed in model (is set by default to 10)
 
 min_layers=2 (`int`)
 
-Integer number
+Integer minimum number of layers composed in model (is set by default to 2)
 
 min_dense=2 (`int`)
 
-Integer number
+Integer minimum number of units in a dense layer of model (is set by default to 2)
 
 max_dense=512 (`int`)
 
-Integer number
+Integer maximum number of units in a dense layer of model (is set by default to 512)
 
 executions_per_trial=3 (`int`)
 
-Integer number
+Integer number of models that are built and fit per trial to ensure robustness of models (is set by default to 3)
 
 max_trials=1 (`int`)
 
-Integer number
+Integer number of hyperparameter combinations that are tested by the tuner (is set by default to 1)
 
 
 *Returns --* 
