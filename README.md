@@ -1,4 +1,6 @@
-<img src="data/gh_images/libra-logo.png" width="100%">
+in progress....this README.md is out of date. Documentation site coming soon. 
+
+<img src="libra/data/gh_images/libra-logo.png" width="100%">
 
 # Libra: Deep Learning fluent in one-liners
 
