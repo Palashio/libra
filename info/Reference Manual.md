@@ -407,7 +407,7 @@ Number of additional layers used after creation of baseline regression model
 
 *Returns --*
 
-model 
+model: `obj` 
 
 Retrieves final regression neural network model with a rectified linear unit activation function and normal kernel initializer compiled using a mean square error loss function and adaptive first/second moment stochastic gradient descent optimizer
 
@@ -437,7 +437,7 @@ Integer number of classes associated with data for classification model
 
 *Returns --*
 
-model 
+model: `obj`
 
 Retrieves final classification neural network model with a rectified linear unit activation function and normal kernel initializer with softmax activation function outer layer compiled using a categorical cross-entropy loss function and adaptive first/second moment stochastic gradient descent optimizer as well as including accuracy metrics
    
@@ -463,7 +463,7 @@ Integer number of classes associated with data for text classification model
 
 *Returns --*
 
-model 
+model: `obj`
 
 Retrieves final text classification neural network model with a softmax activation function outer layer compiled using a binary cross-entropy loss function and adaptive first/second moment stochastic gradient descent optimizer as well as including relevant accuracy metrics
    
@@ -505,7 +505,7 @@ String representation of file path name to load pretrained user model from locat
 
 *Returns --*
 
-loaded_model 
+loaded_model: `obj`
 
 Retrieves model with initialized weights that was stored in json formatted file from specified path
 
@@ -565,7 +565,7 @@ Dictionary of hyperparameter options
 
 *Returns --* 
 
-model
+model: `obj`
 
 Retrieves neural network hypermodel with numerous inbuilt options per parameter enabled (activation function choices can be rectified linear unit/tahn/sigmoid based, etc.) to choose upon startup, categorical cross-entropy loss function, logarithmic based sampling, adaptive first/second moment stochastic gradient descent optimization, and relevant accuracy metrics
 
@@ -582,14 +582,14 @@ libra.tuneReg(data,
               max_trials=1)
 ```
 
-Performs automatic tuning of prior defined hyperparameters varying range of layers and number of units in dense layers across selected trials for optimizing regression neural network
+Performs automatic tuning of prior defined hyperparameters varying across range of layers and number of units in dense layers across selected trials for finding optimal regression neural network model
 
 
 *Parameters --*
 
 data
 
-Data selected and sent via written query by user to be analyzed 
+Data selected and sent via written query to instance by user to be analyzed 
 
 target
 
@@ -622,9 +622,9 @@ Integer number of hyperparameter combinations that are tested by the tuner (is s
 
 *Returns --* 
 
-None 
+models[0]: `obj`
 
-Executes code to generate scenarios tune hyperparameters of convolutional neural network model and determine ideal number of layers based upon target function value and notifies user of tuning
+Retrieves best model from generated scenario models used while tuning hyperparameters of regression neural network model
 
 ### build_model ###
 
@@ -632,7 +632,7 @@ Executes code to generate scenarios tune hyperparameters of convolutional neural
 libra.build_model(hp)
 ```
 
-Generates/stores with base object an encoding mask of form list ```[int/long, int/long, int/long]``` based on frequency of distinct characters used for sequence to sequence pre-training for natural language generation
+Constructs regression/convolution neural networks based off identified hyperparameters 
 
 
 *Parameters --*
@@ -644,24 +644,43 @@ Dictionary of hyperparameter options
 
 *Returns --* 
 
-mask: `[int/long, int/long, int/long]` 
+model: `obj`
 
-Outputs an list of encoded numerical representation of the instruction text recieved
+Retrieves the model built using the hyperparameters defined in the dictionary of hyperparameter options
 
 ### tuneClass ###
 
 ``` python
-libra.tuneClass(X, y, num_classes)
+libra.tuneClass(X, 
+                y, 
+                num_classes,
+                max_layers=10,
+                min_layers=2,
+                min_dense=32,
+                max_dense=512,
+                executions_per_trial=3,
+                max_trials=1,
+                activation='relu',
+                loss='categorical_crossentropy',
+                metrics='accuracy')
 ```
 
-Performs automatic tuning of prior defined hyperparameters varying range of layers and number of units in dense layers across selected trials for optimizing classification neural network
+Performs automatic tuning of prior defined hyperparameters varying across range of layers and number of units in dense layers amongst selected trials for finding optimal classification neural network
 
 
 *Parameters --*
 
+X
+
+Variable/vector of input features in data for classification neural network model analysis
+
+y
+
+Prediction variable/vector of classes in data for classification neural network model analysis 
+
 data
 
-Data selected and sent via written query by user to be analyzed 
+Data selected and sent via written query to instance by user to be analyzed 
 
 target
 
@@ -691,12 +710,20 @@ max_trials=1 (`int`)
 
 Integer number of hyperparameter combinations that are tested by the tuner (is set by default to 1)
 
+activation='relu' (`str`)
+
+String representation of the type of activation function used by the model (is set by default to 'relu', or rectified linear unit based activation function)
+
+loss='categorical_crossentropy' (`str`)
+
+String representation of the type of loss function used by the model (is set by default to 'categorical_crossentropy', or categorical cross-entropy loss function that measures model based of logarithmic loss)
+
 
 *Returns --* 
 
-None 
+models[0]: `obj`
 
-Executes code to generate scenarios tune hyperparameters of convolutional neural network model and determine ideal number of layers based upon target function value and notifies user of tuning
+Retrieves best model from generated scenario models used while tuning hyperparameters of classification neural network model
 
 ### tuneCNN ###  
 
