@@ -1,3 +1,85 @@
+from keras_squeezenet import SqueezeNet
+from keras.models import Model
+from keras.layers import  Convolution2D, MaxPooling2D, Lambda
+from keras.layers import Activation, GlobalAveragePooling2D, concatenate
+from keras.losses import categorical_crossentropy as logloss
+from keras.metrics import categorical_accuracy, top_k_categorical_accuracy
+from keras import backend
+from keras import optimizers
+
+temperature, lambda_const = 5.0, 0.2
+num_classes=2
+def knowledge_distillation_loss(y_true, y_pred, lambda_const,num_classes):
+    y_true, logits = y_true[:, :num_classes], y_true[:, num_classes:]
+    y_soft = backend.softmax(logits/temperature)
+    y_pred, y_pred_soft = y_pred[:, :num_classes], y_pred[:, num_classes:]    
+    return lambda_const*logloss(y_true, y_pred) + logloss(y_soft, y_pred_soft)
+
+def accuracy(y_true, y_pred):
+    y_true = y_true[:, :num_classes]
+    y_pred = y_pred[:, :num_classes]
+    return categorical_accuracy(y_true, y_pred)
+
+def top_5_accuracy(y_true, y_pred):
+    y_true = y_true[:, :num_classes]
+    y_pred = y_pred[:, :num_classes]
+    return top_k_categorical_accuracy(y_true, y_pred)
+
+def categorical_crossentropy(y_true, y_pred):
+    y_true = y_true[:, :num_classes]
+    y_pred = y_pred[:, :num_classes]
+    return logloss(y_true, y_pred)
+
+# logloss with only soft probabilities and targets
+def soft_logloss(y_true, y_pred):     
+    logits = y_true[:, num_classes:]
+    y_soft = backend.softmax(logits/temperature)
+    y_pred_soft = y_pred[:, num_classes:]    
+    return logloss(y_soft, y_pred_soft)
+
+def get_snet_layer(num_out=2):
+    global num_outputs
+    num_outputs=num_out
+    model = SqueezeNet()
+
+    # remove softmax
+    model.layers.pop()
+    # usual probabilities
+    logits = model.layers[-1].output
+    probabilities = Activation('softmax')(logits)
+    # softed probabilities
+    logits_T = Lambda(lambda x: x/temperature)(logits)
+    probabilities_T = Activation('softmax')(logits_T)
+
+    output = concatenate([probabilities, probabilities_T])
+    model = Model(model.input, output)
+    model.compile(
+        optimizer=optimizers.SGD(lr=1e-2, momentum=0.9, nesterov=True), 
+        loss=lambda y_true, y_pred: knowledge_distillation_loss(y_true, y_pred, lambda_const), 
+        metrics=[accuracy, top_5_accuracy, categorical_crossentropy, soft_logloss]
+    )
+    return model
+#########################################################################################
+#########################################################################################
+#########################################################################################
+
+'''
+from keras_squeezenet import SqueezeNet
+def get_snet_layer(num_outputs=2):
+    model = SqueezeNet()
+    x = model.get_layer('drop9').output
+    x = Convolution2D(num_outputs, (1, 1), padding='valid', name='conv10')(x)
+    x = Activation('relu', name='relu_conv10')(x)
+    x = GlobalAveragePooling2D()(x)
+    out = Activation('softmax', name='loss')(x)
+    model = Model(inputs=model.input, outputs=out)
+    return model
+'''
+#########################################################################################
+#########################################################################################
+#########################################################################################
+
+"""
 import keras
 from keras import Sequential
 from keras.models import Model
@@ -136,7 +218,6 @@ def soft_logloss(y_true, y_pred):
     return logloss(y_soft, y_pred_soft)
 
 def get_snet_layer():
-    """
     train_datagen = ImageDataGenerator(rescale = 1./255,
                                        shear_range = 0.2,
                                        zoom_range = 0.2,
@@ -153,7 +234,6 @@ def get_snet_layer():
                                                 target_size = (64, 64),
                                                 batch_size = 32,
                                                 class_mode = 'binary')
-    """
 
     model = SqueezeNet(weight_decay=1e-4, image_size=64)
 
@@ -170,7 +250,7 @@ def get_snet_layer():
 
     output = concatenate([probabilities, probabilities_T])
     model = Model(model.input, output)
-    """
+ 
     model.compile(
         optimizer=optimizers.SGD(lr=1e-2, momentum=0.9, nesterov=True), 
         loss=lambda y_true, y_pred: knowledge_distillation_loss(y_true, y_pred, lambda_const), 
@@ -185,21 +265,9 @@ def get_snet_layer():
         ],
         validation_data=val_generator, validation_steps=80, workers=4
     )
-    """
+
     return model
-
+"""
 #########################################################################################
 #########################################################################################
 #########################################################################################
-
-
-from keras_squeezenet import SqueezeNet
-def get_snet_layer(num_outputs=2):
-    model = SqueezeNet()
-    x = model.get_layer('drop9').output
-    x = Convolution2D(num_outputs, (1, 1), padding='valid', name='conv10')(x)
-    x = Activation('relu', name='relu_conv10')(x)
-    x = GlobalAveragePooling2D()(x)
-    out = Activation('softmax', name='loss')(x)
-    model = Model(inputs=model.input, outputs=out)
-    return model

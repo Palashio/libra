@@ -7,7 +7,7 @@ sys.path.insert(1, './modeling')
 sys.path.insert(1, './plotting')
 
 from image_preprocesser import setwise_preprocessing, pathwise_preprocessing, classwise_preprocessing
-from data_reader import DataReader
+from data_reader import DataReader  
 from keras.models import Sequential
 from keras.layers import (Dense, Conv2D, Flatten, Input, MaxPooling2D, )
 import pandas as pd
@@ -18,12 +18,15 @@ from sklearn.preprocessing import OneHotEncoder, StandardScaler
 from generate_plots import (generate_clustering_plots,
                            generate_regression_plots,
                            generate_classification_plots)
+from squeezenet import get_snet_layer
 from data_preprocesser import structured_preprocesser, initial_preprocesser
 from prediction_model_creation import get_keras_model_reg, get_keras_text_class
 from prediction_model_creation import get_keras_model_class
 from sklearn.preprocessing import StandardScaler
 import numpy as np
 from tabulate import tabulate
+from keras.callbacks import ReduceLROnPlateau, EarlyStopping
+
 #from prediction_queries import logger, clearLog
 
 
@@ -434,16 +437,17 @@ def convolutional(self,
     input_shape = (processInfo["height"], processInfo["width"], 3)
     input_single = (processInfo["height"], processInfo["width"])
     num_classes = processInfo["num_categories"]
-    loss_func = ""
+    #loss_func = ""
 
-    if num_classes > 2:
-        loss_func = "categorical_crossentropy"
-    elif num_classes == 2:
-        loss_func = "binary_crossentropy"
+    #if num_classes > 2:
+    #    loss_func = "categorical_crossentropy"
+    #elif num_classes == 2:
+    #    loss_func = "binary_crossentropy"
 
     logger("Creating convolutional neural network dynamically...")
     # Convolutional Neural Network
-    model = Sequential()
+    """
+    model = Sequential() 
     model.add(
         Conv2D(
             64,
@@ -459,7 +463,7 @@ def convolutional(self,
         optimizer="adam",
         loss=loss_func,
         metrics=['accuracy'])
-
+    """
     train_data = ImageDataGenerator(rescale=1. / 255,
                                     shear_range=0.2,
                                     zoom_range=0.2,
@@ -477,6 +481,21 @@ def convolutional(self,
                                             batch_size=32,
                                             class_mode='categorical')
 
+    
+    model= get_snet_layer(num_classes)
+    history = model.fit_generator(
+        X_train, 
+        steps_per_epoch=X_train.n //
+        X_train.batch_size, epochs=25,verbose=0,
+        callbacks=[
+            EarlyStopping(monitor='val_accuracy', patience=4, min_delta=0.01),
+            ReduceLROnPlateau(monitor='val_accuracy', factor=0.1, patience=2, epsilon=0.007)
+        ],
+        validation_data=X_test, validation_steps=X_test.n //
+        X_test.batch_size, workers=4
+    )
+    """
+    
     # print(X_train)
     history = model.fit_generator(
         generator=X_train,
@@ -486,7 +505,7 @@ def convolutional(self,
         validation_steps=X_test.n //
         X_test.batch_size,
         epochs=25)
-
+    """
     # storing values the model dictionary
     return {
         'id': generate_id(),
