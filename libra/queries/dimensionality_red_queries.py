@@ -383,6 +383,6 @@ def dimensionality_KPCA(instruction, dataset, target="", y=""):
 
 #dimensionalityReduc("Predict ocean_proximity", "./data/housing.csv")
 
-data = pd.read_csv("./data/housing.csv")
-
-print(dimensionality_PCA("Model ocean proximity", data))
+# data = pd.read_csv("./data/housing.csv")
+#
+# print(dimensionality_PCA("Model ocean proximity", data))
