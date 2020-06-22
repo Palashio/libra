@@ -1,7 +1,10 @@
 import os
 import shutil
 import cv2
+import glob
 import pandas as pd
+from dataset_labelmatcher import get_similar_column
+from grammartree import get_value_instruction
 
 # Preprocesses images from images to median of heighs/widths
 def setwise_preprocessing(data_path, new_folder=True):
@@ -48,8 +51,14 @@ def setwise_preprocessing(data_path, new_folder=True):
 
 # processes a csv_file containing image paths and creates a testing/training folders
 # with resized images inside the same directory as the csv file
-def pathwise_preprocessing(csv_file, data_paths, label, image_column, training_ratio):
+def csv_preprocessing(csv_file, data_path, instruction, image_column, training_ratio):
     df = pd.read_csv(csv_file)
+    if instruction is None:
+        raise BaseException("Instruction was not given.")
+    label = get_similar_column(get_value_instruction(instruction), df)
+    avoid_directories = ["proc_training_set", "proc_testing_set"]
+    data_paths = [data_path + "/" + d for d in os.listdir(data_path) if os.path.isdir(data_path + "/" + d) and d not in avoid_directories]
+
     # get file extension
     _, file_extension = os.path.splitext(os.listdir(data_paths[0])[0])
 
@@ -61,27 +70,28 @@ def pathwise_preprocessing(csv_file, data_paths, label, image_column, training_r
     while image_column is None:
         for column, value in random_row.iloc[0].items():
             if type(value) is str:
+                if os.path.exists(value):
+                    path_included = True
+                    image_column = column
+                    break
                 # add file extension if not included
-                if file_extension not in value:
-                    file = value + file_extension
+                file = value if file_extension in value else value + file_extension
+
                 # look through all data_paths for file
-                for data_path in data_paths:
-                    if os.path.exists(data_path + "/" + file):
+                for path in data_paths:
+                    if os.path.exists(path + "/" + file):
                         if file_extension in file:
                             need_file_extension = True
                         image_column = column
                         break
-                    elif os.path.exists(file):
-                        path_included = True
-                        if file_extension in file:
-                            need_file_extension = True
-                        image_column = column
-                        break
+            if image_column is not None:
+                break
+
     else:
-        if file_extension not in df.iloc[0][image_column]:
-            need_file_extension = True
         if os.path.exists(df.iloc[0][image_column]):
             path_included = True
+        elif file_extension not in df.iloc[0][image_column]:
+            need_file_extension = True
 
     df = df[[image_column, label]].dropna()
 
@@ -93,12 +103,14 @@ def pathwise_preprocessing(csv_file, data_paths, label, image_column, training_r
     image_list = []
 
     # get the median heights and widths
-    for index, row in df.iterrows():
-        for data_path in data_paths:
-            p = row[image_column] if path_included else data_path + "/" + row[image_column]
+    for index, row in df.head(100).iterrows():
+        for path in data_paths:
+            p = row[image_column] if path_included else path + "/" + row[image_column]
             img = cv2.imread(p)
             if img is not None:
                 break
+        else:
+            raise BaseException(f"{row[image_column]} could not be found in any directories.")
         image_list.append(img)
         heights.append(img.shape[0])
         widths.append(img.shape[1])
@@ -106,23 +118,22 @@ def pathwise_preprocessing(csv_file, data_paths, label, image_column, training_r
     height, width = calculate_medians(heights, widths)
 
     # create training and testing folders
-    path = os.path.dirname(csv_file)
-    create_folder(path, "proc_training_set")
-    create_folder(path, "proc_testing_set")
+    create_folder(data_path, "proc_training_set")
+    create_folder(data_path, "proc_testing_set")
     # create classification folders
     for classification in df[label].unique():
-        create_folder(path + "/proc_training_set", classification)
-        create_folder(path + "/proc_testing_set", classification)
+        create_folder(data_path + "/proc_training_set", classification)
+        create_folder(data_path + "/proc_testing_set", classification)
 
     # save images into correct folder
-    for index, row in df.iterrows():
+    for index, row in df.head(100).iterrows():
         # resize images
         img = process_color_channel(image_list[index], height, width)
         p = "proc_" + (os.path.basename(row[image_column]) if path_included else row[image_column])
-        if (index / df.head.shape[0]) < training_ratio:
-            save_image(path + "/proc_training_set", img, p, row[label])
+        if (index / df.head(100).shape[0]) < training_ratio:
+            save_image(data_path + "/proc_training_set", img, p, row[label])
         else:
-            save_image(path + "/proc_testing_set", img, p, row[label])
+            save_image(data_path + "/proc_testing_set", img, p, row[label])
 
     return {"num_categories": classifications, "height": height, "width": width}
 
@@ -177,12 +188,16 @@ def process_class_folders(data_path):
         num_classifications += 1
         for image in os.listdir(data_path + "/" + class_folder):
             try:
+                if image == ".DS_Store":
+                    continue
                 img = cv2.imread(data_path + "/" + class_folder + "/" + image)
                 heights.append(img.shape[0])
                 widths.append(img.shape[1])
                 img_dict[class_folder][image] = img
             except BaseException:
-                continue
+                del img_dict[class_folder]
+                num_classifications -= 1
+                break
 
     return [heights, widths, num_classifications, img_dict]
 
@@ -283,3 +298,18 @@ def process_color_channel(img, height, width):
 #     r = cv2.resize(r, dsize=(224, 224), interpolation=cv2.INTER_CUBIC)
 #     img = cv2.merge((b, g, r))
 #     return img
+
+def set_distinguisher(data_path):
+
+    # check if setwise
+    if os.path.isdir(data_path + "/training_set") and os.path.isdir(data_path + "/testing_set"):
+        return {"read_mode":"setwise"}
+
+    # check if contains a csv file
+    csv_path = glob.glob(data_path + "/*.csv")
+    if len(csv_path) == 1:
+        return {"read_mode":"pathwise or namewise", "csv_path":csv_path[0]}
+    elif len(csv_path) > 1:
+        raise BaseException(f"Too many csv files in directory: {[os.path.basename(path) for path in csv_path]}")
+
+    return {"read_mode":"classwise"}

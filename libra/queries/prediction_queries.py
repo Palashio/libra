@@ -313,21 +313,15 @@ class client:
         return
 
     def convolutional_query(self,
-                            read_mode="setwise",
-                            data_paths=None,
+                            instruction=None,
                             new_folders=True,
-                            csv_file=None,
-                            label_column=None,
                             image_column=None,
                             training_ratio=0.8):
 
         # storing values the model dictionary
-        self.models["convolutional_NN"] = convolutional(self,
-                                                        read_mode=read_mode,
-                                                        data_paths=data_paths,
+        self.models["convolutional_NN"] = convolutional(instruction=instruction,
+                                                        data_path=self.dataset,
                                                         new_folders=new_folders,
-                                                        csv_file=csv_file,
-                                                        label_column=label_column,
                                                         image_column=image_column,
                                                         training_ratio=training_ratio)
 
@@ -419,3 +413,5 @@ class client:
 #newClient.decision_tree_query("Model ocean proximity")
 # newClient = client('./data/landslides_after_rainfall.csv').neural_network_query(instruction='Model distance',
 # drop=['id', 'geolocation', 'source_link', 'source_name'])
+newClient = client("/Users/rostamvakhshoori/Desktop/data/54339_104884_bundle_archive")
+newClient.convolutional_query(instruction="model dx")

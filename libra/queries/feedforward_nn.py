@@ -6,7 +6,10 @@ sys.path.insert(1, './data_generation')
 sys.path.insert(1, './modeling')
 sys.path.insert(1, './plotting')
 
-from image_preprocesser import setwise_preprocessing, pathwise_preprocessing, classwise_preprocessing
+from image_preprocesser import (setwise_preprocessing,
+                                csv_preprocessing,
+                                classwise_preprocessing,
+                                set_distinguisher)
 from data_reader import DataReader
 from keras.models import Sequential
 from keras.layers import (Dense, Conv2D, Flatten, Input, MaxPooling2D, )
@@ -370,44 +373,37 @@ def classification_ann(instruction,
                 'validation_accuracy': final_hist.history['val_accuracy']}}
 
 
-def convolutional(self,
-                read_mode="setwise",
-                data_paths=None,
+def convolutional(instruction=None,
+                data_path=os.getcwd(),
                 new_folders=True,
-                csv_file=None,
-                label_column=None,
                 image_column=None,
                 training_ratio=0.8):
 
-    logger("Creating CNN generation query")
-    # generates the dataset based on instructions using a selenium query on
-    # google chrome
     logger("Generating datasets for classes...")
 
-    # if image dataset in form of a data folder
+    read_mode_info = set_distinguisher(data_path)
+    read_mode = read_mode_info["read_mode"]
+
     training_path = "/proc_training_set"
     testing_path = "/proc_testing_set"
 
     if read_mode=="setwise":
-        if data_paths is None:
-            data_path = os.getcwd()
-        else:
-            data_path = data_paths
-        # process images
-        processInfo = setwise_preprocessing(data_paths, new_folders)
+        processInfo = setwise_preprocessing(data_path, new_folders)
         if not new_folders:
             training_path = "/training_set"
             testing_path = "/testing_set"
 
     # if image dataset in form of csv
-    elif read_mode=="pathwise":
-        processInfo = pathwise_preprocessing(csv_file, data_paths, label_column, image_column, training_ratio)
-        data_path = os.path.dirname(csv_file)
+    elif read_mode=="pathwise or namewise":
+        processInfo = csv_preprocessing(read_mode_info["csv_path"],
+                                        data_path,
+                                        instruction,
+                                        image_column,
+                                        training_ratio)
 
     # if image dataset in form of one folder containing class folders
     elif read_mode=="classwise":
-        processInfo = classwise_preprocessing(data_paths, training_ratio)
-        data_path = data_paths
+        processInfo = classwise_preprocessing(data_path, training_ratio)
 
     input_shape = (processInfo["height"], processInfo["width"], 3)
     input_single = (processInfo["height"], processInfo["width"])
