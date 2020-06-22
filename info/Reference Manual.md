@@ -635,12 +635,16 @@ libra.build_model(hp)
 Generates/stores with base object an encoding mask of form list ```[int/long, int/long, int/long]``` based on frequency of distinct characters used for sequence to sequence pre-training for natural language generation
 
 
-Parameters -- instruction_label: `str`
+*Parameters --*
 
-Acquires a string based of the instruction sent to encode in the form of a mask
+hp: `{}`
+
+Dictionary of hyperparameter options 
 
 
-Returns -- mask: `[int/long, int/long, int/long]` 
+*Returns --* 
+
+mask: `[int/long, int/long, int/long]` 
 
 Outputs an list of encoded numerical representation of the instruction text recieved
 
@@ -650,17 +654,49 @@ Outputs an list of encoded numerical representation of the instruction text reci
 libra.tuneClass(X, y, num_classes)
 ```
 
-Generates/stores with base object an encoding mask of form list ```[int/long, int/long, int/long]``` based on frequency of distinct characters used for sequence to sequence pre-training for natural language generation
+Performs automatic tuning of prior defined hyperparameters varying range of layers and number of units in dense layers across selected trials for optimizing classification neural network
 
 
-Parameters -- instruction_label: `str`
+*Parameters --*
 
-Acquires a string based of the instruction sent to encode in the form of a mask
+data
+
+Data selected and sent via written query by user to be analyzed 
+
+target
+
+Target variable of analysis the model seeks to optimize (also known as hyperparameter metric)
+
+max_layers=10 (`int`)
+
+Integer maximum number of layers composed in model (is set by default to 10)
+
+min_layers=2 (`int`)
+
+Integer minimum number of layers composed in model (is set by default to 2)
+
+min_dense=2 (`int`)
+
+Integer minimum number of units in a dense layer of model (is set by default to 2)
+
+max_dense=512 (`int`)
+
+Integer maximum number of units in a dense layer of model (is set by default to 512)
+
+executions_per_trial=3 (`int`)
+
+Integer number of models that are built and fit per trial to ensure robustness of models (is set by default to 3)
+
+max_trials=1 (`int`)
+
+Integer number of hyperparameter combinations that are tested by the tuner (is set by default to 1)
 
 
-Returns -- mask: `[int/long, int/long, int/long]` 
+*Returns --* 
 
-Outputs an list of encoded numerical representation of the instruction text recieved
+None 
+
+Executes code to generate scenarios tune hyperparameters of convolutional neural network model and determine ideal number of layers based upon target function value and notifies user of tuning
 
 ### tuneCNN ###  
 
