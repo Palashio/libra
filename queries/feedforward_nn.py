@@ -23,6 +23,7 @@ from prediction_model_creation import get_keras_model_reg, get_keras_text_class
 from prediction_model_creation import get_keras_model_class
 from sklearn.preprocessing import StandardScaler
 import numpy as np
+from tabulate import tabulate
 #from prediction_queries import logger, clearLog
 
 
@@ -144,10 +145,10 @@ def regression_ann(
         models.append(history)
         model_data.append(model)
 
-        col_name = [["Initial number of layers ","Training Loss ","Test Loss "]]
-        col_width = max(len(word) for row in col_name for word in row) + 2
-        for row in col_name:
-            print( (" " * 2 * counter)+"".join(word.ljust(col_width) for word in row))
+        col_name = ["Initial number of layers ","Training Loss ","Test Loss "]
+        #col_width = max(len(word) for row in col_name for word in row) + 2
+        #for row in col_name:
+        #    print( (" " * 2 * counter)+"".join(word.ljust(col_width) for word in row))
         values=[]
         values.append(str(len(model.layers))) 
         values.append(str(history.history['loss'][len(history.history['val_loss']) -
@@ -156,15 +157,20 @@ def regression_ann(
                                                    1]))
         datax=[]
         datax.append(values)
-        for row in datax:
-            print((" " * 2 * counter)+ "".join(word.ljust(col_width) for word in row))
+        #for row in datax:
+        #    print((" " * 2 * counter)+ "".join(word.ljust(col_width) for word in row))
+        print((" " * 2 * counter)+ tabulate(datax, headers=col_name, tablefmt='orgtbl'))
         losses.append(history.history[maximizer]
                       [len(history.history[maximizer]) - 1])
-
+        del values, datax
+        
         # keeps running model and fit functions until the validation loss stops
         # decreasing
         logger("Testing number of layers...")
         print(currLog)
+        col_name = [["Current number of layers","Training Loss","Test Loss"]]
+        #col_width = max(len(word) for row in col_name for word in row) + 2
+        datax=[]
         while (all(x > y for x, y in zip(losses, losses[1:]))):
             model = get_keras_model_reg(data, i)
             history = model.fit(
@@ -176,27 +182,27 @@ def regression_ann(
                     y_test), verbose=0)
             model_data.append(model)
             models.append(history)
-            col_name = [["Current number of layers","Training Loss","Test Loss"]]
-            col_width = max(len(word) for row in col_name for word in row) + 2
-            for row in col_name:
-                print((" " * 2 * counter)+ "".join(word.ljust(col_width) for word in row))
+            
+            #for row in col_name:
+            #    print((" " * 2 * counter)+ "".join(word.ljust(col_width) for word in row))
             values=[]
-            datax=[]
+            #datax=[]
             values.append(str(len(model.layers)))
             values.append(str(history.history['loss'][len(history.history['val_loss']) -
                                                1]))
             values.append(str(history.history['val_loss'][len(history.history['val_loss']) -
                                                    1]))
             datax.append(values)
-            for row in datax:
-                print((" " * 2 * counter)+ "".join(word.ljust(col_width) for word in row))
-            del values,datax
+            #for row in datax:
+            #    print((" " * 2 * counter)+ "".join(word.ljust(col_width) for word in row))
+            #del values,datax
             losses.append(history.history[maximizer]
                           [len(history.history[maximizer]) - 1])
             i += 1
-
+        print((" " * 2 * counter)+ tabulate(datax, headers=col_name, tablefmt='orgtbl'))
         final_model = model_data[losses.index(min(losses))]
         final_hist = models[losses.index(min(losses))]
+        del values, datax
         print("")
         logger('->', "Best number of layers found: " +
                str(len(final_model.layers)))
@@ -300,10 +306,10 @@ def classification_ann(instruction,
 
         model_data.append(model)
         models.append(history)
-        col_name = [["Initial number of layers","Training Loss","Test Loss"]]
-        col_width = max(len(word) for row in col_name for word in row) + 2  # padding
-        for row in col_name:
-            print((" " * 2 * counter)+ "".join(word.ljust(col_width) for word in row))
+        col_name = ["Initial number of layers ","Training Loss ","Test Loss "]
+        #col_width = max(len(word) for row in col_name for word in row) + 2
+        #for row in col_name:
+        #    print( (" " * 2 * counter)+"".join(word.ljust(col_width) for word in row))
         values=[]
         values.append(str(len(model.layers))) 
         values.append(str(history.history['loss'][len(history.history['val_loss']) -
@@ -312,15 +318,18 @@ def classification_ann(instruction,
                                                    1]))
         datax=[]
         datax.append(values)
-        for row in datax:
-            print((" " * 2 * counter)+ "".join(word.ljust(col_width) for word in row))
-        del values, datax
+        #for row in datax:
+        #    print((" " * 2 * counter)+ "".join(word.ljust(col_width) for word in row))
+        print((" " * 2 * counter)+ tabulate(datax, headers=col_name, tablefmt='orgtbl'))
         losses.append(history.history[maximizer]
                       [len(history.history[maximizer]) - 1])
-
+        del values, datax
         # keeps running model and fit functions until the validation loss stops
         # decreasing
         logger("Testing number of layers...")
+        col_name = [["Current number of layers","Training Loss","Test Loss"]]
+        #col_width = max(len(word) for row in col_name for word in row) + 2
+        datax=[]
         while (all(x > y for x, y in zip(losses, losses[1:]))):
             model = get_keras_model_class(data, i, num_classes)
             history = model.fit(
@@ -332,28 +341,26 @@ def classification_ann(instruction,
                     y_test),
                 callbacks=[es], verbose=0)
 
-            model_data.append(model)
-            models.append(history)
-            col_name = [["Current number of layers","Training Loss","Test Loss"]]
-            col_width = max(len(word) for row in col_name for word in row) + 2
-            for row in col_name:
-                print((" " * 2 * counter)+ "".join(word.ljust(col_width) for word in row))
+            #for row in col_name:
+            #    print((" " * 2 * counter)+ "".join(word.ljust(col_width) for word in row))
             values=[]
-            values.append(str(len(model.layers))) 
+            #datax=[]
+            values.append(str(len(model.layers)))
             values.append(str(history.history['loss'][len(history.history['val_loss']) -
                                                1]))
             values.append(str(history.history['val_loss'][len(history.history['val_loss']) -
                                                    1]))
-            datax=[]
             datax.append(values)
-            for row in datax:
-                print((" " * 2 * counter)+ "".join(word.ljust(col_width) for word in row))
+            #for row in datax:
+            #    print((" " * 2 * counter)+ "".join(word.ljust(col_width) for word in row))
+            #del values,datax
             losses.append(history.history[maximizer]
                           [len(history.history[maximizer]) - 1])
             accuracies.append(history.history['val_accuracy']
                               [len(history.history['val_accuracy']) - 1])
             i += 1
-
+        print((" " * 2 * counter)+ tabulate(datax, headers=col_name, tablefmt='orgtbl'))
+        del values, datax
         final_model = model_data[losses.index(min(losses))]
         final_hist = models[losses.index(min(losses))]
         print("")
