@@ -439,7 +439,7 @@ Integer number of classes associated with data for classification model
 
 model 
 
-Retrieves final classification neural network model with a rectified linear unit activation function and normal kernel initializer with softmax activation function outer layer compiled using a categorical cross-entropy loss function and adaptive first/second moment stochastic gradient descent optimizer
+Retrieves final classification neural network model with a rectified linear unit activation function and normal kernel initializer with softmax activation function outer layer compiled using a categorical cross-entropy loss function and adaptive first/second moment stochastic gradient descent optimizer as well as including accuracy metrics
    
 ### get_keras_text_class ###
 
@@ -447,17 +447,25 @@ Retrieves final classification neural network model with a rectified linear unit
 libra.get_keras_text_class(max_features, num_classes)
 ```
 
-Generates/stores with base object an encoding mask of form list ```[int/long, int/long, int/long]``` based on frequency of distinct characters used for sequence to sequence pre-training for natural language generation
+Constructs a long term short memory recurrent binary text classification neural network that uses softmax activation function
 
 
-Parameters -- instruction_label: `str`
+*Parameters --* 
 
-Acquires a string based of the instruction sent to encode in the form of a mask
+max_features: `int`
+
+Integer maximum number of feature variables (measurable properties found in other column segments of data) to take into account in text classification model
+
+num_classes: `int`
+
+Integer number of classes associated with data for text classification model
 
 
-Returns -- mask: `[int/long, int/long, int/long]` 
+*Returns --*
 
-Outputs an list of encoded numerical representation of the instruction text recieved
+model 
+
+Retrieves final text classification neural network model with a softmax activation function outer layer compiled using a binary cross-entropy loss function and adaptive first/second moment stochastic gradient descent optimizer as well as including relevant accuracy metrics
    
 ### getKerasConvolutional ###
 
@@ -465,17 +473,19 @@ Outputs an list of encoded numerical representation of the instruction text reci
 libra.instruction_getKerasConvolutional()
 ```
 
-Generates/stores with base object an encoding mask of form list ```[int/long, int/long, int/long]``` based on frequency of distinct characters used for sequence to sequence pre-training for natural language generation
+Updates user of successful entry of instruction to request convolutional neural network from written query
 
 
-Parameters -- instruction_label: `str`
+*Parameters --*
 
-Acquires a string based of the instruction sent to encode in the form of a mask
+None
 
 
-Returns -- mask: `[int/long, int/long, int/long]` 
+*Returns --*
 
-Outputs an list of encoded numerical representation of the instruction text recieved
+None
+
+Executes method to send message to user that indicates convolutional neural network request has been recorded
 
 ### load_model ###
 
@@ -483,17 +493,21 @@ Outputs an list of encoded numerical representation of the instruction text reci
 libra.load_model(self, load_path)
 ```
 
-Generates/stores with base object an encoding mask of form list ```[int/long, int/long, int/long]``` based on frequency of distinct characters used for sequence to sequence pre-training for natural language generation
+Loads a user defined model from user specified model file path if the user has provided the model dictionary
 
 
-Parameters -- instruction_label: `str`
+*Parameters --* 
 
-Acquires a string based of the instruction sent to encode in the form of a mask
+load_path: `str`
+
+String representation of file path name to load pretrained user model from location
 
 
-Returns -- mask: `[int/long, int/long, int/long]` 
+*Returns --*
 
-Outputs an list of encoded numerical representation of the instruction text recieved
+loaded_model 
+
+Retrieves model with initialized weights that was stored in json formatted file from specified path
 
 ***
 
