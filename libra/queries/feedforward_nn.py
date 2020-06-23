@@ -139,7 +139,7 @@ def regression_ann(
         models.append(history)
         model_data.append(model)
 
-        col_name = ["Initial number of layers ","Training Loss ","Test Loss "]
+        col_name = [["Initial number of layers ","Training Loss ","Test Loss "]]
         col_width = max(len(word) for row in col_name for word in row) + 2
         for row in col_name:
             print( (" " * 2 * counter)+"".join(word.ljust(col_width) for word in row))
@@ -300,7 +300,7 @@ def classification_ann(instruction,
 
         model_data.append(model)
         models.append(history)
-        col_name = ["Initial number of layers ","Training Loss ","Test Loss "]
+        col_name = [["Initial number of layers ","Training Loss ","Test Loss "]]
         col_width = max(len(word) for row in col_name for word in row) + 2
         for row in col_name:
             print( (" " * 2 * counter)+"".join(word.ljust(col_width) for word in row))
