@@ -18,7 +18,7 @@ from libra.plotting.generate_plots import (generate_clustering_plots,
                            generate_regression_plots,
                            generate_classification_plots)
 from libra.preprocessing.data_preprocesser import structured_preprocesser, initial_preprocesser
-from libra.modeling.prediction_model_creation import get_keras_model_reg, get_keras_text_class
+from libra.modeling.prediction_model_creation import get_keras_model_reg, get_keras_text_class, get_keras_model_class
 from sklearn.preprocessing import StandardScaler
 import numpy as np
 from tabulate import tabulate
@@ -397,7 +397,8 @@ def convolutional(instruction=None,
                 data_path=os.getcwd(),
                 new_folders=True,
                 image_column=None,
-                training_ratio=0.8):
+                training_ratio=0.8,
+                augmentation=True):
 
     logger("Generating datasets for classes...")
 
@@ -428,12 +429,12 @@ def convolutional(instruction=None,
     input_shape = (processInfo["height"], processInfo["width"], 3)
     input_single = (processInfo["height"], processInfo["width"])
     num_classes = processInfo["num_categories"]
-    #loss_func = ""
+    loss_func = ""
 
-    #if num_classes > 2:
-    #    loss_func = "categorical_crossentropy"
-    #elif num_classes == 2:
-    #    loss_func = "binary_crossentropy"
+    if num_classes > 2:
+        loss_func = "categorical_crossentropy"
+    elif num_classes == 2:
+        loss_func = "binary_crossentropy"
 
     logger("Creating convolutional neural network dynamically...")
     # Convolutional Neural Network
@@ -453,33 +454,67 @@ def convolutional(instruction=None,
         optimizer="adam",
         loss=loss_func,
         metrics=['accuracy'])
-    train_data = ImageDataGenerator(rescale=1. / 255,
-                                    shear_range=0.2,
-                                    zoom_range=0.2,
-                                    horizontal_flip=True)
+    if augmentation==True:
+        train_data = ImageDataGenerator(rescale=1. / 255,
+                                        shear_range=0.2,
+                                        zoom_range=0.2,
+                                        horizontal_flip=True)
+        test_data = ImageDataGenerator(rescale=1. / 255)
+    
+    else:
+        train_data= ImageDataGenerator()   
+        test_data = ImageDataGenerator()
+        """
+        trainingImages = []
+        train_labels = []
+        validationImages = []
+        test_labels = []
 
+        for path in imgPaths:
+        classLabel = path.split(os.path.sep)[-2]
+        classes.add(classLabel)
+        img = img_to_array(load_img(path, target_size=(64, 64)))
+
+        if path.split(os.path.sep)[-3] == 'training_set':
+            trainingImages.append(img)
+            train_labels.append(classLabel)
+        else:
+            validationImages.append(img)
+            test_labels.append(classLabel)
+
+        trainingImages = np.array(trainingImages)
+        train_labels = to_categorical(np.array(train_labels))
+        validationImages = np.array(validationImages)
+        test_labels = to_categorical(np.array(test_labels))
+        model.compile(loss=’categorical_crossentropy’,
+                  optimizer=’sgd’,
+                  metrics=[‘accuracy’])
+        history=model.fit(train_images, train_labels,
+                  batch_size=100,
+                  epochs=5,
+                  verbose=1)
+        """
+    
     X_train = train_data.flow_from_directory(data_path + training_path,
+                                                    target_size=input_single,
+                                                    color_mode='rgb',
+                                                    batch_size=(32 if processInfo["train_size"] >= 32 else 1),
+                                                    class_mode=loss_func[:loss_func.find("_")])
+    X_test = test_data.flow_from_directory(data_path + testing_path,
                                                 target_size=input_single,
                                                 color_mode='rgb',
-                                                batch_size=(32 if processInfo["train_size"] >= 32 else 1),
-                                                class_mode='categorical')
-    test_data = ImageDataGenerator(rescale=1. / 255)
-    X_test = test_data.flow_from_directory(data_path + testing_path,
-                                            target_size=input_single,
-                                            color_mode='rgb',
-                                            batch_size=(32 if processInfo["test_size"] >= 32 else 1),
-                                            class_mode='categorical')
+                                                batch_size=(32 if processInfo["test_size"] >= 32 else 1),
+                                                class_mode=loss_func[:loss_func.find("_")])
 
-    # print(X_train)
+        # print(X_train)
     history = model.fit_generator(
-        generator=X_train,
-        steps_per_epoch=X_train.n //
-        X_train.batch_size,
-        validation_data=X_test,
-        validation_steps=X_test.n //
-        X_test.batch_size,
-        epochs=25)
-
+            generator=X_train,
+            steps_per_epoch=X_train.n //
+            X_train.batch_size,
+            validation_data=X_test,
+            validation_steps=X_test.n //
+            X_test.batch_size,
+            epochs=25)
     # storing values the model dictionary
     return {
         'id': generate_id(),
