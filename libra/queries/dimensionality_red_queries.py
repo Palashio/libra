@@ -1,26 +1,25 @@
 from sklearn.feature_selection import SelectFromModel
 from sklearn import preprocessing, tree
 from itertools import product, permutations
-from data_reader import DataReader
+from libra.preprocessing.data_reader import DataReader
 import os
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.neighbors import KNeighborsClassifier
-from tuner import tuneReg, tuneClass
+from libra.modeling.tuner import tuneReg, tuneClass
 from os import listdir
 from keras.layers import Dense, Conv2D, Flatten
 from keras.models import Sequential
-from generate_plots import generate_clustering_plots, generate_regression_plots, generate_classification_plots, generate_classification_together
+from libra.plotting.generate_plots import generate_clustering_plots, generate_regression_plots, generate_classification_plots, generate_classification_together
 import matplotlib.pyplot as plt
 from sklearn.cluster import KMeans
 from keras.utils import np_utils
 from keras.utils import to_categorical
-from prediction_model_creation import get_keras_model_class
-from prediction_model_creation import get_keras_model_reg
-from data_preprocesser import structured_preprocesser, initial_preprocesser
-from grammartree import get_value_instruction
+from libra.modeling.prediction_model_creation import get_keras_model_reg, get_keras_model_class
+from libra.preprocessing.data_preprocesser import structured_preprocesser, initial_preprocesser
+from libra.data_generation.grammartree import get_value_instruction
 from matplotlib import pyplot
 from keras.callbacks import EarlyStopping
-from dataset_labelmatcher import get_similar_column
+from libra.data_generation.dataset_labelmatcher import get_similar_column
 from tensorflow.python.keras.layers import Dense, Input
 from xgboost import XGBClassifier
 from sklearn.preprocessing import OneHotEncoder, StandardScaler
@@ -39,11 +38,6 @@ import pandas as pd
 import numpy as np
 import keras
 import sys
-
-sys.path.insert(1, './preprocessing')
-sys.path.insert(1, './data_generation')
-sys.path.insert(1, './modeling')
-sys.path.insert(1, './plotting')
 
 # function imports from other files
 

@@ -1,26 +1,20 @@
 import sys
 import os
 
-sys.path.insert(1, './preprocessing')
-sys.path.insert(1, './data_generation')
-sys.path.insert(1, './modeling')
-sys.path.insert(1, './plotting')
-
-from image_preprocesser import setwise_preprocessing, pathwise_preprocessing, classwise_preprocessing
-from data_reader import DataReader
+from libra.preprocessing.image_preprocesser import setwise_preprocessing, pathwise_preprocessing, classwise_preprocessing
+from libra.preprocessing.data_reader import DataReader
 from keras.models import Sequential
 from keras.layers import (Dense, Conv2D, Flatten, Input, MaxPooling2D, )
 import pandas as pd
-from supplementaries import save, generate_id
+from libra.queries.supplementaries import save, generate_id
 from keras.preprocessing.image import ImageDataGenerator
 from tensorflow.keras.callbacks import EarlyStopping
 from sklearn.preprocessing import OneHotEncoder, StandardScaler
-from generate_plots import (generate_clustering_plots,
+from libra.plotting.generate_plots import (generate_clustering_plots,
                            generate_regression_plots,
                            generate_classification_plots)
-from data_preprocesser import structured_preprocesser, initial_preprocesser
-from prediction_model_creation import get_keras_model_reg, get_keras_text_class
-from prediction_model_creation import get_keras_model_class
+from libra.preprocessing.data_preprocesser import structured_preprocesser, initial_preprocesser
+from libra.modeling.prediction_model_creation import get_keras_model_reg, get_keras_text_class
 from sklearn.preprocessing import StandardScaler
 import numpy as np
 #from prediction_queries import logger, clearLog
