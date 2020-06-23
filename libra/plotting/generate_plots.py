@@ -4,11 +4,6 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import warnings
 
-sys.path.insert(1, './preprocessing')
-sys.path.insert(1, './data_generation')
-sys.path.insert(1, './modeling')
-sys.path.insert(1, './plotting')
-
 warnings.filterwarnings("ignore", category=RuntimeWarning) 
 
 # generates all of the plots in clustering

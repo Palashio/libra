@@ -1,25 +1,20 @@
 import sys
 import os 
-import pandas as pd 
+import pandas as pd
 
-sys.path.insert(1, './preprocessing')
-sys.path.insert(1, './data_generation')
-sys.path.insert(1, './modeling')
-sys.path.insert(1, './plotting')
-
-from data_reader import DataReader
-from grammartree import get_value_instruction
+from libra.preprocessing.data_reader import DataReader
+from libra.data_generation.grammartree import get_value_instruction
 from sklearn import preprocessing, svm
 from sklearn import preprocessing, tree
 from sklearn.metrics import accuracy_score
-from data_preprocesser import structured_preprocesser, initial_preprocesser, clustering_preprocessor
+from libra.preprocessing.data_preprocesser import structured_preprocesser, initial_preprocesser, clustering_preprocessor
 from sklearn.cluster import KMeans
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.model_selection import train_test_split
 from sklearn.model_selection import cross_val_score
 import numpy as np
-from supplementaries import generate_id
-from generate_plots import (generate_clustering_plots,
+from libra.queries.supplementaries import generate_id
+from libra.plotting.generate_plots import (generate_clustering_plots,
                            generate_regression_plots,
                            generate_classification_plots)
 
