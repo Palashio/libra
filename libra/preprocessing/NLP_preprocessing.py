@@ -7,9 +7,9 @@ from keras_preprocessing.sequence import pad_sequences
 from keras_preprocessing.text import Tokenizer
 from spacy.lang.en import English
 from nltk.corpus import stopwords
-from dataset_labelmatcher import get_similar_column
-from dimensionality_red_queries import logger
-from grammartree import get_value_instruction
+from libra.data_generation.dataset_labelmatcher import get_similar_column
+from libra.queries.dimensionality_red_queries import logger
+from libra.data_generation.grammartree import get_value_instruction
 
 
 def get_target_values(data, instruction, yLabel):

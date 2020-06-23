@@ -4,7 +4,7 @@ from keras.layers import Input, LSTM, Dense
 import numpy as np
 import pandas as pd
 import string
-from grammartree import get_value_instruction
+from libra.data_generation.grammartree import get_value_instruction
 from sklearn.metrics.pairwise import cosine_similarity
 import Levenshtein
 

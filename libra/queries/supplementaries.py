@@ -1,9 +1,9 @@
-from tuner import tuneReg, tuneClass, tuneCNN
+from libra.modeling.tuner import tuneReg, tuneClass, tuneCNN
 import numpy as np
 import os
-from data_reader import DataReader
+from libra.preprocessing.data_reader import DataReader
 from tabulate import tabulate
-from data_preprocesser import structured_preprocesser, initial_preprocesser
+from libra.preprocessing.data_preprocesser import structured_preprocesser, initial_preprocesser
 import pandas as pd
 from sklearn.preprocessing import LabelEncoder
 from scipy.spatial.distance import cosine
