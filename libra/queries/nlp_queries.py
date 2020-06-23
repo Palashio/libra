@@ -178,6 +178,7 @@ def summarization_query(self, instruction,
     for epoch in range(TRAIN_EPOCHS):
         train(epoch, tokenizer, model, device, training_loader, optimizer)
 
+    logger("Storing information in client object...")
     self.models["Document Summarization"] = {
         "model": model
     }
