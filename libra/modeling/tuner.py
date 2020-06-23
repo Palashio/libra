@@ -14,6 +14,7 @@ from sklearn.model_selection import train_test_split
 from tensorflow.python.keras.layers import Dense, Input
 import keras
 import tensorflow as tf
+from kerastuner.applications import HyperResNet
 from libra.preprocessing.data_preprocesser import structured_preprocesser, clustering_preprocessor
 import sys
 
@@ -151,20 +152,11 @@ def tuneReg(
         return model
 
     # random search for the model
-    #tuner = RandomSearch(
-    #    build_model,
-    #    objective='loss',
-    #    max_trials=max_trials,
-    #    executions_per_trial=executions_per_trial)
-    tuner = Hyperband(
-        hypermodel,
-        max_epochs=max_trials,
+    tuner = RandomSearch(
+        build_model,
         objective='loss',
-        seed=42,
-        executions_per_trial=executions_per_trial,
-        directory='hyperband'
-    )
-
+        max_trials=max_trials,
+        executions_per_trial=executions_per_trial)
     # tuner.search_space_summary()
     # del data[target]
 
@@ -217,22 +209,13 @@ def tuneClass(
         return model
 
     # tuners, establish the object to look through the tuner search space
-    #tuner = RandomSearch(
-    #    build_model,
-    #    objective='loss',
-    #    max_trials=max_trials,
-    #    executions_per_trial=executions_per_trial,
-    #    directory='models',
-    #    project_name='class_tuned')
-    
-    tuner = Hyperband(
-        hypermodel,
-        max_epochs=10,
-        objective='val_accuracy',
-        seed=42,
-        executions_per_trial=3,
-        directory='hyperband'
-    )
+    tuner = RandomSearch(
+        build_model,
+        objective='loss',
+        max_trials=max_trials,
+        executions_per_trial=executions_per_trial,
+        directory='models',
+        project_name='class_tuned')
 
     # tuner.search_space_summary()
 
@@ -255,21 +238,13 @@ def tuneCNN(X, y, num_classes):
         224, 224, 3), num_classes=num_classes)
 
     # tuners, establish the object to look through the tuner search space
-    #tuner = RandomSearch(
-    #    hypermodel,
-    #    objective='val_accuracy',
-    #    seed=42,
-    #    max_trials=3,
-    #    executions_per_trial=3,
-    #    directory='random_search',
-    #)
-    tuner = Hyperband(
-    hypermodel,
-    max_epochs=10,
-    objective='val_accuracy',
-    seed=42,
-    executions_per_trial=3,
-    directory='hyperband'
+    tuner = RandomSearch(
+        hypermodel,
+        objective='val_accuracy',
+        seed=42,
+        max_trials=3,
+        executions_per_trial=3,
+        directory='random_search',
     )
     X_train, X_test, y_train, y_test = train_test_split(
         np.asarray(X), np.asarray(y), test_size=0.33, random_state=42)
@@ -282,3 +257,25 @@ def tuneCNN(X, y, num_classes):
 
     # returns the best model
     return tuner.get_best_models(1)[0]
+
+def tuneHyperband(X,
+        y,
+        max_trials=3):
+    hypermodel = HyperResNet(input_shape=(128, 128, 3), num_classes=10)
+    tuner = Hyperband(
+        hypermodel,
+        max_epochs=max_trials,
+        objective='val_accuracy',
+        seed=42,
+    )
+
+    X_train, X_test, y_train, y_test = train_test_split(
+        X, y, test_size=0.2, random_state=49)
+
+    # searches the tuner space defined by hyperparameters (hp) and returns the
+    # best model
+    tuner.search(X_train, y_train,
+                 epochs=5,
+                 validation_data=(X_test, y_test))
+    models = tuner.get_best_models(num_models=1)
+    return models[0]
