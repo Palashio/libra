@@ -22,7 +22,7 @@ from libra.modeling.prediction_model_creation import get_keras_model_reg, get_ke
 from sklearn.preprocessing import StandardScaler
 import numpy as np
 from tabulate import tabulate
-from keras.callbacks import ReduceLROnPlateau, EarlyStopping
+from tensorflow.keras.callbacks import EarlyStopping
 
 #from prediction_queries import logger, clearLog
 
