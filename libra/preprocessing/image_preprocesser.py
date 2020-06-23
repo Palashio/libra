@@ -168,13 +168,13 @@ def classwise_preprocessing(data_path, training_ratio):
                 data_size[0] += 1
                 save_image(data_path + "/proc_training_set",
                            resized_img,
-                           "proc" + image_name,
+                           "proc_" + image_name,
                            class_folder)
             else:
                 data_size[1] += 1
                 save_image(data_path + "/proc_testing_set",
                            resized_img,
-                           "proc" + image_name,
+                           "proc_" + image_name,
                            class_folder)
             count += 1
 
