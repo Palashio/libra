@@ -10,15 +10,15 @@ from torch.utils.data import DataLoader
 from transformers import T5Tokenizer, T5ForConditionalGeneration
 import tensorflow as tf
 
-from data_generation.dataset_labelmatcher import get_similar_column
-from data_generation.grammartree import get_value_instruction
-from modeling.prediction_model_creation import get_keras_text_class
-from plotting.generate_plots import generate_classification_plots
-from preprocessing.NLP_preprocessing import get_target_values, text_clean_up, lemmatize_text, encode_text
-from preprocessing.huggingface_model_finetune_helper import CustomDataset, train, inference
-from preprocessing.image_caption_helpers import load_image, map_func, CNN_Encoder, RNN_Decoder, get_path_column, \
+from libra.data_generation.dataset_labelmatcher import get_similar_column
+from libra.data_generation.grammartree import get_value_instruction
+from libra.modeling.prediction_model_creation import get_keras_text_class
+from libra.plotting.generate_plots import generate_classification_plots
+from libra.preprocessing.NLP_preprocessing import get_target_values, text_clean_up, lemmatize_text, encode_text
+from libra.preprocessing.huggingface_model_finetune_helper import CustomDataset, train, inference
+from libra.preprocessing.image_caption_helpers import load_image, map_func, CNN_Encoder, RNN_Decoder, get_path_column, \
     generate_caption_helper
-from queries.dimensionality_red_queries import logger
+from libra.queries.dimensionality_red_queries import logger
 
 
 def predict_text_sentiment(self, text):

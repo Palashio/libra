@@ -15,8 +15,8 @@ from keras.callbacks import EarlyStopping
 from matplotlib import pyplot
 from os import listdir
 from PIL import Image as PImage
-from dataset_labelmatcher import get_similar_column
-from grammartree import get_value_instruction
+from libra.data_generation.dataset_labelmatcher import get_similar_column
+from libra.data_generation.grammartree import get_value_instruction
 import cv2
 from prince.ca import CA
 
