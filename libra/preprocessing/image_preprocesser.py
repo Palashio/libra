@@ -18,8 +18,10 @@ def setwise_preprocessing(data_path, new_folder=True):
     # first dictionary is training and second is testing set
     paths = [training_path, testing_path]
     dict = []
+    data_size = []
     for index in range(2):
         info = process_class_folders(paths[index])
+        data_size.append(len(info[0]))
         heights += info[0]
         widths += info[1]
         classification += info[2]
@@ -46,7 +48,7 @@ def setwise_preprocessing(data_path, new_folder=True):
             for class_folder, images in dict[index].items():
                 replace_images(p + "/" + class_folder, images)
 
-    return {"num_categories": classification, "height": height, "width": width}
+    return {"num_categories": classification, "height": height, "width": width, "train_size": data_size[0], "test_size": data_size[1]}
 
 
 # processes a csv_file containing image paths and creates a testing/training folders
@@ -125,17 +127,20 @@ def csv_preprocessing(csv_file, data_path, instruction, image_column, training_r
         create_folder(data_path + "/proc_training_set", classification)
         create_folder(data_path + "/proc_testing_set", classification)
 
+    data_size = [0,0]
     # save images into correct folder
     for index, row in df.iterrows():
         # resize images
         img = process_color_channel(image_list[index], height, width)
         p = "proc_" + (os.path.basename(row[image_column]) if path_included else row[image_column])
         if (index / df.shape[0]) < training_ratio:
+            data_size[0] += 1
             save_image(data_path + "/proc_training_set", img, p, row[label])
         else:
+            data_size[1] += 1
             save_image(data_path + "/proc_testing_set", img, p, row[label])
 
-    return {"num_categories": classifications, "height": height, "width": width}
+    return {"num_categories": classifications, "height": height, "width": width, "train_size": data_size[0], "test_size": data_size[1]}
 
 
 # preprocesses images when given a folder containing class folders
@@ -154,23 +159,26 @@ def classwise_preprocessing(data_path, training_ratio):
         create_folder(data_path + "/proc_training_set", classification)
         create_folder(data_path + "/proc_testing_set", classification)
 
+    data_size = [0,0]
     for class_folder, images in img_dict.items():
         count = 0
         for image_name, image in images.items():
             resized_img = process_color_channel(image, height, width)
             if count / len(images) < training_ratio:
+                data_size[0] += 1
                 save_image(data_path + "/proc_training_set",
                            resized_img,
                            "proc" + image_name,
                            class_folder)
             else:
+                data_size[1] += 1
                 save_image(data_path + "/proc_testing_set",
                            resized_img,
                            "proc" + image_name,
                            class_folder)
             count += 1
 
-    return {"num_categories": num_classifications, "height": height, "width": width}
+    return {"num_categories": num_classifications, "height": height, "width": width, "train_size": data_size[0], "test_size": data_size[1]}
 
 
 # process a class folder by getting return a list of all the heights and widths

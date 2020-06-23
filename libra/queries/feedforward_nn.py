@@ -438,13 +438,13 @@ def convolutional(instruction=None,
     X_train = train_data.flow_from_directory(data_path + training_path,
                                                 target_size=input_single,
                                                 color_mode='rgb',
-                                                batch_size=32,
+                                                batch_size=(32 if processInfo["train_size"] >= 32 else 1),
                                                 class_mode='categorical')
     test_data = ImageDataGenerator(rescale=1. / 255)
     X_test = test_data.flow_from_directory(data_path + testing_path,
                                             target_size=input_single,
                                             color_mode='rgb',
-                                            batch_size=32,
+                                            batch_size=(32 if processInfo["test_size"] >= 32 else 1),
                                             class_mode='categorical')
 
     # print(X_train)
