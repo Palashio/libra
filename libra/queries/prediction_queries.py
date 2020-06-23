@@ -303,15 +303,15 @@ class client:
         return
 
     def convolutional_query(self,
-                            read_mode=None,
                             instruction=None,
+                            read_mode=None,
                             new_folders=True,
                             image_column=None,
                             training_ratio=0.8):
 
         # storing values the model dictionary
-        self.models["convolutional_NN"] = convolutional(read_mode=read_mode,
-                                                        instruction=instruction,
+        self.models["convolutional_NN"] = convolutional(instruction=instruction,
+                                                        read_mode=read_mode,
                                                         data_path=self.dataset,
                                                         new_folders=new_folders,
                                                         image_column=image_column,

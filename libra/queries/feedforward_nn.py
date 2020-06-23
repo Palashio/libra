@@ -368,8 +368,8 @@ def classification_ann(instruction,
                 'validation_accuracy': final_hist.history['val_accuracy']}}
 
 
-def convolutional(read_mode=None,
-                instruction=None,
+def convolutional(instruction=None,
+                read_mode=None,
                 data_path=os.getcwd(),
                 new_folders=True,
                 image_column=None,
