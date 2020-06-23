@@ -3,27 +3,17 @@
 
 import sys
 
-from nlp_queries import image_caption_query, generate_caption
-
-sys.path.insert(1, './preprocessing')
-sys.path.insert(1, './data_generation')
-sys.path.insert(1, './modeling')
-sys.path.insert(1, './plotting')
-
-from classification_models import k_means_clustering, train_svm, nearest_neighbors, decision_tree
-from supplementaries import tune_helper, stats, generate_id
-from feedforward_nn import regression_ann, classification_ann, convolutional
-from dimensionality_red_queries import dimensionality_reduc
-from grammartree import get_value_instruction
-from dataset_labelmatcher import get_similar_column, get_similar_model
+from libra.queries.nlp_queries import image_caption_query, generate_caption, predict_text_sentiment, text_classification_query, get_summary, summarization_query
+from libra.queries.classification_models import k_means_clustering, train_svm, nearest_neighbors, decision_tree
+from libra.queries.supplementaries import tune_helper, stats, generate_id
+from libra.queries.feedforward_nn import regression_ann, classification_ann, convolutional
+from libra.queries.dimensionality_red_queries import dimensionality_reduc
+from libra.data_generation.grammartree import get_value_instruction
+from libra.data_generation.dataset_labelmatcher import get_similar_column, get_similar_model
 import pandas as pd
 from pandas.core.common import SettingWithCopyWarning
 import warnings
 import os
-
-from nlp_queries import predict_text_sentiment, text_classification_query, get_summary, summarization_query
-
-
 
 # Importing the T5 modules from huggingface/transformers
 
@@ -413,5 +403,5 @@ class client:
 
 #newClient = client('./data/housing.csv')
 #newClient.decision_tree_query("Model ocean proximity")
-newClient = client('./libra/data/structured_data/landslides_after_rainfall.csv').neural_network_query(instruction='Model distance',
+newClient = client('tools/data/structured_data/landslides_after_rainfall.csv').neural_network_query(instruction='Model distance',
 drop=['id', 'geolocation', 'source_link', 'source_name'])
