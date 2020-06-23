@@ -103,7 +103,7 @@ def csv_preprocessing(csv_file, data_path, instruction, image_column, training_r
     image_list = []
 
     # get the median heights and widths
-    for index, row in df.head(100).iterrows():
+    for index, row in df.iterrows():
         for path in data_paths:
             p = row[image_column] if path_included else path + "/" + row[image_column]
             img = cv2.imread(p)
@@ -126,11 +126,11 @@ def csv_preprocessing(csv_file, data_path, instruction, image_column, training_r
         create_folder(data_path + "/proc_testing_set", classification)
 
     # save images into correct folder
-    for index, row in df.head(100).iterrows():
+    for index, row in df.iterrows():
         # resize images
         img = process_color_channel(image_list[index], height, width)
         p = "proc_" + (os.path.basename(row[image_column]) if path_included else row[image_column])
-        if (index / df.head(100).shape[0]) < training_ratio:
+        if (index / df.shape[0]) < training_ratio:
             save_image(data_path + "/proc_training_set", img, p, row[label])
         else:
             save_image(data_path + "/proc_testing_set", img, p, row[label])
@@ -305,7 +305,20 @@ def process_color_channel(img, height, width):
 #     img = cv2.merge((b, g, r))
 #     return img
 
-def set_distinguisher(data_path):
+def set_distinguisher(data_path, read_mode):
+    if read_mode is not None:
+        if read_mode == "setwise":
+            return {"read_mode": "setwise"}
+        elif read_mode == "classwise":
+            return {"read_mode":"classwise"}
+        elif read_mode == "pathwise" or read_mode == "namewise":
+            csv_path = glob.glob(data_path + "/*.csv")
+            if len(csv_path) == 1:
+                return {"read_mode":"pathwise or namewise", "csv_path":csv_path[0]}
+            elif len(csv_path) > 1:
+                raise BaseException(f"Too many csv files in directory: {[os.path.basename(path) for path in csv_path]}")
+        else:
+            raise BaseException(f"{read_mode}, is an invalid read mode.")
 
     # check if setwise
     if os.path.isdir(data_path + "/training_set") and os.path.isdir(data_path + "/testing_set"):

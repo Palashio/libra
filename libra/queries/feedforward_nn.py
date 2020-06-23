@@ -373,7 +373,8 @@ def classification_ann(instruction,
                 'validation_accuracy': final_hist.history['val_accuracy']}}
 
 
-def convolutional(instruction=None,
+def convolutional(read_mode=None,
+                instruction=None,
                 data_path=os.getcwd(),
                 new_folders=True,
                 image_column=None,
@@ -381,7 +382,7 @@ def convolutional(instruction=None,
 
     logger("Generating datasets for classes...")
 
-    read_mode_info = set_distinguisher(data_path)
+    read_mode_info = set_distinguisher(data_path, read_mode)
     read_mode = read_mode_info["read_mode"]
 
     training_path = "/proc_training_set"
