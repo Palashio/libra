@@ -139,20 +139,20 @@ def regression_ann(
         models.append(history)
         model_data.append(model)
 
-        col_name = [["Initial number of layers ","Training Loss ","Test Loss "]]
+        col_name = [["Initial number of layers ","| Training Loss ","| Test Loss "]]
         col_width = max(len(word) for row in col_name for word in row) + 2
         for row in col_name:
-            print( (" " * 2 * counter)+"".join(word.ljust(col_width) for word in row))
+            print((" " * 2 * counter)+"| "+ ("".join(word.ljust(col_width) for word in row))+" |")
         values=[]
         values.append(str(len(model.layers))) 
-        values.append(str(history.history['loss'][len(history.history['val_loss']) -
+        values.append("| "+str(history.history['loss'][len(history.history['val_loss']) -
                                                1]))
-        values.append(str(history.history['val_loss'][len(history.history['val_loss']) -
+        values.append("| "+str(history.history['val_loss'][len(history.history['val_loss']) -
                                                    1]))
         datax=[]
         datax.append(values)
         for row in datax:
-            print((" " * 2 * counter)+ "".join(word.ljust(col_width) for word in row))
+            print((" " * 2 * counter)+"| "+ ("".join(word.ljust(col_width) for word in row))+" |")
         #print((" " * 2 * counter)+ tabulate(datax, headers=col_name, tablefmt='orgtbl'))
         losses.append(history.history[maximizer]
                       [len(history.history[maximizer]) - 1])
@@ -162,10 +162,10 @@ def regression_ann(
         # decreasing
         logger("Testing number of layers...")
         print(currLog)
-        col_name = [["Current number of layers","Training Loss","Test Loss"]]
+        col_name = [["Current number of layers","| Training Loss","| Test Loss"]]
         col_width = max(len(word) for row in col_name for word in row) + 2
         for row in col_name:
-                print((" " * 2 * counter)+ "".join(word.ljust(col_width) for word in row))
+            print((" " * 2 * counter)+"| "+ ("".join(word.ljust(col_width) for word in row))+" |")
         datax=[]
         while (all(x > y for x, y in zip(losses, losses[1:]))):
             model = get_keras_model_reg(data, i)
@@ -182,13 +182,13 @@ def regression_ann(
             values=[]
             datax=[]
             values.append(str(len(model.layers)))
-            values.append(str(history.history['loss'][len(history.history['val_loss']) -
+            values.append("| "+str(history.history['loss'][len(history.history['val_loss']) -
                                                1]))
-            values.append(str(history.history['val_loss'][len(history.history['val_loss']) -
+            values.append("| "+str(history.history['val_loss'][len(history.history['val_loss']) -
                                                    1]))
             datax.append(values)
             for row in datax:
-                print((" " * 2 * counter)+ "".join(word.ljust(col_width) for word in row))
+                print((" " * 2 * counter)+"| "+ ("".join(word.ljust(col_width) for word in row))+" |")
             del values,datax
             losses.append(history.history[maximizer]
                           [len(history.history[maximizer]) - 1])
@@ -300,20 +300,20 @@ def classification_ann(instruction,
 
         model_data.append(model)
         models.append(history)
-        col_name = [["Initial number of layers ","Training Loss ","Test Loss "]]
+        col_name = [["Initial number of layers ","| Training Loss ","| Test Loss "]]
         col_width = max(len(word) for row in col_name for word in row) + 2
         for row in col_name:
-            print( (" " * 2 * counter)+"".join(word.ljust(col_width) for word in row))
+            print((" " * 2 * counter)+"| "+ ("".join(word.ljust(col_width) for word in row))+" |")
         values=[]
         values.append(str(len(model.layers))) 
-        values.append(str(history.history['loss'][len(history.history['val_loss']) -
+        values.append("| "+str(history.history['loss'][len(history.history['val_loss']) -
                                                1]))
-        values.append(str(history.history['val_loss'][len(history.history['val_loss']) -
+        values.append("| "+str(history.history['val_loss'][len(history.history['val_loss']) -
                                                    1]))
         datax=[]
         datax.append(values)
         for row in datax:
-            print((" " * 2 * counter)+ "".join(word.ljust(col_width) for word in row))
+            print((" " * 2 * counter)+"| "+ ("".join(word.ljust(col_width) for word in row))+" |")
         #print((" " * 2 * counter)+ tabulate(datax, headers=col_name, tablefmt='orgtbl'))
         losses.append(history.history[maximizer]
                       [len(history.history[maximizer]) - 1])
@@ -321,10 +321,10 @@ def classification_ann(instruction,
         # keeps running model and fit functions until the validation loss stops
         # decreasing
         logger("Testing number of layers...")
-        col_name = [["Current number of layers","Training Loss","Test Loss"]]
+        col_name = [["Current number of layers","| Training Loss","| Test Loss"]]
         col_width = max(len(word) for row in col_name for word in row) + 2
         for row in col_name:
-            print((" " * 2 * counter)+ "".join(word.ljust(col_width) for word in row))
+            print((" " * 2 * counter)+"| "+ ("".join(word.ljust(col_width) for word in row))+" |")
         datax=[]
         while (all(x > y for x, y in zip(losses, losses[1:]))):
             model = get_keras_model_class(data, i, num_classes)
@@ -340,13 +340,13 @@ def classification_ann(instruction,
             values=[]
             datax=[]
             values.append(str(len(model.layers)))
-            values.append(str(history.history['loss'][len(history.history['val_loss']) -
+            values.append("| "+str(history.history['loss'][len(history.history['val_loss']) -
                                                1]))
-            values.append(str(history.history['val_loss'][len(history.history['val_loss']) -
+            values.append("| "+str(history.history['val_loss'][len(history.history['val_loss']) -
                                                    1]))
             datax.append(values)
             for row in datax:
-                print((" " * 2 * counter)+ "".join(word.ljust(col_width) for word in row))
+                print((" " * 2 * counter)+"| "+ ("".join(word.ljust(col_width) for word in row))+" |")
             del values,datax
             losses.append(history.history[maximizer]
                           [len(history.history[maximizer]) - 1])
