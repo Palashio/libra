@@ -3,7 +3,7 @@ import os
 
 
 from libra.preprocessing.image_preprocesser import (setwise_preprocessing,
-                                                    pathwise_preprocessing,
+                                                    csv_preprocessing,
                                                     classwise_preprocessing,
                                                     set_distinguisher)
 from libra.preprocessing.data_reader import DataReader
