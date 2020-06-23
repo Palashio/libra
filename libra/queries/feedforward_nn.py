@@ -163,7 +163,7 @@ def regression_ann(
         logger("Testing number of layers...")
         print(currLog)
         col_name = [["Current number of layers","Training Loss","Test Loss"]]
-        #col_width = max(len(word) for row in col_name for word in row) + 2
+        col_width = max(len(word) for row in col_name for word in row) + 2
         for row in col_name:
                 print((" " * 2 * counter)+ "".join(word.ljust(col_width) for word in row))
         datax=[]
@@ -322,7 +322,7 @@ def classification_ann(instruction,
         # decreasing
         logger("Testing number of layers...")
         col_name = [["Current number of layers","Training Loss","Test Loss"]]
-        #col_width = max(len(word) for row in col_name for word in row) + 2
+        col_width = max(len(word) for row in col_name for word in row) + 2
         for row in col_name:
             print((" " * 2 * counter)+ "".join(word.ljust(col_width) for word in row))
         datax=[]
