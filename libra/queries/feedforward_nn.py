@@ -19,7 +19,6 @@ from libra.plotting.generate_plots import (generate_clustering_plots,
                            generate_classification_plots)
 from libra.preprocessing.data_preprocesser import structured_preprocesser, initial_preprocesser
 from libra.modeling.prediction_model_creation import get_keras_model_reg, get_keras_text_class
-from libra.modeling.squeezenet import get_snet_layer
 from sklearn.preprocessing import StandardScaler
 import numpy as np
 from tabulate import tabulate
@@ -438,7 +437,6 @@ def convolutional(instruction=None,
 
     logger("Creating convolutional neural network dynamically...")
     # Convolutional Neural Network
-    """
     model = Sequential() 
     model.add(
         Conv2D(
@@ -455,7 +453,6 @@ def convolutional(instruction=None,
         optimizer="adam",
         loss=loss_func,
         metrics=['accuracy'])
-    """
     train_data = ImageDataGenerator(rescale=1. / 255,
                                     shear_range=0.2,
                                     zoom_range=0.2,
@@ -473,21 +470,6 @@ def convolutional(instruction=None,
                                             batch_size=(32 if processInfo["test_size"] >= 32 else 1),
                                             class_mode='categorical')
 
-    
-    model= get_snet_layer(num_classes)
-    history = model.fit_generator(
-        X_train, 
-        steps_per_epoch=X_train.n //
-        X_train.batch_size, epochs=25,verbose=0,
-        callbacks=[
-            EarlyStopping(monitor='val_accuracy', patience=4, min_delta=0.01),
-            ReduceLROnPlateau(monitor='val_accuracy', factor=0.1, patience=2, epsilon=0.007)
-        ],
-        validation_data=X_test, validation_steps=X_test.n //
-        X_test.batch_size, workers=4
-    )
-    """
-    
     # print(X_train)
     history = model.fit_generator(
         generator=X_train,
@@ -497,7 +479,7 @@ def convolutional(instruction=None,
         validation_steps=X_test.n //
         X_test.batch_size,
         epochs=25)
-    """
+
     # storing values the model dictionary
     return {
         'id': generate_id(),
