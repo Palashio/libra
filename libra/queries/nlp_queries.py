@@ -42,6 +42,7 @@ def text_classification_query(self, instruction,
                               epochs=50,
                               maxTextLength=200,
                               generate_plots=True):
+    logger("Reading in dataset....")
     data = pd.read_csv(self.dataset)
     data.fillna(0, inplace=True)
     X, Y = get_target_values(data, instruction, "label")
@@ -55,7 +56,7 @@ def text_classification_query(self, instruction,
         X = encode_text(X, X)
 
     X = np.array(X)
-
+    logger("Building Model...")
     model = get_keras_text_class(maxTextLength, len(classes))
 
     X_train, X_test, y_train, y_test = train_test_split(
@@ -124,6 +125,8 @@ def summarization_query(self, instruction,
                         test_size=0.2,
                         random_state=49,
                         generate_plots=True):
+    logger("Reading in dataset....")
+
     data = pd.read_csv(self.dataset)
     data.fillna(0, inplace=True)
 
@@ -162,13 +165,15 @@ def summarization_query(self, instruction,
 
     training_loader = DataLoader(training_set, **train_params)
     # used small model
+    logger("Downloading Pretrained Model...")
+
     model = T5ForConditionalGeneration.from_pretrained("t5-small")
     model = model.to(device)
 
     optimizer = torch.optim.Adam(
         params=model.parameters(), lr=LEARNING_RATE)
 
-    logger('Initiating Fine-Tuning for the model on your dataset')
+    logger('Initiating Fine-Tuning for the model on your dataset...')
 
     for epoch in range(TRAIN_EPOCHS):
         train(epoch, tokenizer, model, device, training_loader, optimizer)
@@ -194,8 +199,11 @@ def image_caption_query(self, instruction,
                         preprocess=True,
                         random_state=49,
                         generate_plots=False):
+
     np.random.seed(random_state)
     tf.random.set_seed(random_state)
+
+    logger("Reading in dataset....")
 
     df = pd.read_csv(self.dataset)
     df.fillna(0, inplace=True)
@@ -265,7 +273,7 @@ def image_caption_query(self, instruction,
     # Shuffle and batch
     dataset = dataset.shuffle(BUFFER_SIZE).batch(BATCH_SIZE)
     dataset = dataset.prefetch(buffer_size=tf.data.experimental.AUTOTUNE)
-
+    logger("Building Model...")
     encoder = CNN_Encoder(embedding_dim)
     decoder = RNN_Decoder(embedding_dim, units, vocab_size)
 
