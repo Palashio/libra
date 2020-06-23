@@ -156,7 +156,6 @@ def regression_ann(
         #print((" " * 2 * counter)+ tabulate(datax, headers=col_name, tablefmt='orgtbl'))
         losses.append(history.history[maximizer]
                       [len(history.history[maximizer]) - 1])
-        del values, datax
         
         # keeps running model and fit functions until the validation loss stops
         # decreasing
@@ -196,7 +195,6 @@ def regression_ann(
         #print((" " * 2 * counter)+ tabulate(datax, headers=col_name, tablefmt='orgtbl'))
         final_model = model_data[losses.index(min(losses))]
         final_hist = models[losses.index(min(losses))]
-        del values, datax
         print("")
         logger('->', "Best number of layers found: " +
                str(len(final_model.layers)))
@@ -317,7 +315,6 @@ def classification_ann(instruction,
         #print((" " * 2 * counter)+ tabulate(datax, headers=col_name, tablefmt='orgtbl'))
         losses.append(history.history[maximizer]
                       [len(history.history[maximizer]) - 1])
-        del values, datax
         # keeps running model and fit functions until the validation loss stops
         # decreasing
         logger("Testing number of layers...")
@@ -347,7 +344,6 @@ def classification_ann(instruction,
             datax.append(values)
             for row in datax:
                 print((" " * 2 * counter)+"| "+ ("".join(word.ljust(col_width) for word in row))+" |")
-            del values,datax
             losses.append(history.history[maximizer]
                           [len(history.history[maximizer]) - 1])
             accuracies.append(history.history['val_accuracy']
