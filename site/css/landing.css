@@ -102,7 +102,8 @@ body{
 }
 
 .nav_tab:hover{
-    animation-name: navBorder;
+/*    animation name gets inherited by the child element nav_line*/
+    animation-name: navBorder; 
     color: #464646;
 }
 
@@ -116,6 +117,12 @@ body{
     animation-name: inherit;
     animation-duration: 0.4s;
     animation-fill-mode: forwards;
+    margin-left: 10%;
+    margin-right: 10%;
+}
+
+.nav_line.selected{
+    width: 80%;
 }
 
 #infoBox{
@@ -284,5 +291,5 @@ body{
 
 @keyframes navBorder{
     from{width:0%}
-    to{width:100%}
+    to{width:80%}
 }

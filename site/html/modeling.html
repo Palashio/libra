@@ -8,16 +8,14 @@
 
     <!-- jQuery library -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-    
+    <link href="https://fonts.googleapis.com/css?family=Montserrat:400,500,600" rel="stylesheet" type="text/css">
     <link href="../css/api.css" rel="stylesheet" type="text/css">
 </head>
 <body>
     <div id="side-nav">
-        <a link href = "landing.html" class= "nav">
-            <img src = "../resources/libra-logo.png" id="icon">
-        </a>
+        <img src = "../resources/libra-logo.png" id="icon">
         <ul class="nav">
-            <li><a class="nav-tab" href="about.html">About</a></li>
+            <li><a class="nav-tab" href="about.html">Libra Home</a></li> 
             
             <li><a class="nav-tab" href="started.html">Getting Started</a></li> 
             
@@ -44,35 +42,37 @@
     <div id="nav-bar">Modeling Queries</div>
         <div id="content">
             <div class="box">
-                <h2 id="title1">Title goes here</h2>
-                <p>type the actual documention in p elements, and you can format <strong>bold</strong> words with the strong tag.
-                    You can also make these small code snippets: <code>someMethodName()</code> with the code tag, and links with the "a" tag: <a href="https://www.google.com">Click to go to google</a>.
-                    Links can go to other websites or even pages within the same site.
-                <p>Here is the <code>method()</code> use description:</p>
-
-                <pre><code>import some library
-do some code
-return 0;
-            you get the point</code></pre>
-                <p>You can make these code boxes with the pre tag around a code tag. Keep in mind line indentation will count, as you can see in the 4th line of code</p>
+                <h2 id="nnq">neural_network_query()</h2>
                 <br>
-                <p>And here is a table formatted with css that you can put stuff into:</p>
-                
+                <p>Automatically fits a neural network to your dataset. Target detection, preprocessing, and scoring are done by default.</p>
+                <br>
                 <table style="width:100%">
                     <tr>
-                        <td colspan="2">Example table</td>
+                        <td colspan="2">Arguments</td>
                     </tr>
                     <tr>
-                        <td>value</td>
-                        <td>A 4-D Tensor of type float. It needs to be in the default NHWC format. Its shape is [batch, in_height, in_width, in_channels].</td>
+                        <td>Instruction</td>
+                        <td>An English language statement of what you’d like to do, eg: predict the median house value</td>
                     </tr>
                     <tr>
-                        <td>filters</td>
-                        <td>A 4-D Tensor with the same type as value and shape [filter_height, filter_width, out_channels, in_channels]. filters' in_channels dimension must match that of value. Atrous convolution is equivalent to standard convolution with upsampled filters with effective height filter_height + (filter_height - 1) * (rate - 1) and effective width filter_width + (filter_width - 1) * (rate - 1), produced by inserting rate - 1 zeros along consecutive elements across the filters' spatial dimensions.</td>
+                        <td>Mca_threshold</td>
+                        <td>Changes the proportion at which multiple correspondence analysis is applied. This deals with reducing the number of categorical features that are one-hot-encoded.</td>
                     </tr>
                     <tr>
-                        <td>Hotel</td>
-                        <td>Trivago</td>
+                        <td>Drop</td>
+                        <td>Columns to drop manually, drop columns with links, weirdly formatted numbers, and others.</td>
+                    </tr>
+                    <tr>
+                        <td>Preprocess</td>
+                        <td>Whether you want your dataset to be intelligently preprocessed</td>
+                    </tr>
+                    <tr>
+                        <td>Test_size</td>
+                        <td>The size of your testing dataset</td>
+                    </tr>
+                    <tr>
+                        <td>Random_state</td>
+                        <td>The state ticker you want to be set at</td>
                     </tr>
                 </table>
             </div>
