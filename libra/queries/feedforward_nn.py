@@ -18,9 +18,12 @@ from libra.plotting.generate_plots import (generate_clustering_plots,
                            generate_regression_plots,
                            generate_classification_plots)
 from libra.preprocessing.data_preprocesser import structured_preprocesser, initial_preprocesser
-from libra.modeling.prediction_model_creation import get_keras_model_reg, get_keras_text_class
+from libra.modeling.prediction_model_creation import get_keras_model_reg, get_keras_text_class, get_keras_model_class
 from sklearn.preprocessing import StandardScaler
 import numpy as np
+from tabulate import tabulate
+from tensorflow.keras.callbacks import EarlyStopping
+
 #from prediction_queries import logger, clearLog
 
 
@@ -49,28 +52,22 @@ def clearLog():
 # global variable parallels
 
 
-def logger(instruction, found="", slash=''):
+def logger(instruction, found=""):
     global currLog
     global counter
     if counter == 0:
         currLog += (" " * 2 * counter) + str(instruction) + str(found)
     elif instruction == "->":
         counter = counter - 1
-        if slash == '|':
-            currLog += (" " * 2 * counter) + slash + str(found)
-        else:
-            currLog += (" " * 2 * counter) + str(instruction) + str(found)
+        currLog += (" " * 2 * counter) + str(instruction) + str(found)
     else:
-        currLog += (" " * 2 * counter) + "|" + "\n"
+        #currLog += (" " * 2 * counter) + "|" + "\n"
         currLog += (" " * 2 * counter) + "|- " + str(instruction) + str(found)
         if instruction == "done...":
             currLog += "\n"+"\n"
 
     counter += 1
-    if instruction == "->":
-        print(currLog, end="")
-    else:
-        print(currLog)
+    print(currLog)
     currLog = ""
 
 def regression_ann(
@@ -89,7 +86,8 @@ def regression_ann(
             save_path=os.getcwd()):
 
         global currLog
-        logger("reading in dataset...")
+        global counter
+        logger("Reading in dataset...")
 
         dataReader = DataReader(dataset)
         data = dataReader.data_generator()
@@ -110,7 +108,7 @@ def regression_ann(
         y_train = target_scaler.fit_transform(np.array(y['train']).reshape(-1, 1))
         y_test = target_scaler.transform(np.array(y['test']).reshape(-1,1))
 
-        logger("establishing callback function...")
+        logger("Establishing callback function...")
 
         models = []
         losses = []
@@ -128,7 +126,7 @@ def regression_ann(
         # get the first 3 layer model
         model = get_keras_model_reg(data, i)
 
-        logger("training initial model...")
+        logger("Training initial model...")
         history = model.fit(
             X_train,
             y_train,
@@ -141,22 +139,33 @@ def regression_ann(
         models.append(history)
         model_data.append(model)
 
-        logger("->", "Initial number of layers " + str(len(model.layers)))
-
-        logger("->", "Training Loss: " + \
-               str(history.history['loss'][len(history.history['val_loss']) - 1]), '|')
-        logger("->", "Test Loss: " +
-               str(history.history['val_loss'][len(history.history['val_loss']) -
-                                               1]), '|')
-        print("")
-
+        col_name = [["Initial number of layers ","| Training Loss ","| Test Loss "]]
+        col_width = max(len(word) for row in col_name for word in row) + 2
+        for row in col_name:
+            print((" " * 2 * counter)+"| "+ ("".join(word.ljust(col_width) for word in row))+" |")
+        values=[]
+        values.append(str(len(model.layers))) 
+        values.append("| "+str(history.history['loss'][len(history.history['val_loss']) -
+                                               1]))
+        values.append("| "+str(history.history['val_loss'][len(history.history['val_loss']) -
+                                                   1]))
+        datax=[]
+        datax.append(values)
+        for row in datax:
+            print((" " * 2 * counter)+"| "+ ("".join(word.ljust(col_width) for word in row))+" |")
+        #print((" " * 2 * counter)+ tabulate(datax, headers=col_name, tablefmt='orgtbl'))
         losses.append(history.history[maximizer]
                       [len(history.history[maximizer]) - 1])
-
+        
         # keeps running model and fit functions until the validation loss stops
         # decreasing
-        logger("testing number of layers...")
+        logger("Testing number of layers...")
         print(currLog)
+        col_name = [["Current number of layers","| Training Loss","| Test Loss"]]
+        col_width = max(len(word) for row in col_name for word in row) + 2
+        for row in col_name:
+            print((" " * 2 * counter)+"| "+ ("".join(word.ljust(col_width) for word in row))+" |")
+        datax=[]
         while (all(x > y for x, y in zip(losses, losses[1:]))):
             model = get_keras_model_reg(data, i)
             history = model.fit(
@@ -168,22 +177,25 @@ def regression_ann(
                     y_test), verbose=0)
             model_data.append(model)
             models.append(history)
-            logger("->", "Current number of layers: " + str(len(model.layers)))
-
-            logger("->", "Training Loss: " +
-                   str(history.history['loss'][len(history.history['val_loss']) -
-                                               1]), '|')
-            logger("->", "Test Loss: " +
-                   str(history.history['val_loss'][len(history.history['val_loss']) -
-                                                   1]), '|')
-            print("")
+            
+            values=[]
+            datax=[]
+            values.append(str(len(model.layers)))
+            values.append("| "+str(history.history['loss'][len(history.history['val_loss']) -
+                                               1]))
+            values.append("| "+str(history.history['val_loss'][len(history.history['val_loss']) -
+                                                   1]))
+            datax.append(values)
+            for row in datax:
+                print((" " * 2 * counter)+"| "+ ("".join(word.ljust(col_width) for word in row))+" |")
+            del values,datax
             losses.append(history.history[maximizer]
                           [len(history.history[maximizer]) - 1])
             i += 1
-
+        #print((" " * 2 * counter)+ tabulate(datax, headers=col_name, tablefmt='orgtbl'))
         final_model = model_data[losses.index(min(losses))]
         final_hist = models[losses.index(min(losses))]
-
+        print("")
         logger('->', "Best number of layers found: " +
                str(len(final_model.layers)))
 
@@ -232,7 +244,7 @@ def classification_ann(instruction,
             save_path=os.getcwd()):
 
         global currLog
-        logger("reading in dataset...")
+        logger("Reading in dataset...")
 
         dataReader = DataReader(dataset)
         data = dataReader.data_generator()
@@ -268,7 +280,7 @@ def classification_ann(instruction,
         accuracies = []
         model_data = []
 
-        logger("establishing callback function...")
+        logger("Establishing callback function...")
 
         # early stopping callback
         es = EarlyStopping(
@@ -279,29 +291,38 @@ def classification_ann(instruction,
 
         i = 0
         model = get_keras_model_class(data, i, num_classes)
-        logger("training initial model...")
+        logger("Training initial model...")
         history = model.fit(
             X_train, y_train, epochs=epochs, validation_data=(
                 X_test, y_test), callbacks=[es], verbose=0)
 
         model_data.append(model)
         models.append(history)
-        logger("->", "Initial number of layers " + str(len(model.layers)))
-
-        logger("->", "Training Loss: " + \
-               str(history.history['loss'][len(history.history['val_loss']) - 1]), '|')
-        logger("->", "Test Loss: " +
-               str(history.history['val_loss'][len(history.history['val_loss']) -
-                                               1]), '|')
-        print("")
-
-
+        col_name = [["Initial number of layers ","| Training Loss ","| Test Loss "]]
+        col_width = max(len(word) for row in col_name for word in row) + 2
+        for row in col_name:
+            print((" " * 2 * counter)+"| "+ ("".join(word.ljust(col_width) for word in row))+" |")
+        values=[]
+        values.append(str(len(model.layers))) 
+        values.append("| "+str(history.history['loss'][len(history.history['val_loss']) -
+                                               1]))
+        values.append("| "+str(history.history['val_loss'][len(history.history['val_loss']) -
+                                                   1]))
+        datax=[]
+        datax.append(values)
+        for row in datax:
+            print((" " * 2 * counter)+"| "+ ("".join(word.ljust(col_width) for word in row))+" |")
+        #print((" " * 2 * counter)+ tabulate(datax, headers=col_name, tablefmt='orgtbl'))
         losses.append(history.history[maximizer]
                       [len(history.history[maximizer]) - 1])
-
         # keeps running model and fit functions until the validation loss stops
         # decreasing
-        logger("testing number of layers...")
+        logger("Testing number of layers...")
+        col_name = [["Current number of layers","| Training Loss","| Test Loss"]]
+        col_width = max(len(word) for row in col_name for word in row) + 2
+        for row in col_name:
+            print((" " * 2 * counter)+"| "+ ("".join(word.ljust(col_width) for word in row))+" |")
+        datax=[]
         while (all(x > y for x, y in zip(losses, losses[1:]))):
             model = get_keras_model_class(data, i, num_classes)
             history = model.fit(
@@ -313,27 +334,26 @@ def classification_ann(instruction,
                     y_test),
                 callbacks=[es], verbose=0)
 
-            model_data.append(model)
-            models.append(history)
-            logger("->", "Current number of layers: " + str(len(model.layers)))
-
-            logger("->", "Training Loss: " +
-                   str(history.history['loss'][len(history.history['val_loss']) -
-                                               1]), '|')
-            logger("->", "Test Loss: " +
-                   str(history.history['val_loss'][len(history.history['val_loss']) -
-                                                   1]), '|')
-            print("")
-
+            values=[]
+            datax=[]
+            values.append(str(len(model.layers)))
+            values.append("| "+str(history.history['loss'][len(history.history['val_loss']) -
+                                               1]))
+            values.append("| "+str(history.history['val_loss'][len(history.history['val_loss']) -
+                                                   1]))
+            datax.append(values)
+            for row in datax:
+                print((" " * 2 * counter)+"| "+ ("".join(word.ljust(col_width) for word in row))+" |")
             losses.append(history.history[maximizer]
                           [len(history.history[maximizer]) - 1])
             accuracies.append(history.history['val_accuracy']
                               [len(history.history['val_accuracy']) - 1])
             i += 1
-
+        #print((" " * 2 * counter)+ tabulate(datax, headers=col_name, tablefmt='orgtbl'))
+        #del values, datax
         final_model = model_data[losses.index(min(losses))]
         final_hist = models[losses.index(min(losses))]
-
+        print("")
         logger('->', "Best number of layers found: " +
                str(len(final_model.layers)))
         logger('->', "Training Accuracy: " + str(final_hist.history['accuracy']
@@ -373,7 +393,8 @@ def convolutional(instruction=None,
                 data_path=os.getcwd(),
                 new_folders=True,
                 image_column=None,
-                training_ratio=0.8):
+                training_ratio=0.8,
+                augmentation=True):
 
     logger("Generating datasets for classes...")
 
@@ -413,7 +434,7 @@ def convolutional(instruction=None,
 
     logger("Creating convolutional neural network dynamically...")
     # Convolutional Neural Network
-    model = Sequential()
+    model = Sequential() 
     model.add(
         Conv2D(
             64,
@@ -429,34 +450,67 @@ def convolutional(instruction=None,
         optimizer="adam",
         loss=loss_func,
         metrics=['accuracy'])
+    if augmentation==True:
+        train_data = ImageDataGenerator(rescale=1. / 255,
+                                        shear_range=0.2,
+                                        zoom_range=0.2,
+                                        horizontal_flip=True)
+        test_data = ImageDataGenerator(rescale=1. / 255)
+    
+    else:
+        train_data= ImageDataGenerator()   
+        test_data = ImageDataGenerator()
+        """
+        trainingImages = []
+        train_labels = []
+        validationImages = []
+        test_labels = []
 
-    train_data = ImageDataGenerator(rescale=1. / 255,
-                                    shear_range=0.2,
-                                    zoom_range=0.2,
-                                    horizontal_flip=True)
+        for path in imgPaths:
+        classLabel = path.split(os.path.sep)[-2]
+        classes.add(classLabel)
+        img = img_to_array(load_img(path, target_size=(64, 64)))
 
+        if path.split(os.path.sep)[-3] == 'training_set':
+            trainingImages.append(img)
+            train_labels.append(classLabel)
+        else:
+            validationImages.append(img)
+            test_labels.append(classLabel)
+
+        trainingImages = np.array(trainingImages)
+        train_labels = to_categorical(np.array(train_labels))
+        validationImages = np.array(validationImages)
+        test_labels = to_categorical(np.array(test_labels))
+        model.compile(loss=’categorical_crossentropy’,
+                  optimizer=’sgd’,
+                  metrics=[‘accuracy’])
+        history=model.fit(train_images, train_labels,
+                  batch_size=100,
+                  epochs=5,
+                  verbose=1)
+        """
+    
     X_train = train_data.flow_from_directory(data_path + training_path,
+                                                    target_size=input_single,
+                                                    color_mode='rgb',
+                                                    batch_size=(32 if processInfo["train_size"] >= 32 else 1),
+                                                    class_mode=loss_func[:loss_func.find("_")])
+    X_test = test_data.flow_from_directory(data_path + testing_path,
                                                 target_size=input_single,
                                                 color_mode='rgb',
-                                                batch_size=(32 if processInfo["train_size"] >= 32 else 1),
-                                                class_mode='categorical')
-    test_data = ImageDataGenerator(rescale=1. / 255)
-    X_test = test_data.flow_from_directory(data_path + testing_path,
-                                            target_size=input_single,
-                                            color_mode='rgb',
-                                            batch_size=(32 if processInfo["test_size"] >= 32 else 1),
-                                            class_mode='categorical')
+                                                batch_size=(32 if processInfo["test_size"] >= 32 else 1),
+                                                class_mode=loss_func[:loss_func.find("_")])
 
-    # print(X_train)
+        # print(X_train)
     history = model.fit_generator(
-        generator=X_train,
-        steps_per_epoch=X_train.n //
-        X_train.batch_size,
-        validation_data=X_test,
-        validation_steps=X_test.n //
-        X_test.batch_size,
-        epochs=25)
-
+            generator=X_train,
+            steps_per_epoch=X_train.n //
+            X_train.batch_size,
+            validation_data=X_test,
+            validation_steps=X_test.n //
+            X_test.batch_size,
+            epochs=25)
     # storing values the model dictionary
     return {
         'id': generate_id(),

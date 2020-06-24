@@ -25,8 +25,6 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
 currLog = ""
 counter = 0
-number = 0
-
 
 # # current_dir=os.getcw()
 
@@ -62,7 +60,7 @@ def logger(instruction, found="", slash=''):
         else:
             currLog += (" " * 2 * counter) + str(instruction) + str(found)
     else:
-        currLog += (" " * 2 * counter) + "|" + "\n"
+        #currLog += (" " * 2 * counter) + "|" + "\n"
         currLog += (" " * 2 * counter) + "|- " + str(instruction) + str(found)
         if instruction == "done...":
             currLog += "\n" + "\n"
@@ -82,7 +80,7 @@ class client:
     def __init__(self, data):
         logger("creating object...")
         self.dataset = data
-        logger("loading dataset...")
+        logger("Loading dataset...")
         self.models = {}
         self.old_models = {}
         logger("done...")
