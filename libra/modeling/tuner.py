@@ -168,7 +168,15 @@ def tuneReg(
                  callbacks=[tf.keras.callbacks.TensorBoard('my_dir')])
 
     models = tuner.get_best_models(num_models=1)
-    return models[0]
+    hyp = tuner.get_best_hyperparameters(num_trials = 1)[0]
+    #hyp = tuner.oracle.get_best_trials(num_trials=1)[0].hyperparameters.values
+    best_hps = np.stack(hyp).astype(None)
+    """
+    Return:
+        models[0] : best model obtained after tuning
+        best_hps : best Hyperprameters obtained after tuning, stored as array
+    """
+    return models[0], best_hps
 
 
 def tuneClass(
@@ -225,7 +233,15 @@ def tuneClass(
                  epochs=5,
                  validation_data=(X_test, y_test))
     models = tuner.get_best_models(num_models=1)
-    return models[0]
+    hyp = tuner.get_best_hyperparameters(num_trials = 1)
+    #hyp = tuner.oracle.get_best_trials(num_trials=1)[0].hyperparameters.values
+    best_hps = np.stack(hyp).astype(None)
+    """
+    Return:
+        models[0] : best model obtained after tuning
+        best_hps : best Hyperprameters obtained after tuning, stored as array
+    """
+    return models[0], best_hps
 
 
 def tuneCNN(X, y, num_classes):
@@ -252,12 +268,27 @@ def tuneCNN(X, y, num_classes):
                  validation_data=(X_test, y_test),
                  callbacks=[tf.keras.callbacks.EarlyStopping(patience=1)])
 
-    # returns the best model
-    return tuner.get_best_models(1)[0]
+    # best hyperparamters
+    hyp = tuner.get_best_hyperparameters(num_trials = 1)
+    #hyp = tuner.oracle.get_best_trials(num_trials=1)[0].hyperparameters.values
+    best_hps = np.stack(hyp).astype(None)
+    """
+    Return:
+        models[0] : best model obtained after tuning
+        best_hps : best Hyperprameters obtained after tuning, stored as array
+    """
+    return tuner.get_best_models(1)[0], best_hps
 
 def tuneHyperband(X,
         y,
         max_trials=3):
+    """ 
+    Perform Hyperband Tuning to search for the best model and Hyperparameters
+    Arguments:
+        X: Input dataset
+        y: Label or output dataset
+        max_trials: Trials required to perform tuning
+    """
     hypermodel = HyperResNet(input_shape=(128, 128, 3), num_classes=10)
     tuner = Hyperband(
         hypermodel,
@@ -274,5 +305,13 @@ def tuneHyperband(X,
     tuner.search(X_train, y_train,
                  epochs=5,
                  validation_data=(X_test, y_test))
-    models = tuner.get_best_models(num_models=1)
-    return models[0]
+    hyp = tuner.get_best_hyperparameters(num_trials = 1)
+    #hyp = tuner.oracle.get_best_trials(num_trials=1)[0].hyperparameters.values
+    best_hps = np.stack(hyp).astype(None)
+    """
+    Return:
+        models[0] : best model obtained after tuning
+        best_hps : best Hyperprameters obtained after tuning, stored as array
+    """
+    return tuner.get_best_models(1)[0], best_hps
+    

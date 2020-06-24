@@ -48,28 +48,21 @@ def clearLog():
 # global variable parallels
 
 
-def logger(instruction, found="", slash=''):
+def logger(instruction, found=""):
     global currLog
     global counter
     if counter == 0:
         currLog += (" " * 2 * counter) + str(instruction) + str(found)
     elif instruction == "->":
         counter = counter - 1
-        if slash == '|':
-            currLog += (" " * 2 * counter) + slash + str(found)
-        else:
-            currLog += (" " * 2 * counter) + str(instruction) + str(found)
+        currLog += (" " * 2 * counter) + str(instruction) + str(found)
     else:
-        #currLog += (" " * 2 * counter) + "|" + "\n"
         currLog += (" " * 2 * counter) + "|- " + str(instruction) + str(found)
         if instruction == "done...":
             currLog += "\n" + "\n"
 
     counter += 1
-    if instruction == "->":
-        print(currLog, end="")
-    else:
-        print(currLog)
+    print(currLog)
     currLog = ""
 
 

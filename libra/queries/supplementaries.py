@@ -34,17 +34,14 @@ def clearLog():
 # global variable parallels
 
 
-def logger(instruction, found="", slash=''):
+def logger(instruction, found=""):
     global currLog
     global counter
     if counter == 0:
         currLog += (" " * 2 * counter) + str(instruction) + str(found)
     elif instruction == "->":
         counter = counter - 1
-        if slash == '|':
-            currLog += (" " * 2 * counter) + slash + str(found)
-        else:
-            currLog += (" " * 2 * counter) + str(instruction) + str(found)
+        currLog += (" " * 2 * counter) + str(instruction) + str(found)
     else:
         #currLog += (" " * 2 * counter) + "|" + "\n"
         currLog += (" " * 2 * counter) + "|- " + str(instruction) + str(found)
@@ -52,10 +49,7 @@ def logger(instruction, found="", slash=''):
             currLog += "\n"+ "\n"
 
     counter += 1
-    if instruction == "|":
-        print(currLog, end="")
-    else:
-        print(currLog)
+    print(currLog)
     currLog = ""
 
 
@@ -85,7 +79,7 @@ def tune_helper(
         target_column = data[models['regression_ANN']['target']]
         data = models['regression_ANN']['preprocesser'].transform(
             data.drop(target, axis=1))
-        returned_model = tuneReg(
+        returned_model, returned_pms = tuneReg(
             data,
             target_column,
             max_layers=max_layers,
@@ -94,7 +88,8 @@ def tune_helper(
             max_dense=max_dense,
             executions_per_trial=executions_per_trial,
             max_trials=max_trials)
-        models['regression_ANN'] = {'model': returned_model}
+        models['regression_ANN'] = {'model': returned_model,
+                                    'hyperparametes' : returned_pms}
         return returned_model
 
         # processing for classification feed forward NN
@@ -106,7 +101,7 @@ def tune_helper(
         target_column = data[models['classification_ANN']['target']]
         data = models['classification_ANN']['preprocesser'].transform(
             data.drop(target, axis=1))
-        returned_model = tuneClass(
+        returned_model, returned_pms = tuneClass(
             data,
             target_column,
             models['classification_ANN']['num_classes'],
@@ -119,18 +114,20 @@ def tune_helper(
             activation=activation,
             loss=loss,
             metrics=metrics)
-        models['classification_ANN'] = {'model': returned_model}
+        models['classification_ANN'] = {'model': returned_model,
+                                        'hyperparametes' : returned_pms}
         return returned_model
         # processing for convolutional NN
     if model_to_tune == "convolutional_NN":
         logger("Tuning model hyperparameters...")
         X = models['convolutional_NN']["X"]
         y = models['convolutional_NN']["y"]
-        model = tuneCNN(
+        model, returned_pms = tuneCNN(
             np.asarray(X),
             np.asarray(y),
             models["convolutional_NN"]["num_classes"])
         models["convolutional_NN"]["model"] = model
+        models["convolutional_NN"]["hyperparametes"] = returned_pms
     return models
 
 
@@ -141,12 +138,14 @@ def stats(dataset=None,
 
 
 def save(model, save_model, save_path=os.getcwd()):
+    global number
     model_json = model.to_json()
     with open(save_path + "/model" + str(number) + ".json", "w") as json_file:
         json_file.write(model_json)
         # serialize weights to HDF5
         model.save_weights(save_path + "/weights" + str(number) + ".h5")
         logger("->", "Saved model to disk as model" + str(number))
+    number=bumber+1
 
 def generate_id():
     return str(uuid.uuid4())
