@@ -102,21 +102,30 @@ def csv_preprocessing(csv_file, data_path, instruction, image_column, training_r
 
     df = df[[image_column, label]].dropna()
 
-    if need_file_extension:
-        df[image_column] = df[image_column] + ".jpg"
     heights = []
     widths = []
     classifications = df[label].nunique()
     image_list = []
 
     # get the median heights and widths
-    for index, row in df.iterrows():
-        for path in data_paths:
-            p = data_path + "/" + row[image_column] if path_included else path + "/" + row[image_column]
+    for index, row in df.head().iterrows():
+        if path_included:
+            p = data_path + "/" + row[image_column]
             img = cv2.imread(p)
-            if img is not None:
-                break
         else:
+            for path in data_paths:
+                if need_file_extension:
+                    for extension in file_extensions:
+                        p = path + "/" + row[image_column] + "." + extension
+                        img = cv2.imread(p)
+                        if img is not None:
+                            break
+                else:
+                    p = path + "/" + row[image_column]
+                    img = cv2.imread(p)
+                if img is not None:
+                    break
+        if img is None:
             raise BaseException(f"{row[image_column]} could not be found in any directories.")
         image_list.append(img)
         heights.append(img.shape[0])
@@ -134,11 +143,11 @@ def csv_preprocessing(csv_file, data_path, instruction, image_column, training_r
 
     data_size = [0,0]
     # save images into correct folder
-    for index, row in df.iterrows():
+    for index, row in df.head().iterrows():
         # resize images
         img = process_color_channel(image_list[index], height, width)
-        p = "proc_" + (os.path.basename(row[image_column]) if path_included else row[image_column])
-        if (index / df.shape[0]) < training_ratio:
+        p = "proc_" + (os.path.basename(row[image_column]) if path_included else row[image_column] + ".jpg")
+        if (index / df.head().shape[0]) < training_ratio:
             data_size[0] += 1
             save_image(data_path + "/proc_training_set", img, p, row[label])
         else:
