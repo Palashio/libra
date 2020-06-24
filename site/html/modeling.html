@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<head>
+    <meta charset = "utf-8">
+    <title>About Libra</title>
+    
+    <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+
+    <!-- jQuery library -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <link href="https://fonts.googleapis.com/css?family=Montserrat:400,500,600" rel="stylesheet" type="text/css">
+    <link href="../css/api.css" rel="stylesheet" type="text/css">
+</head>
+<body>
+    <div id="side-nav">
+        <img src = "../resources/libra-logo.png" id="icon">
+        <ul class="nav">
+            <li><a class="nav-tab" href="about.html">Libra Home</a></li> 
+            
+            <li><a class="nav-tab" href="started.html">Getting Started</a></li> 
+            
+            <li><a class="nav-tab" href="devGuides.html">Developer Guides</a></li>
+                <li class="dropdown-item">Providing Instructions to Libra</li>   
+            
+            <li class="nav-tab selected" href="modeling.html">Modeling Queries</li>
+                <li class="dropdown-item selected">Neural Network</li>
+                <li class="dropdown-item selected">Single Regression</li>
+                <li class="dropdown-item selected">Classification</li>
+                <li class="dropdown-item selected">Convolutional Neural Network</li>
+                <li class="dropdown-item selected">K Mans Clustering</li>
+                <li class="dropdown-item selected">Nearest Neighbors</li>
+                <li class="dropdown-item selected">Support Vector Machines</li>
+                <li class="dropdown-item selected">Decision Tree</li>
+            
+            <li><a class="nav-tab" href="dataset.html">Dataset-Related Queries</a></li>
+                <li class="dropdown-item">Dimensionality Reduction Pipeline</li>
+                <li class="dropdown-item">Random Forest Feature Importances</li>
+                <li class="dropdown-item">Principal Component Analysis</li>
+                <li class="dropdown-item">Independent Component Analysis</li>
+        </ul>
+    </div>
+    <div id="nav-bar">Modeling Queries</div>
+        <div id="content">
+            <div class="box">
+                <h2 id="nnq">neural_network_query()</h2>
+                <br>
+                <p>Automatically fits a neural network to your dataset. Target detection, preprocessing, and scoring are done by default.</p>
+                <br>
+                <table style="width:100%">
+                    <tr>
+                        <td colspan="2">Arguments</td>
+                    </tr>
+                    <tr>
+                        <td>Instruction</td>
+                        <td>An English language statement of what you’d like to do, eg: predict the median house value</td>
+                    </tr>
+                    <tr>
+                        <td>Mca_threshold</td>
+                        <td>Changes the proportion at which multiple correspondence analysis is applied. This deals with reducing the number of categorical features that are one-hot-encoded.</td>
+                    </tr>
+                    <tr>
+                        <td>Drop</td>
+                        <td>Columns to drop manually, drop columns with links, weirdly formatted numbers, and others.</td>
+                    </tr>
+                    <tr>
+                        <td>Preprocess</td>
+                        <td>Whether you want your dataset to be intelligently preprocessed</td>
+                    </tr>
+                    <tr>
+                        <td>Test_size</td>
+                        <td>The size of your testing dataset</td>
+                    </tr>
+                    <tr>
+                        <td>Random_state</td>
+                        <td>The state ticker you want to be set at</td>
+                    </tr>
+                </table>
+            </div>
+            <div class="box">
+                <h2 id="title2">Another title goes here</h2>
+                <p>make sure to put a div element with the class box outside of each method description</p>
+            </div>
+    </div>
+</body>
