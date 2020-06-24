@@ -62,7 +62,11 @@ def csv_preprocessing(csv_file, data_path, instruction, image_column, training_r
     data_paths = [data_path + "/" + d for d in os.listdir(data_path) if os.path.isdir(data_path + "/" + d) and d not in avoid_directories]
 
     # get file extension
-    _, file_extension = os.path.splitext(os.listdir(data_paths[0])[0])
+    for path in data_paths:
+        dir_elements = os.listdir(path)
+        if cv2.imread(path + "/" + dir_elements[0]) is not None:
+            _, file_extension = os.path.splitext(dir_elements[0])
+            break
 
     # select random row to find which column is image path
     random_row = df.sample()
