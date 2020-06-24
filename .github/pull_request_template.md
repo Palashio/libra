@@ -1,6 +1,6 @@
 ---
 name: b) New feature
-about: Select this if you're adding a new feature to Keras.
+about: Select this if you're adding a new feature to Libra.
 labels: feature
 ---
 
