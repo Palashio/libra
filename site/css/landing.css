@@ -1,0 +1,295 @@
+:root{
+    --anim-del: 0s;
+    --screen-width: 10;
+    --screen-height: 10;
+    transform-origin: top left;
+    transform:scale(calc(var(--screen-width)/1920));
+}
+
+#topArrow{
+    height: 410px;
+    width: 970px;
+    position: absolute;
+    left: -65px;
+    top:40px;
+    background-color: white;
+    transform: skewX(-20deg);
+}
+#bottomArrow{
+    height: 370px;
+    width: 970px;
+    position: absolute;
+    left: -70px;
+    top:440px;
+    background-color: white;
+    transform: skewX(20deg);
+}
+
+body{
+    height: 5000px; /*code was originally written on a 1920 by 969 monitor*/
+    /*    window may be 1920 but that included the scroll bar area so 100% width is actually a bit less*/
+    width: 1905px;
+    padding:0px;
+    background-color: aliceblue;
+    font-family: "Montserrat", sans-serif;
+    font-weight: 400;
+    overflow-x: hidden;
+}
+
+#overview{
+    width: 600px;
+    left: 180px;
+    top: 130px;
+    color: rgb(39, 130, 255);
+    z-index: 11;
+    position: absolute;
+    text-align: left;
+    font-size: 45px;
+    font-weight: 600;
+}
+
+#navigation {
+    list-style-type: none;
+    background-color: white;
+    width: 1920px;
+    height: 45px;
+    
+    top:0;
+    left:0px;
+    
+    margin: 0px;
+    padding-bottom: 3px;
+    overflow:hidden;
+    position: fixed;
+    padding-left: 0px;
+    z-index: 100;
+    
+    box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.66);
+}
+
+#nav_logo{
+    height: inherit;
+}
+
+#nav_logo_tab{
+    float:left;
+    width: 15%;
+    text-align: center;
+    height:inherit;
+    display: block;
+}
+
+.nav_tab{
+    float:left;
+    width: 130px;
+    text-align: center;
+    height:inherit;
+    display: block;
+    color: #727272;
+}
+
+.nav_tab a{
+    background-color: white;
+    display: block;
+    box-sizing: border-box;
+    height: inherit;
+    color: inherit;
+    padding-top: 15px;
+    text-decoration: none;
+    text-align: center;
+    font-size: 15px;
+    font-weight: 500;
+}
+
+.nav_tab:hover{
+/*    animation name gets inherited by the child element nav_line*/
+    animation-name: navBorder; 
+    color: #464646;
+}
+
+.nav_line{
+    background-color: #464646;
+    height: 3px;
+    width: 0px;
+    position: relative;
+    clear:both;
+    z-index: 101;
+    animation-name: inherit;
+    animation-duration: 0.4s;
+    animation-fill-mode: forwards;
+    margin-left: 10%;
+    margin-right: 10%;
+}
+
+.nav_line.selected{
+    width: 80%;
+}
+
+#infoBox{
+    z-index: 5;
+    position: absolute;
+    top: 450px;
+    left: 100px;
+    
+    width: 700px;
+    height: 300px;
+    
+    background-color: white;
+    border: 2px solid white;
+    border-radius: 15px;
+    box-shadow: 0px 0px 20px #a8d7ff;
+    padding-left: 50px;
+    padding-right: 50px;
+    box-sizing: border-box;
+}
+
+#des_nav_bar{
+    list-style-type: none;
+    padding-left: 0px;
+    border-bottom: 1px solid gray;
+    height: 40px;
+}
+
+.des_nav_line{
+    margin-top: 10px;
+}
+
+.des_tab{
+    width: 89px;
+    padding-right: 10px;
+    padding-top: 10px;
+    
+    float:left;
+    text-align: center;
+    font-weight: 500;
+    color: #464646;
+}
+
+.des_tab:hover{
+    animation-name: navBorder;
+    cursor: pointer;
+}
+
+.des_tab.active{
+    animation-name: navBorder;
+}
+
+.description{
+    color: #5f5f5f;
+    z-index: 4;
+    position: absolute;   
+    width: auto;
+    
+    font-size: 30px;
+    font-weight: 400;
+    opacity: 0%;
+}
+
+.description.slideIn{
+    animation-name: slideIn;
+    animation-duration: 1s;
+    animation-fill-mode: forwards;
+}
+
+#graphic{
+    width: 1920px;
+    top:40px;
+    position: absolute;
+}
+
+/*coin*/
+#g0{
+    z-index: 4;
+    position: absolute;
+    left: 1402px;
+    top: 70px;
+}
+
+/*pencil*/
+#g1{
+    z-index: 6;
+    position: absolute;
+    left: 1527px;
+    top: 245px;
+}
+
+/*table*/
+#g2{
+    z-index: 4;
+    position: absolute;
+    left: 1005px;
+    top: 215px;
+}
+
+/*stats*/
+#g3{
+    z-index: 4;
+    position: absolute;
+    left: 1007px;
+    top: 465px;
+}
+
+/*handshake*/
+#g4{
+    z-index: 6;
+    position: absolute;
+    left: 1320px;
+    top: 550px;
+}
+
+/*bulb*/
+#g5{
+    z-index: 5;
+    position: absolute;
+    left: 1230px;
+    top: 215px;
+}
+
+.platform.float{
+    animation-name: floating;
+    animation-duration: 2s;
+    animation-fill-mode: forwards;
+    animation-iteration-count: infinite;
+    animation-timing-function: ease-in-out;
+}
+
+.platform.drop{
+    animation-name: drop;
+    animation-duration: 0.5s;
+    animation-fill-mode: forwards;
+    animation-timing-function: ease-out;
+    animation-iteration-count: 1;
+}
+
+.platform.lift{
+    animation-name: lift;
+    animation-duration: 0.5s;
+    animation-fill-mode: forwards;
+    animation-timing-function: ease-out;
+}
+
+@keyframes slideIn{
+    from{opacity: 0%; margin-top:30px;}
+    to{opacity: 100%; margin-top:10px}
+}
+
+@keyframes floating{
+    0%   {margin-top: -35px;}
+    50%  {margin-top: -25px;}
+    100%  {margin-top: -35px;}
+}
+
+@keyframes drop{
+    from{margin-top:-35px;}
+    to{margin-top:0px;}
+}
+
+@keyframes lift{
+    from{margin-top:0px;}
+    to{margin-top:-35px;}
+}
+
+@keyframes navBorder{
+    from{width:0%}
+    to{width:80%}
+}
