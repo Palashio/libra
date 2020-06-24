@@ -2,11 +2,11 @@ from libra.modeling.tuner import tuneReg, tuneClass, tuneCNN
 import numpy as np
 import os
 from libra.preprocessing.data_reader import DataReader
-from tabulate import tabulate
-from libra.preprocessing.data_preprocesser import structured_preprocesser, initial_preprocesser
-import pandas as pd
-from sklearn.preprocessing import LabelEncoder
-from scipy.spatial.distance import cosine
+from keras.preprocessing.image import ImageDataGenerator
+from libra.preprocessing.image_preprocesser import (setwise_preprocessing,
+                                                    csv_preprocessing,
+                                                    classwise_preprocessing,
+                                                    set_distinguisher)
 import uuid
 
 currLog = ""
@@ -124,14 +124,13 @@ def tune_helper(
         # processing for convolutional NN
     if model_to_tune == "convolutional_NN":
         logger("Tuning model hyperparameters...")
-        X = models['convolutional_NN']["X"]
-        y = models['convolutional_NN']["y"]
+        X_train, X_test, height, width, num_classes = get_image_data(dataset)
         model = tuneCNN(
-            np.asarray(X),
-            np.asarray(y),
-            models["convolutional_NN"]["num_classes"])
-        models["convolutional_NN"]["model"] = model
-    return models
+            X_train,
+            X_test, height,width, num_classes)
+    #         models["convolutional_NN"]["num_classes"])
+    #     models["convolutional_NN"]["model"] = model
+    # return models
 
 
 def stats(dataset=None,
@@ -150,3 +149,41 @@ def save(model, save_model, save_path=os.getcwd()):
 
 def generate_id():
     return str(uuid.uuid4())
+
+
+def get_image_data(data_path, read_mode=None):
+    training_path = "/proc_training_set"
+    testing_path = "/proc_testing_set"
+
+    read_type = set_distinguisher(data_path, read_mode)['read_mode']
+    if read_type == "setwise":
+        process_info = setwise_preprocessing(data_path, True)
+
+    input_shape = (process_info["height"], process_info["width"], 3)
+    input_single = (process_info["height"], process_info["width"])
+    num_classes = process_info["num_categories"]
+    loss_func = ""
+
+    if num_classes > 2:
+        loss_func = "categorical_crossentropy"
+    elif num_classes == 2:
+        loss_func = "binary_crossentropy"
+
+    train_data = ImageDataGenerator(rescale=1. / 255,
+                                    shear_range=0.2,
+                                    zoom_range=0.2,
+                                    horizontal_flip=True)
+    test_data = ImageDataGenerator(rescale=1. / 255)
+
+    X_train = train_data.flow_from_directory(data_path + training_path,
+                                                    target_size=input_single,
+                                                    color_mode='rgb',
+                                                    batch_size=(32 if process_info["train_size"] >= 32 else 1),
+                                                    class_mode=loss_func[:loss_func.find("_")])
+    X_test = test_data.flow_from_directory(data_path + testing_path,
+                                                target_size=input_single,
+                                                color_mode='rgb',
+                                                batch_size=(32 if process_info["test_size"] >= 32 else 1),
+                                                class_mode=loss_func[:loss_func.find("_")])
+
+    return X_train, X_test, process_info['height'], process_info['width'], num_classes

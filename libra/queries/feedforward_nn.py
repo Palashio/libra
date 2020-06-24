@@ -510,7 +510,7 @@ def convolutional(instruction=None,
             validation_data=X_test,
             validation_steps=X_test.n //
             X_test.batch_size,
-            epochs=25)
+            epochs=1)
     # storing values the model dictionary
     return {
         'id': generate_id(),

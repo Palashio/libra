@@ -1,19 +1,13 @@
-from libra.preprocessing.data_reader import DataReader
+
 from tensorflow.keras.layers import Conv2D, MaxPooling2D, Dense, Flatten, Activation, Dropout
 from kerastuner import HyperModel
 from kerastuner.tuners import RandomSearch, Hyperband
-from tensorflow.keras import layers
 from sklearn import preprocessing
-import kerastuner as kt
 from tensorflow import keras
-import sys
-import pandas as pd
-import numpy as np
 from sklearn.model_selection import train_test_split
-from tensorflow.python.keras.layers import Input
 import tensorflow as tf
 from kerastuner.applications import HyperResNet
-from libra.preprocessing.data_preprocesser import structured_preprocesser, clustering_preprocessor
+
 
 # creates hypermodel class for CNN tuning
 
@@ -115,7 +109,7 @@ class CNNHyperModel(HyperModel):
                     default=1e-3
                 )
             ),
-            loss='categorical_crossentropy',
+            loss=('binary_crossentropy' if self.num_classes is 2 else 'categorical_crossentropy'),
             metrics=['accuracy']
         )
         return model
@@ -228,13 +222,13 @@ def tuneClass(
     return models[0]
 
 
-def tuneCNN(X, y, num_classes):
+def tuneCNN(X_train, X_test, height, width, num_classes):
 
     # creates hypermodel object based on the num_classes and the input shape
     hypermodel = CNNHyperModel(input_shape=(
-        224, 224, 3), num_classes=num_classes)
+        height, width, 3), num_classes=num_classes)
 
-    # tuners, establish the object to look through the tuner search space
+    # # tuners, establish the object to look through the tuner search space
     tuner = RandomSearch(
         hypermodel,
         objective='val_accuracy',
@@ -243,17 +237,16 @@ def tuneCNN(X, y, num_classes):
         executions_per_trial=3,
         directory='random_search',
     )
-    X_train, X_test, y_train, y_test = train_test_split(
-        np.asarray(X), np.asarray(y), test_size=0.33, random_state=42)
-
-    # searches the tuner space defined by hyperparameters (hp) and returns the
-    # best model
-    tuner.search(X_train, y_train,
-                 validation_data=(X_test, y_test),
+    # X_train, X_test, y_train, y_test = train_test_split(
+    #     np.asarray(X), np.asarray(y), test_size=0.33, random_state=42)
+    #
+    # # searches the tuner space defined by hyperparameters (hp) and returns the
+    # # best model
+    tuner.search(X_train, steps_per_epoch=100,
                  callbacks=[tf.keras.callbacks.EarlyStopping(patience=1)])
-
-    # returns the best model
-    return tuner.get_best_models(1)[0]
+    #
+    # # returns the best model
+    # return tuner.get_best_models(1)[0]
 
 def tuneHyperband(X,
         y,

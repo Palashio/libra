@@ -3,7 +3,7 @@
 
 import sys
 
-from libra.queries.nlp_queries import image_caption_query, generate_caption, predict_text_sentiment, text_classification_query, get_summary, summarization_query
+#from libra.queries.nlp_queries import image_caption_query, generate_caption, predict_text_sentiment, text_classification_query, get_summary, summarization_query
 from libra.queries.classification_models import k_means_clustering, train_svm, nearest_neighbors, decision_tree
 from libra.queries.supplementaries import tune_helper, stats, generate_id
 from libra.queries.feedforward_nn import regression_ann, classification_ann, convolutional
@@ -399,7 +399,12 @@ class client:
 # Easier to comment the one you don't want to run instead of typing them
 # out every time
 
-#newClient = client('./data/housing.csv')
-#newClient.decision_tree_query("Model ocean proximity")
-newClient = client('tools/data/structured_data/landslides_after_rainfall.csv').neural_network_query(instruction='Model distance',
-drop=['id', 'geolocation', 'source_link', 'source_name'])
+newClient = client('/Users/palashshah/Desktop')
+newClient.convolutional_query()
+newClient.tune('convolutional_NN')
+# newClient.neural_network_query("Model median house value")
+# newClient = client('tools/data/structured_data/landslides_after_rainfall.csv').neural_network_query(instruction='Model distance',
+# drop=['id', 'geolocation', 'source_link', 'source_name'])
+
+
+
