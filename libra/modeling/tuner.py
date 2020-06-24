@@ -1,6 +1,5 @@
 from libra.preprocessing.data_reader import DataReader
 from tensorflow.keras.layers import Conv2D, MaxPooling2D, Dense, Flatten, Activation, Dropout
-from kerastuner.tuners import Hyperband
 from kerastuner import HyperModel
 from kerastuner.tuners import RandomSearch, Hyperband
 from tensorflow.keras import layers
@@ -11,12 +10,10 @@ import sys
 import pandas as pd
 import numpy as np
 from sklearn.model_selection import train_test_split
-from tensorflow.python.keras.layers import Dense, Input
-import keras
+from tensorflow.python.keras.layers import Input
 import tensorflow as tf
 from kerastuner.applications import HyperResNet
 from libra.preprocessing.data_preprocesser import structured_preprocesser, clustering_preprocessor
-import sys
 
 # creates hypermodel class for CNN tuning
 
@@ -139,12 +136,12 @@ def tuneReg(
     def build_model(hp):
         model = keras.Sequential()
         for i in range(hp.Int('num_layers', min_layers, max_layers)):
-            model.add(layers.Dense(units=hp.Int('units_' + str(i),
+            model.add(Dense(units=hp.Int('units_' + str(i),
                                                 min_value=min_dense,
                                                 max_value=max_dense,
                                                 step=32),
                                    activation='relu'))
-        model.add(layers.Dense(1, activation='softmax'))
+        model.add(Dense(1))
         model.compile(
             optimizer=keras.optimizers.Adam(
                 hp.Choice('learning_rate', [1e-2, 1e-3, 1e-4])),
@@ -195,12 +192,12 @@ def tuneClass(
     def build_model(hp):
         model = keras.Sequential()
         for i in range(hp.Int('num_layers', min_layers, max_layers)):
-            model.add(layers.Dense(units=hp.Int('units_' + str(i),
+            model.add(Dense(units=hp.Int('units_' + str(i),
                                                 min_value=min_dense,
                                                 max_value=max_dense,
                                                 step=32),
                                    activation=activation))
-        model.add(layers.Dense(num_classes, activation='softmax'))
+        model.add(Dense(num_classes, activation='softmax'))
         model.compile(
             optimizer=keras.optimizers.Adam(
                 hp.Choice('learning_rate', [1e-2, 1e-3, 1e-4])),
