@@ -82,7 +82,6 @@ def csv_preprocessing(csv_file, data_path, instruction, image_column, training_r
                     file = []
                     for extension in file_extensions:
                         file.append(value + "." + extension)
-                # file = value if file_extension in value else value + file_extension
 
                 # look through all data_paths for file
                 for path in data_paths:
