@@ -103,5 +103,88 @@
 #    y_pred=clf.predict(X_test)
 #    return accuracy_score(y_pred, y_test), y_pred 
 #    #importance graph
-#    #plt.rcParams['figure.figsize'] = [5, 5]
-#    #plt.show()
+#   feature_important = model.get_booster().get_score(importance_type='weight')
+#   keys = list(feature_important.keys())
+#   values = list(feature_important.values())
+#
+#   data = pd.DataFrame(data=values, index=keys, columns=["score"]).sort_values(by = "score", ascending=False)
+#   data.plot(kind='barh')
+
+
+#Squeezenet
+"""
+from keras_squeezenet import SqueezeNet
+from keras.models import Model
+from keras.layers import  Convolution2D, MaxPooling2D, Lambda
+from keras.layers import Activation, GlobalAveragePooling2D, concatenate
+from keras.losses import categorical_crossentropy as logloss
+from keras.metrics import categorical_accuracy, top_k_categorical_accuracy
+from keras import backend
+from keras import optimizers
+
+temperature, lambda_const = 5.0, 0.2
+num_classes=2
+def knowledge_distillation_loss(y_true, y_pred, lambda_const,num_classes):
+    y_true, logits = y_true[:, :num_classes], y_true[:, num_classes:]
+    y_soft = backend.softmax(logits/temperature)
+    y_pred, y_pred_soft = y_pred[:, :num_classes], y_pred[:, num_classes:]    
+    return lambda_const*logloss(y_true, y_pred) + logloss(y_soft, y_pred_soft)
+
+def accuracy(y_true, y_pred):
+    y_true = y_true[:, :num_classes]
+    y_pred = y_pred[:, :num_classes]
+    return categorical_accuracy(y_true, y_pred)
+
+def top_5_accuracy(y_true, y_pred):
+    y_true = y_true[:, :num_classes]
+    y_pred = y_pred[:, :num_classes]
+    return top_k_categorical_accuracy(y_true, y_pred)
+
+def categorical_crossentropy(y_true, y_pred):
+    y_true = y_true[:, :num_classes]
+    y_pred = y_pred[:, :num_classes]
+    return logloss(y_true, y_pred)
+
+# logloss with only soft probabilities and targets
+def soft_logloss(y_true, y_pred):     
+    logits = y_true[:, num_classes:]
+    y_soft = backend.softmax(logits/temperature)
+    y_pred_soft = y_pred[:, num_classes:]    
+    return logloss(y_soft, y_pred_soft)
+
+def get_snet_layer(num_out=2):
+    global num_outputs
+    num_outputs=num_out
+    model = SqueezeNet()
+
+    # remove softmax
+    model.layers.pop()
+    # usual probabilities
+    logits = model.layers[-1].output
+    probabilities = Activation('softmax')(logits)
+    # softed probabilities
+    logits_T = Lambda(lambda x: x/temperature)(logits)
+    probabilities_T = Activation('softmax')(logits_T)
+
+    output = concatenate([probabilities, probabilities_T])
+    model = Model(model.input, output)
+    model.compile(
+        optimizer=optimizers.SGD(lr=1e-2, momentum=0.9, nesterov=True), 
+        loss=lambda y_true, y_pred: knowledge_distillation_loss(y_true, y_pred, lambda_const), 
+        metrics=[accuracy, top_5_accuracy, categorical_crossentropy, soft_logloss]
+    )
+    return model
+
+model= get_snet_layer(num_classes)
+history = model.fit_generator(
+        X_train, 
+        steps_per_epoch=X_train.n //
+        X_train.batch_size, epochs=25,verbose=0,
+        callbacks=[
+            EarlyStopping(monitor='val_accuracy', patience=4, min_delta=0.01),
+            ReduceLROnPlateau(monitor='val_accuracy', factor=0.1, patience=2, epsilon=0.007)
+        ],
+        validation_data=X_test, validation_steps=X_test.n //
+        X_test.batch_size, workers=4
+    )
+"""
