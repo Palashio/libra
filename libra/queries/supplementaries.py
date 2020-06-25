@@ -46,7 +46,6 @@ def logger(instruction, found=""):
         counter = counter - 1
         currLog += (" " * 2 * counter) + str(instruction) + str(found)
     else:
-        #currLog += (" " * 2 * counter) + "|" + "\n"
         currLog += (" " * 2 * counter) + "|- " + str(instruction) + str(found)
         if instruction == "done...":
             currLog += "\n" + "\n"
@@ -100,12 +99,13 @@ def tune_helper(
             epochs=epochs,
             activation=activation,
             step=step)
-        models['regression_ANN'] = {'model': returned_model,
-                                    'hyperparametes' : returned_pms,
-                                    'losses': {
+        models['regression_ANN'] = {
+               'model': returned_model,
+               'hyperparametes' : returned_pms,
+               'losses': {
                         'training_loss': history.history['loss'],
                         'val_loss': history.history['val_loss']}
-                                    }
+               }
         return returned_model
 
         # processing for classification feed forward NN
@@ -132,12 +132,13 @@ def tune_helper(
             metrics=metrics,
             epochs=epochs,
             step=step)
-        models['classification_ANN'] = {'model': returned_model,
-                                        'hyperparametes' : returned_pms,
-                                        'losses': {
-                                'training_loss': history.history['loss'],
-                                'val_loss': history.history['val_loss']}
-                                       }
+        models['classification_ANN'] = {
+               'model': returned_model,
+               'hyperparametes' : returned_pms,
+               'losses': {
+                          'training_loss': history.history['loss'],
+                           'val_loss': history.history['val_loss']}
+               }
         return returned_model
         # processing for convolutional NN
     if model_to_tune == "convolutional_NN":

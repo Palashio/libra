@@ -1,10 +1,8 @@
-from libra.preprocessing.data_reader import DataReader
 from tensorflow.keras.layers import (Conv2D, 
-     MaxPooling2D, 
-     Dense, 
-     Flatten, 
-     Activation, 
-     Dropout)
+                                     MaxPooling2D, 
+                                     Dense, 
+                                     Flatten, 
+                                     Dropout)
 from kerastuner import HyperModel
 from kerastuner.tuners import RandomSearch, Hyperband
 from sklearn import preprocessing
@@ -12,9 +10,7 @@ from tensorflow import keras
 from sklearn.model_selection import train_test_split
 import tensorflow as tf
 from kerastuner.applications import HyperResNet
-from libra.preprocessing.data_preprocesser import (structured_preprocesser, 
-     clustering_preprocessor)
-
+import numpy as np
 
 # creates hypermodel class for CNN tuning
 
@@ -282,7 +278,7 @@ def tuneCNN(
 
     # searches the tuner space defined by hyperparameters (hp) and returns the
     # best model
-    tuner.search(X_train, y_train,
+    tuner.search(X_train,
                  validation_data=X_test,
                  callbacks=[tf.keras.callbacks.EarlyStopping(patience=1)],
                  epochs=epochs)
@@ -291,7 +287,7 @@ def tuneCNN(
     hyp = tuner.get_best_hyperparameters(num_trials = 1)[0]
     #hyp = tuner.oracle.get_best_trials(num_trials=1)[0].hyperparameters.values
     best_hps = np.stack(hyp).astype(None)
-    history = tuner_hist(X,y,tuner,hyp)
+    history = tuner_hist(X_train,X_test,tuner,hyp,img=1)
 
     """
     Return:
@@ -341,13 +337,19 @@ def tuneHyperband(X,
     """
     return tuner.get_best_models(1)[0], best_hps, history
     
-def tuner_hist(X,y,tuner,best_hps):
-    X_train, X_test, y_train, y_test = train_test_split(
-        X, y, test_size=0.2, random_state=49)
+def tuner_hist(X,y,tuner,best_hps,img=0):
     model = tuner.hypermodel.build(best_hps)
-    history = model.fit(X_train, y_train, 
+    if img==0:
+        X_train, X_test, y_train, y_test = train_test_split(
+            X, y, test_size=0.2, random_state=49)
+        
+        history = model.fit(X_train, y_train, 
                         epochs = 10, 
                         validation_data = (X_test, y_test), 
                         verbose=0)
+    else:
+        history=model.fit_generator(X_train, 
+                        epochs = 10, 
+                        validation_data = y, 
+                        verbose=0)
     return history
-    
