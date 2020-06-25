@@ -1,4 +1,6 @@
-from libra.modeling.tuner import tuneReg, tuneClass, tuneCNN
+from libra.modeling.tuner import (tuneReg, tuneClass, 
+     tuneCNN, tuner_hist,
+     tuneHyperband)
 import numpy as np
 import os
 from libra.preprocessing.data_reader import DataReader

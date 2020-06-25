@@ -241,7 +241,7 @@ def tuneClass(
                  epochs=5,
                  validation_data=(X_test, y_test))
     models = tuner.get_best_models(num_models=1)
-    hyp = tuner.get_best_hyperparameters(num_trials = 1)
+    hyp = tuner.get_best_hyperparameters(num_trials = 1)[0]
     #hyp = tuner.oracle.get_best_trials(num_trials=1)[0].hyperparameters.values
     best_hps = np.stack(hyp).astype(None)
     history = tuner_hist(X,y,tuner,hyp)
@@ -279,7 +279,7 @@ def tuneCNN(X, y, num_classes):
                  callbacks=[tf.keras.callbacks.EarlyStopping(patience=1)])
 
     # best hyperparamters
-    hyp = tuner.get_best_hyperparameters(num_trials = 1)
+    hyp = tuner.get_best_hyperparameters(num_trials = 1)[0]
     #hyp = tuner.oracle.get_best_trials(num_trials=1)[0].hyperparameters.values
     best_hps = np.stack(hyp).astype(None)
     history = tuner_hist(X,y,tuner,hyp)
@@ -318,7 +318,7 @@ def tuneHyperband(X,
     tuner.search(X_train, y_train,
                  epochs=5,
                  validation_data=(X_test, y_test))
-    hyp = tuner.get_best_hyperparameters(num_trials = 1)
+    hyp = tuner.get_best_hyperparameters(num_trials = 1)[0]
     #hyp = tuner.oracle.get_best_trials(num_trials=1)[0].hyperparameters.values
     best_hps = np.stack(hyp).astype(None)
 
