@@ -43,8 +43,18 @@ RUN conda config --append channels conda-forge
 RUN conda install -y python=${python_version} && \
     pip install --upgrade pip && \
     pip install \
-      sklearn_pandas \
+      sklearn-pandas \
       tensorflow-gpu \
+      Keras\
+      numpy\
+      pprintpp\
+      os-sys\
+      torch\
+      spacy\
+      seaborn\
+      textblob\
+      tabulate\
+      picklable-itertools\
       cntk-gpu && \
     conda install \
       bcolz \
