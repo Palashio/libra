@@ -74,7 +74,7 @@ class client:
         logger("done...")
         clearLog()
 
-    # returns models with a specific string
+    # returns models with a specific string - currently deprecated, should not be used. 
     def get_models(self, model_requested):
         logger("Getting model...")
         return get_similar_model(model_requested, self.models.keys())
