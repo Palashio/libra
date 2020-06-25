@@ -3,7 +3,7 @@
 
 import sys
 
-#from libra.queries.nlp_queries import image_caption_query, generate_caption, predict_text_sentiment, text_classification_query, get_summary, summarization_query
+# from libra.queries.nlp_queries import image_caption_query, generate_caption, predict_text_sentiment, text_classification_query, get_summary, summarization_query
 from libra.queries.classification_models import k_means_clustering, train_svm, nearest_neighbors, decision_tree
 from libra.queries.supplementaries import tune_helper, stats, generate_id
 from libra.queries.feedforward_nn import regression_ann, classification_ann, convolutional
@@ -25,6 +25,7 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
 currLog = ""
 counter = 0
+
 
 # # current_dir=os.getcw()
 
@@ -60,7 +61,7 @@ def logger(instruction, found="", slash=''):
         else:
             currLog += (" " * 2 * counter) + str(instruction) + str(found)
     else:
-        #currLog += (" " * 2 * counter) + "|" + "\n"
+        # currLog += (" " * 2 * counter) + "|" + "\n"
         currLog += (" " * 2 * counter) + "|- " + str(instruction) + str(found)
         if instruction == "done...":
             currLog += "\n" + "\n"
@@ -275,24 +276,39 @@ class client:
                                                      test_size=0.2,
                                                      drop=None)
 
-    def tune(self, model_to_tune):
+    def tune(self,
+             model_to_tune,
+             max_layers=10,
+             min_layers=2,
+             min_dense=32,
+             max_dense=512,
+             executions_per_trial=3,
+             max_trials=1,
+             activation='relu',
+             loss='categorical_crossentropy',
+             metrics='accuracy',
+             epochs=10,
+             objective='val_accuracy',
+             seed=42,
+             directory='my_dir'):
+
         self.models = tune_helper(
             model_to_tune=model_to_tune,
             dataset=self.dataset,
             models=self.models,
-            max_layers=10,
-            min_layers=2,
-            min_dense=32,
-            max_dense=512,
-            executions_per_trial=3,
-            max_trials=1,
-            activation='relu',
-            loss='categorical_crossentropy',
-            metrics='accuracy',
-            epochs=10,
-            objective='val_accuracy',
-            seed=42,
-            directory='my_dir',
+            max_layers=max_layers,
+            min_layers=min_layers,
+            min_dense=min_dense,
+            max_dense=max_dense,
+            executions_per_trial=executions_per_trial,
+            max_trials=max_trials,
+            activation=activation,
+            loss=loss,
+            metrics=metrics,
+            epochs=epochs,
+            objective=objective,
+            seed=seed,
+            directory=directory,
         )
 
     def stat_analysis(self, column_name="none", drop=None):
@@ -413,7 +429,7 @@ class client:
 
 newClient = client('/Users/palashshah/Desktop')
 newClient.convolutional_query()
-newClient.tune('convolutional_NN')
+newClient.tune('convolutional_NN', epochs=1)
 # newClient.neural_network_query("Model median house value")
 # newClient = client('tools/data/structured_data/landslides_after_rainfall.csv').neural_network_query(instruction='Model distance',
 # drop=['id', 'geolocation', 'source_link', 'source_name'])

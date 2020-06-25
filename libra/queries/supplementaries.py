@@ -75,7 +75,8 @@ def tune_helper(
         seed=42,
         objective='val_accuracy',
         directory='my_dir',
-        epochs=10
+        epochs=10,
+        step=32
 ):
     logger("Getting target model for tuning...")
 
@@ -99,7 +100,9 @@ def tune_helper(
             max_dense=max_dense,
             executions_per_trial=executions_per_trial,
             max_trials=max_trials,
-            epochs=epochs)
+            epochs=epochs,
+            activation=activation,
+            step=step)
         models['regression_ANN'] = {'model': returned_model}
         return returned_model
 
@@ -125,7 +128,8 @@ def tune_helper(
             activation=activation,
             loss=loss,
             metrics=metrics,
-            epochs=epochs)
+            epochs=epochs,
+            step=step)
         models['classification_ANN'] = {'model': returned_model}
         return returned_model
         # processing for convolutional NN
@@ -167,13 +171,13 @@ def generate_id():
     return str(uuid.uuid4())
 
 
-def get_image_data(data_path, read_mode=None):
+def get_image_data(data_path, read_mode=None, training_ratio=0.8):
     training_path = "/proc_training_set"
     testing_path = "/proc_testing_set"
 
     read_type = set_distinguisher(data_path, read_mode)['read_mode']
-    if read_type == "setwise":
-        process_info = setwise_preprocessing(data_path, True)
+
+    process_info = setwise_preprocessing(data_path, True)
 
     input_shape = (process_info["height"], process_info["width"], 3)
     input_single = (process_info["height"], process_info["width"])

@@ -121,20 +121,20 @@ def tuneReg(
         max_dense=512,
         executions_per_trial=3,
         max_trials=3,
-        epochs=10
+        epochs=10,
+        activation='relu',
+        step=32
 ):
-    print("entered1")
 
     # function build model using hyperparameter
-
     def build_model(hp):
         model = keras.Sequential()
         for i in range(hp.Int('num_layers', min_layers, max_layers)):
             model.add(Dense(units=hp.Int('units_' + str(i),
                                          min_value=min_dense,
                                          max_value=max_dense,
-                                         step=32),
-                            activation='relu'))
+                                         step=step),
+                            activation=activation))
         model.add(Dense(1))
         model.compile(
             optimizer=keras.optimizers.Adam(
@@ -178,7 +178,8 @@ def tuneClass(
         activation='relu',
         loss='categorical_crossentropy',
         metrics='accuracy',
-        epochs=10):
+        epochs=10,
+        step=32):
     # function build model using hyperparameter
     le = preprocessing.LabelEncoder()
     y = tf.keras.utils.to_categorical(
@@ -190,7 +191,7 @@ def tuneClass(
             model.add(Dense(units=hp.Int('units_' + str(i),
                                          min_value=min_dense,
                                          max_value=max_dense,
-                                         step=32),
+                                         step=step),
                             activation=activation))
         model.add(Dense(num_classes, activation='softmax'))
         model.compile(
@@ -255,8 +256,7 @@ def tuneCNN(
     # # best model
     tuner.search(X_train,
                  validation_data=X_test,
-                 epochs=epochs,
-                 callbacks=[tf.keras.callbacks.EarlyStopping(patience=1)])
+                 epochs=epochs)
     #
     # returns the best model
     return tuner.get_best_models(1)[0]
