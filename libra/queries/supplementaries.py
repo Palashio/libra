@@ -71,7 +71,9 @@ def tune_helper(
         max_trials=1,
         activation='relu',
         loss='categorical_crossentropy',
-        metrics='accuracy'):
+        metrics='accuracy',
+        directory='random_search'
+):
     logger("Getting target model for tuning...")
 
     # checks to see which requested model is in the self.models
@@ -127,7 +129,7 @@ def tune_helper(
         X_train, X_test, height, width, num_classes = get_image_data(dataset)
         model = tuneCNN(
             X_train,
-            X_test, height,width, num_classes)
+            X_test, height,width, num_classes, directory=directory)
     #         models["convolutional_NN"]["num_classes"])
     #     models["convolutional_NN"]["model"] = model
     # return models

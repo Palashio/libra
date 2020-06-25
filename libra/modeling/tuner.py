@@ -109,7 +109,7 @@ class CNNHyperModel(HyperModel):
                     default=1e-3
                 )
             ),
-            loss=('binary_crossentropy' if self.num_classes is 2 else 'categorical_crossentropy'),
+            loss=('binary_crossentropy' if self.num_classes == 2 else 'categorical_crossentropy'),
             metrics=['accuracy']
         )
         return model
@@ -222,7 +222,7 @@ def tuneClass(
     return models[0]
 
 
-def tuneCNN(X_train, X_test, height, width, num_classes):
+def tuneCNN(X_train, X_test, height, width, num_classes, executions_per_trial=3, seed=42, max_trials=3, objective='val_accuracy', directory='random_search'):
 
     # creates hypermodel object based on the num_classes and the input shape
     hypermodel = CNNHyperModel(input_shape=(
@@ -231,18 +231,19 @@ def tuneCNN(X_train, X_test, height, width, num_classes):
     # # tuners, establish the object to look through the tuner search space
     tuner = RandomSearch(
         hypermodel,
-        objective='val_accuracy',
-        seed=42,
-        max_trials=3,
-        executions_per_trial=3,
-        directory='random_search',
+        objective=objective,
+        seed=seed,
+        max_trials=max_trials,
+        executions_per_trial=executions_per_trial,
+        directory=directory,
     )
     # X_train, X_test, y_train, y_test = train_test_split(
     #     np.asarray(X), np.asarray(y), test_size=0.33, random_state=42)
     #
     # # searches the tuner space defined by hyperparameters (hp) and returns the
     # # best model
-    tuner.search(X_train, steps_per_epoch=100,
+    tuner.search(X_train,
+                 validation_data=X_test,
                  callbacks=[tf.keras.callbacks.EarlyStopping(patience=1)])
     #
     # # returns the best model

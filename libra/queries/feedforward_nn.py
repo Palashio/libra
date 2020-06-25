@@ -503,8 +503,8 @@ def convolutional(instruction=None,
                                                 class_mode=loss_func[:loss_func.find("_")])
 
         # print(X_train)
-    history = model.fit_generator(
-            generator=X_train,
+    history = model.fit(
+            X_train,
             steps_per_epoch=X_train.n //
             X_train.batch_size,
             validation_data=X_test,
