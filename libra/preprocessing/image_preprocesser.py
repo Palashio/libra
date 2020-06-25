@@ -48,18 +48,27 @@ def setwise_preprocessing(data_path, new_folder=True):
             for class_folder, images in dict[index].items():
                 replace_images(p + "/" + class_folder, images)
 
-    return {"num_categories": classification, "height": height, "width": width, "train_size": data_size[0], "test_size": data_size[1]}
+    return {"num_categories": classification, 
+            "height": height, 
+            "width": width, 
+            "train_size": data_size[0], 
+            "test_size": data_size[1]}
 
 
-# processes a csv_file containing image paths and creates a testing/training folders
-# with resized images inside the same directory as the csv file
-def csv_preprocessing(csv_file, data_path, instruction, image_column, training_ratio):
+# processes a csv_file containing image paths and creates a testing/training 
+# folders with resized images inside the same directory as the csv file
+def csv_preprocessing(csv_file, 
+                      data_path, 
+                      instruction, 
+                      image_column, 
+                      training_ratio):
     df = pd.read_csv(csv_file)
     if instruction is None:
         raise BaseException("Instruction was not given.")
     label = get_similar_column(get_value_instruction(instruction), df)
     avoid_directories = ["proc_training_set", "proc_testing_set"]
-    data_paths = [data_path + "/" + d for d in os.listdir(data_path) if os.path.isdir(data_path + "/" + d) and d not in avoid_directories]
+    data_paths = [data_path + "/" + d for d in os.listdir(data_path) 
+                  if os.path.isdir(data_path + "/" + d) and d not in avoid_directories]
 
     # get file extension
     _, file_extension = os.path.splitext(os.listdir(data_paths[0])[0])
@@ -132,7 +141,8 @@ def csv_preprocessing(csv_file, data_path, instruction, image_column, training_r
     for index, row in df.iterrows():
         # resize images
         img = process_color_channel(image_list[index], height, width)
-        p = "proc_" + (os.path.basename(row[image_column]) if path_included else row[image_column])
+        p = "proc_" + (os.path.basename(row[image_column]) 
+                            if path_included else row[image_column])
         if (index / df.shape[0]) < training_ratio:
             data_size[0] += 1
             save_image(data_path + "/proc_training_set", img, p, row[label])
@@ -140,7 +150,11 @@ def csv_preprocessing(csv_file, data_path, instruction, image_column, training_r
             data_size[1] += 1
             save_image(data_path + "/proc_testing_set", img, p, row[label])
 
-    return {"num_categories": classifications, "height": height, "width": width, "train_size": data_size[0], "test_size": data_size[1]}
+    return {"num_categories": classifications, 
+            "height": height, 
+            "width": width, 
+            "train_size": data_size[0], 
+            "test_size": data_size[1]}
 
 
 # preprocesses images when given a folder containing class folders
@@ -178,7 +192,11 @@ def classwise_preprocessing(data_path, training_ratio):
                            class_folder)
             count += 1
 
-    return {"num_categories": num_classifications, "height": height, "width": width, "train_size": data_size[0], "test_size": data_size[1]}
+    return {"num_categories": num_classifications, 
+            "height": height, 
+            "width": width, 
+            "train_size": data_size[0], 
+            "test_size": data_size[1]}
 
 
 # process a class folder by getting return a list of all the heights and widths

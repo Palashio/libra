@@ -108,12 +108,18 @@ class RNN_Decoder(tf.keras.Model):
         return tf.zeros((batch_size, self.units))
 
 
-def generate_caption_helper(image, decoder, encoder, tokenizer, image_features_extract_model, max_length=500):
+def generate_caption_helper(image,
+                            decoder, 
+                            encoder, 
+                            tokenizer, 
+                            image_features_extract_model, 
+                            max_length=500):
     hidden = decoder.reset_state(batch_size=1)
 
     temp_input = tf.expand_dims(load_image(image)[0], 0)
     img_tensor_val = image_features_extract_model(temp_input)
-    img_tensor_val = tf.reshape(img_tensor_val, (img_tensor_val.shape[0], -1, img_tensor_val.shape[3]))
+    img_tensor_val = tf.reshape(img_tensor_val, (img_tensor_val.shape[0], -1, 
+                                                 img_tensor_val.shape[3]))
 
     features = encoder(img_tensor_val)
 

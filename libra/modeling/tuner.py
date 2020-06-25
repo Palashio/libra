@@ -1,5 +1,10 @@
 from libra.preprocessing.data_reader import DataReader
-from tensorflow.keras.layers import Conv2D, MaxPooling2D, Dense, Flatten, Activation, Dropout
+from tensorflow.keras.layers import (Conv2D, 
+     MaxPooling2D, 
+     Dense, 
+     Flatten, 
+     Activation, 
+     Dropout)
 from kerastuner import HyperModel
 from kerastuner.tuners import RandomSearch, Hyperband
 from tensorflow.keras import layers
@@ -13,7 +18,8 @@ from sklearn.model_selection import train_test_split
 from tensorflow.python.keras.layers import Input
 import tensorflow as tf
 from kerastuner.applications import HyperResNet
-from libra.preprocessing.data_preprocesser import structured_preprocesser, clustering_preprocessor
+from libra.preprocessing.data_preprocesser import (structured_preprocesser, 
+     clustering_preprocessor)
 
 # creates hypermodel class for CNN tuning
 

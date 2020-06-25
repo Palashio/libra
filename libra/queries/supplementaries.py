@@ -3,7 +3,8 @@ import numpy as np
 import os
 from libra.preprocessing.data_reader import DataReader
 from tabulate import tabulate
-from libra.preprocessing.data_preprocesser import structured_preprocesser, initial_preprocesser
+from libra.preprocessing.data_preprocesser import ( structured_preprocesser, 
+     initial_preprocesser)
 import pandas as pd
 from sklearn.preprocessing import LabelEncoder
 from scipy.spatial.distance import cosine
@@ -145,7 +146,7 @@ def save(model, save_model, save_path=os.getcwd()):
         # serialize weights to HDF5
         model.save_weights(save_path + "/weights" + str(number) + ".h5")
         logger("->", "Saved model to disk as model" + str(number))
-    number=bumber+1
+    number= number+1
 
 def generate_id():
     return str(uuid.uuid4())

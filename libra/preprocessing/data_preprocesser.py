@@ -8,7 +8,8 @@ from sklearn.compose import ColumnTransformer
 from sklearn.impute import SimpleImputer
 from sklearn.model_selection import train_test_split
 from sklearn.pipeline import Pipeline
-from sklearn.preprocessing import OneHotEncoder, StandardScaler, FunctionTransformer
+from sklearn.preprocessing import ( OneHotEncoder, 
+     StandardScaler, FunctionTransformer)
 from tensorflow import keras
 from tensorflow.python.keras.layers import Dense, Input
 from keras.callbacks import EarlyStopping
@@ -89,13 +90,15 @@ def structured_preprocesser(data, mca_threshold):
     if len(categorical_columns) != 0:
         combined = pd.concat([data['train'], data['test']], axis=0)
 
-        mca_threshold = combined.shape[0]*.25 if mca_threshold is None else combined.shape[0] * mca_threshold
+        mca_threshold = (combined.shape[0]*.25 if mca_threshold is None 
+                         else combined.shape[0] * mca_threshold)
 
         if too_many_values(combined[categorical_columns], mca_threshold):
             cat_pipeline = Pipeline([
                 ('imputer', SimpleImputer(strategy="constant", fill_value="")),
                 ('one_hot_encoder', OneHotEncoder(handle_unknown='ignore')),
-                ('transformer', FunctionTransformer(lambda x: x.toarray(), accept_sparse=True)),
+                ('transformer', FunctionTransformer(lambda x: x.toarray(), 
+                                accept_sparse=True)),
                 ('mca', CA(n_components=-1))
             ])
         else:

@@ -5,7 +5,8 @@ from tensorflow.python.client import device_lib
 
 # Creates a constructor for the DataReader class to create Pandas DataFrame
 # objects based off of the dataset's file extension, user's preference on 
-# random trimming of the dataset, and the proportion of data to be trimmed specified by the user
+# random trimming of the dataset, and the proportion of data to be trimmed 
+# specified by the user
 class DataReader():
     def __init__(self, filepath, trim=True, trim_ratio=0.20):
         self.filepath = filepath
@@ -40,13 +41,15 @@ class DataReader():
     # Returns a list of available GPUs on the current device
     def get_available_gpus(self):
         local_device_protos = device_lib.list_local_devices()
-        return [device.name for device in local_device_protos if device.device_type == 'GPU']
+        return [ device.name for device in local_device_protos 
+                 if device.device_type == 'GPU']
     
     # Checks if the current device has a GPU
     def is_gpu_available(self):
         return tf.test.gpu_device_name() != ''
     
-    # Trims the dataset based off of user preference and the ratio of data to be trimmed specified
+    # Trims the dataset based off of user preference and the ratio 
+    # of data to be trimmed specified
     def random_trim (self):
         if self.trim == True and self.is_gpu_available():
             trimmed_df = self.data_generator().sample(frac=(1.0 - self.trim_ratio))
@@ -56,7 +59,8 @@ class DataReader():
     # def stratified_strim(self):
     #     if
 
-    # If the device running the program has a GPU, no trimming will occur unles the user specifies so, and vice-versa
+    # If the device running the program has a GPU, no trimming will occur unless 
+    # the user specifies so, and vice-versa
     def trim_gpu (self):
         if self.is_gpu_available() == True and self.trim == True:
             return self.random_trim()

@@ -3,13 +3,21 @@
 
 import sys
 
-from libra.queries.nlp_queries import image_caption_query, generate_caption, predict_text_sentiment, text_classification_query, get_summary, summarization_query
-from libra.queries.classification_models import k_means_clustering, train_svm, nearest_neighbors, decision_tree
+from libra.queries.nlp_queries import ( image_caption_query, 
+     generate_caption, predict_text_sentiment, 
+     text_classification_query, get_summary, 
+     summarization_query)
+from libra.queries.classification_models import (k_means_clustering, 
+     train_svm, nearest_neighbors,
+     decision_tree)
 from libra.queries.supplementaries import tune_helper, stats, generate_id
-from libra.queries.feedforward_nn import regression_ann, classification_ann, convolutional
+from libra.queries.feedforward_nn import (regression_ann, 
+     classification_ann, 
+     convolutional)
 from libra.queries.dimensionality_red_queries import dimensionality_reduc
 from libra.data_generation.grammartree import get_value_instruction
-from libra.data_generation.dataset_labelmatcher import get_similar_column, get_similar_model
+from libra.data_generation.dataset_labelmatcher import (get_similar_column, 
+     get_similar_model)
 import pandas as pd
 from pandas.core.common import SettingWithCopyWarning
 import warnings
@@ -344,7 +352,10 @@ class client:
                             preprocess=True,
                             generate_plots=True):
         self.models["Image Caption"] = image_caption_query(
-            self=self, epochs=epochs, instruction=instruction, random_state=random_state, preprocess=preprocess,
+            self=self, epochs=epochs, 
+            instruction=instruction, 
+            random_state=random_state, 
+            preprocess=preprocess,
             generate_plots=generate_plots)
 
     def dimensionality_reducer(self, instruction):
@@ -369,7 +380,8 @@ class client:
             print(operations)
         else:
             raise Exception(
-                "There are no built-in operators defined for this model. Please refer to the models dictionary.")
+                "There are no built-in operators defined for this model." 
+                " Please refer to the models dictionary.")
 
 
     # show accuracy scores for client's model
@@ -394,5 +406,6 @@ class client:
 
 #newClient = client('./data/housing.csv')
 #newClient.decision_tree_query("Model ocean proximity")
-newClient = client('tools/data/structured_data/landslides_after_rainfall.csv').neural_network_query(instruction='Model distance',
-drop=['id', 'geolocation', 'source_link', 'source_name'])
+newClient = client('tools/data/structured_data/'
+    'landslides_after_rainfall.csv').neural_network_query(instruction='Model distance',
+    drop=['id', 'geolocation', 'source_link', 'source_name'])
