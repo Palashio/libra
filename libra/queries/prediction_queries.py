@@ -1,7 +1,4 @@
-# Making functions in other directories accesible to this file by
-# inserting into sys path
 
-import sys
 
 from libra.queries.nlp_queries import ( image_caption_query, 
      generate_caption, predict_text_sentiment, 
@@ -23,8 +20,8 @@ from pandas.core.common import SettingWithCopyWarning
 import warnings
 import os
 
-# Importing the T5 modules from huggingface/transformers
 
+#supressing warnings for cleaner dialogue box
 warnings.simplefilter(action='error', category=FutureWarning)
 warnings.simplefilter(action="ignore", category=SettingWithCopyWarning)
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
@@ -34,15 +31,9 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 currLog = ""
 counter = 0
 
-# # current_dir=os.getcw()
-
-# # allows for all columns to be displayed when printing()
-# pd.options.display.width = None
 
 
-# # clears the log when new process is started up
-
-
+#clears log when needed - currently not being used
 def clearLog():
     global currLog
     global counter
@@ -53,10 +44,8 @@ def clearLog():
 
 # logging function that creates hierarchial display of the processes of
 # different functions. Copied into different python files to maintain
-# global variable parallels
-
-
-def logger(instruction, found=""):
+# global variables.
+def logger(instruction, found="", slash=''):
     global currLog
     global counter
     if counter == 0:
@@ -74,9 +63,7 @@ def logger(instruction, found=""):
     currLog = ""
 
 
-# class to store all query information
-
-
+# class to store all query information. Currently, old_models is not being used.
 class client:
     def __init__(self, data):
         logger("creating object...")
@@ -87,7 +74,7 @@ class client:
         logger("done...")
         clearLog()
 
-    # returns models with a specific string
+    # returns models with a specific string - currently deprecated, should not be used. 
     def get_models(self, model_requested):
         logger("Getting model...")
         return get_similar_model(model_requested, self.models.keys())
@@ -276,20 +263,39 @@ class client:
                                                      test_size=0.2,
                                                      drop=None)
 
-    def tune(self, model_to_tune):
+    def tune(self,
+             model_to_tune,
+             max_layers=10,
+             min_layers=2,
+             min_dense=32,
+             max_dense=512,
+             executions_per_trial=3,
+             max_trials=1,
+             activation='relu',
+             loss='categorical_crossentropy',
+             metrics='accuracy',
+             epochs=10,
+             objective='val_accuracy',
+             seed=42,
+             directory='my_dir'):
+
         self.models = tune_helper(
             model_to_tune=model_to_tune,
             dataset=self.dataset,
             models=self.models,
-            max_layers=10,
-            min_layers=2,
-            min_dense=32,
-            max_dense=512,
-            executions_per_trial=3,
-            max_trials=1,
-            activation='relu',
-            loss='categorical_crossentropy',
-            metrics='accuracy'
+            max_layers=max_layers,
+            min_layers=min_layers,
+            min_dense=min_dense,
+            max_dense=max_dense,
+            executions_per_trial=executions_per_trial,
+            max_trials=max_trials,
+            activation=activation,
+            loss=loss,
+            metrics=metrics,
+            epochs=epochs,
+            objective=objective,
+            seed=seed,
+            directory=directory,
         )
 
     def stat_analysis(self, column_name="none", drop=None):
@@ -309,12 +315,13 @@ class client:
                             training_ratio=0.8):
 
         # storing values the model dictionary
-        self.models["convolutional_NN"] = convolutional(instruction=instruction,
-                                                        read_mode=read_mode,
-                                                        data_path=self.dataset,
-                                                        new_folders=new_folders,
-                                                        image_column=image_column,
-                                                        training_ratio=training_ratio)
+        self.models["convolutional_NN"] = convolutional(
+            instruction=instruction,
+            read_mode=read_mode,
+            data_path=self.dataset,
+            new_folders=new_folders,
+            image_column=image_column,
+            training_ratio=training_ratio)
 
     # Sentiment analysis predict wrapper
     def predict_text_sentiment(self, text):
@@ -352,9 +359,10 @@ class client:
                             preprocess=True,
                             generate_plots=True):
         self.models["Image Caption"] = image_caption_query(
-            self=self, epochs=epochs, 
-            instruction=instruction, 
-            random_state=random_state, 
+            self=self,
+            epochs=epochs,
+            instruction=instruction,
+            random_state=random_state,
             preprocess=preprocess,
             generate_plots=generate_plots)
 
@@ -370,12 +378,15 @@ class client:
             data = [key for key in self.models[model].keys()]
             print(data)
         else:
-            raise Exception("The requested model has not been applied to the client.")
+            raise Exception(
+                "The requested model has not been applied to the client.")
 
     # returns all operators applicable to the client's models dictionary
     def operators(self, model):
         defined = ['plots', 'accuracy', 'losses']
-        operations = [func + "()" for func in self.models[model].keys() if func in defined]
+        operations = [
+            func +
+            "()" for func in self.models[model].keys() if func in defined]
         if len(operations) > 0:
             print(operations)
         else:
@@ -383,8 +394,8 @@ class client:
                 "There are no built-in operators defined for this model." 
                 " Please refer to the models dictionary.")
 
-
     # show accuracy scores for client's model
+
     def accuracy(self, model):
         if 'accuracy' in self.models[model].keys():
             return self.models[model]['accuracy']
@@ -404,8 +415,9 @@ class client:
 # Easier to comment the one you don't want to run instead of typing them
 # out every time
 
-#newClient = client('./data/housing.csv')
-#newClient.decision_tree_query("Model ocean proximity")
-newClient = client('tools/data/structured_data/'
-    'landslides_after_rainfall.csv').neural_network_query(instruction='Model distance',
-    drop=['id', 'geolocation', 'source_link', 'source_name'])
+newClient = client('/Users/palashshah/Desktop')
+newClient.convolutional_query()
+newClient.tune('convolutional_NN', epochs=1)
+# newClient.neural_network_query("Model median house value")
+# newClient = client('tools/data/structured_data/landslides_after_rainfall.csv').neural_network_query(instruction='Model distance',
+# drop=['id', 'geolocation', 'source_link', 'source_name'])
