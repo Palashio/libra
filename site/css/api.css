@@ -1,0 +1,140 @@
+body{
+    height: 2000px;
+    font-family: "Montserrat", sans-serif;
+}
+
+#side-nav{
+    max-width: 300px;
+    position: fixed;
+    top: 0px;
+    border: 1px solid rgb(221, 221, 221);
+    border-top: none;
+    border-left: none;
+}
+
+#icon{
+    width: 100%;
+}
+
+.nav-tab{
+    margin-top: -1px;
+    padding: 7px;
+    padding-left: 20px;
+    
+    border-top: 1px solid rgb(221, 221, 221);
+    
+    color: rgb(0, 113, 196);
+    font-size: 120%;
+    background-color: rgb(248, 248, 248);
+}
+
+.nav-tab:hover{
+    background-color: rgb(229, 229, 229);
+    cursor: pointer;
+    
+    border-right-style: solid;
+    border-right-color: rgb(0, 125, 217);
+    border-right-width: 3px;
+    border-radius: 3px;
+}
+
+.nav-tab.selected{
+    background-color: rgb(0, 125, 217);
+    color: white;
+}
+
+.dropdown-item.selected{
+    visibility: visible;
+    animation-name: drop;
+    animation-fill-mode: forwards;
+    animation-duration: 300ms;
+}
+
+.dropdown-item:hover{
+    background-color: rgb(229, 229, 229);
+}
+
+.dropdown-item{
+    height: 0px;
+    padding-top: 0px;
+    padding-bottom: 0px;
+    padding-left: 40px;
+    color: rgb(90, 90, 90);
+    
+    visibility: hidden;
+}
+
+#nav-bar{
+    position: absolute;
+    left:300px;
+    width: 1000px;
+    height: 70px;
+    line-height: 70px;
+    padding-left: 20px;
+    border-bottom: solid rgb(221, 221, 221) 1px;
+}
+
+@keyframes drop{
+    from{
+        height: 0px;
+        padding-top: 0px;
+        padding-bottom: 0px;
+    }
+    to{
+        height: 30px;
+        padding-top: 5px;
+        padding-bottom: 5px;
+    }
+}
+
+/*css for the content pages below*/
+
+#content{
+    position: absolute;
+    width: 1000px;
+    left:300px;
+    top:70px;
+}
+
+h2{
+    padding:0px;
+    margin:0px;
+    font-weight: 600;
+}
+
+.box{
+    border: 1px solid rgb(206, 206, 206);
+    margin: 25px;
+    padding: 30px;
+    border-radius: 15px;
+}
+
+td {
+    border: 1px solid rgb(111, 194, 255);
+    border-left: none;
+    border-right: none;
+    border-collapse: collapse;
+}
+
+table{
+    margin-bottom: 30px;
+}
+
+td{
+    padding: 10px;
+    min-width: 150px;
+    color: #393939;
+}
+
+td:nth-child(2){
+    background-color: rgb(240, 252, 255);
+}
+
+td:nth-child(1){
+    background-color: rgb(220, 247, 255);
+    font-weight: bold;
+}
+
+td:nth-child(1)[colspan = "2"]{
+    background-color: rgb(194, 241, 255);
+}
