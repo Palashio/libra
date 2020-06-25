@@ -1,3 +1,5 @@
+#The following code has been inspired from keras dockerfile
+
 ARG cuda_version=9.0
 ARG cudnn_version=7
 FROM nvidia/cuda:${cuda_version}-cudnn${cudnn_version}-devel
@@ -41,8 +43,19 @@ RUN conda config --append channels conda-forge
 RUN conda install -y python=${python_version} && \
     pip install --upgrade pip && \
     pip install \
-      sklearn_pandas \
+      sklearn-pandas \
       tensorflow-gpu \
+      Keras\
+      numpy\
+      pprintpp\
+      os-sys\
+      torch\
+      spacy\
+      seaborn\
+      textblob\
+      tabulate\
+      python-Levenshtein\
+      picklable-itertools\
       cntk-gpu && \
     conda install \
       bcolz \
@@ -58,6 +71,7 @@ RUN conda install -y python=${python_version} && \
       pyyaml \
       scikit-learn \
       six \
+      theano \
       mkdocs \
       && \
       git clone git://github.com/Palashio/libra.git /src && pip install -e /src[tests] && pip install git+git://github.com/Palashio/libra.git && \
@@ -65,6 +79,8 @@ RUN conda install -y python=${python_version} && \
 
 ENV LC_ALL=C.UTF-8
 ENV LANG=C.UTF-8
+
+ADD theanorc /home/libra/.theanorc
 
 ENV PYTHONPATH='/src/:$PYTHONPATH'
 
