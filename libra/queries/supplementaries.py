@@ -1,6 +1,7 @@
-from libra.modeling.tuner import (tuneReg, tuneClass, 
-     tuneCNN, tuner_hist,
-     tuneHyperband)
+from libra.modeling.tuner import (tuneReg, 
+                                  tuneClass, 
+                                  tuneCNN, tuner_hist,
+                                  tuneHyperband)
 import numpy as np
 import os
 from libra.preprocessing.data_reader import DataReader
@@ -106,10 +107,9 @@ def tune_helper(
                         'training_loss': history.history['loss'],
                         'val_loss': history.history['val_loss']}
                }
-        return returned_model
 
         # processing for classification feed forward NN
-    if model_to_tune == "classification_ANN":
+    elif model_to_tune == "classification_ANN":
         logger("Tuning model hyperparameters...")
         dataReader = DataReader(dataset)
         data = dataReader.data_generator()
@@ -139,9 +139,8 @@ def tune_helper(
                           'training_loss': history.history['loss'],
                            'val_loss': history.history['val_loss']}
                }
-        return returned_model
         # processing for convolutional NN
-    if model_to_tune == "convolutional_NN":
+    elif model_to_tune == "convolutional_NN":
         logger("Tuning model hyperparameters...")
         X_train, X_test, height, width, num_classes = get_image_data(dataset)
         model, returned_pms, history = tuneCNN(
@@ -161,6 +160,7 @@ def tune_helper(
         models["convolutional_NN"]["losses"] = {
                                 'training_loss': history.history['loss'],
                                 'val_loss': history.history['val_loss']}
+
     return models
 
 
