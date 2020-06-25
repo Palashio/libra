@@ -2,11 +2,11 @@ from libra.modeling.tuner import tuneReg, tuneClass, tuneCNN
 import numpy as np
 import os
 from libra.preprocessing.data_reader import DataReader
-from tabulate import tabulate
-from libra.preprocessing.data_preprocesser import structured_preprocesser, initial_preprocesser
-import pandas as pd
-from sklearn.preprocessing import LabelEncoder
-from scipy.spatial.distance import cosine
+from keras.preprocessing.image import ImageDataGenerator
+from libra.preprocessing.image_preprocesser import (setwise_preprocessing,
+                                                    csv_preprocessing,
+                                                    classwise_preprocessing,
+                                                    set_distinguisher)
 import uuid
 
 currLog = ""
@@ -49,7 +49,7 @@ def logger(instruction, found="", slash=''):
         #currLog += (" " * 2 * counter) + "|" + "\n"
         currLog += (" " * 2 * counter) + "|- " + str(instruction) + str(found)
         if instruction == "done...":
-            currLog += "\n"+ "\n"
+            currLog += "\n" + "\n"
 
     counter += 1
     if instruction == "|":
@@ -71,7 +71,13 @@ def tune_helper(
         max_trials=1,
         activation='relu',
         loss='categorical_crossentropy',
-        metrics='accuracy'):
+        metrics='accuracy',
+        seed=42,
+        objective='val_accuracy',
+        directory='my_dir',
+        epochs=10,
+        step=32
+):
     logger("Getting target model for tuning...")
 
     # checks to see which requested model is in the self.models
@@ -93,7 +99,10 @@ def tune_helper(
             min_dense=min_dense,
             max_dense=max_dense,
             executions_per_trial=executions_per_trial,
-            max_trials=max_trials)
+            max_trials=max_trials,
+            epochs=epochs,
+            activation=activation,
+            step=step)
         models['regression_ANN'] = {'model': returned_model}
         return returned_model
 
@@ -118,18 +127,27 @@ def tune_helper(
             max_trials=max_trials,
             activation=activation,
             loss=loss,
-            metrics=metrics)
+            metrics=metrics,
+            epochs=epochs,
+            step=step)
         models['classification_ANN'] = {'model': returned_model}
         return returned_model
         # processing for convolutional NN
     if model_to_tune == "convolutional_NN":
         logger("Tuning model hyperparameters...")
-        X = models['convolutional_NN']["X"]
-        y = models['convolutional_NN']["y"]
+        X_train, X_test, height, width, num_classes = get_image_data(dataset)
         model = tuneCNN(
-            np.asarray(X),
-            np.asarray(y),
-            models["convolutional_NN"]["num_classes"])
+            X_train,
+            X_test,
+            height,
+            width,
+            num_classes,
+            executions_per_trial=executions_per_trial,
+            max_trials=max_trials,
+            seed=seed,
+            objective=objective,
+            directory=directory,
+            epochs=epochs)
         models["convolutional_NN"]["model"] = model
     return models
 
@@ -148,5 +166,44 @@ def save(model, save_model, save_path=os.getcwd()):
         model.save_weights(save_path + "/weights" + str(number) + ".h5")
         logger("->", "Saved model to disk as model" + str(number))
 
+
 def generate_id():
     return str(uuid.uuid4())
+
+
+def get_image_data(data_path, read_mode=None, training_ratio=0.8):
+    training_path = "/proc_training_set"
+    testing_path = "/proc_testing_set"
+
+    read_type = set_distinguisher(data_path, read_mode)['read_mode']
+
+    process_info = setwise_preprocessing(data_path, True)
+
+    input_shape = (process_info["height"], process_info["width"], 3)
+    input_single = (process_info["height"], process_info["width"])
+    num_classes = process_info["num_categories"]
+    loss_func = ""
+
+    if num_classes > 2:
+        loss_func = "categorical_crossentropy"
+    elif num_classes == 2:
+        loss_func = "binary_crossentropy"
+
+    train_data = ImageDataGenerator(rescale=1. / 255,
+                                    shear_range=0.2,
+                                    zoom_range=0.2,
+                                    horizontal_flip=True)
+    test_data = ImageDataGenerator(rescale=1. / 255)
+
+    X_train = train_data.flow_from_directory(data_path + training_path,
+                                             target_size=input_single,
+                                             color_mode='rgb',
+                                             batch_size=(32 if process_info["train_size"] >= 32 else 1),
+                                             class_mode=loss_func[:loss_func.find("_")])
+    X_test = test_data.flow_from_directory(data_path + testing_path,
+                                           target_size=input_single,
+                                           color_mode='rgb',
+                                           batch_size=(32 if process_info["test_size"] >= 32 else 1),
+                                           class_mode=loss_func[:loss_func.find("_")])
+
+    return X_train, X_test, process_info['height'], process_info['width'], num_classes
