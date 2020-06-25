@@ -55,63 +55,77 @@ def setwise_preprocessing(data_path, new_folder=True):
 # with resized images inside the same directory as the csv file
 def csv_preprocessing(csv_file, data_path, instruction, image_column, training_ratio):
     df = pd.read_csv(csv_file)
+
     if instruction is None:
         raise BaseException("Instruction was not given.")
+
     label = get_similar_column(get_value_instruction(instruction), df)
     avoid_directories = ["proc_training_set", "proc_testing_set"]
     data_paths = [data_path + "/" + d for d in os.listdir(data_path) if os.path.isdir(data_path + "/" + d) and d not in avoid_directories]
 
-    # get file extension
-    _, file_extension = os.path.splitext(os.listdir(data_paths[0])[0])
-
-    # select random row to find which column is image path
-    random_row = df.sample()
+    file_extensions = ["jpg", "jpeg", "png", "gif"]
     need_file_extension = False
     path_included = False
 
     while image_column is None:
+        random_row = df.sample()
         for column, value in random_row.iloc[0].items():
             if type(value) is str:
-                if os.path.exists(value):
+                if os.path.exists(data_path + "/" + value):
                     path_included = True
                     image_column = column
                     break
                 # add file extension if not included
-                file = value if file_extension in value else value + file_extension
+                if value.split(".")[-1] in file_extensions:
+                    file = [value]
+                else:
+                    file = []
+                    for extension in file_extensions:
+                        file.append(value + "." + extension)
 
                 # look through all data_paths for file
                 for path in data_paths:
-                    if os.path.exists(path + "/" + file):
-                        if file_extension in file:
-                            need_file_extension = True
-                        image_column = column
-                        break
+                    for file_option in file:
+                        if os.path.exists(path + "/" + file_option):
+                            if file_option.split(".")[-1] in file_extensions:
+                                need_file_extension = True
+                            image_column = column
+                            break
             if image_column is not None:
                 break
 
     else:
-        if os.path.exists(df.iloc[0][image_column]):
+        if os.path.exists(data_path + "/" + df.iloc[0][image_column]):
             path_included = True
-        elif file_extension not in df.iloc[0][image_column]:
+        elif df.iloc[0][image_column].split(".")[-1]:
             need_file_extension = True
 
     df = df[[image_column, label]].dropna()
 
-    if need_file_extension:
-        df[image_column] = df[image_column] + file_extension
     heights = []
     widths = []
     classifications = df[label].nunique()
     image_list = []
 
     # get the median heights and widths
-    for index, row in df.iterrows():
-        for path in data_paths:
-            p = row[image_column] if path_included else path + "/" + row[image_column]
+    for index, row in df.head().iterrows():
+        if path_included:
+            p = data_path + "/" + row[image_column]
             img = cv2.imread(p)
-            if img is not None:
-                break
         else:
+            for path in data_paths:
+                if need_file_extension:
+                    for extension in file_extensions:
+                        p = path + "/" + row[image_column] + "." + extension
+                        img = cv2.imread(p)
+                        if img is not None:
+                            break
+                else:
+                    p = path + "/" + row[image_column]
+                    img = cv2.imread(p)
+                if img is not None:
+                    break
+        if img is None:
             raise BaseException(f"{row[image_column]} could not be found in any directories.")
         image_list.append(img)
         heights.append(img.shape[0])
@@ -129,11 +143,11 @@ def csv_preprocessing(csv_file, data_path, instruction, image_column, training_r
 
     data_size = [0,0]
     # save images into correct folder
-    for index, row in df.iterrows():
+    for index, row in df.head().iterrows():
         # resize images
         img = process_color_channel(image_list[index], height, width)
-        p = "proc_" + (os.path.basename(row[image_column]) if path_included else row[image_column])
-        if (index / df.shape[0]) < training_ratio:
+        p = "proc_" + (os.path.basename(row[image_column]) if path_included else row[image_column] + ".jpg")
+        if (index / df.head().shape[0]) < training_ratio:
             data_size[0] += 1
             save_image(data_path + "/proc_training_set", img, p, row[label])
         else:
