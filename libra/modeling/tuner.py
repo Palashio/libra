@@ -123,7 +123,9 @@ def tuneReg(
         min_dense=32,
         max_dense=512,
         executions_per_trial=3,
-        max_trials=3):
+        max_trials=3,
+        epochs=10
+):
     print("entered1")
     # function build model using hyperparameter
 
@@ -157,7 +159,7 @@ def tuneReg(
     # searches the tuner space defined by hyperparameters (hp) and returns the
     # best model
     tuner.search(X_train, y_train,
-                 epochs=5,
+                 epochs=epochs,
                  validation_data=(X_test, y_test),
                  callbacks=[tf.keras.callbacks.TensorBoard('my_dir')])
 
@@ -177,7 +179,8 @@ def tuneClass(
         max_trials=3,
         activation='relu',
         loss='categorical_crossentropy',
-        metrics='accuracy'):
+        metrics='accuracy',
+        epochs=10):
     # function build model using hyperparameter
     le = preprocessing.LabelEncoder()
     y = tf.keras.utils.to_categorical(
@@ -216,13 +219,13 @@ def tuneClass(
     # searches the tuner space defined by hyperparameters (hp) and returns the
     # best model
     tuner.search(X_train, y_train,
-                 epochs=5,
+                 epochs=epochs,
                  validation_data=(X_test, y_test))
     models = tuner.get_best_models(num_models=1)
     return models[0]
 
 
-def tuneCNN(X_train, X_test, height, width, num_classes, executions_per_trial=3, seed=42, max_trials=3, objective='val_accuracy', directory='random_search'):
+def tuneCNN(X_train, X_test, height, width, num_classes, executions_per_trial=3, seed=42, max_trials=3, objective='val_accuracy', directory='random_search',epochs=10):
 
     # creates hypermodel object based on the num_classes and the input shape
     hypermodel = CNNHyperModel(input_shape=(
@@ -244,6 +247,7 @@ def tuneCNN(X_train, X_test, height, width, num_classes, executions_per_trial=3,
     # # best model
     tuner.search(X_train,
                  validation_data=X_test,
+                 epochs=epochs,
                  callbacks=[tf.keras.callbacks.EarlyStopping(patience=1)])
     #
     # # returns the best model

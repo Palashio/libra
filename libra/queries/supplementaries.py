@@ -72,7 +72,10 @@ def tune_helper(
         activation='relu',
         loss='categorical_crossentropy',
         metrics='accuracy',
-        directory='random_search'
+        seed=42,
+        objective='val_accuracy',
+        directory='my_dir',
+        epochs=10
 ):
     logger("Getting target model for tuning...")
 
@@ -95,7 +98,8 @@ def tune_helper(
             min_dense=min_dense,
             max_dense=max_dense,
             executions_per_trial=executions_per_trial,
-            max_trials=max_trials)
+            max_trials=max_trials,
+            epochs=epochs)
         models['regression_ANN'] = {'model': returned_model}
         return returned_model
 
@@ -120,7 +124,8 @@ def tune_helper(
             max_trials=max_trials,
             activation=activation,
             loss=loss,
-            metrics=metrics)
+            metrics=metrics,
+            epochs=epochs)
         models['classification_ANN'] = {'model': returned_model}
         return returned_model
         # processing for convolutional NN
@@ -129,7 +134,9 @@ def tune_helper(
         X_train, X_test, height, width, num_classes = get_image_data(dataset)
         model = tuneCNN(
             X_train,
-            X_test, height,width, num_classes, directory=directory)
+            X_test, height,width, num_classes, executions_per_trial=executions_per_trial,
+            max_trials=max_trials, seed=seed, objective=objective, directory=directory,
+            epochs=epochs)
     #         models["convolutional_NN"]["num_classes"])
     #     models["convolutional_NN"]["model"] = model
     # return models
