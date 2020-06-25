@@ -1,8 +1,6 @@
-# Making functions in other directories accesible to this file by
-# inserting into sys path
 
-import sys
 
+#function imports for all queries
 from libra.queries.nlp_queries import image_caption_query, generate_caption, predict_text_sentiment, text_classification_query, get_summary, summarization_query
 from libra.queries.classification_models import k_means_clustering, train_svm, nearest_neighbors, decision_tree
 from libra.queries.supplementaries import tune_helper, stats, generate_id
@@ -15,8 +13,8 @@ from pandas.core.common import SettingWithCopyWarning
 import warnings
 import os
 
-# Importing the T5 modules from huggingface/transformers
 
+#supressing warnings for cleaner dialogue box
 warnings.simplefilter(action='error', category=FutureWarning)
 warnings.simplefilter(action="ignore", category=SettingWithCopyWarning)
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
@@ -27,15 +25,8 @@ currLog = ""
 counter = 0
 
 
-# # current_dir=os.getcw()
 
-# # allows for all columns to be displayed when printing()
-# pd.options.display.width = None
-
-
-# # clears the log when new process is started up
-
-
+#clears log when needed - currently not being used
 def clearLog():
     global currLog
     global counter
@@ -46,9 +37,7 @@ def clearLog():
 
 # logging function that creates hierarchial display of the processes of
 # different functions. Copied into different python files to maintain
-# global variable parallels
-
-
+# global variables.
 def logger(instruction, found="", slash=''):
     global currLog
     global counter
@@ -74,9 +63,7 @@ def logger(instruction, found="", slash=''):
     currLog = ""
 
 
-# class to store all query information
-
-
+# class to store all query information. Currently, old_models is not being used.
 class client:
     def __init__(self, data):
         logger("creating object...")
