@@ -288,7 +288,11 @@ class client:
             max_trials=1,
             activation='relu',
             loss='categorical_crossentropy',
-            metrics='accuracy'
+            metrics='accuracy',
+            epochs=10,
+            objective='val_accuracy',
+            seed=42,
+            directory='my_dir',
         )
 
     def stat_analysis(self, column_name="none", drop=None):
@@ -308,12 +312,13 @@ class client:
                             training_ratio=0.8):
 
         # storing values the model dictionary
-        self.models["convolutional_NN"] = convolutional(instruction=instruction,
-                                                        read_mode=read_mode,
-                                                        data_path=self.dataset,
-                                                        new_folders=new_folders,
-                                                        image_column=image_column,
-                                                        training_ratio=training_ratio)
+        self.models["convolutional_NN"] = convolutional(
+            instruction=instruction,
+            read_mode=read_mode,
+            data_path=self.dataset,
+            new_folders=new_folders,
+            image_column=image_column,
+            training_ratio=training_ratio)
 
     # Sentiment analysis predict wrapper
     def predict_text_sentiment(self, text):
@@ -351,7 +356,11 @@ class client:
                             preprocess=True,
                             generate_plots=True):
         self.models["Image Caption"] = image_caption_query(
-            self=self, epochs=epochs, instruction=instruction, random_state=random_state, preprocess=preprocess,
+            self=self,
+            epochs=epochs,
+            instruction=instruction,
+            random_state=random_state,
+            preprocess=preprocess,
             generate_plots=generate_plots)
 
     def dimensionality_reducer(self, instruction):
@@ -366,20 +375,23 @@ class client:
             data = [key for key in self.models[model].keys()]
             print(data)
         else:
-            raise Exception("The requested model has not been applied to the client.")
+            raise Exception(
+                "The requested model has not been applied to the client.")
 
     # returns all operators applicable to the client's models dictionary
     def operators(self, model):
         defined = ['plots', 'accuracy', 'losses']
-        operations = [func + "()" for func in self.models[model].keys() if func in defined]
+        operations = [
+            func +
+            "()" for func in self.models[model].keys() if func in defined]
         if len(operations) > 0:
             print(operations)
         else:
             raise Exception(
                 "There are no built-in operators defined for this model. Please refer to the models dictionary.")
 
-
     # show accuracy scores for client's model
+
     def accuracy(self, model):
         if 'accuracy' in self.models[model].keys():
             return self.models[model]['accuracy']
@@ -405,6 +417,3 @@ newClient.tune('convolutional_NN')
 # newClient.neural_network_query("Model median house value")
 # newClient = client('tools/data/structured_data/landslides_after_rainfall.csv').neural_network_query(instruction='Model distance',
 # drop=['id', 'geolocation', 'source_link', 'source_name'])
-
-
-

@@ -1,4 +1,3 @@
-
 from tensorflow.keras.layers import Conv2D, MaxPooling2D, Dense, Flatten, Activation, Dropout
 from kerastuner import HyperModel
 from kerastuner.tuners import RandomSearch, Hyperband
@@ -106,12 +105,10 @@ class CNNHyperModel(HyperModel):
                     min_value=1e-4,
                     max_value=1e-2,
                     sampling='LOG',
-                    default=1e-3
-                )
-            ),
-            loss=('binary_crossentropy' if self.num_classes == 2 else 'categorical_crossentropy'),
-            metrics=['accuracy']
-        )
+                    default=1e-3)),
+            loss=(
+                'binary_crossentropy' if self.num_classes == 2 else 'categorical_crossentropy'),
+            metrics=['accuracy'])
         return model
 
 
@@ -127,16 +124,17 @@ def tuneReg(
         epochs=10
 ):
     print("entered1")
+
     # function build model using hyperparameter
 
     def build_model(hp):
         model = keras.Sequential()
         for i in range(hp.Int('num_layers', min_layers, max_layers)):
             model.add(Dense(units=hp.Int('units_' + str(i),
-                                                min_value=min_dense,
-                                                max_value=max_dense,
-                                                step=32),
-                                   activation='relu'))
+                                         min_value=min_dense,
+                                         max_value=max_dense,
+                                         step=32),
+                            activation='relu'))
         model.add(Dense(1))
         model.compile(
             optimizer=keras.optimizers.Adam(
@@ -190,10 +188,10 @@ def tuneClass(
         model = keras.Sequential()
         for i in range(hp.Int('num_layers', min_layers, max_layers)):
             model.add(Dense(units=hp.Int('units_' + str(i),
-                                                min_value=min_dense,
-                                                max_value=max_dense,
-                                                step=32),
-                                   activation=activation))
+                                         min_value=min_dense,
+                                         max_value=max_dense,
+                                         step=32),
+                            activation=activation))
         model.add(Dense(num_classes, activation='softmax'))
         model.compile(
             optimizer=keras.optimizers.Adam(
@@ -225,8 +223,18 @@ def tuneClass(
     return models[0]
 
 
-def tuneCNN(X_train, X_test, height, width, num_classes, executions_per_trial=3, seed=42, max_trials=3, objective='val_accuracy', directory='random_search',epochs=10):
-
+def tuneCNN(
+        X_train,
+        X_test,
+        height,
+        width,
+        num_classes,
+        executions_per_trial=3,
+        seed=42,
+        max_trials=3,
+        objective='val_accuracy',
+        directory='random_search',
+        epochs=10):
     # creates hypermodel object based on the num_classes and the input shape
     hypermodel = CNNHyperModel(input_shape=(
         height, width, 3), num_classes=num_classes)
@@ -250,12 +258,13 @@ def tuneCNN(X_train, X_test, height, width, num_classes, executions_per_trial=3,
                  epochs=epochs,
                  callbacks=[tf.keras.callbacks.EarlyStopping(patience=1)])
     #
-    # # returns the best model
-    # return tuner.get_best_models(1)[0]
+    # returns the best model
+    return tuner.get_best_models(1)[0]
+
 
 def tuneHyperband(X,
-        y,
-        max_trials=3):
+                  y,
+                  max_trials=3):
     hypermodel = HyperResNet(input_shape=(128, 128, 3), num_classes=10)
     tuner = Hyperband(
         hypermodel,

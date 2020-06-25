@@ -49,7 +49,7 @@ def logger(instruction, found="", slash=''):
         #currLog += (" " * 2 * counter) + "|" + "\n"
         currLog += (" " * 2 * counter) + "|- " + str(instruction) + str(found)
         if instruction == "done...":
-            currLog += "\n"+ "\n"
+            currLog += "\n" + "\n"
 
     counter += 1
     if instruction == "|":
@@ -134,12 +134,18 @@ def tune_helper(
         X_train, X_test, height, width, num_classes = get_image_data(dataset)
         model = tuneCNN(
             X_train,
-            X_test, height,width, num_classes, executions_per_trial=executions_per_trial,
-            max_trials=max_trials, seed=seed, objective=objective, directory=directory,
+            X_test,
+            height,
+            width,
+            num_classes,
+            executions_per_trial=executions_per_trial,
+            max_trials=max_trials,
+            seed=seed,
+            objective=objective,
+            directory=directory,
             epochs=epochs)
-    #         models["convolutional_NN"]["num_classes"])
-    #     models["convolutional_NN"]["model"] = model
-    # return models
+        models["convolutional_NN"]["model"] = model
+    return models
 
 
 def stats(dataset=None,
@@ -155,6 +161,7 @@ def save(model, save_model, save_path=os.getcwd()):
         # serialize weights to HDF5
         model.save_weights(save_path + "/weights" + str(number) + ".h5")
         logger("->", "Saved model to disk as model" + str(number))
+
 
 def generate_id():
     return str(uuid.uuid4())
@@ -185,14 +192,14 @@ def get_image_data(data_path, read_mode=None):
     test_data = ImageDataGenerator(rescale=1. / 255)
 
     X_train = train_data.flow_from_directory(data_path + training_path,
-                                                    target_size=input_single,
-                                                    color_mode='rgb',
-                                                    batch_size=(32 if process_info["train_size"] >= 32 else 1),
-                                                    class_mode=loss_func[:loss_func.find("_")])
+                                             target_size=input_single,
+                                             color_mode='rgb',
+                                             batch_size=(32 if process_info["train_size"] >= 32 else 1),
+                                             class_mode=loss_func[:loss_func.find("_")])
     X_test = test_data.flow_from_directory(data_path + testing_path,
-                                                target_size=input_single,
-                                                color_mode='rgb',
-                                                batch_size=(32 if process_info["test_size"] >= 32 else 1),
-                                                class_mode=loss_func[:loss_func.find("_")])
+                                           target_size=input_single,
+                                           color_mode='rgb',
+                                           batch_size=(32 if process_info["test_size"] >= 32 else 1),
+                                           class_mode=loss_func[:loss_func.find("_")])
 
     return X_train, X_test, process_info['height'], process_info['width'], num_classes
