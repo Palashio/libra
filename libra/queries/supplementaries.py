@@ -80,7 +80,7 @@ def tune_helper(
         target_column = data[models['regression_ANN']['target']]
         data = models['regression_ANN']['preprocesser'].transform(
             data.drop(target, axis=1))
-        returned_model, returned_pms = tuneReg(
+        returned_model, returned_pms, history = tuneReg(
             data,
             target_column,
             max_layers=max_layers,
@@ -90,7 +90,11 @@ def tune_helper(
             executions_per_trial=executions_per_trial,
             max_trials=max_trials)
         models['regression_ANN'] = {'model': returned_model,
-                                    'hyperparametes' : returned_pms}
+                                    'hyperparametes' : returned_pms,
+                                    'losses': {
+                        'training_loss': history.history['loss'],
+                        'val_loss': history.history['val_loss']}
+                                    }
         return returned_model
 
         # processing for classification feed forward NN
@@ -102,7 +106,7 @@ def tune_helper(
         target_column = data[models['classification_ANN']['target']]
         data = models['classification_ANN']['preprocesser'].transform(
             data.drop(target, axis=1))
-        returned_model, returned_pms = tuneClass(
+        returned_model, returned_pms, history = tuneClass(
             data,
             target_column,
             models['classification_ANN']['num_classes'],
@@ -116,19 +120,26 @@ def tune_helper(
             loss=loss,
             metrics=metrics)
         models['classification_ANN'] = {'model': returned_model,
-                                        'hyperparametes' : returned_pms}
+                                        'hyperparametes' : returned_pms,
+                                        'losses': {
+                                'training_loss': history.history['loss'],
+                                'val_loss': history.history['val_loss']}
+                                       }
         return returned_model
         # processing for convolutional NN
     if model_to_tune == "convolutional_NN":
         logger("Tuning model hyperparameters...")
         X = models['convolutional_NN']["X"]
         y = models['convolutional_NN']["y"]
-        model, returned_pms = tuneCNN(
+        model, returned_pms, history = tuneCNN(
             np.asarray(X),
             np.asarray(y),
             models["convolutional_NN"]["num_classes"])
         models["convolutional_NN"]["model"] = model
-        models["convolutional_NN"]["hyperparametes"] = returned_pms
+        models["convolutional_NN"]["hyperparametes"] = returned_pms,
+        models["convolutional_NN"]["losses"] = {
+                                'training_loss': history.history['loss'],
+                                'val_loss': history.history['val_loss']}
     return models
 
 
