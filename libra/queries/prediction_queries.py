@@ -3,7 +3,7 @@
 
 import sys
 
-# from libra.queries.nlp_queries import image_caption_query, generate_caption, predict_text_sentiment, text_classification_query, get_summary, summarization_query
+from libra.queries.nlp_queries import image_caption_query, generate_caption, predict_text_sentiment, text_classification_query, get_summary, summarization_query
 from libra.queries.classification_models import k_means_clustering, train_svm, nearest_neighbors, decision_tree
 from libra.queries.supplementaries import tune_helper, stats, generate_id
 from libra.queries.feedforward_nn import regression_ann, classification_ann, convolutional
