@@ -140,13 +140,14 @@ def k_means_clustering(dataset= None,
 
 
 def train_svm(instruction,
-        dataset=None,
-            test_size=0.2,
-            kernel='linear',
-            preprocess=True,
-            mca_threshold=None,
-            drop=None,
-            cross_val_size=0.3):
+              dataset=None,
+              test_size=0.2,
+              kernel='linear',
+              text=None,
+              preprocess=True,
+              ca_threshold=None,
+              drop=None,
+              cross_val_size=0.3):
 
         logger("Reading in dataset....")
         # reads dataset and fills n/a values with zeroes
@@ -158,7 +159,7 @@ def train_svm(instruction,
         if drop is not None:
             data.drop(drop, axis=1, inplace=True)
 
-        data, y, target, full_pipeline = initial_preprocesser(data, instruction, preprocess, mca_threshold)
+        data, y, target, full_pipeline = initial_preprocesser(data, instruction, preprocess, ca_threshold, text)
         logger("->", "Target Column Found: {}".format(target))
 
 
@@ -210,12 +211,12 @@ def train_svm(instruction,
 
 
 def nearest_neighbors(instruction=None,
-            dataset = None,
-            mca_threshold=None,
-            preprocess=True,
-            drop=None,
-            min_neighbors=3,
-            max_neighbors=10):
+                      dataset = None,
+                      ca_threshold=None,
+                      preprocess=True,
+                      drop=None,
+                      min_neighbors=3,
+                      max_neighbors=10):
         logger("Reading in dataset....")
         # Reads in dataset
         # data = pd.read_csv(self.dataset)
@@ -224,7 +225,7 @@ def nearest_neighbors(instruction=None,
         if drop is not None:
             data.drop(drop, axis=1, inplace=True)
         data, y, remove, full_pipeline = initial_preprocesser(
-            data, instruction, preprocess, mca_threshold)
+            data, instruction, preprocess, ca_threshold, text)
         logger("->", "Target Column Found: {}".format(remove))
         X_train = data['train']
         y_train = y['train']
@@ -263,11 +264,12 @@ def nearest_neighbors(instruction=None,
         clearLog()
 
 def decision_tree(instruction,
-            dataset=None,
-            preprocess=True,
-            mca_threshold=None,
-            test_size=0.2,
-            drop=None):
+                  dataset=None,
+                  preprocess=True,
+                  ca_threshold=None,
+                  text=None,
+                  test_size=0.2,
+                  drop=None):
     logger("Reading in dataset....")
 
     dataReader = DataReader(dataset)
@@ -277,7 +279,7 @@ def decision_tree(instruction,
         data.drop(drop, axis=1, inplace=True)
 
     data, y, remove, full_pipeline = initial_preprocesser(
-        data, instruction, preprocess, mca_threshold)
+        data, instruction, preprocess, ca_threshold, text)
     logger("->", "Target Column Found: {}".format(remove))
 
     X_train = data['train']

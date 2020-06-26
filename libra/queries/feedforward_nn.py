@@ -73,7 +73,8 @@ def logger(instruction, found=""):
 
 def regression_ann(
         instruction,
-        mca_threshold=None,
+        ca_threshold=None,
+        text=None,
         dataset=None,
         drop=None,
         preprocess=True,
@@ -87,8 +88,7 @@ def regression_ann(
         save_path=os.getcwd()):
 
     global currLog
-    global counter
-    logger("Reading in dataset...")
+    logger("reading in dataset...")
 
     dataReader = DataReader(dataset)
     data = dataReader.data_generator()
@@ -97,9 +97,9 @@ def regression_ann(
     if drop is not None:
         data.drop(drop, axis=1, inplace=True)
 
-    data, y, target, full_pipeline = initial_preprocesser(
-        data, instruction, preprocess, mca_threshold)
+    data, y, target, full_pipeline = initial_preprocesser(data, instruction, preprocess, ca_threshold, text)
     logger("->", "Target Column Found: {}".format(target))
+
     X_train = data['train']
     X_test = data['test']
 
@@ -237,7 +237,8 @@ def regression_ann(
 
 def classification_ann(instruction,
                        dataset=None,
-                       mca_threshold=None,
+                       text=None,
+                       ca_threshold=None,
                        preprocess=True,
                        callback_mode='min',
                        drop=None,
@@ -259,7 +260,7 @@ def classification_ann(instruction,
         data.drop(drop, axis=1, inplace=True)
 
     data, y, remove, full_pipeline = initial_preprocesser(
-        data, instruction, preprocess, mca_threshold)
+        data, instruction, preprocess, ca_threshold, text)
     logger("->", "Target Column Found: {}".format(remove))
 
     # Needed to make a custom label encoder due to train test split changes
@@ -405,6 +406,7 @@ def classification_ann(instruction,
 
 def convolutional(instruction=None,
                   read_mode=None,
+                  text=None,
                   data_path=os.getcwd(),
                   new_folders=True,
                   image_column=None,

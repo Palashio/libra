@@ -94,7 +94,8 @@ class client:
 
     def neural_network_query(self,
                              instruction,
-                             mca_threshold=None,
+                             text=None,
+                             ca_threshold=None,
                              drop=None,
                              preprocess=True,
                              test_size=0.2,
@@ -112,12 +113,13 @@ class client:
 
             remove = get_similar_column(
                 get_value_instruction(instruction), data)
-            if (data[remove].dtype.name == 'object'):
+            if data[remove].dtype.name == 'object':
                 callback_mode = 'max'
                 maximizer = "val_accuracy"
                 self.classification_query_ann(
                     instruction,
-                    mca_threshold=mca_threshold,
+                    text=text,
+                    ca_threshold=ca_threshold,
                     preprocess=preprocess,
                     test_size=test_size,
                     random_state=random_state,
@@ -130,7 +132,8 @@ class client:
             else:
                 self.regression_query_ann(
                     instruction,
-                    mca_threshold=mca_threshold,
+                    text=text,
+                    ca_threshold=ca_threshold,
                     preprocess=preprocess,
                     test_size=test_size,
                     random_state=random_state,
@@ -147,8 +150,9 @@ class client:
     def regression_query_ann(
             self,
             instruction,
+            text=None,
             drop=None,
-            mca_threshold=None,
+            ca_threshold=None,
             preprocess=True,
             test_size=0.2,
             random_state=49,
@@ -161,8 +165,9 @@ class client:
 
         self.models['regression_ANN'] = regression_ann(
             instruction=instruction,
-            mca_threshold=.25 if mca_threshold is None else mca_threshold,
+            ca_threshold=.25 if ca_threshold is None else ca_threshold,
             dataset=self.dataset,
+            text=text,
             drop=drop,
             preprocess=preprocess,
             test_size=test_size,
@@ -179,7 +184,8 @@ class client:
     def classification_query_ann(
             self,
             instruction,
-            mca_threshold=None,
+            text=None,
+            ca_threshold=None,
             preprocess=True,
             callback_mode='min',
             drop=None,
@@ -194,7 +200,8 @@ class client:
         self.models['classification_ANN'] = classification_ann(
             instruction=instruction,
             dataset=self.dataset,
-            mca_threshold=.25 if mca_threshold is None else mca_threshold,
+            text=text,
+            ca_threshold=.25 if ca_threshold is None else ca_threshold,
             drop=drop,
             preprocess=preprocess,
             test_size=test_size,
@@ -222,6 +229,7 @@ class client:
     def svm_query(self,
                   instruction,
                   test_size=0.2,
+                  text=None,
                   kernel='linear',
                   preprocess=True,
                   drop=None,
@@ -229,6 +237,7 @@ class client:
 
         self.models['svm'] = train_svm(instruction,
                                        dataset=self.dataset,
+                                       text=text,
                                        test_size=test_size,
                                        kernel=kernel,
                                        preprocess=preprocess,
@@ -237,6 +246,7 @@ class client:
 
     def nearest_neighbor_query(
             self,
+            text=None,
             instruction=None,
             preprocess=True,
             drop=None,
@@ -244,6 +254,7 @@ class client:
             max_neighbors=10):
         self.models['nearest_neigbor'] = nearest_neighbors(
             instruction=instruction,
+            text=text,
             dataset=self.dataset,
             preprocess=preprocess,
             drop=drop,
@@ -258,6 +269,7 @@ class client:
             drop=None):
 
         self.models['decision_tree'] = decision_tree(instruction,
+                                                     text=None,
                                                      dataset=self.dataset,
                                                      preprocess=True,
                                                      test_size=0.2,
@@ -414,9 +426,12 @@ class client:
 # Easier to comment the one you don't want to run instead of typing them
 # out every time
 
-newClient = client('/Users/palashshah/Desktop')
-newClient.convolutional_query()
-newClient.tune('convolutional_NN', epochs=1)
+# newClient = client('/Users/palashshah/Desktop')
+# newClient.convolutional_query()
+# newClient.tune('convolutional_NN', epochs=1)
 # newClient.neural_network_query("Model median house value")
 # newClient = client('tools/data/structured_data/landslides_after_rainfall.csv').neural_network_query(instruction='Model distance',
 # drop=['id', 'geolocation', 'source_link', 'source_name'])
+newClient = client('tools/data/structured_data/fake_job_postings.csv').neural_network_query(instruction='Classify fraudulent',
+                                                                                            drop=['job_id'],
+                                                                                            text=['department','description', 'company_profile','requirements', 'benefits'])
