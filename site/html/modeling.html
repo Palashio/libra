@@ -144,9 +144,9 @@ new_client.models['regression_ANN'].plots() #access plots</pre>
 newClient.convolutional_query("Please classify my images")</pre>
             </div>
             <div class="box">
-                <h2 id="nnq">Classification</h2>
+                <h2 id="nnq">text_classification_query()</h2>
                 <br>
-                <p>Automatically fits a neural network to your dataset. Target detection, preprocessing, and scoring are done by default.</p>
+                <p>Lets you create a text classification model automatically; works for all sorts of situations like sentiment analysis.</p>
                 <br>
                 <table style="width:100%">
                     <tr>
@@ -154,14 +154,16 @@ newClient.convolutional_query("Please classify my images")</pre>
                     </tr>
                     <tr>
                         <td>Instruction</td>
-                        <td>An English language statement of what you’d like to do, eg: predict the median house value</td>
+                        <td>An English language statement that represents the task you would like to be completed. eg: 'predict the median house value' or 'please estimate the number of households'</td>
                     </tr>
                 </table>
-                <pre>print("hello world")
-//random code stuff here, tabs are important though</pre>
+                <pre>newClient = client('path_to_file')
+newClient.text_classification_query('Model credit card transaction type')
+newClient.predict_text_sentiment('new_text_to_classify')</pre>
+
             </div>
             <div class="box">
-                <h2 id="nnq">Convolutional Neural Network</h2>
+                <h2 id="nnq">summarization_query()</h2>
                 <br>
                 <p>Automatically fits a neural network to your dataset. Target detection, preprocessing, and scoring are done by default.</p>
                 <br>
