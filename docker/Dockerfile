@@ -54,6 +54,7 @@ RUN conda install -y python=${python_version} && \
       seaborn\
       textblob\
       tabulate\
+      jupyter\
       python-Levenshtein\
       picklable-itertools\
       cntk-gpu && \
