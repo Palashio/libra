@@ -40,10 +40,12 @@ def text_classification_query(self, instruction,
                               test_size=0.2,
                               random_state=49,
                               epochs=50,
+                              batch_size=32,
                               maxTextLength=200,
                               generate_plots=True):
     data = pd.read_csv(self.dataset)
-    data.fillna(0, inplace=True)
+    if preprocess:
+        data.fillna(0, inplace=True)
     X, Y = get_target_values(data, instruction, "label")
     Y = np.array(Y)
     classes = np.unique(Y)
@@ -67,13 +69,13 @@ def text_classification_query(self, instruction,
 
     logger("Training Model...")
     history = model.fit(X_train, y_train,
-                        batch_size=32,
+                        batch_size=batch_size,
                         epochs=epochs,
                         validation_split=0.1)
 
     logger("Testing Model...")
     score, acc = model.evaluate(X_test, y_test,
-                                batch_size=32)
+                                batch_size=batch_size)
 
     logger("->", "Test accuracy:" + str(acc))
 
