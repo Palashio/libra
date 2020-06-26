@@ -20,7 +20,8 @@ from libra.preprocessing.image_caption_helpers import load_image, map_func, CNN_
     generate_caption_helper
 from libra.queries.dimensionality_red_queries import logger
 
-def predict_text_sentiment(self, text):
+
+def classify_text(self, text):
     sentimentInfo = self.models.get("Text Classification LSTM")
     vocab = sentimentInfo["vocabulary"]
     # Clean up text
@@ -47,6 +48,8 @@ def text_classification_query(self, instruction,
     Y = np.array(Y)
     classes = np.unique(Y)
 
+    logger("->", "Target Column Found: {}".format(Y))
+
     if preprocess:
         logger("Preprocessing data...")
         X = lemmatize_text(text_clean_up(X.array))
@@ -72,7 +75,7 @@ def text_classification_query(self, instruction,
     score, acc = model.evaluate(X_test, y_test,
                                 batch_size=32)
 
-    logger("->","Test accuracy:" + str(acc))
+    logger("->", "Test accuracy:" + str(acc))
 
     if generate_plots:
         # generates appropriate classification plots by feeding all
@@ -119,6 +122,11 @@ def get_summary(self, text):
 
 # text summarization query
 def summarization_query(self, instruction,
+                        epochs=10,
+                        batch_size=64,
+                        learning_rate=1e-4,
+                        max_text_length=512,
+                        max_summary_length=150,
                         preprocess=True,
                         test_size=0.2,
                         random_state=49,
@@ -133,28 +141,21 @@ def summarization_query(self, instruction,
 
     device = 'cpu'
 
-    TRAIN_BATCH_SIZE = 64
-    TRAIN_EPOCHS = 10
-    LEARNING_RATE = 1e-4
-    SEED = random_state
-    MAX_LEN = 512
-    SUMMARY_LEN = 150
-
-    torch.manual_seed(SEED)
-    np.random.seed(SEED)
+    torch.manual_seed(random_state)
+    np.random.seed(random_state)
 
     tokenizer = T5Tokenizer.from_pretrained("t5-small")
 
     train_size = 1 - test_size
     train_dataset = df.sample(
         frac=train_size,
-        random_state=SEED).reset_index(
+        random_state=random_state).reset_index(
         drop=True)
 
     training_set = CustomDataset(
-        train_dataset, tokenizer, MAX_LEN, SUMMARY_LEN)
+        train_dataset, tokenizer, max_text_length, max_summary_length)
     train_params = {
-        'batch_size': TRAIN_BATCH_SIZE,
+        'batch_size': batch_size,
         'shuffle': True,
         'num_workers': 0
     }
@@ -165,11 +166,11 @@ def summarization_query(self, instruction,
     model = model.to(device)
 
     optimizer = torch.optim.Adam(
-        params=model.parameters(), lr=LEARNING_RATE)
+        params=model.parameters(), lr=learning_rate)
 
     logger('Initiating Fine-Tuning for the model on your dataset...')
 
-    for epoch in range(TRAIN_EPOCHS):
+    for epoch in range(epochs):
         train(epoch, tokenizer, model, device, training_loader, optimizer)
 
     self.models["Document Summarization"] = {

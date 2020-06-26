@@ -1,7 +1,7 @@
 
 
 #function imports for all queries
-from libra.queries.nlp_queries import image_caption_query, generate_caption, predict_text_sentiment, text_classification_query, get_summary, summarization_query
+from libra.queries.nlp_queries import image_caption_query, generate_caption, classify_text, text_classification_query, get_summary, summarization_query
 from libra.queries.classification_models import k_means_clustering, train_svm, nearest_neighbors, decision_tree
 from libra.queries.supplementaries import tune_helper, stats, generate_id
 from libra.queries.feedforward_nn import regression_ann, classification_ann, convolutional
@@ -324,8 +324,8 @@ class client:
             training_ratio=training_ratio)
 
     # Sentiment analysis predict wrapper
-    def predict_text_sentiment(self, text):
-        return predict_text_sentiment(self=self, text=text)
+    def classify_text(self, text):
+        return classify_text(self=self, text=text)
 
     # sentiment analysis query
     def text_classification_query(self, instruction):
