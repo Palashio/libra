@@ -54,6 +54,7 @@ RUN conda install -y python=${python_version} && \
       seaborn\
       textblob\
       tabulate\
+      jupyter\
       python-Levenshtein\
       picklable-itertools\
       cntk-gpu && \
@@ -80,7 +81,7 @@ RUN conda install -y python=${python_version} && \
 ENV LC_ALL=C.UTF-8
 ENV LANG=C.UTF-8
 
-ADD theanorc /home/libra/.theanorc
+ADD theanorc /home/$NB_USER/.theanorc
 
 ENV PYTHONPATH='/src/:$PYTHONPATH'
 
