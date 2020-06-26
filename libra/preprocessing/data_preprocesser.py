@@ -75,8 +75,6 @@ def structured_preprocesser(data, ca_threshold, text):
     # Preprocessing for datetime columns
     process_dates(data)
 
-    # Preprocessing for cols with text (work in progress)
-    # process_text(data)
     # This will be used inside process_text once complete
     if len(text) > 0:
         text_preprocessing(data, text)
@@ -180,43 +178,6 @@ def process_dates(data):
             df[f'{col}_MonthDay'] = df[col].dt.day
 
             del df[col]
-
-
-# # Checks columns for text
-# # Converts text to numbers using TF-IDF
-# def process_text(data):
-#
-#     combined = pd.concat([data['train'], data['test']], axis=0)
-#
-#     combined.dropna(inplace=True)
-#
-#     possible_text_cols = combined.select_dtypes(
-#         exclude=["number"]).columns
-#     text_cols = list()
-#
-#     # Scans categorical columns for text
-#     for col in possible_text_cols:
-#         print(len(pd.unique(combined[col])))
-#         print(len(combined))
-#         print("\n\n")
-#         if len(np.unique(combined[col])) == len(combined):
-#             text_cols.append(col)
-#
-#     print(text_cols)
-#     #text_preprocessing()
-
-
-# Returns True if text has more than 3 spaces
-# Otherwise false
-# def find_spaces(text):
-#     spaces = 0
-#     for i in text:
-#         if spaces > 3:
-#             return True
-#         if i.isspace():
-#             spaces += 1
-#     return False
-
 
 # Preprocesses text for word embedding
 def text_preprocessing(data, text_cols):
