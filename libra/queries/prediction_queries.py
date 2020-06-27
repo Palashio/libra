@@ -85,7 +85,6 @@ class client:
             modelKey = self.latest_model
         modeldict = self.models[modelKey]
         data = modeldict['preprocesser'].transform(data)
-        print(data)
         predictions = modeldict['model'].predict(data)
         if modeldict.get('interpreter'):
             predictions = modeldict['interpreter'].inverse_transform(
@@ -478,4 +477,4 @@ class client:
 #                                                                                            drop=['job_id'],
 #                                                                                            text=['department','description', 'company_profile','requirements', 'benefits'])
 newClient = client('../../tools/data/structured_data/housing.csv')
-newClient.neural_network_query("Model median house value")
+newClient.neural_network_query("Model median house value", epochs=3)

@@ -89,7 +89,6 @@ def regression_ann(
 
     if drop is not None:
         data.drop(drop, axis=1, inplace=True)
-
     data, y, target, full_pipeline = initial_preprocesser(data, instruction, preprocess, ca_threshold, text)
     logger("->", "Target Column Found: {}".format(target))
 
@@ -164,7 +163,7 @@ def regression_ann(
         print((" " * 2 * counter) + "| " + ("".join(word.ljust(col_width)
                                                     for word in row)) + " |")
     datax = []
-    while (all(x > y for x, y in zip(losses, losses[1:]))):
+    while all(x > y for x, y in zip(losses, losses[1:])):
         model = get_keras_model_reg(data, i)
         history = model.fit(
             X_train,

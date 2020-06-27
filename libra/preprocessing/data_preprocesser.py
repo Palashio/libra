@@ -11,15 +11,8 @@ from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import ( OneHotEncoder, 
                                     StandardScaler, 
                                     FunctionTransformer)
-from tensorflow import keras
-from tensorflow.python.keras.layers import Dense, Input
-from keras.callbacks import EarlyStopping
-from matplotlib import pyplot
-from os import listdir
-from PIL import Image as PImage
 from libra.data_generation.dataset_labelmatcher import get_similar_column
 from libra.data_generation.grammartree import get_value_instruction
-import cv2
 from prince.ca import CA
 
 from nltk.stem import WordNetLemmatizer
@@ -101,7 +94,6 @@ def structured_preprocesser(data, ca_threshold, text):
         full_pipeline.transformers.append(("num", num_pipeline, numeric_columns))
 
     if len(text) != 0:
-        print(categorical_columns)
         # Each text col needs a separate pipeline
         for x in range(len(text)):
             full_pipeline.transformers.append((f"text_{x}",
@@ -164,7 +156,6 @@ def structured_preprocesser(data, ca_threshold, text):
             test,
             np.ndarray) else test),
         columns=test_cols)
-    print(data['train'])
     return data, full_pipeline
 
 
