@@ -221,7 +221,7 @@ class client:
                                 preprocess=True,
                                 generate_plots=True,
                                 drop=None,
-                                base_clusters=1):
+                                base_clusters=2):
 
         self.models['k_means_clustering'] = k_means_clustering(
             dataset=self.dataset,
