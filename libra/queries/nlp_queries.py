@@ -1,4 +1,3 @@
-# Sentiment analysis predict wrapper
 import os
 
 import numpy as np
@@ -21,6 +20,7 @@ from libra.preprocessing.image_caption_helpers import load_image, map_func, CNN_
 from libra.queries.dimensionality_red_queries import logger
 
 
+# Sentiment analysis predict wrapper
 def classify_text(self, text):
     sentimentInfo = self.models.get("Text Classification LSTM")
     vocab = sentimentInfo["vocabulary"]
@@ -34,7 +34,7 @@ def classify_text(self, text):
     return sentimentInfo["classes"][tf.keras.backend.get_value(prediction)[0]]
 
 
-# sentiment analysis query
+# Sentiment analysis query
 def text_classification_query(self, instruction,
                               preprocess=True,
                               test_size=0.2,
@@ -73,6 +73,8 @@ def text_classification_query(self, instruction,
                         epochs=epochs,
                         validation_split=0.1)
 
+    logger("->", "Final loss:" + str(acc))
+
     logger("Testing Model...")
     score, acc = model.evaluate(X_test, y_test,
                                 batch_size=batch_size)
@@ -108,17 +110,15 @@ def get_summary(self, text):
     model = modelInfo['model']
     model.eval()
     tokenizer = T5Tokenizer.from_pretrained("t5-small")
-    MAX_LEN = 512
-    SUMMARY_LEN = 150
     df = pd.DataFrame({'text': [""], 'ctext': [text]})
-    set = CustomDataset(df, tokenizer, MAX_LEN, SUMMARY_LEN)
+    set = CustomDataset(df, tokenizer, modelInfo["maxTextLength"], modelInfo["maxSumLength"])
     params = {
         'batch_size': 1,
         'shuffle': True,
         'num_workers': 0
     }
     loader = DataLoader(set, **params)
-    predictions, actuals = inference(tokenizer, model, "cpu", loader)
+    predictions, truth = inference(tokenizer, model, "cpu", loader)
     return predictions
 
 
@@ -134,12 +134,14 @@ def summarization_query(self, instruction,
                         random_state=49,
                         generate_plots=True):
     data = pd.read_csv(self.dataset)
-    data.fillna(0, inplace=True)
+    if preprocess:
+        data.fillna(0, inplace=True)
 
     logger("Preprocessing data...")
 
     X, Y = get_target_values(data, instruction, "summary")
     df = pd.DataFrame({'text': Y, 'ctext': X})
+    logger("->", "Target Column Found: {}".format(Y))
 
     device = 'cpu'
 
@@ -175,8 +177,19 @@ def summarization_query(self, instruction,
     for epoch in range(epochs):
         train(epoch, tokenizer, model, device, training_loader, optimizer)
 
+    if generate_plots:
+        # generates appropriate classification plots by feeding all
+        # information
+        plots = generate_classification_plots(
+            history, X, Y, model, X_test, y_test)
+
+    logger("Storing information in client object...")
+
     self.models["Document Summarization"] = {
-        "model": model
+        "model": model,
+        "maxTextLength": max_text_length,
+        "maxSumLength": max_summary_length,
+        "plots": plots
     }
     return self.models["Document Summarization"]
 
@@ -195,7 +208,12 @@ def image_caption_query(self, instruction,
                         epochs,
                         preprocess=True,
                         random_state=49,
-                        generate_plots=False):
+                        top_k=5000,
+                        batch_size=1,
+                        buffer_size=1000,
+                        embedding_dim=256,
+                        units=512,
+                        generate_plots=True):
     np.random.seed(random_state)
     tf.random.set_seed(random_state)
 
@@ -225,7 +243,6 @@ def image_caption_query(self, instruction,
 
     image_features_extract_model = tf.keras.Model(new_input, hidden_layer)
 
-    # Feel free to change batch_size according to your system configuration
     image_dataset = tf.data.Dataset.from_tensor_slices(sorted(set(img_name_vector)))
     image_dataset = image_dataset.map(
         load_image, num_parallel_calls=tf.data.experimental.AUTOTUNE).batch(16)
@@ -239,8 +256,6 @@ def image_caption_query(self, instruction,
             path_of_feature = p.numpy().decode("utf-8")
             np.save(path_of_feature, bf.numpy())
 
-    # Choose the top 5000 words from the vocabulary
-    top_k = 5000
     tokenizer = tf.keras.preprocessing.text.Tokenizer(num_words=top_k,
                                                       oov_token="<unk>",
                                                       filters='!"#$%&()*+.,-/:;=?@[\]^_`{|}~ ')
@@ -250,22 +265,17 @@ def image_caption_query(self, instruction,
     train_seqs = tokenizer.texts_to_sequences(train_captions)
     cap_vector = tf.keras.preprocessing.sequence.pad_sequences(train_seqs, padding='post')
 
-    BATCH_SIZE = 1
-    BUFFER_SIZE = 1000
-    embedding_dim = 256
-    units = 512
     vocab_size = top_k + 1
-    num_steps = len(img_name_vector) // BATCH_SIZE
+    num_steps = len(img_name_vector) // batch_size
 
     dataset = tf.data.Dataset.from_tensor_slices((img_name_vector, cap_vector))
 
-    # Use map to load the numpy files in parallel
     dataset = dataset.map(lambda item1, item2: tf.numpy_function(
         map_func, [item1, item2], [tf.float32, tf.int32]),
                           num_parallel_calls=tf.data.experimental.AUTOTUNE)
 
     # Shuffle and batch
-    dataset = dataset.shuffle(BUFFER_SIZE).batch(BATCH_SIZE)
+    dataset = dataset.shuffle(buffer_size).batch(batch_size)
     dataset = dataset.prefetch(buffer_size=tf.data.experimental.AUTOTUNE)
 
     encoder = CNN_Encoder(embedding_dim)
@@ -325,7 +335,7 @@ def image_caption_query(self, instruction,
             batch_loss, t_loss = train_step(img_tensor, target)
             total_loss += t_loss
 
-        print('Epoch {} Loss {:.6f}'.format(epoch + 1,
+        logger('Epoch {} Loss {:.6f}'.format(epoch + 1,
                                             total_loss / num_steps))
 
     logger("Storing information in client object...")
