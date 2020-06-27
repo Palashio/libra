@@ -10,7 +10,7 @@ from libra.preprocessing.image_preprocesser import (setwise_preprocessing,
                                                     csv_preprocessing,
                                                     classwise_preprocessing,
                                                     set_distinguisher)
-from libra.preprocessing.data_preprocesser import ( structured_preprocesser, 
+from libra.preprocessing.data_preprocesser import structured_preprocesser 
 import uuid
 
 currLog = ""

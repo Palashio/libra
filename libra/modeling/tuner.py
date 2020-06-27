@@ -339,9 +339,10 @@ def tuneHyperband(X,
     
 def tuner_hist(X,y,tuner,best_hps,img=0):
     model = tuner.hypermodel.build(best_hps)
-    if img==0:
-        X_train, X_test, y_train, y_test = train_test_split(
+    X_train, X_test, y_train, y_test = train_test_split(
             X, y, test_size=0.2, random_state=49)
+    if img==0:
+        
         
         history = model.fit(X_train, y_train, 
                         epochs = 10, 
