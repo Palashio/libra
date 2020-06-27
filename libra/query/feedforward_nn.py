@@ -7,7 +7,7 @@ from libra.preprocessing.data_reader import DataReader
 from keras.models import Sequential
 from keras.layers import (Dense, Conv2D, Flatten, MaxPooling2D, )
 import pandas as pd
-from libra.queries.supplementaries import save, generate_id
+from libra.query.supplementaries import save, generate_id
 from keras.preprocessing.image import ImageDataGenerator
 from sklearn.preprocessing import OneHotEncoder
 from libra.plotting.generate_plots import (generate_regression_plots,
