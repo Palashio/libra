@@ -68,6 +68,7 @@ class client:
         logger("Loading dataset...")
         self.models = {}
         self.old_models = {}
+        self.latest_model = None
         logger("done...")
         clearLog()
 
@@ -89,9 +90,12 @@ class client:
                 predictions)
         return predictions
 
+    def predict(self, data):
+        return self.predict(self.latest_model, data)
+
     def neural_network_query(self,
                              instruction,
-                             text=None,
+                             text=[],
                              ca_threshold=None,
                              drop=None,
                              preprocess=True,
@@ -147,7 +151,7 @@ class client:
     def regression_query_ann(
             self,
             instruction,
-            text=None,
+            text=[],
             drop=None,
             ca_threshold=None,
             preprocess=True,
@@ -176,12 +180,14 @@ class client:
             save_model=save_model,
             save_path=save_path)
 
+        self.latest_model = 'regression_ANN'
+
     # query for multilabel classification query, does not work for
     # binaryclassification, fits to feed-forward neural network
     def classification_query_ann(
             self,
             instruction,
-            text=None,
+            text=[],
             ca_threshold=None,
             preprocess=True,
             callback_mode='min',
@@ -210,6 +216,8 @@ class client:
             save_model=save_model,
             save_path=save_path)
 
+        self.latest_model = 'classification_ANN'
+
     def kmeans_clustering_query(self,
                                 preprocess=True,
                                 generate_plots=True,
@@ -223,10 +231,12 @@ class client:
             drop=drop,
             base_clusters=base_clusters)
 
+        self.latest_model = 'k_means_clustering'
+
     def svm_query(self,
                   instruction,
                   test_size=0.2,
-                  text=None,
+                  text=[],
                   kernel='linear',
                   preprocess=True,
                   drop=None,
@@ -241,9 +251,11 @@ class client:
                                        drop=drop,
                                        cross_val_size=cross_val_size)
 
+        self.latest_model = 'svm'
+
     def nearest_neighbor_query(
             self,
-            text=None,
+            text=[],
             instruction=None,
             preprocess=True,
             drop=None,
@@ -258,6 +270,8 @@ class client:
             min_neighbors=min_neighbors,
             max_neighbors=max_neighbors)
 
+        self.latest_model = 'nearest_neighbor'
+
     def decision_tree_query(
             self,
             instruction,
@@ -266,11 +280,14 @@ class client:
             drop=None):
 
         self.models['decision_tree'] = decision_tree(instruction,
-                                                     text=None,
+                                                     text=[],
                                                      dataset=self.dataset,
                                                      preprocess=True,
                                                      test_size=0.2,
                                                      drop=None)
+
+        self.latest_model = 'decision_tree'
+
 
     def tune(self,
              model_to_tune,
@@ -337,6 +354,9 @@ class client:
             image_column=image_column,
             training_ratio=training_ratio)
 
+        self.latest_model = 'convolutional_NN'
+
+
     # Sentiment analysis predict wrapper
     def predict_text_sentiment(self, text):
         return predict_text_sentiment(self=self, text=text)
@@ -347,6 +367,7 @@ class client:
         # storing values the model dictionary
         self.models["Text Classification LSTM"] = text_classification_query(
             self=self, instruction=instruction)
+        self.latest_model = 'Text Classification LSTM'
 
     # Document summarization predict wrapper
     def get_summary(self, text):
@@ -362,6 +383,7 @@ class client:
 
         self.models["Document Summarization"] = summarization_query(
             self=self, instruction=instruction)
+        self.latest_model = 'Document Summarization'
 
     # Image caption prediction
     def generate_caption(self, image):
@@ -379,6 +401,7 @@ class client:
             random_state=random_state,
             preprocess=preprocess,
             generate_plots=generate_plots)
+        self.latest_model = 'Image Caption'
 
     def dimensionality_reducer(self, instruction):
         dimensionality_reduc(instruction, self.dataset)
@@ -435,6 +458,8 @@ class client:
 # newClient.neural_network_query("Model median house value")
 # newClient = client('tools/data/structured_data/landslides_after_rainfall.csv').neural_network_query(instruction='Model distance',
 # drop=['id', 'geolocation', 'source_link', 'source_name'])
-newClient = client('tools/data/structured_data/fake_job_postings.csv').neural_network_query(instruction='Classify fraudulent',
-                                                                                            drop=['job_id'],
-                                                                                            text=['department','description', 'company_profile','requirements', 'benefits'])
+#newClient = client('tools/data/structured_data/fake_job_postings.csv').neural_network_query(instruction='Classify fraudulent',
+#                                                                                            drop=['job_id'],
+#                                                                                            text=['department','description', 'company_profile','requirements', 'benefits'])
+newClient = client('../../tools/data/structured_data/housing.csv')
+newClient.neural_network_query("Model median house value")
