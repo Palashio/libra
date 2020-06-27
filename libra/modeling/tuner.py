@@ -168,15 +168,15 @@ def tuneReg(
     models = tuner.get_best_models(num_models=1)
     hyp = tuner.get_best_hyperparameters(num_trials = 1)[0]
     #hyp = tuner.oracle.get_best_trials(num_trials=1)[0].hyperparameters.values
-    best_hps = np.stack(hyp).astype(None)
+    #best_hps = np.stack(hyp).astype(None)
     history = tuner_hist(data,target,tuner,hyp)
     """
     Return:
         models[0] : best model obtained after tuning
-        best_hps : best Hyperprameters obtained after tuning, stored as array
+        best_hps : best Hyperprameters obtained after tuning, stored as map
         history : history of the data executed from the given model
     """
-    return models[0], best_hps, history
+    return models[0], hyp, history
 
 
 def tuneClass(
@@ -237,7 +237,7 @@ def tuneClass(
     models = tuner.get_best_models(num_models=1)
     hyp = tuner.get_best_hyperparameters(num_trials = 1)[0]
     #hyp = tuner.oracle.get_best_trials(num_trials=1)[0].hyperparameters.values
-    best_hps = np.stack(hyp).astype(None)
+    #best_hps = np.stack(hyp).astype(None)
     history = tuner_hist(X,y,tuner,hyp)
     """
     Return:
@@ -245,7 +245,7 @@ def tuneClass(
         best_hps : best Hyperprameters obtained after tuning, stored as array
         history : history of the data executed from the given model
     """
-    return models[0], best_hps, history
+    return models[0], hyp, history
 
 
 def tuneCNN(
@@ -286,7 +286,7 @@ def tuneCNN(
     # best hyperparamters
     hyp = tuner.get_best_hyperparameters(num_trials = 1)[0]
     #hyp = tuner.oracle.get_best_trials(num_trials=1)[0].hyperparameters.values
-    best_hps = np.stack(hyp).astype(None)
+    #best_hps = np.stack(hyp).astype(None)
     history = tuner_hist(X_train,X_test,tuner,hyp,img=1)
 
     """
@@ -295,7 +295,7 @@ def tuneCNN(
         best_hps : best Hyperprameters obtained after tuning, stored as array
         history : history of the data executed from the given model
     """
-    return tuner.get_best_models(1)[0], best_hps, history
+    return tuner.get_best_models(1)[0], hyp, history
 
 
 def tuneHyperband(X,
@@ -326,7 +326,7 @@ def tuneHyperband(X,
                  validation_data=(X_test, y_test))
     hyp = tuner.get_best_hyperparameters(num_trials = 1)[0]
     #hyp = tuner.oracle.get_best_trials(num_trials=1)[0].hyperparameters.values
-    best_hps = np.stack(hyp).astype(None)
+    #best_hps = np.stack(hyp).astype(None)
 
     history = tuner_hist(X,y,tuner,hyp)
     """
@@ -335,7 +335,7 @@ def tuneHyperband(X,
         best_hps : best Hyperprameters obtained after tuning, stored as array
         history : history of the data executed from the given model
     """
-    return tuner.get_best_models(1)[0], best_hps, history
+    return tuner.get_best_models(1)[0], hyp, history
     
 def tuner_hist(X,y,tuner,best_hps,img=0):
     model = tuner.hypermodel.build(best_hps)
