@@ -1,3 +1,4 @@
+## INITIAL BUILD RELEASE DATE: JULY 16TH.
 in progress....this README.md is out of date. Documentation site coming soon. 
 
 ![image](tools/data/gh_images/libra-logo.png)

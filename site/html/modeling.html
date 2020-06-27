@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <head>
     <meta charset = "utf-8">
@@ -45,6 +46,126 @@
                 <h2 id="nnq">neural_network_query()</h2>
                 <br>
                 <p>Automatically fits a neural network to your dataset. Target detection, preprocessing, and scoring are done by default.</p>
+                <b>Only instruction is required. ALL other parameters are optional</b>
+                <br>
+                <br>
+                <table style="width:100%">
+                    <tr>
+                        <td colspan="2">Arguments</td>
+                    </tr>
+                    <tr>
+                        <td>Instruction=None</td>
+                        <td>An English language statement that represents the task you would like to be completed. eg: 'predict the median house value' or 'please estimate the number of households'</td>
+                    </tr>
+                    <tr>
+                        <td>Mca_threshold=0.2</td>
+                        <td>Changes the proportion at which multiple correspondence analysis is applied. This deals with reducing the number of categorical features that are one-hot-encoded.</td>
+                    </tr>
+                    <tr>
+                        <td>Drop=[]</td>
+                        <td>Columns to drop manually, drop columns with links, weirdly formatted numbers, and others.</td>
+                    </tr>
+                    <tr>
+                        <td>Preprocess=True</td>
+                        <td>Whether you want your dataset to be intelligently preprocessed</td>
+                    </tr>
+                    <tr>
+                        <td>Test_size=0.2</td>
+                        <td>The size of your testing dataset</td>
+                    </tr>
+                    <tr>
+                        <td>Random_state=49</td>
+                        <td>The state ticker you want to be set at</td>
+                    </tr>
+                    <tr>
+                        <td>epochs=50</td>
+                        <td>Number of epochs for every model attempted</td>
+                    </tr>
+                    <tr>
+                        <td>generate_plots=True</td>
+                        <td>Whether you want libra to create accuracy and loss plots for you. </td>
+                    </tr>
+                    <tr>
+                        <td>generate_plots=True</td>
+                        <td>Whether you want libra to create accuracy and loss plots for you. </td>
+                    </tr>
+                    <tr>
+                        <td>save_model=False</td>
+                        <td> Do you want the model weights and architecture to be saved as a .json and .h5 file.</td>
+                    </tr>
+                    <tr>
+                        <td>save_path='current_directory'</td>
+                        <td>Where do you want the save_model information to be stored. </td>
+                    </tr>
+                </table>
+                <pre>new_client = client('path_to_dataset')
+new_client.neural_network_query('Please estimate the number of households.')
+new_client.models['regression_ANN'].plots() #access plots</pre>
+            </div>
+            <div class="box">
+                <h2 id="nnq">convolutional_query()</h2>
+                <br>
+                <p>Automatically fits a Convolutional Neural Network to your dataset. Everything is handled by libra internally. Three types of dataset structures are detectable: 
+                    <br>
+                    <br>
+1) classwise: where every folder represents a seperate class of images 
+<br>
+2) setwise: where a training_set and testing_set folder are created with individually folders of classes
+<br>
+3) pathwise: where a csv file stores relative paths to images
+                </p>
+                <br>
+                <table style="width:100%">
+                    <tr>
+                        <td colspan="2">Arguments</td>
+                    </tr>
+                    <tr>
+                        <td>Instruction=None</td>
+                        <td>An English language statement that represents the task you would like to be completed. eg: 'predict the median house value' or 'please estimate the number of households'</td>
+                    </tr>
+                    <tr>
+                        <td>readmode=distinguisher()</td>
+                        <td>Identifies the format in which data the present in. If none is specified then the query will automatically identify the format of your data. Note that only three types of formats are supported currently. </td>
+                    </tr>
+                    <tr>
+                        <td>new_folders=True</td>
+                        <td>This query will automatically crop all images to an intelligent size and create new folders with these images. If you would like it to replace your original images then set this to false. </td>
+                    </tr>
+                    <tr>
+                        <td>image_column=None</td>
+                        <td>If you're using pathwise from a csv, you can by default use a column in the set as the path location.</td>
+                    </tr>
+                    <tr>
+                        <td>training_ratio=0.8</td>
+                        <td>Represents the size of the training set.</td>
+                    </tr>
+                </table>
+                <pre>newClient = client('path_to_directory_with_image_folders')
+newClient.convolutional_query("Please classify my images")</pre>
+            </div>
+            <div class="box">
+                <h2 id="nnq">text_classification_query()</h2>
+                <br>
+                <p>Lets you create a text classification model automatically; works for all sorts of situations like sentiment analysis.</p>
+                <br>
+                <table style="width:100%">
+                    <tr>
+                        <td colspan="2">Arguments</td>
+                    </tr>
+                    <tr>
+                        <td>Instruction</td>
+                        <td>An English language statement that represents the task you would like to be completed. eg: 'predict the median house value' or 'please estimate the number of households'</td>
+                    </tr>
+                </table>
+                <pre>newClient = client('path_to_file')
+newClient.text_classification_query('Model credit card transaction type')
+newClient.predict_text_sentiment('new_text_to_classify')</pre>
+
+            </div>
+            <div class="box">
+                <h2 id="nnq">summarization_query()</h2>
+                <br>
+                <p>Automatically fits a neural network to your dataset. Target detection, preprocessing, and scoring are done by default.</p>
                 <br>
                 <table style="width:100%">
                     <tr>
@@ -54,31 +175,77 @@
                         <td>Instruction</td>
                         <td>An English language statement of what you’d like to do, eg: predict the median house value</td>
                     </tr>
-                    <tr>
-                        <td>Mca_threshold</td>
-                        <td>Changes the proportion at which multiple correspondence analysis is applied. This deals with reducing the number of categorical features that are one-hot-encoded.</td>
-                    </tr>
-                    <tr>
-                        <td>Drop</td>
-                        <td>Columns to drop manually, drop columns with links, weirdly formatted numbers, and others.</td>
-                    </tr>
-                    <tr>
-                        <td>Preprocess</td>
-                        <td>Whether you want your dataset to be intelligently preprocessed</td>
-                    </tr>
-                    <tr>
-                        <td>Test_size</td>
-                        <td>The size of your testing dataset</td>
-                    </tr>
-                    <tr>
-                        <td>Random_state</td>
-                        <td>The state ticker you want to be set at</td>
-                    </tr>
                 </table>
+                <pre>print("hello world")
+//random code stuff here, tabs are important though</pre>
             </div>
             <div class="box">
-                <h2 id="title2">Another title goes here</h2>
-                <p>make sure to put a div element with the class box outside of each method description</p>
+                <h2 id="nnq">K Mans Clustering</h2>
+                <br>
+                <p>Automatically fits a neural network to your dataset. Target detection, preprocessing, and scoring are done by default.</p>
+                <br>
+                <table style="width:100%">
+                    <tr>
+                        <td colspan="2">Arguments</td>
+                    </tr>
+                    <tr>
+                        <td>Instruction</td>
+                        <td>An English language statement of what you’d like to do, eg: predict the median house value</td>
+                    </tr>
+                </table>
+                <pre>print("hello world")
+//random code stuff here, tabs are important though</pre>
+            </div>
+            <div class="box">
+                <h2 id="nnq">Nearest Neighbors</h2>
+                <br>
+                <p>Automatically fits a neural network to your dataset. Target detection, preprocessing, and scoring are done by default.</p>
+                <br>
+                <table style="width:100%">
+                    <tr>
+                        <td colspan="2">Arguments</td>
+                    </tr>
+                    <tr>
+                        <td>Instruction</td>
+                        <td>An English language statement of what you’d like to do, eg: predict the median house value</td>
+                    </tr>
+                </table>
+                <pre>print("hello world")
+//random code stuff here, tabs are important though</pre>
+            </div>
+            <div class="box">
+                <h2 id="nnq">Support Vector Machines</h2>
+                <br>
+                <p>Automatically fits a neural network to your dataset. Target detection, preprocessing, and scoring are done by default.</p>
+                <br>
+                <table style="width:100%">
+                    <tr>
+                        <td colspan="2">Arguments</td>
+                    </tr>
+                    <tr>
+                        <td>Instruction</td>
+                        <td>An English language statement of what you’d like to do, eg: predict the median house value</td>
+                    </tr>
+                </table>
+                <pre>print("hello world")
+//random code stuff here, tabs are important though</pre>
+            </div>
+            <div class="box">
+                <h2 id="nnq">Decision Tree</h2>
+                <br>
+                <p>Automatically fits a neural network to your dataset. Target detection, preprocessing, and scoring are done by default.</p>
+                <br>
+                <table style="width:100%">
+                    <tr>
+                        <td colspan="2">Arguments</td>
+                    </tr>
+                    <tr>
+                        <td>Instruction</td>
+                        <td>An English language statement of what you’d like to do, eg: predict the median house value</td>
+                    </tr>
+                </table>
+                <pre>print("hello world")
+//random code stuff here, tabs are important though</pre>
             </div>
     </div>
 </body>
