@@ -7,7 +7,7 @@ from libra.queries.prediction_queries import logger
 
 def train(epoch, tokenizer, model, device, loader, optimizer):
     model.train()
-    total_loss = 0
+    running_loss = 0.0
     for _, data in enumerate(loader, 0):
         y = data['target_ids'].to(device, dtype=torch.long)
         y_ids = y[:, :-1].contiguous()
@@ -22,12 +22,12 @@ def train(epoch, tokenizer, model, device, loader, optimizer):
         if _ % 500 == 0:
             logger(f'Epoch: {epoch}, Loss:  {loss.item()}')
 
-        total_loss = loss.item()
+        running_loss += loss.item()
 
         optimizer.zero_grad()
         loss.backward()
         optimizer.step()
-    return total_loss
+    return running_loss/len(loader)
 
 
 class CustomDataset(Dataset):

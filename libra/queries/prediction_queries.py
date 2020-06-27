@@ -328,26 +328,63 @@ class client:
         return classify_text(self=self, text=text)
 
     # sentiment analysis query
-    def text_classification_query(self, instruction):
+    def text_classification_query(self, instruction, drop=None,
+                              preprocess=True,
+                              test_size=0.2,
+                              random_state=49,
+                              learning_rate=1e-2,
+                              epochs=20,
+                              batch_size=32,
+                              maxTextLength=200,
+                              generate_plots=True,
+                              save_model=False,
+                              save_path=os.getcwd()):
 
         # storing values the model dictionary
         self.models["Text Classification LSTM"] = text_classification_query(
-            self=self, instruction=instruction)
+            self=self, instruction=instruction, drop=drop,
+                              preprocess=preprocess,
+                              test_size=test_size,
+                              random_state=random_state,
+                              learning_rate=learning_rate,
+                              epochs=epochs,
+                              batch_size=batch_size,
+                              maxTextLength=maxTextLength,
+                              generate_plots=generate_plots,
+                              save_model=save_model,
+                              save_path=save_path)
 
     # Document summarization predict wrapper
     def get_summary(self, text):
         return get_summary(self=self, text=text)
 
     # text summarization query
-    def summarization_query(self, instruction,
-                            preprocess=True,
-                            test_size=0.2,
-                            random_state=49,
-                            epochs=1,
-                            generate_plots=True):
+    def summarization_query(self,  instruction, preprocess=True,
+                        drop=None,
+                        epochs=10,
+                        batch_size=64,
+                        learning_rate=1e-4,
+                        max_text_length=512,
+                        max_summary_length=150,
+                        test_size=0.2,
+                        random_state=49,
+                        generate_plots=True,
+                        save_model=False,
+                        save_path=os.getcwd()):
 
         self.models["Document Summarization"] = summarization_query(
-            self=self, instruction=instruction)
+            self=self, instruction=instruction, preprocess=preprocess,
+                        drop=drop,
+                        epochs=epochs,
+                        batch_size=batch_size,
+                        learning_rate=learning_rate,
+                        max_text_length=max_text_length,
+                        max_summary_length=max_summary_length,
+                        test_size=test_size,
+                        random_state=random_state,
+                        generate_plots=generate_plots,
+                        save_model=save_model,
+                        save_path=save_path)
 
     # Image caption prediction
     def generate_caption(self, image):
@@ -355,16 +392,37 @@ class client:
         return ' '.join(caption[:len(caption) - 1])
 
     # Image Caption query
-    def image_caption_query(self, instruction, epochs, random_state,
-                            preprocess=True,
-                            generate_plots=True):
+    def image_caption_query(self,instruction,
+                        drop=None,
+                        epochs=10,
+                        preprocess=True,
+                        random_state=49,
+                        top_k=5000,
+                        batch_size=1,
+                        buffer_size=1000,
+                        embedding_dim=256,
+                        units=512,
+                        generate_plots=True,
+                        save_model_decoder=False,
+                        save_path_decoder=os.getcwd(),
+                        save_model_encoder=False,
+                        save_path_encoder=os.getcwd()):
         self.models["Image Caption"] = image_caption_query(
-            self=self,
+            self, instruction=instruction,
+            drop=drop,
             epochs=epochs,
-            instruction=instruction,
-            random_state=random_state,
             preprocess=preprocess,
-            generate_plots=generate_plots)
+            random_state=random_state,
+            top_k=top_k,
+            batch_size=batch_size,
+            buffer_size=buffer_size,
+            embedding_dim=embedding_dim,
+            units=units,
+            generate_plots=generate_plots,
+            save_model_decoder=save_model_decoder,
+            save_path_decoder=save_path_decoder,
+            save_model_encoder=save_model_encoder,
+            save_path_encoder=save_path_encoder)
 
     def dimensionality_reducer(self, instruction):
         dimensionality_reduc(instruction, self.dataset)

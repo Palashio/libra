@@ -41,7 +41,8 @@ def text_classification_query(self, instruction, drop=None,
                               preprocess=True,
                               test_size=0.2,
                               random_state=49,
-                              epochs=50,
+                              learning_rate=1e-2,
+                              epochs=20,
                               batch_size=32,
                               maxTextLength=200,
                               generate_plots=True,
@@ -65,7 +66,7 @@ def text_classification_query(self, instruction, drop=None,
 
     X = np.array(X)
 
-    model = get_keras_text_class(maxTextLength, len(classes))
+    model = get_keras_text_class(maxTextLength, len(classes),learning_rate)
 
     X_train, X_test, y_train, y_test = train_test_split(
         X, Y, test_size=test_size, random_state=random_state)
@@ -75,7 +76,7 @@ def text_classification_query(self, instruction, drop=None,
     logger("Training Model...")
     history = model.fit(X_train, y_train,
                         batch_size=batch_size,
-                        epochs=epochs)
+                        epochs=epochs,learning_rate = learning_rate)
 
     logger("Testing Model...")
     score, acc = model.evaluate(X_test, y_test,
@@ -182,15 +183,18 @@ def summarization_query(self, instruction, preprocess=True,
         params=model.parameters(), lr=learning_rate)
 
     logger('Initiating Fine-Tuning for the model on your dataset...')
-
+    total_loss_train = []
     for epoch in range(epochs):
-        loss = train(epoch, tokenizer, model, device, training_loader, optimizer)
+        loss_train, acc_train, loss_val, acc_val = train(epoch, tokenizer, model, device, training_loader, optimizer)
+        total_loss_train.append(loss_train)
+        total_acc_train.append(acc_train)
+        total_loss_val.append(loss_val)
+        total_acc_val.append(acc_val)
 
     if generate_plots:
-        # generates appropriate classification plots by feeding all
-        # information
-        plots = None  # generate_classification_plots(
-        #     history, X, Y, model, X_test, y_test)
+        plots = []
+        plots.append(plot_loss(total_loss_train,total_loss_val))
+        plots.append(plot_accuracy(total_acc_train, total_acc_val))
 
     if save_model:
         logger("Saving model...")
@@ -205,7 +209,10 @@ def summarization_query(self, instruction, preprocess=True,
         "maxTextLength": max_text_length,
         "maxSumLength": max_summary_length,
         "plots": plots,
-        "loss": loss
+        'losses': {'training_loss': total_loss_train,
+                    'val_loss': total_loss_val},
+         'accuracy':{'train_accuracy': total_acc_train.
+                     'validation_accuracy': total_acc_val}
     }
     return self.models["Document Summarization"]
 
