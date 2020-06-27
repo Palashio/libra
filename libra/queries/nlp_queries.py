@@ -165,16 +165,25 @@ def summarization_query(self, instruction, preprocess=True,
         frac=train_size,
         random_state=random_state).reset_index(
         drop=True)
+    val_dataset = df.drop(train_dataset.index).reset_index(drop=True)
 
     training_set = CustomDataset(
         train_dataset, tokenizer, max_text_length, max_summary_length)
+    val_set = CustomDataset(val_dataset, tokenizer, max_text_length, max_summary_length)
     train_params = {
         'batch_size': batch_size,
         'shuffle': True,
         'num_workers': 0
     }
 
+    val_params = {
+        'batch_size': batch_size,
+        'shuffle': False,
+        'num_workers': 0
+    }
+
     training_loader = DataLoader(training_set, **train_params)
+    val_loader = DataLoader(val_set, **val_params)
     # used small model
     model = T5ForConditionalGeneration.from_pretrained("t5-small")
     model = model.to(device)
@@ -182,19 +191,16 @@ def summarization_query(self, instruction, preprocess=True,
     optimizer = torch.optim.Adam(
         params=model.parameters(), lr=learning_rate)
 
-    logger('Initiating Fine-Tuning for the model on your dataset...')
+    logger('Fine-Tuning the model on your dataset...')
     total_loss_train = []
     for epoch in range(epochs):
-        loss_train, acc_train, loss_val, acc_val = train(epoch, tokenizer, model, device, training_loader, optimizer)
+        loss_train, loss_val = train(epoch, tokenizer, model, device, training_loader, optimizer)
         total_loss_train.append(loss_train)
-        total_acc_train.append(acc_train)
         total_loss_val.append(loss_val)
-        total_acc_val.append(acc_val)
 
     if generate_plots:
         plots = []
         plots.append(plot_loss(total_loss_train,total_loss_val))
-        plots.append(plot_accuracy(total_acc_train, total_acc_val))
 
     if save_model:
         logger("Saving model...")
@@ -210,9 +216,7 @@ def summarization_query(self, instruction, preprocess=True,
         "maxSumLength": max_summary_length,
         "plots": plots,
         'losses': {'training_loss': total_loss_train,
-                    'val_loss': total_loss_val},
-         'accuracy':{'train_accuracy': total_acc_train.
-                     'validation_accuracy': total_acc_val}
+                    'val_loss': total_loss_val}
     }
     return self.models["Document Summarization"]
 

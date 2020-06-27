@@ -5,7 +5,7 @@ from torch.utils.data import Dataset, DataLoader, RandomSampler, SequentialSampl
 from libra.queries.prediction_queries import logger
 
 
-def train(epoch, tokenizer, model, device, loader, optimizer):
+def train(epoch, tokenizer, model, device, loader, val_loader optimizer):
     model.train()
     running_loss = 0.0
     for _, data in enumerate(loader, 0):
@@ -19,15 +19,31 @@ def train(epoch, tokenizer, model, device, loader, optimizer):
         outputs = model(input_ids=ids, attention_mask=mask, decoder_input_ids=y_ids, lm_labels=lm_labels)
         loss = outputs[0]
 
-        if _ % 500 == 0:
-            logger(f'Epoch: {epoch}, Loss:  {loss.item()}')
+        logger(f'Epoch: {epoch}, Loss:  {loss.item()}')
+
 
         running_loss += loss.item()
 
         optimizer.zero_grad()
         loss.backward()
         optimizer.step()
-    return running_loss/len(loader)
+
+    running_loss_val = 0.0
+    with torch.no_grad():
+        for _, data in enumerate(val_loader, 0):
+            y = data['target_ids'].to(device, dtype=torch.long)
+            y_ids = y[:, :-1].contiguous()
+            lm_labels = y[:, 1:].clone().detach()
+            lm_labels[y[:, 1:] == tokenizer.pad_token_id] = -100
+            ids = data['source_ids'].to(device, dtype=torch.long)
+            mask = data['source_mask'].to(device, dtype=torch.long)
+
+            outputs = model(input_ids=ids, attention_mask=mask, decoder_input_ids=y_ids, lm_labels=lm_labels)
+            loss = outputs[0]
+
+            running_loss_val += loss.item()
+
+    return running_loss/len(loader), running_loss_val/len(val_loader)
 
 
 class CustomDataset(Dataset):
