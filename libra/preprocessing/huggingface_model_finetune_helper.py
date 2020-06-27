@@ -1,6 +1,6 @@
 import torch
 import torch.nn.functional as F
-from torch.utils.data import Dataset, DataLoader, RandomSampler, SequentialSampler
+from torch.utils.data import Dataset, DataLoader, RandomSampler
 
 
 def train(epoch, tokenizer, model, device, loader, optimizer):
@@ -13,7 +13,10 @@ def train(epoch, tokenizer, model, device, loader, optimizer):
         ids = data['source_ids'].to(device, dtype=torch.long)
         mask = data['source_mask'].to(device, dtype=torch.long)
 
-        outputs = model(input_ids=ids, attention_mask=mask, decoder_input_ids=y_ids, lm_labels=lm_labels)
+        outputs = model(input_ids=ids, 
+                        attention_mask=mask, 
+                        decoder_input_ids=y_ids, 
+                        lm_labels=lm_labels)
         loss = outputs[0]
 
         if _ % 500 == 0:
@@ -44,10 +47,14 @@ class CustomDataset(Dataset):
         text = str(self.text[index])
         text = ' '.join(text.split())
 
-        source = self.tokenizer.batch_encode_plus([ctext], max_length=self.source_len, pad_to_max_length=True,
-                                                  return_tensors='pt')
-        target = self.tokenizer.batch_encode_plus([text], max_length=self.summ_len, pad_to_max_length=True,
-                                                  return_tensors='pt')
+        source = self.tokenizer.batch_encode_plus([ctext], 
+                                                   max_length=self.source_len, 
+                                                   pad_to_max_length=True,
+                                                   return_tensors='pt')
+        target = self.tokenizer.batch_encode_plus([text], 
+                                                   max_length=self.summ_len, 
+                                                   pad_to_max_length=True,
+                                                   return_tensors='pt')
 
         source_ids = source['input_ids'].squeeze()
         source_mask = source['attention_mask'].squeeze()
@@ -81,8 +88,10 @@ def inference(tokenizer, model, device, loader):
                 length_penalty=1.0,
                 early_stopping=True
                 )
-            preds = [tokenizer.decode(g, skip_special_tokens=True, clean_up_tokenization_spaces=True) for g in generated_ids]
-            target = [tokenizer.decode(t, skip_special_tokens=True, clean_up_tokenization_spaces=True)for t in y]
+            preds = [tokenizer.decode(g, skip_special_tokens=True,
+                     clean_up_tokenization_spaces=True) for g in generated_ids]
+            target = [tokenizer.decode(t, skip_special_tokens=True, 
+                      clean_up_tokenization_spaces=True)for t in y]
 
             predictions.extend(preds)
             actuals.extend(target)

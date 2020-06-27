@@ -1,18 +1,20 @@
-from libra.modeling.tuner import tuneReg, tuneClass, tuneCNN
-import numpy as np
+from libra.modeling.tuner import (tuneReg, 
+                                  tuneClass, 
+                                  tuneCNN)
 import os
 from libra.preprocessing.data_reader import DataReader
 from keras.preprocessing.image import ImageDataGenerator
 from libra.preprocessing.image_preprocesser import (setwise_preprocessing,
-                                                    csv_preprocessing,
-                                                    classwise_preprocessing,
                                                     set_distinguisher)
+
 import uuid
+
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
 currLog = ""
 counter = 0
 number = 0
-# # current_dir=os.getcw()
+
 
 # # allows for all columns to be displayed when printing()
 # pd.options.display.width = None
@@ -34,28 +36,21 @@ def clearLog():
 # global variable parallels
 
 
-def logger(instruction, found="", slash=''):
+def logger(instruction, found=""):
     global currLog
     global counter
     if counter == 0:
         currLog += (" " * 2 * counter) + str(instruction) + str(found)
     elif instruction == "->":
         counter = counter - 1
-        if slash == '|':
-            currLog += (" " * 2 * counter) + slash + str(found)
-        else:
-            currLog += (" " * 2 * counter) + str(instruction) + str(found)
+        currLog += (" " * 2 * counter) + str(instruction) + str(found)
     else:
-        #currLog += (" " * 2 * counter) + "|" + "\n"
         currLog += (" " * 2 * counter) + "|- " + str(instruction) + str(found)
         if instruction == "done...":
             currLog += "\n" + "\n"
 
     counter += 1
-    if instruction == "|":
-        print(currLog, end="")
-    else:
-        print(currLog)
+    print(currLog)
     currLog = ""
 
 
@@ -76,7 +71,9 @@ def tune_helper(
         objective='val_accuracy',
         directory='my_dir',
         epochs=10,
-        step=32
+        step=32,
+        verbose=0,
+        test_size=0.2
 ):
     logger("Getting target model for tuning...")
 
@@ -91,7 +88,7 @@ def tune_helper(
         target_column = data[models['regression_ANN']['target']]
         data = models['regression_ANN']['preprocesser'].transform(
             data.drop(target, axis=1))
-        returned_model = tuneReg(
+        returned_model, returned_pms, history = tuneReg(
             data,
             target_column,
             max_layers=max_layers,
@@ -102,12 +99,20 @@ def tune_helper(
             max_trials=max_trials,
             epochs=epochs,
             activation=activation,
-            step=step)
-        models['regression_ANN'] = {'model': returned_model}
-        return returned_model
+            step=step,
+            verbose=verbose,
+            test_size=test_size
+        )
+        models['regression_ANN'] = {
+               'model': returned_model,
+               'hyperparametes' : returned_pms,
+               'losses': {
+                        'training_loss': history.history['loss'],
+                        'val_loss': history.history['val_loss']}
+               }
 
         # processing for classification feed forward NN
-    if model_to_tune == "classification_ANN":
+    elif model_to_tune == "classification_ANN":
         logger("Tuning model hyperparameters...")
         dataReader = DataReader(dataset)
         data = dataReader.data_generator()
@@ -115,7 +120,7 @@ def tune_helper(
         target_column = data[models['classification_ANN']['target']]
         data = models['classification_ANN']['preprocesser'].transform(
             data.drop(target, axis=1))
-        returned_model = tuneClass(
+        returned_model, returned_pms, history = tuneClass(
             data,
             target_column,
             models['classification_ANN']['num_classes'],
@@ -129,14 +134,22 @@ def tune_helper(
             loss=loss,
             metrics=metrics,
             epochs=epochs,
-            step=step)
-        models['classification_ANN'] = {'model': returned_model}
-        return returned_model
+            step=step,
+            verbose=verbose,
+            test_size=test_size
+            )
+        models['classification_ANN'] = {
+               'model': returned_model,
+               'hyperparametes' : returned_pms,
+               'losses': {
+                          'training_loss': history.history['loss'],
+                           'val_loss': history.history['val_loss']}
+               }
         # processing for convolutional NN
-    if model_to_tune == "convolutional_NN":
+    elif model_to_tune == "convolutional_NN":
         logger("Tuning model hyperparameters...")
         X_train, X_test, height, width, num_classes = get_image_data(dataset)
-        model = tuneCNN(
+        model, returned_pms, history = tuneCNN(
             X_train,
             X_test,
             height,
@@ -147,8 +160,16 @@ def tune_helper(
             seed=seed,
             objective=objective,
             directory=directory,
-            epochs=epochs)
+            epochs=epochs,
+            verbose=verbose,
+            test_size=test_size
+        )
         models["convolutional_NN"]["model"] = model
+        models["convolutional_NN"]["hyperparametes"] = returned_pms,
+        models["convolutional_NN"]["losses"] = {
+                                'training_loss': history.history['loss'],
+                                'val_loss': history.history['val_loss']}
+
     return models
 
 
@@ -159,12 +180,14 @@ def stats(dataset=None,
 
 
 def save(model, save_model, save_path=os.getcwd()):
+    global number
     model_json = model.to_json()
     with open(save_path + "/model" + str(number) + ".json", "w") as json_file:
         json_file.write(model_json)
         # serialize weights to HDF5
         model.save_weights(save_path + "/weights" + str(number) + ".h5")
         logger("->", "Saved model to disk as model" + str(number))
+    number= number+1
 
 
 def generate_id():
