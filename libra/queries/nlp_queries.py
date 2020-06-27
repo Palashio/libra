@@ -90,7 +90,7 @@ def text_classification_query(self, instruction, drop=None,
             history, X, Y, model, X_test, y_test)
 
     if save_model:
-        save(model, save_model)
+        save(model, save_model,save_path=save_path)
 
     logger("Storing information in client object...")
     # storing values the model dictionary
@@ -194,7 +194,7 @@ def summarization_query(self, instruction, preprocess=True,
 
     if save_model:
         logger("Saving model...")
-        path = save_path+ "DocSummarization.pth"
+        path = save_path + "DocSummarization.pth"
         torch.save(model, path)
         logger("->", "Saved model to disk as DocSummarization.pth")
 
@@ -233,9 +233,9 @@ def image_caption_query(self, instruction,
                         units=512,
                         generate_plots=True,
                         save_model_decoder=False,
-                        save_path_decoder=None,
+                        save_path_decoder=os.getcwd(),
                         save_model_encoder=False,
-                        save_path_encoder=None):
+                        save_path_encoder=os.getcwd()):
     np.random.seed(random_state)
     tf.random.set_seed(random_state)
 
@@ -373,11 +373,11 @@ def image_caption_query(self, instruction,
 
     if save_model_decoder:
         logger("Saving decoder...")
-        save(decoder, save_model_decoder)
+        save(decoder, save_model_decoder, save_path=save_path_decoder)
 
     if save_model_encoder:
         logger("Saving encoder...")
-        save(decoder, save_model_encoder)
+        save(decoder, save_model_encoder, save_path=save_path_encoder)
 
     self.models["Image Caption"] = {
         "decoder": decoder,
