@@ -207,13 +207,13 @@ def dimensionality_RF(instruction, dataset, target="", y="", n_features=10):
         accuracy_scores), list(columns[the_index])
 
 
-def dimensionality_PCA(instruction, dataset, mca_threshold=None):
+def dimensionality_PCA(instruction, dataset, ca_threshold=None):
     global currLog
     global counter
 
     pca = PCA(0.92)
 
-    data, y, target, full_pipeline = initial_preprocesser(dataset, instruction, mca_threshold=mca_threshold, preprocess=True)
+    data, y, target, full_pipeline = initial_preprocesser(dataset, instruction, ca_threshold=ca_threshold, preprocess=True)
 
     X_train = data['train']
     X_test = data['test']
