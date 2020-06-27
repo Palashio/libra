@@ -35,7 +35,7 @@ def classify_text(self, text):
 
 
 # Sentiment analysis query
-def text_classification_query(self, instruction,
+def text_classification_query(self, instruction, drop=None,
                               preprocess=True,
                               test_size=0.2,
                               random_state=49,
@@ -46,6 +46,7 @@ def text_classification_query(self, instruction,
     data = pd.read_csv(self.dataset)
     if preprocess:
         data.fillna(0, inplace=True)
+    data = data.drop(drop)
     X, Y = get_target_values(data, instruction, "label")
     Y = np.array(Y)
     classes = np.unique(Y)
@@ -72,8 +73,6 @@ def text_classification_query(self, instruction,
                         batch_size=batch_size,
                         epochs=epochs,
                         validation_split=0.1)
-
-    logger("->", "Final loss:" + str(acc))
 
     logger("Testing Model...")
     score, acc = model.evaluate(X_test, y_test,
@@ -111,31 +110,33 @@ def get_summary(self, text):
     model.eval()
     tokenizer = T5Tokenizer.from_pretrained("t5-small")
     df = pd.DataFrame({'text': [""], 'ctext': [text]})
-    set = CustomDataset(df, tokenizer, modelInfo["maxTextLength"], modelInfo["maxSumLength"])
     params = {
         'batch_size': 1,
         'shuffle': True,
         'num_workers': 0
     }
-    loader = DataLoader(set, **params)
+    loader = DataLoader(CustomDataset(df, tokenizer, modelInfo["maxTextLength"], modelInfo["maxSumLength"]), **params)
     predictions, truth = inference(tokenizer, model, "cpu", loader)
     return predictions
 
 
-# text summarization query
-def summarization_query(self, instruction,
+# Text summarization query
+def summarization_query(self, instruction, preprocess=True,
+                        drop=None,
                         epochs=10,
                         batch_size=64,
                         learning_rate=1e-4,
                         max_text_length=512,
                         max_summary_length=150,
-                        preprocess=True,
                         test_size=0.2,
                         random_state=49,
                         generate_plots=True):
+    if drop is None:
+        drop = []
     data = pd.read_csv(self.dataset)
     if preprocess:
         data.fillna(0, inplace=True)
+    data = data.drop(drop)
 
     logger("Preprocessing data...")
 
@@ -175,13 +176,13 @@ def summarization_query(self, instruction,
     logger('Initiating Fine-Tuning for the model on your dataset...')
 
     for epoch in range(epochs):
-        train(epoch, tokenizer, model, device, training_loader, optimizer)
+        loss = train(epoch, tokenizer, model, device, training_loader, optimizer)
 
     if generate_plots:
         # generates appropriate classification plots by feeding all
         # information
-        plots = generate_classification_plots(
-            history, X, Y, model, X_test, y_test)
+        plots = None  # generate_classification_plots(
+        #     history, X, Y, model, X_test, y_test)
 
     logger("Storing information in client object...")
 
@@ -189,11 +190,13 @@ def summarization_query(self, instruction,
         "model": model,
         "maxTextLength": max_text_length,
         "maxSumLength": max_summary_length,
-        "plots": plots
+        "plots": plots,
+        "loss": loss
     }
     return self.models["Document Summarization"]
 
 
+# Image Caption Generation Prediction
 def generate_caption(self, image):
     modelInfo = self.models.get("Image Caption")
     decoder = modelInfo['decoder']
@@ -205,7 +208,8 @@ def generate_caption(self, image):
 
 # Image Caption Generation query
 def image_caption_query(self, instruction,
-                        epochs,
+                        drop=None,
+                        epochs=10,
                         preprocess=True,
                         random_state=49,
                         top_k=5000,
@@ -218,7 +222,9 @@ def image_caption_query(self, instruction,
     tf.random.set_seed(random_state)
 
     df = pd.read_csv(self.dataset)
-    df.fillna(0, inplace=True)
+    if preprocess:
+        df.fillna(0, inplace=True)
+    df = df.drop(drop)
 
     logger("Preprocessing data...")
 
@@ -336,7 +342,7 @@ def image_caption_query(self, instruction,
             total_loss += t_loss
 
         logger('Epoch {} Loss {:.6f}'.format(epoch + 1,
-                                            total_loss / num_steps))
+                                             total_loss / num_steps))
 
     logger("Storing information in client object...")
 
@@ -352,6 +358,7 @@ def image_caption_query(self, instruction,
         "encoder": encoder,
         "tokenizer": tokenizer,
         "feature_extraction": image_features_extract_model,
+        "plots": None,
         'losses': {
             'training_loss': total_loss
         }

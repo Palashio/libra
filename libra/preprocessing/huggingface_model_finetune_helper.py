@@ -2,9 +2,12 @@ import torch
 import torch.nn.functional as F
 from torch.utils.data import Dataset, DataLoader, RandomSampler, SequentialSampler
 
+from libra.queries.prediction_queries import logger
+
 
 def train(epoch, tokenizer, model, device, loader, optimizer):
     model.train()
+    total_loss = 0
     for _, data in enumerate(loader, 0):
         y = data['target_ids'].to(device, dtype=torch.long)
         y_ids = y[:, :-1].contiguous()
@@ -17,11 +20,14 @@ def train(epoch, tokenizer, model, device, loader, optimizer):
         loss = outputs[0]
 
         if _ % 500 == 0:
-            print(f'Epoch: {epoch}, Loss:  {loss.item()}')
+            logger(f'Epoch: {epoch}, Loss:  {loss.item()}')
+
+        total_loss = loss.item()
 
         optimizer.zero_grad()
         loss.backward()
         optimizer.step()
+    return total_loss
 
 
 class CustomDataset(Dataset):
