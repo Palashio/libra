@@ -98,7 +98,7 @@ class client:
 
     def neural_network_query(self,
                              instruction,
-                             text=None,
+                             text=[],
                              ca_threshold=None,
                              drop=None,
                              preprocess=True,
@@ -154,7 +154,7 @@ class client:
     def regression_query_ann(
             self,
             instruction,
-            text=None,
+            text=[],
             drop=None,
             ca_threshold=None,
             preprocess=True,
@@ -190,7 +190,7 @@ class client:
     def classification_query_ann(
             self,
             instruction,
-            text=None,
+            text=[],
             ca_threshold=None,
             preprocess=True,
             callback_mode='min',
@@ -239,7 +239,7 @@ class client:
     def svm_query(self,
                   instruction,
                   test_size=0.2,
-                  text=None,
+                  text=[],
                   kernel='linear',
                   preprocess=True,
                   drop=None,
@@ -258,7 +258,7 @@ class client:
 
     def nearest_neighbor_query(
             self,
-            text=None,
+            text=[],
             instruction=None,
             preprocess=True,
             drop=None,
@@ -283,7 +283,7 @@ class client:
             drop=None):
 
         self.models['decision_tree'] = decision_tree(instruction,
-                                                     text=None,
+                                                     text=[],
                                                      dataset=self.dataset,
                                                      preprocess=True,
                                                      test_size=0.2,
@@ -455,6 +455,8 @@ class client:
 # newClient.neural_network_query("Model median house value")
 # newClient = client('tools/data/structured_data/landslides_after_rainfall.csv').neural_network_query(instruction='Model distance',
 # drop=['id', 'geolocation', 'source_link', 'source_name'])
-newClient = client('tools/data/structured_data/fake_job_postings.csv').neural_network_query(instruction='Classify fraudulent',
-                                                                                            drop=['job_id'],
-                                                                                            text=['department','description', 'company_profile','requirements', 'benefits'])
+#newClient = client('tools/data/structured_data/fake_job_postings.csv').neural_network_query(instruction='Classify fraudulent',
+#                                                                                            drop=['job_id'],
+#                                                                                            text=['department','description', 'company_profile','requirements', 'benefits'])
+newClient = client('../../tools/data/structured_data/housing.csv')
+newClient.neural_network_query("Model median house value")
