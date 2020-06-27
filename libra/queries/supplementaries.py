@@ -1,22 +1,20 @@
 from libra.modeling.tuner import (tuneReg, 
                                   tuneClass, 
-                                  tuneCNN, tuner_hist,
-                                  tuneHyperband)
-import numpy as np
+                                  tuneCNN)
 import os
 from libra.preprocessing.data_reader import DataReader
 from keras.preprocessing.image import ImageDataGenerator
 from libra.preprocessing.image_preprocesser import (setwise_preprocessing,
-                                                    csv_preprocessing,
-                                                    classwise_preprocessing,
                                                     set_distinguisher)
-from libra.preprocessing.data_preprocesser import structured_preprocesser 
+
 import uuid
+
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
 currLog = ""
 counter = 0
 number = 0
-# # current_dir=os.getcw()
+
 
 # # allows for all columns to be displayed when printing()
 # pd.options.display.width = None
@@ -73,7 +71,9 @@ def tune_helper(
         objective='val_accuracy',
         directory='my_dir',
         epochs=10,
-        step=32
+        step=32,
+        verbose=0,
+        test_size=0.2
 ):
     logger("Getting target model for tuning...")
 
@@ -99,7 +99,10 @@ def tune_helper(
             max_trials=max_trials,
             epochs=epochs,
             activation=activation,
-            step=step)
+            step=step,
+            verbose=verbose,
+            test_size=test_size
+        )
         models['regression_ANN'] = {
                'model': returned_model,
                'hyperparametes' : returned_pms,
@@ -131,7 +134,10 @@ def tune_helper(
             loss=loss,
             metrics=metrics,
             epochs=epochs,
-            step=step)
+            step=step,
+            verbose=verbose,
+            test_size=test_size
+            )
         models['classification_ANN'] = {
                'model': returned_model,
                'hyperparametes' : returned_pms,
@@ -154,7 +160,10 @@ def tune_helper(
             seed=seed,
             objective=objective,
             directory=directory,
-            epochs=epochs)
+            epochs=epochs,
+            verbose=verbose,
+            test_size=test_size
+        )
         models["convolutional_NN"]["model"] = model
         models["convolutional_NN"]["hyperparametes"] = returned_pms,
         models["convolutional_NN"]["losses"] = {

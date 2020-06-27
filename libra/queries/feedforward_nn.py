@@ -1,30 +1,23 @@
-import sys
 import os
-
-
 from libra.preprocessing.image_preprocesser import (setwise_preprocessing,
                                                     csv_preprocessing,
                                                     classwise_preprocessing,
                                                     set_distinguisher)
 from libra.preprocessing.data_reader import DataReader
 from keras.models import Sequential
-from keras.layers import (Dense, Conv2D, Flatten, Input, MaxPooling2D, )
+from keras.layers import (Dense, Conv2D, Flatten, MaxPooling2D, )
 import pandas as pd
 from libra.queries.supplementaries import save, generate_id
 from keras.preprocessing.image import ImageDataGenerator
-from tensorflow.keras.callbacks import EarlyStopping
-from sklearn.preprocessing import OneHotEncoder, StandardScaler
-from libra.plotting.generate_plots import (generate_clustering_plots,
-                                           generate_regression_plots,
+from sklearn.preprocessing import OneHotEncoder
+from libra.plotting.generate_plots import (generate_regression_plots,
                                            generate_classification_plots)
-from libra.preprocessing.data_preprocesser import structured_preprocesser, initial_preprocesser
-from libra.modeling.prediction_model_creation import get_keras_model_reg, get_keras_text_class, get_keras_model_class
+from libra.preprocessing.data_preprocesser import initial_preprocesser
+from libra.modeling.prediction_model_creation import get_keras_model_reg, get_keras_model_class
 from sklearn.preprocessing import StandardScaler
 import numpy as np
-from tabulate import tabulate
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 from tensorflow.keras.callbacks import EarlyStopping
-
-#from prediction_queries import logger, clearLog
 
 
 currLog = ""
@@ -157,7 +150,7 @@ def regression_ann(
     for row in datax:
         print((" " * 2 * counter) + "| " + ("".join(word.ljust(col_width)
                                                     for word in row)) + " |")
-    #print((" " * 2 * counter)+ tabulate(datax, headers=col_name, tablefmt='orgtbl'))
+
     losses.append(history.history[maximizer]
                   [len(history.history[maximizer]) - 1])
 
@@ -330,9 +323,12 @@ def classification_ann(instruction,
                   [len(history.history[maximizer]) - 1])
     # keeps running model and fit functions until the validation loss stops
     # decreasing
+
     logger("Testing number of layers...")
     col_name = [["Current number of layers", "| Training Loss", "| Test Loss"]]
     col_width = max(len(word) for row in col_name for word in row) + 2
+
+
     for row in col_name:
         print((" " * 2 * counter) + "| " + ("".join(word.ljust(col_width)
                                                     for word in row)) + " |")

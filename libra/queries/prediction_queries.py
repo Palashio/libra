@@ -1,13 +1,11 @@
-
-
-from libra.queries.nlp_queries import ( image_caption_query, 
-     generate_caption, predict_text_sentiment, 
-     text_classification_query, get_summary, 
+from libra.queries.nlp_queries import ( image_caption_query,
+     generate_caption, predict_text_sentiment,
+     text_classification_query, get_summary,
      summarization_query)
 from libra.queries.classification_models import (k_means_clustering, 
      train_svm, nearest_neighbors,
      decision_tree)
-from libra.queries.supplementaries import tune_helper, stats, generate_id
+from libra.queries.supplementaries import tune_helper, stats
 from libra.queries.feedforward_nn import (regression_ann, 
      classification_ann, 
      convolutional)
@@ -27,7 +25,6 @@ warnings.simplefilter(action="ignore", category=SettingWithCopyWarning)
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
 # function imports from other files
-
 currLog = ""
 counter = 0
 
@@ -277,7 +274,10 @@ class client:
              epochs=10,
              objective='val_accuracy',
              seed=42,
-             directory='my_dir'):
+             directory='my_dir',
+             verbose=0,
+             test_size=0.2
+             ):
 
         self.models = tune_helper(
             model_to_tune=model_to_tune,
@@ -296,6 +296,8 @@ class client:
             objective=objective,
             seed=seed,
             directory=directory,
+            verbose=verbose,
+            test_size=test_size
         )
 
     def stat_analysis(self, column_name="none", drop=None):
@@ -415,9 +417,9 @@ class client:
 # Easier to comment the one you don't want to run instead of typing them
 # out every time
 
-newClient = client('/Users/palashshah/Desktop')
-newClient.convolutional_query()
-newClient.tune('convolutional_NN', epochs=1)
+# newClient = client('/Users/palashshah/Desktop/other')
+# newClient.convolutional_query()
+# newClient.tune('convolutional_NN', epochs=1)
 # newClient.neural_network_query("Model median house value")
 # newClient = client('tools/data/structured_data/landslides_after_rainfall.csv').neural_network_query(instruction='Model distance',
 # drop=['id', 'geolocation', 'source_link', 'source_name'])
