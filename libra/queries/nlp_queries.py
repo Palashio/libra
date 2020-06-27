@@ -19,8 +19,10 @@ from libra.preprocessing.image_caption_helpers import load_image, map_func, CNN_
     generate_caption_helper
 from libra.queries.dimensionality_red_queries import logger
 
-
 # Sentiment analysis predict wrapper
+from libra.queries.supplementaries import save
+
+
 def classify_text(self, text):
     sentimentInfo = self.models.get("Text Classification LSTM")
     vocab = sentimentInfo["vocabulary"]
@@ -42,7 +44,9 @@ def text_classification_query(self, instruction, drop=None,
                               epochs=50,
                               batch_size=32,
                               maxTextLength=200,
-                              generate_plots=True):
+                              generate_plots=True,
+                              save_model=False,
+                              save_path=os.getcwd()):
     data = pd.read_csv(self.dataset)
     if preprocess:
         data.fillna(0, inplace=True)
@@ -71,8 +75,7 @@ def text_classification_query(self, instruction, drop=None,
     logger("Training Model...")
     history = model.fit(X_train, y_train,
                         batch_size=batch_size,
-                        epochs=epochs,
-                        validation_split=0.1)
+                        epochs=epochs)
 
     logger("Testing Model...")
     score, acc = model.evaluate(X_test, y_test,
@@ -85,6 +88,9 @@ def text_classification_query(self, instruction, drop=None,
         # information
         plots = generate_classification_plots(
             history, X, Y, model, X_test, y_test)
+
+    if save_model:
+        save(model, save_model)
 
     logger("Storing information in client object...")
     # storing values the model dictionary
@@ -130,7 +136,9 @@ def summarization_query(self, instruction, preprocess=True,
                         max_summary_length=150,
                         test_size=0.2,
                         random_state=49,
-                        generate_plots=True):
+                        generate_plots=True,
+                        save_model=False,
+                        save_path=os.getcwd()):
     if drop is None:
         drop = []
     data = pd.read_csv(self.dataset)
@@ -184,6 +192,12 @@ def summarization_query(self, instruction, preprocess=True,
         plots = None  # generate_classification_plots(
         #     history, X, Y, model, X_test, y_test)
 
+    if save_model:
+        logger("Saving model...")
+        path = save_path+ "DocSummarization.pth"
+        torch.save(model, path)
+        logger("->", "Saved model to disk as DocSummarization.pth")
+
     logger("Storing information in client object...")
 
     self.models["Document Summarization"] = {
@@ -217,7 +231,11 @@ def image_caption_query(self, instruction,
                         buffer_size=1000,
                         embedding_dim=256,
                         units=512,
-                        generate_plots=True):
+                        generate_plots=True,
+                        save_model_decoder=False,
+                        save_path_decoder=None,
+                        save_model_encoder=False,
+                        save_path_encoder=None):
     np.random.seed(random_state)
     tf.random.set_seed(random_state)
 
@@ -352,6 +370,14 @@ def image_caption_query(self, instruction,
     for item in files:
         if item.endswith(".npy"):
             os.remove(os.path.join(dir_name, item))
+
+    if save_model_decoder:
+        logger("Saving decoder...")
+        save(decoder, save_model_decoder)
+
+    if save_model_encoder:
+        logger("Saving encoder...")
+        save(decoder, save_model_encoder)
 
     self.models["Image Caption"] = {
         "decoder": decoder,
