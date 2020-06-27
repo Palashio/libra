@@ -80,7 +80,9 @@ class client:
 
     # param modelKey: string representation of the model to make prediction
     # param data: dataframe version of desired prediction set
-    def predict(self, modelKey, data):
+    def predict(self, data, modelKey=None):
+        if modelKey == None:
+            modelKey = self.latest_model
         modeldict = self.models[modelKey]
         data = modeldict['preprocesser'].transform(data)
         print(data)
@@ -90,8 +92,6 @@ class client:
                 predictions)
         return predictions
 
-    def predict(self, data):
-        return self.predict(self.latest_model, data)
 
     def neural_network_query(self,
                              instruction,
@@ -290,7 +290,7 @@ class client:
 
 
     def tune(self,
-             model_to_tune,
+             model_to_tune=None,
              max_layers=10,
              min_layers=2,
              min_dense=32,
@@ -307,6 +307,9 @@ class client:
              verbose=0,
              test_size=0.2
              ):
+
+        if model_to_tune == None:
+            model_to_tune =  self.latest_model
 
         self.models = tune_helper(
             model_to_tune=model_to_tune,
@@ -406,11 +409,16 @@ class client:
     def dimensionality_reducer(self, instruction):
         dimensionality_reduc(instruction, self.dataset)
 
-    def show_plots(self, model):
+    def show_plots(self, model=None):
+        if model == None:
+            model = self.latest_model
         print(self.models[model]['plots'].keys())
 
     # shows the keys in the models dictionary
-    def model_data(self, model):
+    def model_data(self, model=None):
+        if model == None:
+            model = self.latest_model
+
         if model in self.models:
             data = [key for key in self.models[model].keys()]
             print(data)
@@ -419,7 +427,9 @@ class client:
                 "The requested model has not been applied to the client.")
 
     # returns all operators applicable to the client's models dictionary
-    def operators(self, model):
+    def operators(self, model=None):
+        if model == None:
+            model = self.latest_model
         defined = ['plots', 'accuracy', 'losses']
         operations = [
             func +
@@ -433,7 +443,10 @@ class client:
 
     # show accuracy scores for client's model
 
-    def accuracy(self, model):
+    def accuracy(self, model=None):
+        if model == None:
+            model = self.latest_model
+
         if 'accuracy' in self.models[model].keys():
             return self.models[model]['accuracy']
         elif 'cross_val_score' in self.models[model].keys():
@@ -442,7 +455,10 @@ class client:
             raise Exception("Accuracy is not defined for {}".format(model))
 
     # show losses for client's model
-    def losses(self, model):
+    def losses(self, model=None):
+        if model == None:
+            model = self.latest_model
+
         if 'losses' in self.models[model].keys():
             return self.models[model]['losses']
         else:
