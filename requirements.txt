@@ -5,8 +5,6 @@ pandas
 sklearn
 pprint
 matplotlib
-os
-itertools
 tabulate
 textblob
 python-Levenshtein
@@ -14,3 +12,4 @@ seaborn
 keras-tuner
 spacy
 torch
+autocorrect
