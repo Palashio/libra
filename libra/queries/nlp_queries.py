@@ -90,7 +90,7 @@ def text_classification_query(self, instruction, drop=None,
             history, X, Y, model, X_test, y_test)
 
     if save_model:
-        save(model, save_model,save_path=save_path)
+        save(model, save_model, save_path=save_path)
 
     logger("Storing information in client object...")
     # storing values the model dictionary
