@@ -8,9 +8,10 @@ from tensorflow.python.client import device_lib
 # random trimming of the dataset, and the proportion of data to be trimmed 
 # specified by the user
 class DataReader():
-    def __init__(self, filepath, trim=True, trim_ratio=0.20):
+    def __init__(self, filepath, trim=False, trim_format='random', trim_ratio=0.20):
         self.filepath = filepath
         self.trim = trim
+        self.trim_format = trim_format
         self.trim_ratio = trim_ratio
 
         self.trim_gpu()
@@ -38,6 +39,15 @@ class DataReader():
                     df[data] = df[data].astype(float)
         elif self.retrieve_extension() == '.json':
             df = pd.read_json(self.filepath)
+
+        if self.is_gpu_available() == False:
+            self.trim = True
+        if self.trim == True:
+            if self.trim_format == 'random':
+                df = df.sample(frac=(1.0 - self.trim_ratio))
+            elif self.trim_format == 'stratify':
+                # ADD STRATIFYING METHOD
+                return None
         return df
     
     # Returns a list of available GPUs on the current device
@@ -71,12 +81,12 @@ class DataReader():
         else:
             return self.random_trim()
 
-# print(len(pd.read_csv("./data/housing.csv")))
+print(len(pd.read_csv("./tools/data/structured_data/housing.csv")))
 
-# dataReader = DataReader("./data/housing.csv", trim=True)
-# data = dataReader.data_generator()
+dataReader = DataReader("./tools/data/structured_data/housing.csv", trim=False, trim_ratio=0.5)
+data = dataReader.data_generator()
 
-# print(len(data))
+print(len(data))
 
 ############################
 
