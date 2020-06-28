@@ -22,7 +22,7 @@ from libra.preprocessing.image_caption_helpers import load_image, map_func, CNN_
 from libra.query.dimensionality_red_queries import logger
 
 # Sentiment analysis predict wrapper
-from libra.query.supplementaries import save
+from libra.query.supplementaries import save, get_standard_training_output_keras, get_standard_training_output_generic
 from nonkeras_generate_plots import plot_loss
 
 
@@ -92,7 +92,8 @@ def text_classification_query(self, instruction, drop=None,
     history = model.fit(X_train, y_train, validation_data=(X_test, y_test),
                         batch_size=batch_size,
                         epochs=epochs, callbacks=[es], verbose=0)
-    
+
+    print(get_standard_training_output(epochs,history))
 
     if generate_plots:
         # generates appropriate classification plots by feeding all
@@ -208,6 +209,7 @@ def summarization_query(self, instruction, preprocess=True,
         loss_train, loss_val = train(epoch, tokenizer, model, device, training_loader, val_loader, optimizer)
         total_loss_train.append(loss_train)
         total_loss_val.append(loss_val)
+    print(get_standard_training_output_generic(epochs, total_loss_train, total_loss_val))
 
     plots = {}
     if generate_plots:

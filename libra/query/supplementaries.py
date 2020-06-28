@@ -232,10 +232,28 @@ def get_image_data(data_path, read_mode=None, training_ratio=0.8):
     return X_train, X_test, process_info['height'], process_info['width'], num_classes
 
 
-def get_standard_training_output(epochs, history):
+def get_standard_training_output_keras(epochs, history):
     result = ""
     print("Epochs | Training Loss | Validation Loss")
-    for i, j, k in zip(range(epochs), history.history["val_loss"], history.history["val_accuracy"]):
+    for i, j, k in zip(range(epochs), history.history["loss"], history.history["val_loss"]):
+        i = str(i)
+        while len(i) < 7:
+            i = i + " "
+        j = str(j)
+        while len(j) < 16:
+            j = j + " "
+
+        k = str(k)
+        while len(k) < 16:
+            k = k + " "
+        result = result + i + "|" + j[:15] + "| " + k[:15] + "\n"
+    return result
+
+
+def get_standard_training_output_generic(epochs, loss, val_loss):
+    result = ""
+    print("Epochs | Training Loss | Validation Loss")
+    for i, j, k in zip(range(epochs), loss, val_loss):
         i = str(i)
         while len(i) < 7:
             i = i + " "

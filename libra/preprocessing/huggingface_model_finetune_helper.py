@@ -21,9 +21,6 @@ def train(epoch, tokenizer, model, device, loader, val_loader, optimizer):
                         lm_labels=lm_labels)
         loss = outputs[0]
 
-        print(f'Epoch: {epoch}, Loss:  {loss.item()}')
-
-
         running_loss += loss.item()
 
         optimizer.zero_grad()
