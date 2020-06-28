@@ -254,13 +254,13 @@ class client:
 
     def nearest_neighbor_query(
             self,
-            text=[],
             instruction=None,
+            text=[],
             preprocess=True,
             drop=None,
             min_neighbors=3,
             max_neighbors=10):
-        self.models['nearest_neigbor'] = nearest_neighbors(
+        self.models['nearest_neighbor'] = nearest_neighbors(
             instruction=instruction,
             text=text,
             dataset=self.dataset,
@@ -462,6 +462,32 @@ class client:
             return self.models[model]['losses']
         else:
             raise Exception("Losses are not defined for {}".format(model))
+
+    # Analysis of model
+    def analyze(self, model=None):
+        if model == None:
+            model = self.latest_model
+        for key in self.models[model]['plots']:
+            self.models[model]['plots'][key].show()
+        if model in ['classification _ANN', 'svm', 'nearest_neighbor',
+                     'decision_tree','convolutional_NN', 'text_classification_query']:
+            binary = False
+            if model in ['svm', 'nearest_neighbor','decision_tree']: #sklearn models
+                if len(self.models[model]['model'].classes_) == 2:
+                    binary = True
+             # find how to check if keras models have 2 classes or not
+             # find  way to only access test set
+
+            if binary:
+                #roc curve
+                #auc
+                pass
+
+            # report confusion matrices
+            # check if binary, if so, plot ROC curve and report AUC
+            pass
+        else:
+            raise Exception("Analysis is not defined for {}".format(model))
 
 
 # Easier to comment the one you don't want to run instead of typing them

@@ -15,16 +15,17 @@ def generate_clustering_plots(kmeans, dataPandas, dataset):
     # columns with each other based on the cluster they're in
     for x in range(len(dataPandas.columns) - 1):
         for y in range(len(dataPandas.columns) - 1):
-            img = plt.figure()
-            plt.scatter(dataset[:, x], dataset[:, y],
-                        c=kmeans.labels_, cmap='rainbow')
-            plt.xlabel(str(dataPandas.columns[x]))
-            plt.ylabel(str(dataPandas.columns[y]))
-            plots.append(img)
-            plot_names.append(
-                dataPandas.columns[x] +
-                "_vs_" +
-                dataPandas.columns[y])
+            if dataPandas.columns[x] != dataPandas.columns[y]:
+                img = plt.figure()
+                plt.scatter(dataset[:, x], dataset[:, y],
+                            c=kmeans.labels_, cmap='rainbow')
+                plt.xlabel(str(dataPandas.columns[x]))
+                plt.ylabel(str(dataPandas.columns[y]))
+                plots.append(img)
+                plot_names.append(
+                    dataPandas.columns[x] +
+                    "_vs_" +
+                    dataPandas.columns[y])
     return plots, plot_names
 
 # generates all of the plots for regression
