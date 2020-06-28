@@ -1,9 +1,18 @@
-from tensorflow.keras.layers import Conv2D, MaxPooling2D, Dense, Flatten, Activation, Dropout
+from tensorflow.keras.layers import (Conv2D, 
+                                     MaxPooling2D, 
+                                     Dense, 
+                                     Flatten, 
+                                     Dropout)
 from kerastuner import HyperModel
 from kerastuner.tuners import RandomSearch, Hyperband
 from sklearn import preprocessing
 from tensorflow import keras
 from sklearn.model_selection import train_test_split
+
+import os
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
+
+
 import tensorflow as tf
 from kerastuner.applications import HyperResNet
 
@@ -123,7 +132,9 @@ def tuneReg(
         max_trials=3,
         epochs=10,
         activation='relu',
-        step=32
+        step=32,
+        verbose = 0,
+        test_size=0.2
 ):
 
     # function build model using hyperparameter
@@ -162,7 +173,17 @@ def tuneReg(
                  callbacks=[tf.keras.callbacks.TensorBoard('my_dir')])
 
     models = tuner.get_best_models(num_models=1)
-    return models[0]
+    hyp = tuner.get_best_hyperparameters(num_trials = 1)[0]
+    #hyp = tuner.oracle.get_best_trials(num_trials=1)[0].hyperparameters.values
+    #best_hps = np.stack(hyp).astype(None)
+    history = tuner_hist(data,target,tuner,hyp, epochs=epochs, verbose = verbose, test_size=test_size)
+    """
+    Return:
+        models[0] : best model obtained after tuning
+        best_hps : best Hyperprameters obtained after tuning, stored as map
+        history : history of the data executed from the given model
+    """
+    return models[0], hyp, history
 
 
 def tuneClass(
@@ -179,7 +200,9 @@ def tuneClass(
         loss='categorical_crossentropy',
         metrics='accuracy',
         epochs=10,
-        step=32):
+        step=32,
+        verbose=0,
+        test_size=0.2):
     # function build model using hyperparameter
     le = preprocessing.LabelEncoder()
     y = tf.keras.utils.to_categorical(
@@ -221,7 +244,17 @@ def tuneClass(
                  epochs=epochs,
                  validation_data=(X_test, y_test))
     models = tuner.get_best_models(num_models=1)
-    return models[0]
+    hyp = tuner.get_best_hyperparameters(num_trials = 1)[0]
+    #hyp = tuner.oracle.get_best_trials(num_trials=1)[0].hyperparameters.values
+    #best_hps = np.stack(hyp).astype(None)
+    history = tuner_hist(X,y,tuner,hyp, epochs=epochs, verbose = verbose, test_size=test_size)
+    """
+    Return:
+        models[0] : best model obtained after tuning
+        best_hps : best Hyperprameters obtained after tuning, stored as array
+        history : history of the data executed from the given model
+    """
+    return models[0], hyp, history
 
 
 def tuneCNN(
@@ -235,7 +268,9 @@ def tuneCNN(
         max_trials=3,
         objective='val_accuracy',
         directory='random_search',
-        epochs=10):
+        epochs=10,
+        verbose=0,
+        test_size=0.2):
     # creates hypermodel object based on the num_classes and the input shape
     hypermodel = CNNHyperModel(input_shape=(
         height, width, 3), num_classes=num_classes)
@@ -251,20 +286,39 @@ def tuneCNN(
     )
     # X_train, X_test, y_train, y_test = train_test_split(
     #     np.asarray(X), np.asarray(y), test_size=0.33, random_state=42)
-    #
-    # # searches the tuner space defined by hyperparameters (hp) and returns the
-    # # best model
+
+    # searches the tuner space defined by hyperparameters (hp) and returns the
+    # best model
     tuner.search(X_train,
                  validation_data=X_test,
+                 callbacks=[tf.keras.callbacks.EarlyStopping(patience=1)],
                  epochs=epochs)
-    #
-    # returns the best model
-    return tuner.get_best_models(1)[0]
+
+    # best hyperparamters
+    hyp = tuner.get_best_hyperparameters(num_trials = 1)[0]
+    #hyp = tuner.oracle.get_best_trials(num_trials=1)[0].hyperparameters.values
+    #best_hps = np.stack(hyp).astype(None)
+    history = tuner_hist(X_train,X_test,tuner,hyp,img=1, epochs=epochs, verbose = verbose, test_size=test_size)
+
+    """
+    Return:
+        models[0] : best model obtained after tuning
+        best_hps : best Hyperprameters obtained after tuning, stored as array
+        history : history of the data executed from the given model
+    """
+    return tuner.get_best_models(1)[0], hyp, history
 
 
 def tuneHyperband(X,
                   y,
                   max_trials=3):
+    """ 
+    Perform Hyperband Tuning to search for the best model and Hyperparameters
+    Arguments:
+        X: Input dataset
+        y: Label or output dataset
+        max_trials: Trials required to perform tuning
+    """
     hypermodel = HyperResNet(input_shape=(128, 128, 3), num_classes=10)
     tuner = Hyperband(
         hypermodel,
@@ -281,5 +335,31 @@ def tuneHyperband(X,
     tuner.search(X_train, y_train,
                  epochs=5,
                  validation_data=(X_test, y_test))
-    models = tuner.get_best_models(num_models=1)
-    return models[0]
+    hyp = tuner.get_best_hyperparameters(num_trials = 1)[0]
+    #hyp = tuner.oracle.get_best_trials(num_trials=1)[0].hyperparameters.values
+    #best_hps = np.stack(hyp).astype(None)
+
+    history = tuner_hist(X,y,tuner,hyp)
+    """
+    Return:
+        models[0] : best model obtained after tuning
+        best_hps : best Hyperprameters obtained after tuning, stored as array
+        history : history of the data executed from the given model
+    """
+    return tuner.get_best_models(1)[0], hyp, history
+    
+def tuner_hist(X,y,tuner,best_hps,img=0, epochs=5, test_size=0.2, verbose=0):
+    model = tuner.hypermodel.build(best_hps)
+    if img==0:
+        X_train, X_test, y_train, y_test = train_test_split(
+            X, y, test_size=test_size, random_state=49)
+        history = model.fit(X_train, y_train, 
+                        epochs = epochs,
+                        validation_data = (X_test, y_test), 
+                        verbose=verbose)
+    else:
+        history=model.fit_generator(X, 
+                        epochs = epochs,
+                        validation_data = y, 
+                        verbose=verbose)
+    return history

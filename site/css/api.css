@@ -65,7 +65,9 @@ body{
 }
 
 #nav-bar{
-    position: absolute;
+    position: fixed;
+    z-index: 1;
+    background-color: white;
     left:300px;
     width: 1000px;
     height: 70px;
@@ -99,14 +101,18 @@ body{
 h2{
     padding:0px;
     margin:0px;
+    margin-bottom: 10px;
     font-weight: 600;
+    color: white;
 }
 
 .box{
     border: 1px solid rgb(206, 206, 206);
     margin: 25px;
     padding: 30px;
+    padding-top: 20px;
     border-radius: 15px;
+    background-image: linear-gradient(to bottom, rgb(77, 193, 255) 70px, white 70px, white 100%);
 }
 
 td {
