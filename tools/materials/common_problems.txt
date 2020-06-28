@@ -1,0 +1,41 @@
+1) If you're getting a lot of Libra module import errors like: 
+        from dataset_labelmatcher import get_similar_column, get_similar_model
+        ImportError: No module named grammartree
+
+        Add this to the top of your file right underneath the import sys:
+
+        sys.path.append('/User/path_to_libra_folder/Libra/') 
+
+2) Make sure that your python packages are installing in the right place. They need to be stored at:
+    /lib/site/python-packages.
+
+    To see where your packages are being installed take any of them and do:
+        pip show package-name
+
+3) If you're getting this AttributeError: 
+    AttributeError: 'EarlyStopping' object has no attribute '_implements_train_batch_hooks
+
+    replace line 25: tensorflow.keras.callbacks instead of keras.callbacks
+
+4)If you're getting an error related to installing Textblob:
+	either go into your folder from terminal, and then pip install 
+
+	or
+
+	make sure that you're treated each of the folders as source folders
+
+    or
+
+    try installing a gcc compiler and then retrying 
+
+5) If you've previous installed anaconda on your machine, and are getting unable to import module errors. Make sure that your libraries are being installed in the right place. 
+	It should not be installing in /anaconda/ paths. 
+
+6) If you're trying to run the codebase and it keeps saying you have to install this: nltk.download('averaged_perception_tagger')
+    include: 
+
+    import nltk
+    nltk.download('averaged_perceptron_tagger')
+
+
+

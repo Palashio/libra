@@ -1,4 +1,7 @@
-<img src="data/libra-logo.png" width="100%">
+## INITIAL BUILD RELEASE DATE: JULY 16TH.
+in progress....this README.md is out of date. Documentation site coming soon. 
+
+![image](tools/data/gh_images/libra-logo.png)
 
 # Libra: Deep Learning fluent in one-liners
 
