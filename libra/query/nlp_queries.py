@@ -93,7 +93,10 @@ def text_classification_query(self, instruction, drop=None,
                         batch_size=batch_size,
                         epochs=epochs, callbacks=[es], verbose=0)
 
-    print(get_standard_training_output(epochs,history))
+    print(get_standard_training_output_keras(epochs, history))
+    logger("Final Training Loss:", history.history["loss"][len(history.history["loss"])-1])
+    logger("Final Validation Loss:", history.history["val_loss"][len(history.history["val_loss"]) - 1])
+    logger("Final Accuracy:", history.history["val_accuracy"][len(history.history["val_accuracy"]) - 1])
 
     if generate_plots:
         # generates appropriate classification plots by feeding all
@@ -210,6 +213,8 @@ def summarization_query(self, instruction, preprocess=True,
         total_loss_train.append(loss_train)
         total_loss_val.append(loss_val)
     print(get_standard_training_output_generic(epochs, total_loss_train, total_loss_val))
+    logger("Final Training Loss: ", loss_train)
+    logger("Final Validation Loss: ", loss_val)
 
     plots = {}
     if generate_plots:
@@ -435,7 +440,7 @@ def image_caption_query(self, instruction,
             total_loss_val += t_loss
 
         loss_plot_val.append(total_loss_val.numpy() / num_steps)
-    print(get_standard_training_output_generic(epochs,loss_plot_train,loss_plot_val))
+    print(get_standard_training_output_generic(epochs, loss_plot_train, loss_plot_val))
 
     logger("Storing information in client object under key 'Image Caption' ...")
 
@@ -449,6 +454,10 @@ def image_caption_query(self, instruction,
     plots = {}
     if generate_plots:
         plots.update({"loss": plot_loss(loss_plot_train, loss_plot_val)})
+
+    logger("Final Training Loss: ", str(total_loss.numpy()/ num_steps))
+    logger("Final Validation Loss: ", str(total_loss_val.numpy()/ num_steps))
+
 
     if save_model_decoder:
         logger("Saving decoder...")
