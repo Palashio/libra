@@ -18,7 +18,7 @@ from libra.preprocessing.NLP_preprocessing import get_target_values, text_clean_
 from libra.preprocessing.huggingface_model_finetune_helper import CustomDataset, train, inference
 from libra.preprocessing.image_caption_helpers import load_image, map_func, CNN_Encoder, RNN_Decoder, get_path_column, \
     generate_caption_helper
-from libra.queries.dimensionality_red_queries import logger
+from libra.query.dimensionality_red_queries import logger
 
 def predict_text_sentiment(self, text):
     sentimentInfo = self.models.get("Text Classification LSTM")

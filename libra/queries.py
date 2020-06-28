@@ -1,15 +1,15 @@
-from libra.queries.nlp_queries import ( image_caption_query,
-     generate_caption, predict_text_sentiment,
-     text_classification_query, get_summary,
-     summarization_query)
-from libra.queries.classification_models import (k_means_clustering, 
-     train_svm, nearest_neighbors,
-     decision_tree)
-from libra.queries.supplementaries import tune_helper, stats
-from libra.queries.feedforward_nn import (regression_ann, 
-     classification_ann, 
-     convolutional)
-from libra.queries.dimensionality_red_queries import dimensionality_reduc
+from libra.query.nlp_queries import (image_caption_query,
+                                     generate_caption, predict_text_sentiment,
+                                     text_classification_query, get_summary,
+                                     summarization_query)
+from libra.query.classification_models import (k_means_clustering,
+                                               train_svm, nearest_neighbors,
+                                               decision_tree)
+from libra.query.supplementaries import tune_helper, stats
+from libra.query.feedforward_nn import (regression_ann,
+                                        classification_ann,
+                                        convolutional)
+from libra.query.dimensionality_red_queries import dimensionality_reduc
 from libra.data_generation.grammartree import get_value_instruction
 from libra.data_generation.dataset_labelmatcher import (get_similar_column, 
      get_similar_model)
