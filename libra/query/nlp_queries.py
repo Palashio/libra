@@ -5,6 +5,7 @@ import pandas as pd
 import torch
 from keras_preprocessing import sequence
 from sklearn.model_selection import train_test_split
+from tensorflow.python.keras.saving.saved_model.json_utils import Encoder
 from torch.utils.data import DataLoader
 from transformers import T5Tokenizer, T5ForConditionalGeneration
 import tensorflow as tf
@@ -20,7 +21,7 @@ from libra.preprocessing.image_caption_helpers import load_image, map_func, CNN_
 from libra.query.dimensionality_red_queries import logger
 
 # Sentiment analysis predict wrapper
-from libra.queries.supplementaries import save
+from libra.query.supplementaries import save
 from nonkeras_generate_plots import plot_loss
 
 
@@ -41,6 +42,7 @@ def classify_text(self, text):
 def text_classification_query(self, instruction, drop=None,
                               preprocess=True,
                               test_size=0.2,
+                              val_size=0.1,
                               random_state=49,
                               learning_rate=1e-2,
                               epochs=20,
@@ -52,12 +54,14 @@ def text_classification_query(self, instruction, drop=None,
     data = pd.read_csv(self.dataset)
     if preprocess:
         data.fillna(0, inplace=True)
+    if drop is None:
+        drop = []
     data = data.drop(drop)
-    X, Y = get_target_values(data, instruction, "label")
+    X, Y, target = get_target_values(data, instruction, "label")
     Y = np.array(Y)
     classes = np.unique(Y)
 
-    logger("->", "Target Column Found: {}".format(Y))
+    logger("->", "Target Column Found: {}".format(target))
 
     if preprocess:
         logger("Preprocessing data...")
@@ -75,9 +79,9 @@ def text_classification_query(self, instruction, drop=None,
     X_test = sequence.pad_sequences(X_test, maxlen=maxTextLength)
 
     logger("Training Model...")
-    history = model.fit(X_train, y_train,
+    history = model.fit(X_train, y_train, validation_split=val_size,
                         batch_size=batch_size,
-                        epochs=epochs, learning_rate=learning_rate)
+                        epochs=epochs)
 
     logger("Testing Model...")
     score, acc = model.evaluate(X_test, y_test,
@@ -150,9 +154,9 @@ def summarization_query(self, instruction, preprocess=True,
 
     logger("Preprocessing data...")
 
-    X, Y = get_target_values(data, instruction, "summary")
+    X, Y, target = get_target_values(data, instruction, "summary")
     df = pd.DataFrame({'text': Y, 'ctext': X})
-    logger("->", "Target Column Found: {}".format(Y))
+    logger("->", "Target Column Found: {}".format(target))
 
     device = 'cpu'
 
@@ -196,7 +200,7 @@ def summarization_query(self, instruction, preprocess=True,
     total_loss_train = []
     total_loss_val = []
     for epoch in range(epochs):
-        loss_train, loss_val = train(epoch, tokenizer, model, device, training_loader, optimizer)
+        loss_train, loss_val = train(epoch, tokenizer, model, device, training_loader, val_loader, optimizer)
         total_loss_train.append(loss_train)
         total_loss_val.append(loss_val)
 
@@ -217,8 +221,8 @@ def summarization_query(self, instruction, preprocess=True,
         "maxTextLength": max_text_length,
         "maxSumLength": max_summary_length,
         "plots": plots,
-        'losses': {'training_loss': total_loss_train,
-                   'val_loss': total_loss_val}
+        'losses': {'training_loss': loss_train,
+                   'val_loss': loss_val}
     }
     return self.models["Document Summarization"]
 
@@ -255,14 +259,16 @@ def image_caption_query(self, instruction,
     df = pd.read_csv(self.dataset)
     if preprocess:
         df.fillna(0, inplace=True)
-    df = df.drop(drop)
+    if drop is not None:
+        df = df.drop(drop)
 
     logger("Preprocessing data...")
 
     train_captions = []
     img_name_vector = []
-    y = get_similar_column(get_value_instruction(instruction), df)
     x = get_path_column(df)
+    y = get_similar_column(get_value_instruction(instruction), df)
+    logger("->", "Target Column Found: {}".format(y))
 
     for row in df.iterrows():
         if preprocess:
@@ -415,7 +421,7 @@ def image_caption_query(self, instruction,
             batch_loss, t_loss = train_step(img_tensor, target)
             total_loss += t_loss
 
-        logger('Epoch {} Loss {:.6f}'.format(epoch + 1,
+        print('Epoch {} Loss {:.6f}'.format(epoch + 1,
                                              total_loss / num_steps))
         loss_plot_train.append(total_loss / num_steps)
 
@@ -439,11 +445,12 @@ def image_caption_query(self, instruction,
 
     if save_model_decoder:
         logger("Saving decoder...")
-        save(decoder, save_model_decoder, save_path=save_path_decoder)
+        encoder.save_weights(save_path_decoder + "decoderImgCap.ckpt")
 
     if save_model_encoder:
         logger("Saving encoder...")
-        save(decoder, save_model_encoder, save_path=save_path_encoder)
+        encoder.save_weights(save_path_encoder+"encoderImgCap.ckpt")
+
 
     self.models["Image Caption"] = {
         "decoder": decoder,
@@ -452,8 +459,8 @@ def image_caption_query(self, instruction,
         "feature_extraction": image_features_extract_model,
         "plots": plots,
         'losses': {
-            'training_loss': total_loss,
-            'validation_loss': total_loss_val
+            'training_loss': total_loss.numpy(),
+            'validation_loss': total_loss_val.numpy()
         }
     }
     return self.models["Image Caption"]

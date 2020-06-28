@@ -187,7 +187,7 @@ def save(model, save_model, save_path=os.getcwd()):
         # serialize weights to HDF5
         model.save_weights(save_path + "/weights" + str(number) + ".h5")
         logger("->", "Saved model to disk as model" + str(number))
-    number= number+1
+    number = number+1
 
 
 def generate_id():

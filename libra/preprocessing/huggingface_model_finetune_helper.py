@@ -1,8 +1,7 @@
 import torch
-import torch.nn.functional as F
-from torch.utils.data import Dataset, DataLoader, RandomSampler
+from torch.utils.data import Dataset
 
-from libra.queries.prediction_queries import logger
+from libra.query.supplementaries import logger
 
 
 def train(epoch, tokenizer, model, device, loader, val_loader, optimizer):
@@ -22,7 +21,7 @@ def train(epoch, tokenizer, model, device, loader, val_loader, optimizer):
                         lm_labels=lm_labels)
         loss = outputs[0]
 
-        logger(f'Epoch: {epoch}, Loss:  {loss.item()}')
+        print(f'Epoch: {epoch}, Loss:  {loss.item()}')
 
 
         running_loss += loss.item()
