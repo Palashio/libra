@@ -3,10 +3,17 @@ import sys
 import matplotlib.pyplot as plt
 import seaborn as sns
 import warnings
+import sklearn
+import numpy as np
+from sklearn.metrics import roc_curve, auc
+from sklearn.preprocessing import label_binarize
+from numpy import interp
+import pandas as pd
 
-warnings.filterwarnings("ignore", category=RuntimeWarning) 
+warnings.filterwarnings("ignore", category=RuntimeWarning)
 
 # generates all of the plots in clustering
+
 
 def generate_clustering_plots(kmeans, dataPandas, dataset):
     plots = []
@@ -115,3 +122,74 @@ def plot_acc(history):
     plt.xlabel('epoch')
     plt.legend(['train', 'test'], loc='upper left')
     return img
+
+
+def plot_mc_roc(y_test, y_score, interpreter=None):
+    lw = 2
+    n_classes = len(np.unique(y_test))
+    classes = pd.unique(y_test)
+    y_test = label_binarize(y_test, classes=classes)
+    y_score = label_binarize(y_score, classes=classes)
+    # Compute ROC curve and ROC area for each class
+    fpr = dict()
+    tpr = dict()
+    roc_auc = dict()
+    for i in range(n_classes):
+        fpr[i], tpr[i], _ = roc_curve(y_test[:, i], y_score[:, i])
+        roc_auc[i] = auc(fpr[i], tpr[i])
+
+    # Compute micro-average ROC curve and ROC area
+    fpr["micro"], tpr["micro"], _ = roc_curve(y_test.ravel(), y_score.ravel())
+    roc_auc["micro"] = auc(fpr["micro"], tpr["micro"])
+    # First aggregate all false positive rates
+    all_fpr = np.unique(np.concatenate([fpr[i] for i in range(n_classes)]))
+
+    # Then interpolate all ROC curves at this points
+    mean_tpr = np.zeros_like(all_fpr)
+    for i in range(n_classes):
+        mean_tpr += interp(all_fpr, fpr[i], tpr[i])
+
+    # Finally average it and compute AUC
+    mean_tpr /= n_classes
+
+    fpr["macro"] = all_fpr
+    tpr["macro"] = mean_tpr
+    roc_auc["macro"] = sklearn.metrics.auc(fpr["macro"], tpr["macro"])
+
+    # Plot all ROC curves
+    plt.figure()
+    plt.plot(fpr["micro"], tpr["micro"],
+             label='micro-average ROC curve (area = {0:0.2f})'
+                   ''.format(roc_auc["micro"]),
+             color='deeppink', linestyle=':', linewidth=4)
+
+    plt.plot(fpr["macro"], tpr["macro"],
+             label='macro-average ROC curve (area = {0:0.2f})'
+                   ''.format(roc_auc["macro"]),
+             color='navy', linestyle=':', linewidth=4)
+
+    for i in range(n_classes):
+        if isinstance(interpreter, dict):
+            inverted_interpreter = dict(map(reversed, interpreter.items()))
+            plt.plot(fpr[i], tpr[i], lw=lw,
+                     label='ROC curve of class {0} (area = {1:0.2f})'
+                           ''.format(inverted_interpreter[i], roc_auc[i]))
+        else:
+            plt.plot(
+                fpr[i],
+                tpr[i],
+                lw=lw,
+                label='ROC curve of class {0} (area = {1:0.2f})'
+                ''.format(
+                    interpreter.inverse_transform(
+                        [i])[0],
+                    roc_auc[i]))
+
+    plt.plot([0, 1], [0, 1], 'k--', lw=lw)
+    plt.xlim([0.0, 1.0])
+    plt.ylim([0.0, 1.05])
+    plt.xlabel('False Positive Rate')
+    plt.ylabel('True Positive Rate')
+    plt.title('ROC Curves')
+    plt.legend(loc="lower right")
+    plt.show()

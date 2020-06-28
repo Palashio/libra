@@ -12,21 +12,17 @@ from libra.query.feedforward_nn import (regression_ann,
 from libra.query.dimensionality_red_queries import dimensionality_reduc
 from libra.data_generation.grammartree import get_value_instruction
 from libra.data_generation.dataset_labelmatcher import (get_similar_column,
-     get_similar_model)
+                                                        get_similar_model)
+from libra.plotting.generate_plots import plot_mc_roc
 import pandas as pd
 from pandas.core.common import SettingWithCopyWarning
 import warnings
 import os
 import sklearn
 import matplotlib.pyplot as plt
-import numpy as np
-from sklearn.metrics import roc_curve, auc, confusion_matrix, plot_confusion_matrix, recall_score, precision_score, f1_score
-from sklearn.preprocessing import label_binarize
-from numpy import interp
-from itertools import cycle
+from sklearn.metrics import confusion_matrix, plot_confusion_matrix, recall_score, precision_score, f1_score
 
-
-#supressing warnings for cleaner dialogue box
+# supressing warnings for cleaner dialogue box
 warnings.simplefilter(action='error', category=FutureWarning)
 warnings.simplefilter(action="ignore", category=SettingWithCopyWarning)
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
@@ -36,8 +32,7 @@ currLog = ""
 counter = 0
 
 
-
-#clears log when needed - currently not being used
+# clears log when needed - currently not being used
 def clearLog():
     global currLog
     global counter
@@ -67,7 +62,8 @@ def logger(instruction, found="", slash=''):
     currLog = ""
 
 
-# class to store all query information. Currently, old_models is not being used.
+# class to store all query information. Currently, old_models is not being
+# used.
 class client:
     def __init__(self, data):
         logger("creating object...")
@@ -79,7 +75,8 @@ class client:
         logger("done...")
         clearLog()
 
-    # returns models with a specific string - currently deprecated, should not be used.
+    # returns models with a specific string - currently deprecated, should not
+    # be used.
     def get_models(self, model_requested):
         logger("Getting model...")
         return get_similar_model(model_requested, self.models.keys())
@@ -88,7 +85,7 @@ class client:
     # param modelKey: string representation of the model to make prediction
     # param data: dataframe version of desired prediction set
     def predict(self, data, modelKey=None):
-        if modelKey == None:
+        if modelKey is None:
             modelKey = self.latest_model
         modeldict = self.models[modelKey]
         data = modeldict['preprocesser'].transform(data)
@@ -98,17 +95,17 @@ class client:
     def interpret(self, modelKey, predictions):
         modeldict = self.models[modelKey]
         if modeldict.get('interpreter'):
-            if type(modeldict['interpreter']) == dict:
-                inverted_interpreter = dict(map(reversed, modeldict['interpreter'].items()))
+            if isinstance(modeldict['interpreter'], dict):
+                inverted_interpreter = dict(
+                    map(reversed, modeldict['interpreter'].items()))
                 toRet = []
                 for each in predictions:
                     toRet.append(inverted_interpreter[each])
                 predictions = toRet
             else:
                 predictions = modeldict['interpreter'].inverse_transform(
-                     predictions)
+                    predictions)
         return predictions
-
 
     def neural_network_query(self,
                              instruction,
@@ -305,7 +302,6 @@ class client:
 
         self.latest_model = 'decision_tree'
 
-
     def tune(self,
              model_to_tune=None,
              max_layers=10,
@@ -325,8 +321,8 @@ class client:
              test_size=0.2
              ):
 
-        if model_to_tune == None:
-            model_to_tune =  self.latest_model
+        if model_to_tune is None:
+            model_to_tune = self.latest_model
 
         self.models = tune_helper(
             model_to_tune=model_to_tune,
@@ -376,8 +372,8 @@ class client:
 
         self.latest_model = 'convolutional_NN'
 
-
     # Sentiment analysis predict wrapper
+
     def predict_text_sentiment(self, text):
         return predict_text_sentiment(self=self, text=text)
 
@@ -427,13 +423,13 @@ class client:
         dimensionality_reduc(instruction, self.dataset)
 
     def show_plots(self, model=None):
-        if model == None:
+        if model is None:
             model = self.latest_model
         print(self.models[model]['plots'].keys())
 
     # shows the keys in the models dictionary
     def model_data(self, model=None):
-        if model == None:
+        if model is None:
             model = self.latest_model
 
         if model in self.models:
@@ -445,7 +441,7 @@ class client:
 
     # returns all operators applicable to the client's models dictionary
     def operators(self, model=None):
-        if model == None:
+        if model is None:
             model = self.latest_model
         defined = ['plots', 'accuracy', 'losses']
         operations = [
@@ -455,13 +451,13 @@ class client:
             print(operations)
         else:
             raise Exception(
-                "There are no built-in operators defined for this model." 
+                "There are no built-in operators defined for this model."
                 " Please refer to the models dictionary.")
 
     # show accuracy scores for client's model
 
     def accuracy(self, model=None):
-        if model == None:
+        if model is None:
             model = self.latest_model
 
         if 'accuracy' in self.models[model].keys():
@@ -473,7 +469,7 @@ class client:
 
     # show losses for client's model
     def losses(self, model=None):
-        if model == None:
+        if model is None:
             model = self.latest_model
 
         if 'losses' in self.models[model].keys():
@@ -483,7 +479,7 @@ class client:
 
     # Analysis of model
     def analyze(self, model=None):
-        if model == None:
+        if model is None:
             model = self.latest_model
 
         logger(" ", ("Analyzing {}".format(model)))
@@ -495,7 +491,6 @@ class client:
             for key in modeldict['plots']:
                 modeldict['plots'][key]
                 plt.show()
-
 
         if modeldict.get('test_data'):
             logger("->", "Making predictions for test data...")
@@ -510,19 +505,22 @@ class client:
             logger(" ", ("MSE on test set: {}".format(str(MSE))))
             logger("->", ("MAE on test set: {}".format(str(MAE))))
 
-        elif model in ['svm', 'nearest_neighbor', 'decision_tree', 'classification_ANN']: # classification models
+        # classification models
+        elif model in ['svm', 'nearest_neighbor', 'decision_tree', 'classification_ANN']:
             logger("->", "Plotting ROC curves...")
             plot_mc_roc(real, preds, modeldict['interpreter'])
 
             logger("->", "Creating confusion matrix...")
-            if model in ['svm', 'nearest_neighbor', 'decision_tree']: #sklearn models ONLY
+            if model in ['svm', 'nearest_neighbor',
+                         'decision_tree']:  # sklearn models ONLY
                 labels = list(modeldict['interpreter'].keys())
-                plot_confusion_matrix(modeldict['model'], data, real, display_labels=labels)
+                plot_confusion_matrix(
+                    modeldict['model'], data, real, display_labels=labels)
                 plt.show()
 
                 accuracy = modeldict['accuracy_score']
-            else: #classification_ANN
-                # TODO: find a way to plot this with labels
+            else:  # classification_ANN
+                # TODO: find a way to display this with labels
                 confusion_matrix(real, preds)
                 accuracy = modeldict['accuracy']['validation_accuracy']
             logger("->", "Reporting metrics: ")
@@ -538,70 +536,6 @@ class client:
             print("further analysis is not supported for {}".format(model))
 
 
-def plot_mc_roc (y_test, y_score, interpreter = None):
-    lw = 2
-    n_classes = len(np.unique(y_test))
-    classes = pd.unique(y_test)
-    y_test= label_binarize(y_test, classes = classes)
-    y_score = label_binarize(y_score, classes = classes)
-    # Compute ROC curve and ROC area for each class
-    fpr = dict()
-    tpr = dict()
-    roc_auc = dict()
-    for i in range(n_classes):
-        fpr[i], tpr[i], _ = roc_curve(y_test[:, i], y_score[:, i])
-        roc_auc[i] = auc(fpr[i], tpr[i])
-
-    # Compute micro-average ROC curve and ROC area
-    fpr["micro"], tpr["micro"], _ = roc_curve(y_test.ravel(), y_score.ravel())
-    roc_auc["micro"] = auc(fpr["micro"], tpr["micro"])
-    # First aggregate all false positive rates
-    all_fpr = np.unique(np.concatenate([fpr[i] for i in range(n_classes)]))
-
-    # Then interpolate all ROC curves at this points
-    mean_tpr = np.zeros_like(all_fpr)
-    for i in range(n_classes):
-        mean_tpr += interp(all_fpr, fpr[i], tpr[i])
-
-    # Finally average it and compute AUC
-    mean_tpr /= n_classes
-
-    fpr["macro"] = all_fpr
-    tpr["macro"] = mean_tpr
-    roc_auc["macro"] = sklearn.metrics.auc(fpr["macro"], tpr["macro"])
-
-    # Plot all ROC curves
-    plt.figure()
-    plt.plot(fpr["micro"], tpr["micro"],
-             label='micro-average ROC curve (area = {0:0.2f})'
-                   ''.format(roc_auc["micro"]),
-             color='deeppink', linestyle=':', linewidth=4)
-
-    plt.plot(fpr["macro"], tpr["macro"],
-             label='macro-average ROC curve (area = {0:0.2f})'
-                   ''.format(roc_auc["macro"]),
-             color='navy', linestyle=':', linewidth=4)
-
-    for i in range(n_classes):
-        if type(interpreter) == dict:
-            inverted_interpreter = dict(map(reversed, interpreter.items()))
-            plt.plot(fpr[i], tpr[i], lw=lw,
-                     label='ROC curve of class {0} (area = {1:0.2f})'
-                           ''.format(inverted_interpreter[i], roc_auc[i]))
-        else:
-            plt.plot(fpr[i], tpr[i], lw=lw,
-                     label='ROC curve of class {0} (area = {1:0.2f})'
-                           ''.format(interpreter.inverse_transform([i])[0], roc_auc[i]))
-
-    plt.plot([0, 1], [0, 1], 'k--', lw=lw)
-    plt.xlim([0.0, 1.0])
-    plt.ylim([0.0, 1.05])
-    plt.xlabel('False Positive Rate')
-    plt.ylabel('True Positive Rate')
-    plt.title('ROC Curves')
-    plt.legend(loc="lower right")
-    plt.show()
-
 # Easier to comment the one you don't want to run instead of typing them
 # out every time
 # newClient = client('/Users/palashshah/Desktop')
@@ -610,9 +544,11 @@ def plot_mc_roc (y_test, y_score, interpreter = None):
 # newClient.neural_network_query("Model median house value")
 # newClient = client('tools/data/structured_data/landslides_after_rainfall.csv').neural_network_query(instruction='Model distance',
 # drop=['id', 'geolocation', 'source_link', 'source_name'])
-#newClient = client('tools/data/structured_data/fake_job_postings.csv').neural_network_query(instruction='Classify fraudulent',
+# newClient = client('tools/data/structured_data/fake_job_postings.csv').neural_network_query(instruction='Classify fraudulent',
 #                                                                                            drop=['job_id'],
-#                                                                                            text=['department','description', 'company_profile','requirements', 'benefits'])
-newClient = client('/Users/ramyabhaskara/PycharmProjects/libra/tools/data/structured_data/housing.csv')
+# text=['department','description', 'company_profile','requirements',
+# 'benefits'])
+newClient = client(
+    '/Users/ramyabhaskara/PycharmProjects/libra/tools/data/structured_data/housing.csv')
 newClient.decision_tree_query("Model ocean proximity")
 newClient.analyze()
