@@ -533,6 +533,7 @@ class client:
 
 # newClient = client('tools/data/structured_data/fake_job_postings.csv').neural_network_query(instruction='Classify
 # fraudulent', drop=['job_id'], text=['department','description', 'company_profile','requirements', 'benefits'])
-newClient = client('./../tools/data/structured_data/housing.csv')
-newClient.neural_network_query("Model median house value", epochs=3)
-
+# newClient = client('./../tools/data/structured_data/housing.csv')
+# newClient.neural_network_query("Model median house value", epochs=3)
+newClient = client('/Users/anasawadalla/PycharmProjects/libra/tools/data/nlp_data/smallSentimentAnalysis.csv')
+newClient.text_classification_query("tweets", epochs=5, save_model=True)

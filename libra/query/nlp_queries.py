@@ -89,20 +89,14 @@ def text_classification_query(self, instruction, drop=None,
         verbose=0,
         patience=5)
 
-    history = model.fit(X_train, y_train, validation_split=val_size,
+    history = model.fit(X_train, y_train, validation_data=(X_test, y_test),
                         batch_size=batch_size,
-                        epochs=epochs, callbacks=[es])
-
-    logger("Testing Model...")
-    score, acc = model.evaluate(X_test, y_test,
-                                batch_size=batch_size)
-
-    logger("->", "Test accuracy:" + str(acc))
+                        epochs=epochs, callbacks=[es], verbose=0)
+    
 
     if generate_plots:
         # generates appropriate classification plots by feeding all
         # information
-        print(history.history['loss'])
         plots = generate_classification_plots(
             history, X, Y, model, X_test, y_test)
 
