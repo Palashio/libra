@@ -1,4 +1,5 @@
 import os
+import numpy as np
 import pandas as pd
 import tensorflow as tf
 from tensorflow.python.client import device_lib
@@ -13,8 +14,6 @@ class DataReader():
         self.trim = trim
         self.trim_format = trim_format
         self.trim_ratio = trim_ratio
-
-        self.trim_gpu()
 
 
     # Retrieves the dataset's size in MB
@@ -46,8 +45,10 @@ class DataReader():
             if self.trim_format == 'random':
                 df = df.sample(frac=(1.0 - self.trim_ratio))
             elif self.trim_format == 'stratify':
-                # ADD STRATIFYING METHOD
-                return None
+                fractions = np.array([1.0 - self.trim_ratio, self.trim_ratio])
+                df = df.sample(frac=1.0)
+                df, trimmed = np.array_split(df, (fractions[:-1].cumsum() * len(df)).astype(int))
+        
         return df
     
     # Returns a list of available GPUs on the current device
@@ -60,33 +61,33 @@ class DataReader():
     def is_gpu_available(self):
         return tf.test.gpu_device_name() != ''
     
-    # Trims the dataset based off of user preference and the ratio 
-    # of data to be trimmed specified
-    def random_trim (self):
-        if self.trim == True:
-            trimmed_df = self.data_generator().sample(frac=(1.0 - self.trim_ratio))
-            return trimmed_df
-        elif self.trim == False:
-            return self.data_generator()
-        
-    # def stratified_strim(self):
+    # # Trims the dataset based off of user preference and the ratio 
+    # # of data to be trimmed specified
+    # def random_trim (self):
+    #     if self.trim == True:
+    #         trimmed_df = self.data_generator().sample(frac=(1.0 - self.trim_ratio))
+    #         return trimmed_df
+    #     elif self.trim == False:
+    #         return self.data_generator()
 
-    # If the device running the program has a GPU, no trimming will occur unless 
-    # the user specifies so, and vice-versa
-    def trim_gpu (self):
-        if self.is_gpu_available() == True and self.trim == True:
-            return self.random_trim()
-        elif self.is_gpu_available() == True and self.trim == False:
-            return self.data_generator()
-        else:
-            return self.random_trim()
+    # # If the device running the program has a GPU, no trimming will occur unless 
+    # # the user specifies so, and vice-versa
+    # def trim_gpu (self):
+    #     if self.is_gpu_available() == True and self.trim == True:
+    #         return self.random_trim()
+    #     elif self.is_gpu_available() == True and self.trim == False:
+    #         return self.data_generator()
+    #     else:
+    #         return self.random_trim()
 
-print(len(pd.read_csv("./tools/data/structured_data/housing.csv")))
 
-dataReader = DataReader("./tools/data/structured_data/housing.csv", trim=False, trim_ratio=0.5)
-data = dataReader.data_generator()
 
-print(len(data))
+# print(len(pd.read_csv("./tools/data/structured_data/housing.csv")))
+
+# dataReader = DataReader("./tools/data/structured_data/housing.csv", trim=False, trim_format='stratify', trim_ratio=0.2)
+# data = dataReader.data_generator()
+
+# print(len(data))
 
 ############################
 
