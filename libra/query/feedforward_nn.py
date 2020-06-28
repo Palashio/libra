@@ -222,6 +222,7 @@ def regression_ann(
         "plots": plots,
         "preprocesser": full_pipeline,
         "interpreter": target_scaler,
+        'test_data': {'X': X_test, 'y': y_test},
         'losses': {
             'training_loss': final_hist.history['loss'],
             'val_loss': final_hist.history['val_loss']}}
@@ -391,6 +392,7 @@ def classification_ann(instruction,
         "target": remove,
         "preprocesser": full_pipeline,
         "interpreter": one_hot_encoder,
+        'test_data': {'X': X_test, 'y': y_test},
         'losses': {
             'training_loss': final_hist.history['loss'],
             'val_loss': final_hist.history['val_loss']},

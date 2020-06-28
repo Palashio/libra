@@ -11,12 +11,19 @@ from libra.query.feedforward_nn import (regression_ann,
                                         convolutional)
 from libra.query.dimensionality_red_queries import dimensionality_reduc
 from libra.data_generation.grammartree import get_value_instruction
-from libra.data_generation.dataset_labelmatcher import (get_similar_column, 
+from libra.data_generation.dataset_labelmatcher import (get_similar_column,
      get_similar_model)
 import pandas as pd
 from pandas.core.common import SettingWithCopyWarning
 import warnings
 import os
+import sklearn
+import matplotlib.pyplot as plt
+import numpy as np
+from sklearn.metrics import roc_curve, auc, confusion_matrix, plot_confusion_matrix, recall_score, precision_score, f1_score
+from sklearn.preprocessing import label_binarize
+from numpy import interp
+from itertools import cycle
 
 
 #supressing warnings for cleaner dialogue box
@@ -72,7 +79,7 @@ class client:
         logger("done...")
         clearLog()
 
-    # returns models with a specific string - currently deprecated, should not be used. 
+    # returns models with a specific string - currently deprecated, should not be used.
     def get_models(self, model_requested):
         logger("Getting model...")
         return get_similar_model(model_requested, self.models.keys())
@@ -86,9 +93,20 @@ class client:
         modeldict = self.models[modelKey]
         data = modeldict['preprocesser'].transform(data)
         predictions = modeldict['model'].predict(data)
+        return self.interpret(modelKey, predictions)
+
+    def interpret(self, modelKey, predictions):
+        modeldict = self.models[modelKey]
         if modeldict.get('interpreter'):
-            predictions = modeldict['interpreter'].inverse_transform(
-                predictions)
+            if type(modeldict['interpreter']) == dict:
+                inverted_interpreter = dict(map(reversed, modeldict['interpreter'].items()))
+                toRet = []
+                for each in predictions:
+                    toRet.append(inverted_interpreter[each])
+                predictions = toRet
+            else:
+                predictions = modeldict['interpreter'].inverse_transform(
+                     predictions)
         return predictions
 
 
@@ -467,32 +485,116 @@ class client:
     def analyze(self, model=None):
         if model == None:
             model = self.latest_model
-        for key in self.models[model]['plots']:
-            self.models[model]['plots'][key].show()
-        if model in ['classification _ANN', 'svm', 'nearest_neighbor',
-                     'decision_tree','convolutional_NN', 'text_classification_query']:
-            binary = False
-            if model in ['svm', 'nearest_neighbor','decision_tree']: #sklearn models
-                if len(self.models[model]['model'].classes_) == 2:
-                    binary = True
-             # find how to check if keras models have 2 classes or not
-             # find  way to only access test set
 
-            if binary:
-                #roc curve
-                #auc
-                pass
+        modeldict = self.models[model]
+        if modeldict.get('plots'):
+            for key in modeldict['plots']:
+                modeldict['plots'][key]
+                plt.show()
 
-            # report confusion matrices
-            # check if binary, if so, plot ROC curve and report AUC
-            pass
+        if modeldict.get('test_data'):
+            data = modeldict['test_data']['X']
+            real = modeldict['test_data']['y']
+            preds = modeldict['model'].predict(data)
+
+        if model == 'regression_ANN':
+            MSE = sklearn.metrics.mean_squared_error(real, preds)
+            MAE = sklearn.metrics.mean_absolute_error(real, preds)
+            print("Mean Squared Error on Test Set: " + str(MSE))
+            print("Mean Absolute Error on Test Set: " + str(MAE))
+
+        elif model in ['svm', 'nearest_neighbor', 'decision_tree', 'classification_ANN']: # classification models
+            plot_mc_roc(real, preds, modeldict['interpreter'])
+
+            if model in ['svm', 'nearest_neighbor', 'decision_tree']: #sklearn models ONLY
+                labels = list(modeldict['interpreter'].keys())
+                plot_confusion_matrix(modeldict['model'], data, real, display_labels=labels)
+                plt.show()
+
+                accuracy = modeldict['accuracy_score']
+            else: #classification_ANN
+                # TODO: find a prettier way to plot this
+                confusion_matrix(real, preds)
+                accuracy = modeldict['accuracy']['validation_accuracy']
+
+            recall = recall_score(real, preds, average='micro')
+            precision = precision_score(real, preds, average='micro')
+            f1 = f1_score(real, preds, average='micro')
+
+            print("Accuracy on Test Set: " + str(accuracy))
+            print("Recall on Test Set: " + str(recall))
+            print("Precision on Test Set: " + str(precision))
+            print("F1 Score on Test Set: " + str(f1))
+        elif model not in ['k_means_clustering', 'regression_ANN']:
+            print("further analysis is not supported for {}".format(model))
+
+
+def plot_mc_roc (y_test, y_score, interpreter = None):
+    lw = 2
+    n_classes = len(np.unique(y_test))
+    classes = pd.unique(y_test)
+    y_test= label_binarize(y_test, classes = classes)
+    y_score = label_binarize(y_score, classes = classes)
+    # Compute ROC curve and ROC area for each class
+    fpr = dict()
+    tpr = dict()
+    roc_auc = dict()
+    for i in range(n_classes):
+        fpr[i], tpr[i], _ = roc_curve(y_test[:, i], y_score[:, i])
+        roc_auc[i] = auc(fpr[i], tpr[i])
+
+    # Compute micro-average ROC curve and ROC area
+    fpr["micro"], tpr["micro"], _ = roc_curve(y_test.ravel(), y_score.ravel())
+    roc_auc["micro"] = auc(fpr["micro"], tpr["micro"])
+    # First aggregate all false positive rates
+    all_fpr = np.unique(np.concatenate([fpr[i] for i in range(n_classes)]))
+
+    # Then interpolate all ROC curves at this points
+    mean_tpr = np.zeros_like(all_fpr)
+    for i in range(n_classes):
+        mean_tpr += interp(all_fpr, fpr[i], tpr[i])
+
+    # Finally average it and compute AUC
+    mean_tpr /= n_classes
+
+    fpr["macro"] = all_fpr
+    tpr["macro"] = mean_tpr
+    roc_auc["macro"] = sklearn.metrics.auc(fpr["macro"], tpr["macro"])
+
+    # Plot all ROC curves
+    plt.figure()
+    plt.plot(fpr["micro"], tpr["micro"],
+             label='micro-average ROC curve (area = {0:0.2f})'
+                   ''.format(roc_auc["micro"]),
+             color='deeppink', linestyle=':', linewidth=4)
+
+    plt.plot(fpr["macro"], tpr["macro"],
+             label='macro-average ROC curve (area = {0:0.2f})'
+                   ''.format(roc_auc["macro"]),
+             color='navy', linestyle=':', linewidth=4)
+
+    for i in range(n_classes):
+        if type(interpreter) == dict:
+            inverted_interpreter = dict(map(reversed, interpreter.items()))
+            plt.plot(fpr[i], tpr[i], lw=lw,
+                     label='ROC curve of class {0} (area = {1:0.2f})'
+                           ''.format(inverted_interpreter[i], roc_auc[i]))
         else:
-            raise Exception("Analysis is not defined for {}".format(model))
+            plt.plot(fpr[i], tpr[i], lw=lw,
+                     label='ROC curve of class {0} (area = {1:0.2f})'
+                           ''.format(interpreter.inverse_transform([i])[0], roc_auc[i]))
 
+    plt.plot([0, 1], [0, 1], 'k--', lw=lw)
+    plt.xlim([0.0, 1.0])
+    plt.ylim([0.0, 1.05])
+    plt.xlabel('False Positive Rate')
+    plt.ylabel('True Positive Rate')
+    plt.title('ROC Curves')
+    plt.legend(loc="lower right")
+    plt.show()
 
 # Easier to comment the one you don't want to run instead of typing them
 # out every time
-
 # newClient = client('/Users/palashshah/Desktop')
 # newClient.convolutional_query()
 # newClient.tune('convolutional_NN', epochs=1)
@@ -502,5 +604,6 @@ class client:
 #newClient = client('tools/data/structured_data/fake_job_postings.csv').neural_network_query(instruction='Classify fraudulent',
 #                                                                                            drop=['job_id'],
 #                                                                                            text=['department','description', 'company_profile','requirements', 'benefits'])
-newClient = client('../../tools/data/structured_data/housing.csv')
-newClient.neural_network_query("Model median house value", epochs=3)
+newClient = client('/Users/ramyabhaskara/PycharmProjects/libra/tools/data/structured_data/housing.csv')
+newClient.decision_tree_query("Model ocean proximity")
+newClient.analyze()
