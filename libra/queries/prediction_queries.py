@@ -1,7 +1,8 @@
 
+# function imports for all queries
 
-#function imports for all queries
-from libra.queries.nlp_queries import image_caption_query, generate_caption, classify_text, text_classification_query, get_summary, summarization_query
+from libra.queries.nlp_queries import image_caption_query, summarization_query, generate_caption, \
+      text_classification_query, classify_text, get_summary
 from libra.queries.classification_models import k_means_clustering, train_svm, nearest_neighbors, decision_tree
 from libra.queries.supplementaries import tune_helper, stats, generate_id
 from libra.queries.feedforward_nn import regression_ann, classification_ann, convolutional
@@ -13,8 +14,8 @@ from pandas.core.common import SettingWithCopyWarning
 import warnings
 import os
 
+# supressing warnings for cleaner dialogue box
 
-#supressing warnings for cleaner dialogue box
 warnings.simplefilter(action='error', category=FutureWarning)
 warnings.simplefilter(action="ignore", category=SettingWithCopyWarning)
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
@@ -25,8 +26,7 @@ currLog = ""
 counter = 0
 
 
-
-#clears log when needed - currently not being used
+# clears log when needed - currently not being used
 def clearLog():
     global currLog
     global counter
@@ -392,7 +392,7 @@ class client:
         return ' '.join(caption[:len(caption) - 1])
 
     # Image Caption query
-    def image_caption_query(self,instruction,
+    def image_caption_query(self ,instruction,
                         drop=None,
                         epochs=10,
                         preprocess=True,
@@ -472,9 +472,13 @@ class client:
 # Easier to comment the one you don't want to run instead of typing them
 # out every time
 
-newClient = client('/Users/palashshah/Desktop')
-newClient.convolutional_query()
-newClient.tune('convolutional_NN', epochs=1)
+# newClient = client('/Users/palashshah/Desktop')
+# newClient.convolutional_query()
+# newClient.tune('convolutional_NN', epochs=1)
 # newClient.neural_network_query("Model median house value")
 # newClient = client('tools/data/structured_data/landslides_after_rainfall.csv').neural_network_query(instruction='Model distance',
 # drop=['id', 'geolocation', 'source_link', 'source_name'])
+
+newClient = client('/Users/anasawadalla/PycharmProjects/libra/tools/data/nlp_data/smallSentimentAnalysis.csv')
+newClient.text_classification_query("text")
+print(newClient.models["Text Classification LSTM"])

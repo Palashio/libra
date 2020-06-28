@@ -21,6 +21,7 @@ from libra.queries.dimensionality_red_queries import logger
 
 # Sentiment analysis predict wrapper
 from libra.queries.supplementaries import save
+from nonkeras_generate_plots import plot_loss
 
 
 def classify_text(self, text):
@@ -66,7 +67,7 @@ def text_classification_query(self, instruction, drop=None,
 
     X = np.array(X)
 
-    model = get_keras_text_class(maxTextLength, len(classes),learning_rate)
+    model = get_keras_text_class(maxTextLength, len(classes), learning_rate)
 
     X_train, X_test, y_train, y_test = train_test_split(
         X, Y, test_size=test_size, random_state=random_state)
@@ -76,7 +77,7 @@ def text_classification_query(self, instruction, drop=None,
     logger("Training Model...")
     history = model.fit(X_train, y_train,
                         batch_size=batch_size,
-                        epochs=epochs,learning_rate = learning_rate)
+                        epochs=epochs, learning_rate=learning_rate)
 
     logger("Testing Model...")
     score, acc = model.evaluate(X_test, y_test,
@@ -193,14 +194,15 @@ def summarization_query(self, instruction, preprocess=True,
 
     logger('Fine-Tuning the model on your dataset...')
     total_loss_train = []
+    total_loss_val = []
     for epoch in range(epochs):
         loss_train, loss_val = train(epoch, tokenizer, model, device, training_loader, optimizer)
         total_loss_train.append(loss_train)
         total_loss_val.append(loss_val)
 
+    plots = []
     if generate_plots:
-        plots = []
-        plots.append(plot_loss(total_loss_train,total_loss_val))
+        plots.append(plot_loss(total_loss_train, total_loss_val))
 
     if save_model:
         logger("Saving model...")
@@ -216,7 +218,7 @@ def summarization_query(self, instruction, preprocess=True,
         "maxSumLength": max_summary_length,
         "plots": plots,
         'losses': {'training_loss': total_loss_train,
-                    'val_loss': total_loss_val}
+                   'val_loss': total_loss_val}
     }
     return self.models["Document Summarization"]
 
@@ -303,7 +305,12 @@ def image_caption_query(self, instruction,
     vocab_size = top_k + 1
     num_steps = len(img_name_vector) // batch_size
 
-    dataset = tf.data.Dataset.from_tensor_slices((img_name_vector, cap_vector))
+    img_name_train, img_name_val, cap_train, cap_val = train_test_split(img_name_vector,
+                                                                        cap_vector,
+                                                                        test_size=0.2,
+                                                                        random_state=0)
+
+    dataset = tf.data.Dataset.from_tensor_slices((img_name_train, cap_train))
 
     dataset = dataset.map(lambda item1, item2: tf.numpy_function(
         map_func, [item1, item2], [tf.float32, tf.int32]),
@@ -312,6 +319,16 @@ def image_caption_query(self, instruction,
     # Shuffle and batch
     dataset = dataset.shuffle(buffer_size).batch(batch_size)
     dataset = dataset.prefetch(buffer_size=tf.data.experimental.AUTOTUNE)
+
+    dataset_val = tf.data.Dataset.from_tensor_slices((img_name_val, cap_val))
+
+    dataset_val = dataset_val.map(lambda item1, item2: tf.numpy_function(
+        map_func, [item1, item2], [tf.float32, tf.int32]),
+                                  num_parallel_calls=tf.data.experimental.AUTOTUNE)
+
+    # Shuffle and batch
+    dataset_val = dataset_val.shuffle(buffer_size).batch(batch_size)
+    dataset_val = dataset_val.prefetch(buffer_size=tf.data.experimental.AUTOTUNE)
 
     encoder = CNN_Encoder(embedding_dim)
     decoder = RNN_Decoder(embedding_dim, units, vocab_size)
@@ -361,10 +378,38 @@ def image_caption_query(self, instruction,
 
         return loss, total_loss
 
+    @tf.function
+    def val_step(img_tensor, target):
+        loss = 0
+
+        # initializing the hidden state for each batch
+        # because the captions are not related from image to image
+        hidden = decoder.reset_state(batch_size=target.shape[0])
+
+        dec_input = tf.expand_dims([tokenizer.word_index['<start>']] * target.shape[0], 1)
+
+        with tf.GradientTape() as tape:
+            features = encoder(img_tensor)
+
+            for i in range(1, target.shape[1]):
+                # passing the features through the decoder
+                predictions, hidden, _ = decoder(dec_input, features, hidden)
+
+                loss += loss_function(target[:, i], predictions)
+
+                # using teacher forcing
+                dec_input = tf.expand_dims(target[:, i], 1)
+
+        total_loss = (loss / int(target.shape[1]))
+        return total_loss
+
     logger("Training model...")
 
+    loss_plot_train = []
+    loss_plot_val = []
     for epoch in range(epochs):
         total_loss = 0
+        total_loss_val = 0
 
         for (batch, (img_tensor, target)) in enumerate(dataset):
             batch_loss, t_loss = train_step(img_tensor, target)
@@ -372,6 +417,13 @@ def image_caption_query(self, instruction,
 
         logger('Epoch {} Loss {:.6f}'.format(epoch + 1,
                                              total_loss / num_steps))
+        loss_plot_train.append(total_loss / num_steps)
+
+        for (batch, (img_tensor, target)) in enumerate(dataset_val):
+            batch_loss, t_loss = train_step(img_tensor, target)
+            total_loss_val += t_loss
+
+        loss_plot_val.append(total_loss_val / num_steps)
 
     logger("Storing information in client object...")
 
@@ -381,6 +433,9 @@ def image_caption_query(self, instruction,
     for item in files:
         if item.endswith(".npy"):
             os.remove(os.path.join(dir_name, item))
+    plots = []
+    if generate_plots:
+        plots.append(plot_loss(loss_plot_train, loss_plot_val))
 
     if save_model_decoder:
         logger("Saving decoder...")
@@ -395,9 +450,10 @@ def image_caption_query(self, instruction,
         "encoder": encoder,
         "tokenizer": tokenizer,
         "feature_extraction": image_features_extract_model,
-        "plots": None,
+        "plots": plots,
         'losses': {
-            'training_loss': total_loss
+            'training_loss': total_loss,
+            'validation_loss': total_loss_val
         }
     }
     return self.models["Image Caption"]

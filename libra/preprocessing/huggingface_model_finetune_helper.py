@@ -5,7 +5,7 @@ from torch.utils.data import Dataset, DataLoader, RandomSampler, SequentialSampl
 from libra.queries.prediction_queries import logger
 
 
-def train(epoch, tokenizer, model, device, loader, val_loader optimizer):
+def train(epoch, tokenizer, model, device, loader, val_loader, optimizer):
     model.train()
     running_loss = 0.0
     for _, data in enumerate(loader, 0):
