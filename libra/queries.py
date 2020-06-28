@@ -486,26 +486,35 @@ class client:
         if model == None:
             model = self.latest_model
 
+        logger(" ", ("Analyzing {}".format(model)))
+
         modeldict = self.models[model]
         if modeldict.get('plots'):
+            logger(" ", "Displaying associated plots")
+            # TODO: plot separately instead of on top of each other
             for key in modeldict['plots']:
                 modeldict['plots'][key]
                 plt.show()
 
+
         if modeldict.get('test_data'):
+            logger("->", "Making predictions for test data...")
             data = modeldict['test_data']['X']
             real = modeldict['test_data']['y']
             preds = modeldict['model'].predict(data)
 
         if model == 'regression_ANN':
+            logger("->", "Reporting metrics: ")
             MSE = sklearn.metrics.mean_squared_error(real, preds)
             MAE = sklearn.metrics.mean_absolute_error(real, preds)
-            print("Mean Squared Error on Test Set: " + str(MSE))
-            print("Mean Absolute Error on Test Set: " + str(MAE))
+            logger(" ", ("MSE on test set: {}".format(str(MSE))))
+            logger("->", ("MAE on test set: {}".format(str(MAE))))
 
         elif model in ['svm', 'nearest_neighbor', 'decision_tree', 'classification_ANN']: # classification models
+            logger("->", "Plotting ROC curves...")
             plot_mc_roc(real, preds, modeldict['interpreter'])
 
+            logger("->", "Creating confusion matrix...")
             if model in ['svm', 'nearest_neighbor', 'decision_tree']: #sklearn models ONLY
                 labels = list(modeldict['interpreter'].keys())
                 plot_confusion_matrix(modeldict['model'], data, real, display_labels=labels)
@@ -513,18 +522,18 @@ class client:
 
                 accuracy = modeldict['accuracy_score']
             else: #classification_ANN
-                # TODO: find a prettier way to plot this
+                # TODO: find a way to plot this with labels
                 confusion_matrix(real, preds)
                 accuracy = modeldict['accuracy']['validation_accuracy']
-
+            logger("->", "Reporting metrics: ")
             recall = recall_score(real, preds, average='micro')
             precision = precision_score(real, preds, average='micro')
             f1 = f1_score(real, preds, average='micro')
 
-            print("Accuracy on Test Set: " + str(accuracy))
-            print("Recall on Test Set: " + str(recall))
-            print("Precision on Test Set: " + str(precision))
-            print("F1 Score on Test Set: " + str(f1))
+            logger(" ", ("Accuracy on test set: {}".format(str(accuracy))))
+            logger("->", ("Recall on test set: {}".format(str(recall))))
+            logger("->", ("Precision on test set: {}".format(str(precision))))
+            logger("->", ("F1 Score on test set: {}".format(str(f1))))
         elif model not in ['k_means_clustering', 'regression_ANN']:
             print("further analysis is not supported for {}".format(model))
 
