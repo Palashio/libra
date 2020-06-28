@@ -428,15 +428,14 @@ def image_caption_query(self, instruction,
             batch_loss, t_loss = train_step(img_tensor, target)
             total_loss += t_loss
 
-        print('Epoch {} Loss {:.6f}'.format(epoch + 1,
-                                            total_loss / num_steps))
-        loss_plot_train.append(total_loss / num_steps)
+        loss_plot_train.append(total_loss.numpy() / num_steps)
 
         for (batch, (img_tensor, target)) in enumerate(dataset_val):
             batch_loss, t_loss = train_step(img_tensor, target)
             total_loss_val += t_loss
 
-        loss_plot_val.append(total_loss_val / num_steps)
+        loss_plot_val.append(total_loss_val.numpy() / num_steps)
+    print(get_standard_training_output_generic(epochs,loss_plot_train,loss_plot_val))
 
     logger("Storing information in client object under key 'Image Caption' ...")
 

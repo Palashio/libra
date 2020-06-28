@@ -257,6 +257,7 @@ def get_standard_training_output_generic(epochs, loss, val_loss):
         i = str(i)
         while len(i) < 7:
             i = i + " "
+
         j = str(j)
         while len(j) < 16:
             j = j + " "
