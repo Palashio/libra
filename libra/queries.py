@@ -20,8 +20,8 @@ import warnings
 import os
 import sklearn
 import matplotlib.pyplot as plt
-from sklearn.metrics import confusion_matrix, plot_confusion_matrix, recall_score, precision_score, f1_score
-
+from sklearn.metrics import confusion_matrix, plot_confusion_matrix, recall_score, precision_score, f1_score, ConfusionMatrixDisplay
+import numpy as np
 # supressing warnings for cleaner dialogue box
 warnings.simplefilter(action='error', category=FutureWarning)
 warnings.simplefilter(action="ignore", category=SettingWithCopyWarning)
@@ -497,6 +497,14 @@ class client:
             data = modeldict['test_data']['X']
             real = modeldict['test_data']['y']
             preds = modeldict['model'].predict(data)
+            if model == 'classification_ANN':  # formats labels column
+                enc = sklearn.preprocessing.LabelEncoder()
+                real = modeldict['interpreter'].inverse_transform(
+                    real).reshape(1, -1)[0]
+                preds = modeldict['interpreter'].inverse_transform(
+                    preds).reshape(1, -1)[0]
+                real = enc.fit_transform(real)
+                preds = enc.transform(preds)
 
         if model == 'regression_ANN':
             logger("->", "Reporting metrics: ")
@@ -504,15 +512,12 @@ class client:
             MAE = sklearn.metrics.mean_absolute_error(real, preds)
             logger(" ", ("MSE on test set: {}".format(str(MSE))))
             logger("->", ("MAE on test set: {}".format(str(MAE))))
-
         # classification models
         elif model in ['svm', 'nearest_neighbor', 'decision_tree', 'classification_ANN']:
-            logger("->", "Plotting ROC curves...")
-            plot_mc_roc(real, preds, modeldict['interpreter'])
-
-            logger("->", "Creating confusion matrix...")
+            logger("->", "Plotting ROC curves and creating confusion matrix...")
             if model in ['svm', 'nearest_neighbor',
                          'decision_tree']:  # sklearn models ONLY
+                plot_mc_roc(real, preds, modeldict['interpreter'])
                 labels = list(modeldict['interpreter'].keys())
                 plot_confusion_matrix(
                     modeldict['model'], data, real, display_labels=labels)
@@ -520,8 +525,14 @@ class client:
 
                 accuracy = modeldict['accuracy_score']
             else:  # classification_ANN
-                # TODO: find a way to display this with labels
-                confusion_matrix(real, preds)
+                plot_mc_roc(real, preds, enc)
+                cm = confusion_matrix(real, preds)
+                labels = enc.classes_
+                ConfusionMatrixDisplay(
+                    confusion_matrix=cm,
+                    display_labels=labels).plot()
+                plt.show()
+
                 accuracy = modeldict['accuracy']['validation_accuracy']
             logger("->", "Reporting metrics: ")
             recall = recall_score(real, preds, average='micro')
@@ -532,7 +543,7 @@ class client:
             logger("->", ("Recall on test set: {}".format(str(recall))))
             logger("->", ("Precision on test set: {}".format(str(precision))))
             logger("->", ("F1 Score on test set: {}".format(str(f1))))
-        elif model not in ['k_means_clustering', 'regression_ANN']:
+        elif model != 'k_means_clustering':
             print("further analysis is not supported for {}".format(model))
 
 

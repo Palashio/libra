@@ -182,7 +182,7 @@ def plot_mc_roc(y_test, y_score, interpreter=None):
                 label='ROC curve of class {0} (area = {1:0.2f})'
                 ''.format(
                     interpreter.inverse_transform(
-                        [i])[0],
+                        [[i]])[0],
                     roc_auc[i]))
 
     plt.plot([0, 1], [0, 1], 'k--', lw=lw)
