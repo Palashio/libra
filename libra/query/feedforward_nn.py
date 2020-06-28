@@ -410,8 +410,7 @@ def convolutional(instruction=None,
                   augmentation=True,
                   epochs=10,
                   height=None,
-                  width=None,
-                  color_mode='rgb'):
+                  width=None):
 
     logger("Generating datasets for classes...")
 
