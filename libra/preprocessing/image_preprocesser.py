@@ -28,6 +28,8 @@ def setwise_preprocessing(data_path, new_folder, height, width):
         dict.append(info[3])
 
     classification = int(classification/2)
+    if classification < 2:
+        raise BaseException(f"Need at least two classes of images.")
     height1, width1 = calculate_medians(heights, widths)
     if height is None:
         height = height1
@@ -82,7 +84,11 @@ def csv_preprocessing(csv_file,
     need_file_extension = False
     path_included = False
 
+    count = 0
     while image_column is None:
+        if count > 20:
+            raise BaseException(f"Could not locate column containing image information.")
+        count += 1
         random_row = df.sample()
         for column, value in random_row.iloc[0].items():
             if type(value) is str:
@@ -120,10 +126,12 @@ def csv_preprocessing(csv_file,
     heights = []
     widths = []
     classifications = df[label].nunique()
+    if classifications < 2:
+        raise BaseException(f"Need at least two classes of images.")
     image_list = []
 
     # get the median heights and widths
-    for index, row in df.head().iterrows():
+    for index, row in df.iterrows():
         if path_included:
             p = data_path + "/" + row[image_column]
             img = cv2.imread(p)
@@ -162,7 +170,7 @@ def csv_preprocessing(csv_file,
 
     data_size = [0,0]
     # save images into correct folder
-    for index, row in df.head().iterrows():
+    for index, row in df.iterrows():
         # resize images
         img = process_color_channel(image_list[index], height, width)
         p = "proc_" + (os.path.basename(row[image_column]) 
@@ -190,6 +198,8 @@ def classwise_preprocessing(data_path, training_ratio, height, width):
     if width is None:
         width = width1
     num_classifications = info[2]
+    if num_classifications < 2:
+        raise BaseException(f"Need at least two classes of images.")
     img_dict = info[3]
 
     # create training and testing folders
@@ -349,7 +359,9 @@ def process_color_channel(img, height, width):
 def set_distinguisher(data_path, read_mode):
     if read_mode is not None:
         if read_mode == "setwise":
-            return {"read_mode": "setwise"}
+            if os.path.isdir(data_path + "/training_set") and os.path.isdir(data_path + "/testing_set"):
+                return {"read_mode": "setwise"}
+            raise BaseException(f"training_set or testing_set folder not in f{data_path}")
         elif read_mode == "classwise":
             return {"read_mode":"classwise"}
         elif read_mode == "pathwise" or read_mode == "namewise":
@@ -358,6 +370,8 @@ def set_distinguisher(data_path, read_mode):
                 return {"read_mode":"pathwise or namewise", "csv_path":csv_path[0]}
             elif len(csv_path) > 1:
                 raise BaseException(f"Too many csv files in directory: {[os.path.basename(path) for path in csv_path]}")
+            else:
+                raise BaseException(f"No csv file in {data_path}")
         else:
             raise BaseException(f"{read_mode}, is an invalid read mode.")
 
@@ -371,6 +385,8 @@ def set_distinguisher(data_path, read_mode):
         return {"read_mode":"pathwise or namewise", "csv_path":csv_path[0]}
     elif len(csv_path) > 1:
         raise BaseException(f"Too many csv files in directory: {[os.path.basename(path) for path in csv_path]}")
+    elif len(csv_path) == 0:
+        raise BaseException(f"No csv file in {data_path}")
 
     return {"read_mode":"classwise"}
 

@@ -496,7 +496,7 @@ def convolutional(instruction=None,
                                            batch_size=(32 if processInfo["test_size"] >= 32 else 1),
                                            class_mode=loss_func[:loss_func.find("_")])
 
-    # print(X_train)
+    if epochs < 0: raise BaseException("Number of epochs has to be greater than 0.")
     history = model.fit(
         X_train,
         steps_per_epoch=X_train.n //
