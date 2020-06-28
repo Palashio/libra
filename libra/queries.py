@@ -367,6 +367,7 @@ class client:
                                   random_state=49,
                                   learning_rate=1e-2,
                                   epochs=20,
+                                  maximizer="val_loss",
                                   batch_size=32,
                                   maxTextLength=200,
                                   generate_plots=True,
@@ -374,20 +375,21 @@ class client:
                                   save_path=os.getcwd()):
 
         # storing values the model dictionary
-        self.models["Text Classification LSTM"] = text_classification_query(
+        self.models["Text Classification"] = text_classification_query(
             self=self, instruction=instruction, drop=drop,
             preprocess=preprocess,
             test_size=test_size,
             val_size=validation_size,
             random_state=random_state,
             learning_rate=learning_rate,
+            maximizer=maximizer,
             epochs=epochs,
             batch_size=batch_size,
             maxTextLength=maxTextLength,
             generate_plots=generate_plots,
             save_model=save_model,
             save_path=save_path)
-        self.latest_model = 'Text Classification LSTM'
+        self.latest_model = 'Text Classification'
 
     # Document summarization predict wrapper
     def get_summary(self, text):
@@ -531,8 +533,6 @@ class client:
 
 # newClient = client('tools/data/structured_data/fake_job_postings.csv').neural_network_query(instruction='Classify
 # fraudulent', drop=['job_id'], text=['department','description', 'company_profile','requirements', 'benefits'])
-# newClient = client('../../tools/data/structured_data/housing.csv')
-# newClient.neural_network_query("Model median house value", epochs=3)
+newClient = client('./../tools/data/structured_data/housing.csv')
+newClient.neural_network_query("Model median house value", epochs=3)
 
-newClient = client('/Users/anasawadalla/PycharmProjects/libra/tools/data/nlp_data/image-caption.csv')
-newClient.image_caption_query("caption", epochs=1, embedding_dim= 2,save_model_decoder=True,save_model_encoder=True)

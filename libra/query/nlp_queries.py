@@ -5,6 +5,7 @@ import pandas as pd
 import torch
 from keras_preprocessing import sequence
 from sklearn.model_selection import train_test_split
+from tensorflow.python.keras.callbacks import EarlyStopping
 from tensorflow.python.keras.saving.saved_model.json_utils import Encoder
 from torch.utils.data import DataLoader
 from transformers import T5Tokenizer, T5ForConditionalGeneration
@@ -26,7 +27,7 @@ from nonkeras_generate_plots import plot_loss
 
 
 def classify_text(self, text):
-    sentimentInfo = self.models.get("Text Classification LSTM")
+    sentimentInfo = self.models.get("Text Classification")
     vocab = sentimentInfo["vocabulary"]
     # Clean up text
     text = lemmatize_text(text_clean_up([text]))
@@ -46,6 +47,7 @@ def text_classification_query(self, instruction, drop=None,
                               random_state=49,
                               learning_rate=1e-2,
                               epochs=20,
+                              maximizer="val_loss",
                               batch_size=32,
                               maxTextLength=200,
                               generate_plots=True,
@@ -79,9 +81,17 @@ def text_classification_query(self, instruction, drop=None,
     X_test = sequence.pad_sequences(X_test, maxlen=maxTextLength)
 
     logger("Training Model...")
+
+    # early stopping callback
+    es = EarlyStopping(
+        monitor=maximizer,
+        mode='min',
+        verbose=0,
+        patience=5)
+
     history = model.fit(X_train, y_train, validation_split=val_size,
                         batch_size=batch_size,
-                        epochs=epochs)
+                        epochs=epochs, callbacks=[es])
 
     logger("Testing Model...")
     score, acc = model.evaluate(X_test, y_test,
@@ -92,27 +102,28 @@ def text_classification_query(self, instruction, drop=None,
     if generate_plots:
         # generates appropriate classification plots by feeding all
         # information
+        print(history.history['loss'])
         plots = generate_classification_plots(
             history, X, Y, model, X_test, y_test)
 
     if save_model:
         save(model, save_model, save_path=save_path)
 
-    logger("Storing information in client object...")
+    logger("Storing information in client object under key 'Text Classification' ...")
     # storing values the model dictionary
-    self.models["Text Classification LSTM"] = {"model": model,
-                                               "classes": classes,
-                                               "plots": plots,
-                                               "target": Y,
-                                               "vocabulary": vocab,
-                                               "maxTextLength": maxTextLength,
-                                               'losses': {
-                                                   'training_loss': history.history['loss'],
-                                                   'val_loss': history.history['val_loss']},
-                                               'accuracy': {
-                                                   'training_accuracy': history.history['accuracy'],
-                                                   'validation_accuracy': history.history['val_accuracy']}}
-    return self.models["Text Classification LSTM"]
+    self.models["Text Classification"] = {"model": model,
+                                          "classes": classes,
+                                          "plots": plots,
+                                          "target": Y,
+                                          "vocabulary": vocab,
+                                          "maxTextLength": maxTextLength,
+                                          'losses': {
+                                              'training_loss': history.history['loss'],
+                                              'val_loss': history.history['val_loss']},
+                                          'accuracy': {
+                                              'training_accuracy': history.history['accuracy'],
+                                              'validation_accuracy': history.history['val_accuracy']}}
+    return self.models["Text Classification"]
 
 
 # Document summarization predict wrapper
@@ -204,9 +215,9 @@ def summarization_query(self, instruction, preprocess=True,
         total_loss_train.append(loss_train)
         total_loss_val.append(loss_val)
 
-    plots = []
+    plots = {}
     if generate_plots:
-        plots.append(plot_loss(total_loss_train, total_loss_val))
+        plots.update({"loss": plot_loss(total_loss_train, total_loss_val)})
 
     if save_model:
         logger("Saving model...")
@@ -214,7 +225,7 @@ def summarization_query(self, instruction, preprocess=True,
         torch.save(model, path)
         logger("->", "Saved model to disk as DocSummarization.pth")
 
-    logger("Storing information in client object...")
+    logger("Storing information in client object under key 'Document Summarization'...")
 
     self.models["Document Summarization"] = {
         "model": model,
@@ -422,7 +433,7 @@ def image_caption_query(self, instruction,
             total_loss += t_loss
 
         print('Epoch {} Loss {:.6f}'.format(epoch + 1,
-                                             total_loss / num_steps))
+                                            total_loss / num_steps))
         loss_plot_train.append(total_loss / num_steps)
 
         for (batch, (img_tensor, target)) in enumerate(dataset_val):
@@ -431,7 +442,7 @@ def image_caption_query(self, instruction,
 
         loss_plot_val.append(total_loss_val / num_steps)
 
-    logger("Storing information in client object...")
+    logger("Storing information in client object under key 'Image Caption' ...")
 
     dir_name = os.path.dirname(img_name_vector[0])
     files = os.listdir(dir_name)
@@ -439,9 +450,10 @@ def image_caption_query(self, instruction,
     for item in files:
         if item.endswith(".npy"):
             os.remove(os.path.join(dir_name, item))
-    plots = []
+
+    plots = {}
     if generate_plots:
-        plots.append(plot_loss(loss_plot_train, loss_plot_val))
+        plots.update({"loss": plot_loss(loss_plot_train, loss_plot_val)})
 
     if save_model_decoder:
         logger("Saving decoder...")
@@ -449,8 +461,7 @@ def image_caption_query(self, instruction,
 
     if save_model_encoder:
         logger("Saving encoder...")
-        encoder.save_weights(save_path_encoder+"encoderImgCap.ckpt")
-
+        encoder.save_weights(save_path_encoder + "encoderImgCap.ckpt")
 
     self.models["Image Caption"] = {
         "decoder": decoder,
