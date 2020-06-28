@@ -485,36 +485,6 @@ def convolutional(instruction=None,
     else:
         train_data = ImageDataGenerator()
         test_data = ImageDataGenerator()
-        """
-        trainingImages = []
-        train_labels = []
-        validationImages = []
-        test_labels = []
-
-        for path in imgPaths:
-        classLabel = path.split(os.path.sep)[-2]
-        classes.add(classLabel)
-        img = img_to_array(load_img(path, target_size=(64, 64)))
-
-        if path.split(os.path.sep)[-3] == 'training_set':
-            trainingImages.append(img)
-            train_labels.append(classLabel)
-        else:
-            validationImages.append(img)
-            test_labels.append(classLabel)
-
-        trainingImages = np.array(trainingImages)
-        train_labels = to_categorical(np.array(train_labels))
-        validationImages = np.array(validationImages)
-        test_labels = to_categorical(np.array(test_labels))
-        model.compile(loss=’categorical_crossentropy’,
-                  optimizer=’sgd’,
-                  metrics=[‘accuracy’])
-        history=model.fit(train_images, train_labels,
-                  batch_size=100,
-                  epochs=5,
-                  verbose=1)
-        """
 
     X_train = train_data.flow_from_directory(data_path + training_path,
                                              target_size=input_single,

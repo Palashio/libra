@@ -345,20 +345,7 @@ def process_color_channel(img, height, width):
 
     return cv2.merge(chanels)
 
-
-# Seperates the color channels and then reshapes each of the channels to
-# (224, 224)
-# def processColorChanel(img):
-#     b, g, r = cv2.split(img)
-#     # seperating each value into a color channel and resizing to a standard
-#     # size of 224, 224, 3 <- because of RGB color channels. If it's not 3
-#     # color channels it'll pad with zeroes
-#     b = cv2.resize(b, dsize=(224, 224), interpolation=cv2.INTER_CUBIC)
-#     g = cv2.resize(g, dsize=(224, 224), interpolation=cv2.INTER_CUBIC)
-#     r = cv2.resize(r, dsize=(224, 224), interpolation=cv2.INTER_CUBIC)
-#     img = cv2.merge((b, g, r))
-#     return img
-
+# distinguishes the preprocess mode to do
 def set_distinguisher(data_path, read_mode):
     if read_mode is not None:
         if read_mode == "setwise":
@@ -387,6 +374,8 @@ def set_distinguisher(data_path, read_mode):
 
     return {"read_mode":"classwise"}
 
+
+# get the dataset info for the CNN model
 def already_processed(data_path):
     training_path = data_path + "/training_set"
     testing_path = data_path + "/testing_set"
@@ -406,8 +395,6 @@ def already_processed(data_path):
             images = [img for img in os.listdir(class_path) if img != ".DS_Store"]
             height, width, _ = cv2.imread(class_path + "/" + images[0]).shape
             test_size += len(images)
-
-
 
     return {"num_categories": num_categories,
             "height": height,
