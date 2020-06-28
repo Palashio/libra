@@ -2,7 +2,8 @@ import os
 from libra.preprocessing.image_preprocesser import (setwise_preprocessing,
                                                     csv_preprocessing,
                                                     classwise_preprocessing,
-                                                    set_distinguisher)
+                                                    set_distinguisher,
+                                                    already_processed)
 from libra.preprocessing.data_reader import DataReader
 from keras.models import Sequential
 from keras.layers import (Dense, Conv2D, Flatten, MaxPooling2D, )
@@ -401,38 +402,50 @@ def classification_ann(instruction,
 
 def convolutional(instruction=None,
                   read_mode=None,
-                  text=None,
+                  preprocess=True,
                   data_path=os.getcwd(),
                   new_folders=True,
                   image_column=None,
                   training_ratio=0.8,
-                  augmentation=True):
+                  augmentation=True,
+                  epochs=10,
+                  height=None,
+                  width=None,
+                  color_mode='rgb'):
 
     logger("Generating datasets for classes...")
 
-    read_mode_info = set_distinguisher(data_path, read_mode)
-    read_mode = read_mode_info["read_mode"]
+    if preprocess:
+        read_mode_info = set_distinguisher(data_path, read_mode)
+        read_mode = read_mode_info["read_mode"]
 
-    training_path = "/proc_training_set"
-    testing_path = "/proc_testing_set"
+        training_path = "/proc_training_set"
+        testing_path = "/proc_testing_set"
 
-    if read_mode == "setwise":
-        processInfo = setwise_preprocessing(data_path, new_folders)
-        if not new_folders:
-            training_path = "/training_set"
-            testing_path = "/testing_set"
+        if read_mode == "setwise":
+            processInfo = setwise_preprocessing(data_path, new_folders, height, width)
+            if not new_folders:
+                training_path = "/training_set"
+                testing_path = "/testing_set"
 
-    # if image dataset in form of csv
-    elif read_mode == "pathwise or namewise":
-        processInfo = csv_preprocessing(read_mode_info["csv_path"],
-                                        data_path,
-                                        instruction,
-                                        image_column,
-                                        training_ratio)
+        # if image dataset in form of csv
+        elif read_mode == "pathwise or namewise":
+            processInfo = csv_preprocessing(read_mode_info["csv_path"],
+                                            data_path,
+                                            instruction,
+                                            image_column,
+                                            training_ratio,
+                                            height,
+                                            width)
 
-    # if image dataset in form of one folder containing class folders
-    elif read_mode == "classwise":
-        processInfo = classwise_preprocessing(data_path, training_ratio)
+        # if image dataset in form of one folder containing class folders
+        elif read_mode == "classwise":
+            processInfo = classwise_preprocessing(data_path, training_ratio, height, width)
+
+    else:
+        training_path = "/training_set"
+        testing_path = "/testing_set"
+        processInfo = already_processed(data_path)
 
     input_shape = (processInfo["height"], processInfo["width"], 3)
     input_single = (processInfo["height"], processInfo["width"])
@@ -522,7 +535,7 @@ def convolutional(instruction=None,
         validation_data=X_test,
         validation_steps=X_test.n //
         X_test.batch_size,
-        epochs=1)
+        epochs=epochs)
     # storing values the model dictionary
     return {
         'id': generate_id(),

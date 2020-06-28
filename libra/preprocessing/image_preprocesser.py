@@ -7,7 +7,7 @@ from libra.data_generation.dataset_labelmatcher import get_similar_column
 from libra.data_generation.grammartree import get_value_instruction
 
 # Preprocesses images from images to median of heighs/widths
-def setwise_preprocessing(data_path, new_folder=True):
+def setwise_preprocessing(data_path, new_folder, height, width):
     training_path = data_path + "/training_set"
     testing_path = data_path + "/testing_set"
 
@@ -28,7 +28,11 @@ def setwise_preprocessing(data_path, new_folder=True):
         dict.append(info[3])
 
     classification = int(classification/2)
-    height, width = calculate_medians(heights, widths)
+    height1, width1 = calculate_medians(heights, widths)
+    if height is None:
+        height = height1
+    if width is None:
+        width = width1
 
     # resize images
     for index, p in enumerate(paths):
@@ -61,7 +65,9 @@ def csv_preprocessing(csv_file,
                       data_path, 
                       instruction, 
                       image_column, 
-                      training_ratio):
+                      training_ratio,
+                      height,
+                      width):
     df = pd.read_csv(csv_file)
 
     if instruction is None:
@@ -140,7 +146,11 @@ def csv_preprocessing(csv_file,
         heights.append(img.shape[0])
         widths.append(img.shape[1])
 
-    height, width = calculate_medians(heights, widths)
+    height1, width1 = calculate_medians(heights, widths)
+    if height is None:
+        height = height1
+    if width is None:
+        width = width1
 
     # create training and testing folders
     create_folder(data_path, "proc_training_set")
@@ -172,9 +182,13 @@ def csv_preprocessing(csv_file,
 
 
 # preprocesses images when given a folder containing class folders
-def classwise_preprocessing(data_path, training_ratio):
+def classwise_preprocessing(data_path, training_ratio, height, width):
     info = process_class_folders(data_path)
-    height, width = calculate_medians(info[0], info[1])
+    height1, width1 = calculate_medians(info[0], info[1])
+    if height is None:
+        height = height1
+    if width is None:
+        width = width1
     num_classifications = info[2]
     img_dict = info[3]
 
@@ -372,3 +386,31 @@ def set_distinguisher(data_path, read_mode):
         raise BaseException(f"Too many csv files in directory: {[os.path.basename(path) for path in csv_path]}")
 
     return {"read_mode":"classwise"}
+
+def already_processed(data_path):
+    training_path = data_path + "/training_set"
+    testing_path = data_path + "/testing_set"
+
+    num_categories = 0
+    train_size = 0
+    for directory in os.listdir(training_path):
+        class_path = training_path + "/" + directory
+        if os.path.isdir(class_path):
+            num_categories += 1
+            train_size += len([img for img in os.listdir(class_path) if img != ".DS_Store"])
+
+    test_size = 0
+    for directory in os.listdir(testing_path):
+        class_path = testing_path + "/" + directory
+        if os.path.isdir(class_path):
+            images = [img for img in os.listdir(class_path) if img != ".DS_Store"]
+            height, width, _ = cv2.imread(class_path + "/" + images[0]).shape
+            test_size += len(images)
+
+
+
+    return {"num_categories": num_categories,
+            "height": height,
+            "width": width,
+            "train_size": train_size,
+            "test_size": test_size}
