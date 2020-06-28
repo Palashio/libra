@@ -11,15 +11,14 @@ from libra.query.feedforward_nn import (regression_ann,
                                         convolutional)
 from libra.query.dimensionality_red_queries import dimensionality_reduc
 from libra.data_generation.grammartree import get_value_instruction
-from libra.data_generation.dataset_labelmatcher import (get_similar_column, 
-     get_similar_model)
+from libra.data_generation.dataset_labelmatcher import (get_similar_column,
+                                                        get_similar_model)
 import pandas as pd
 from pandas.core.common import SettingWithCopyWarning
 import warnings
 import os
 
-
-#supressing warnings for cleaner dialogue box
+# supressing warnings for cleaner dialogue box
 warnings.simplefilter(action='error', category=FutureWarning)
 warnings.simplefilter(action="ignore", category=SettingWithCopyWarning)
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
@@ -29,8 +28,7 @@ currLog = ""
 counter = 0
 
 
-
-#clears log when needed - currently not being used
+# clears log when needed - currently not being used
 def clearLog():
     global currLog
     global counter
@@ -91,7 +89,6 @@ class client:
                 predictions)
         return predictions
 
-
     def neural_network_query(self,
                              instruction,
                              text=[],
@@ -113,7 +110,8 @@ class client:
 
             remove = get_similar_column(
                 get_value_instruction(instruction), data)
-            if data[remove].dtype.name == 'object':
+
+            if len(data[remove].value_counts()) <= 50:
                 callback_mode = 'max'
                 maximizer = "val_accuracy"
                 self.classification_query_ann(
@@ -287,7 +285,6 @@ class client:
 
         self.latest_model = 'decision_tree'
 
-
     def tune(self,
              model_to_tune=None,
              max_layers=10,
@@ -308,7 +305,7 @@ class client:
              ):
 
         if model_to_tune == None:
-            model_to_tune =  self.latest_model
+            model_to_tune = self.latest_model
 
         self.models = tune_helper(
             model_to_tune=model_to_tune,
@@ -357,7 +354,6 @@ class client:
             training_ratio=training_ratio)
 
         self.latest_model = 'convolutional_NN'
-
 
     # Sentiment analysis predict wrapper
     def predict_text_sentiment(self, text):
@@ -437,7 +433,7 @@ class client:
             print(operations)
         else:
             raise Exception(
-                "There are no built-in operators defined for this model." 
+                "There are no built-in operators defined for this model."
                 " Please refer to the models dictionary.")
 
     # show accuracy scores for client's model
@@ -473,8 +469,7 @@ class client:
 # newClient.neural_network_query("Model median house value")
 # newClient = client('tools/data/structured_data/landslides_after_rainfall.csv').neural_network_query(instruction='Model distance',
 # drop=['id', 'geolocation', 'source_link', 'source_name'])
-#newClient = client('tools/data/structured_data/fake_job_postings.csv').neural_network_query(instruction='Classify fraudulent',
-#                                                                                            drop=['job_id'],
-#                                                                                            text=['department','description', 'company_profile','requirements', 'benefits'])
-newClient = client('../../tools/data/structured_data/housing.csv')
-newClient.neural_network_query("Model median house value", epochs=3)
+newClient = client('tools/data/structured_data/fake_job_postings.csv')
+newClient.neural_network_query(instruction='predict fraudulent',
+                               drop=['job_id'],
+                               text=['department', 'description', 'company_profile', 'requirements', 'benefits'])
