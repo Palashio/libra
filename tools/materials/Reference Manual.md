@@ -1055,14 +1055,86 @@ libra.fix_slang(text)
 ### initial_preprocesser ###
 
 ``` python
-libra.initial_preprocesser(data, instruction, preprocess)
+libra.initial_preprocesser(data, instruction, preprocess, ca_threshold)
 ```
+
+Checks data instantiated in Libra instance and applies initial data preprocessing techniques
+
+
+*Parameters --*
+
+data 
+
+Data selected and sent via written query to instance by user to be analyzed 
+
+(is initially set by default to have dataframe format but switches halfway through function to refer to dictionary containing training and testing datasets made from original data)
+
+instruction: `str`
+
+String representation of instruction from written query
+
+preprocess: True (`bool`)
+
+Boolean value representing option to pass preprocessing pipeline in subsequent structured_preprocessor method
+
+ca_threshold: `float` (is set by default to 0.25)
+
+Float number representing the percentage of the length of the data required to apply correspondance analysis
+
+text: `[str, str, str]`
+
+List of string representations of names of columns containing textual data for which additional NLP processing can occur
+
+
+*Returns --*
+
+data: {}
+
+Retrieves dictionary containing train and test data values associated with train and test keys, respectively
+
+y: {}
+
+Retrieves dictionary containing target variable train and test data values associated with train and test keys, respectively
+
+target: `str`
+
+Retrieves string representation of column name of target variable data
+
+full_pipeline: `obj`
+
+Retrieves object containing all of the properties (imputer, one hot encoder, etc.) from the preprocessing pipeline
 
 ### structured_preprocesser ###
 
 ``` python
-libra.structured_preprocesser(data)
+libra.structured_preprocesser(data, ca_threshold)
 ```
+
+Applies well known preprocessing techniques on structured data instantiated in Libra instance for non-clustering modelling/analysis methods
+
+*Parameters --*
+
+data: {}
+
+Dictionary containing train and test data values associated with train and test keys, respectively
+
+ca_threshold: `float` (is set by default to 0.25)
+
+Float number representing the percentage of the length of the data required to apply correspondance analysis
+
+text: `[str, str, str]`
+
+List of string representations of names of columns containing textual data for which additional NLP processing can occur
+
+*Returns --*
+
+data: {}
+
+Retrieves dictionary containing train and test data values associated with train and test keys, respectively
+
+full_pipeline: `obj`
+
+Retrieves object containing all of the properties (imputer, one hot encoder, etc.) from the preprocessing pipeline
 
 ### process_dates ###
 
@@ -1070,11 +1142,98 @@ libra.structured_preprocesser(data)
 libra.process_dates(data)
 ```
 
+Identifies/preprocesses existing timestamp columns within data instantiated in Libra instance
+
+*Parameters --*
+
+data: {}
+
+Dictionary containing train and test data values associated with train and test keys, respectively
+
+
+*Returns --*
+
+None
+
+Executes deconstruction of timestamp column and parses/stores into 4 columns of different datetime divisions
+
+
 ### generate_column_labels ###
 
 ``` python
 libra.generate_column_labels(pipeline, numeric_cols)
 ```
+
+Retains numeric column names in data instantiated in Libra instance to keep/reuse for subsequent dataframes after preprocessing
+
+
+*Parameters --*
+
+full_pipeline: `obj`
+
+Object containing all of the properties (imputer, one hot encoder, etc.) from the preprocessing pipeline
+
+numeric_cols: `[str, str,...,str]`
+
+List of string representations of all column names with numeric data in data instantiated in Libra instance
+
+
+*Returns --*
+
+cols: `[str, str,..., str]`
+
+Retrieves list of string representations of all column names in data instantiated in Libra instance
+
+numeric_cols: `[str, str,...,str]`
+
+Retrieves list of string representations of all column names in data instantiated in Libra instance composed of numeric data
+
+### text_preprocessing ###
+
+``` python
+libra.text_preprocessing(data, text_cols)
+```
+
+Identifies/preprocesses existing columns within data instantiated in Libra instance containing textual data for word embedding
+
+*Parameters --*
+
+data: {}
+
+Dictionary containing train and test data values associated with train and test keys, respectively
+
+text_cols: `[str, str,...,str]`
+
+Retrieves list of string representations of all column names in data instantiated in Libra instance composed of textual data
+
+
+*Returns --*
+
+None
+
+Executes code to tokenize & normalize text, autocorrects spelling, and lemmatizes all columns comprised of textual data
+
+
+### text_embedder ###
+
+``` python
+libra.text_embedder(text)
+```
+
+Embeds data in text column by summing all of the numerical vector representations of textual contents in column into suitable scalar format
+
+*Parameters --*
+
+text: `numpy.array`
+
+Numpy array representation of data column comprised of textual data
+
+*Returns --*
+
+`np.reshape(np.sum(i))`: `numpy.array`
+
+Retrieves shape of the array containing sum of each numerical row vector representation of text column data
+
 
 ### clustering_preprocessor ###
 
@@ -1082,11 +1241,57 @@ libra.generate_column_labels(pipeline, numeric_cols)
 libra.clustering_preprocessor(data)
 ```
 
+Applies well known preprocessing techniques on structured data instantiated in Libra instance for clustering modelling/analysis methods
+
+
+*Parameters --*
+
+data
+
+Data selected and sent via written query to instance by user to be analyzed 
+
+(is initially set by default to have dataframe format)
+
+
+*Returns --*
+
+`pd.DataFrame(data, columns=new_columns)`: pd.DataFrame
+
+Retrieves Pandas dataframe of clustering processed data with new column names 
+
+full_pipeline: `obj`
+
+Object containing all of the properties (imputer, one hot encoder, etc.) from the preprocessing pipeline
+
+
+
 ### too_many_values ###
 
 ```python
-libra.too_many_values(data, mca_threshold)
+libra.too_many_values(data, ca_threshold)
 ```
+
+Determines if correspondance analysis needs to be applied to data instantiated in Libra instance based on whether too many distinct values in data exist
+
+
+*Parameters --*
+
+data: {}
+
+Dictionary containing train and test data values associated with train and test keys, respectively
+
+ca_threshold: `float` (is set by default to 0.25)
+
+Float number representing the percentage of the length of the data required to apply correspondance analysis
+
+
+*Returns --*
+
+False
+
+Boolean value based on number of distinct values calculated in column of data, signalling whether number of values is sufficient for correspondance analysis application (will be set to false if total number of unique values in column does not exceed defined correspondance analysis threshold)
+
+***
 
 ***
 
