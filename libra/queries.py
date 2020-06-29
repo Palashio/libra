@@ -116,6 +116,12 @@ class client:
         return self.interpret(modelKey, predictions)
 
     def interpret(self, modelKey, predictions):
+        '''
+        Function to interpret predictions from a neural network for the creation for graphs / user understanding.
+        :param modelKey: is the model in the self.models dictionary that you want to use to interpret
+        :param predictions: the predictions that come out of the model
+        :return: a prediction, most likely an array
+        '''
         modeldict = self.models[modelKey]
         if modeldict.get('interpreter'):
             if isinstance(modeldict['interpreter'], dict):
