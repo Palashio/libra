@@ -251,7 +251,12 @@ class client:
                   kernel='linear',
                   preprocess=True,
                   drop=None,
-                  cross_val_size=0.3):
+                  cross_val_size=0.3,
+                  degree=3,
+                  gamma='scale',
+                  coef0=0.0,
+                  max_iter=-1
+                  ):
 
         self.models['svm'] = train_svm(instruction,
                                        dataset=self.dataset,
@@ -260,7 +265,12 @@ class client:
                                        kernel=kernel,
                                        preprocess=preprocess,
                                        drop=drop,
-                                       cross_val_size=cross_val_size)
+                                       cross_val_size=cross_val_size,
+                                       degree=degree,
+                                       gamma=gamma,
+                                       coef0=coef0,
+                                       max_iter=max_iter
+                                       )
 
         self.latest_model = 'svm'
 

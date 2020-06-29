@@ -159,8 +159,6 @@ def train_svm(instruction,
               max_iter=-1):
 
         logger("Reading in dataset....")
-        # reads dataset and fills n/a values with zeroes
-        #data = pd.read_csv(self.dataset)
 
         dataReader = DataReader(dataset)
         data = dataReader.data_generator()
