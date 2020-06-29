@@ -273,7 +273,7 @@ def clustering_preprocessor(data):
 
     data = full_pipeline.fit_transform(data)
 
-    new_columns = generate_column_labels(full_pipeline, numeric_columns)
+    new_columns = generate_column_labels(full_pipeline, numeric_columns, text_cols=[])
 
     return pd.DataFrame(data, columns=new_columns), full_pipeline
 
