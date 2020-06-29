@@ -485,13 +485,11 @@ class client:
         logger(" ", ("Analyzing {}".format(model)))
 
         modeldict = self.models[model]
-        if modeldict.get('plots'):
+        if modeldict.get('plots') and model != 'k_means_clustering':
             logger(" ", "Displaying associated plots")
             # TODO: plot separately instead of on top of each other
             for key in modeldict['plots']:
-                modeldict['plots'][key]
-                plt.show()
-
+                modeldict['plots'][key].show()
         if modeldict.get('test_data'):
             logger("->", "Making predictions for test data...")
             data = modeldict['test_data']['X']
@@ -505,8 +503,14 @@ class client:
                     preds).reshape(1, -1)[0]
                 real = enc.fit_transform(real)
                 preds = enc.transform(preds)
-
-        if model == 'regression_ANN':
+        if model == 'k_means_clustering':
+            logger("->", "Reporting metrics: ")
+            inertia = modeldict['model'].inertia_
+            centers = modeldict['model'].cluster_centers_
+            logger(" ", ("Total Clusters: {}".format(str(len(centers)))))
+            logger("->", ("KMeans centroids: {}".format(str(centers))))
+            logger("->", ("KMeans Sum Squared Dist of points to center (inertia): {}".format(str(inertia))))
+        elif model == 'regression_ANN':
             logger("->", "Reporting metrics: ")
             MSE = sklearn.metrics.mean_squared_error(real, preds)
             MAE = sklearn.metrics.mean_absolute_error(real, preds)
@@ -561,5 +565,5 @@ class client:
 # 'benefits'])
 newClient = client(
     '/Users/ramyabhaskara/PycharmProjects/libra/tools/data/structured_data/housing.csv')
-newClient.decision_tree_query("Model ocean proximity")
+newClient.kmeans_clustering_query()
 newClient.analyze()
