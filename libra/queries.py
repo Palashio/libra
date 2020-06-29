@@ -37,10 +37,17 @@ def clearLog():
     counter = 0
 
 
-# logging function that creates hierarchial display of the processes of
-# different functions. Copied into different python files to maintain
-# global variables.
 def logger(instruction, found="", slash=''):
+    '''
+    logging function that creates hierarchial display of the processes of
+    different functions. Copied into different python files to maintain
+    global variables.
+
+    :param instruction: what you want to be displayed
+    :param found: if you want to display something found like target column
+    :param slash: if you're displaying accuracies in a table format
+
+    '''
     global currLog
     global counter
     if counter == 0:
@@ -58,9 +65,17 @@ def logger(instruction, found="", slash=''):
     currLog = ""
 
 
-# class to store all query information. Currently, old_models is not being used.
+
 class client:
+    '''
+    class to store all query information. Currently, old_models is not being used.
+    '''
     def __init__(self, data):
+        '''
+        initializer for the client class, reads in dataset and records by calling logger function
+        :param data: represents the dataset that you're trying to read
+        :return: a completely initialized client class
+        '''
         logger("creating object...")
         self.dataset = data
         logger("Loading dataset...")
@@ -70,8 +85,12 @@ class client:
         logger("done...")
         clearLog()
 
-    # returns models with a specific string - currently deprecated, should not be used. 
     def get_models(self, model_requested):
+        '''
+        returns models with a specific string - currently deprecated, should not be used.
+        :param model_requested: represents the name of the model from which you want to retrieve
+        :return: the model dictionary for your specific model
+        '''
         logger("Getting model...")
         return get_similar_model(model_requested, self.models.keys())
         clearLog()
@@ -79,6 +98,12 @@ class client:
     # param modelKey: string representation of the model to make prediction
     # param data: dataframe version of desired prediction set
     def predict(self, data, modelKey=None):
+        '''
+        Uses a model from the self.models dictionary to make a prediction. Also fits it based on the operator stored in the models dictionary.
+        :param data: is the data that you want to predict for using model
+        :param modelKey: is the specific model you want to use to predict
+        :return: a prediction, most likely an array
+        '''
         if modelKey == None:
             modelKey = self.latest_model
         modeldict = self.models[modelKey]
@@ -88,6 +113,7 @@ class client:
             predictions = modeldict['interpreter'].inverse_transform(
                 predictions)
         return predictions
+
 
     def neural_network_query(self,
                              instruction,
@@ -103,6 +129,11 @@ class client:
                              maximizer="val_loss",
                              save_model=False,
                              save_path=os.getcwd()):
+        '''
+        Detects to see if it's a regression/classification problem and then calls the correct query.
+        :param hyperparameters: all of these are hyperparameters that're passed to the algorithm
+        :return: a model, plots, accuracy information all stored in the self.models dictionary
+        '''
 
         data = pd.read_csv(self.dataset)
 
