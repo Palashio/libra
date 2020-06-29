@@ -8,22 +8,25 @@ function load(){
     slideshow(0);
 }
 
-var prevSlide=5;
+var prevSlide=-1;
 
 function slideshow(slide){
     if(prevSlide == slide){ //don't reanimate if the same tab was clicked consecutively
         return;
     }
     
-//    graphic
-    document.getElementById("g" + prevSlide).classList.remove("float");
-    document.getElementById("g" + prevSlide).classList.add("drop");
-    
-//    description
-    document.getElementById("d" + prevSlide).classList.remove("slideIn");
-    
-//    tab
-    document.getElementById("t" + prevSlide).classList.remove("active");
+    if(prevSlide != -1){ //prevents animation right as the site loads up
+//        graphic
+        document.getElementById("g" + prevSlide).classList.remove("float");
+        document.getElementById("g" + prevSlide).classList.add("drop");
+
+//        description
+        document.getElementById("d" + prevSlide).classList.remove("slideIn");
+
+//        tab
+        document.getElementById("t" + prevSlide).classList.remove("active");
+
+    }
     
     prevSlide=slide;
     
