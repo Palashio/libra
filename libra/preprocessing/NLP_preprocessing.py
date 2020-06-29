@@ -19,7 +19,7 @@ def get_target_values(data, instruction, yLabel):
     del data[target]
     #labels
     Y = data[get_similar_column(get_value_instruction(yLabel), data)]
-    return X, Y
+    return X, Y, get_similar_column(get_value_instruction(yLabel), data)
 
 
 def lemmatize_text(dataset):

@@ -9,6 +9,7 @@
 
     <!-- jQuery library -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    
     <script src="../javascript/api.js" type="text/javascript"></script>
     <link href="https://fonts.googleapis.com/css?family=Montserrat:400,500,600" rel="stylesheet" type="text/css">
     <link href="../css/api.css" rel="stylesheet" type="text/css">
@@ -22,19 +23,18 @@
             <li><a class="nav-tab" href="started.html">Getting Started</a></li> 
             
             <li><a class="nav-tab" href="devGuides.html">Developer Guides</a></li>
-                <li class="dropdown-item">Providing Instructions to Libra</li>   
-            
+
             <li class="nav-tab selected" href="modeling.html">Modeling Queries</li>
-                <li class="dropdown-item selected" data="nnq">Neural Network</li>
-                <li class="dropdown-item selected" data="cq">Convolutional</li>
-                <li class="dropdown-item selected" data="tcq">Text Classification</li>
-                <li class="dropdown-item selected" data="sq">Summarization</li>
-                <li class="dropdown-item selected" data="kmcq">K Mean Clustering</li>           
+                <div>
+                    <li class="dropdown-item selected" data="nnq">Neural Network</li>
+                    <li class="dropdown-item" data="cq">Convolutional</li>
+                    <li class="dropdown-item" data="tcq">Text Classification</li>
+                    <li class="dropdown-item" data="sq">Summarization</li>
+                    <li class="dropdown-item" data="kmcq">K Mean Clustering</li> 
+                </div>                 
+            
             <li><a class="nav-tab" href="nlp.html">NLP Queries</a></li>
-                <li class="dropdown-item">Dimensionality Reduction Pipeline</li>
-                <li class="dropdown-item">Random Forest Feature Importances</li>
-                <li class="dropdown-item">Principal Component Analysis</li>
-                <li class="dropdown-item">Independent Component Analysis</li>
+
         </ul>
     </div>
     <div id="nav-bar">Modeling Queries</div>
@@ -206,56 +206,6 @@ newClient.predict_text_sentiment('new_text_to_classify')</pre>
                 <pre>newClient = client('path_to_file')
 newClient.kmeans_clustering_query(preprocess=True, generate_plots=True, drop=[])</pre>
             </div>
-            <div class="box">
-                <h2 id="nn">Nearest Neighbors</h2>
-                <br>
-                <p>Automatically fits a neural network to your dataset. Target detection, preprocessing, and scoring are done by default.</p>
-                <br>
-                <table style="width:100%">
-                    <tr>
-                        <td colspan="2">Arguments</td>
-                    </tr>
-                    <tr>
-                        <td>Instruction</td>
-                        <td>An English language statement of what you’d like to do, eg: predict the median house value</td>
-                    </tr>
-                </table>
-                <pre>print("hello world")
-//random code stuff here, tabs are important though</pre>
-            </div>
-            <div class="box">
-                <h2 id="svm">Support Vector Machines</h2>
-                <br>
-                <p>Automatically fits a neural network to your dataset. Target detection, preprocessing, and scoring are done by default.</p>
-                <br>
-                <table style="width:100%">
-                    <tr>
-                        <td colspan="2">Arguments</td>
-                    </tr>
-                    <tr>
-                        <td>Instruction</td>
-                        <td>An English language statement of what you’d like to do, eg: predict the median house value</td>
-                    </tr>
-                </table>
-                <pre>print("hello world")
-//random code stuff here, tabs are important though</pre>
-            </div>
-            <div class="box">
-                <h2 id="dt">Decision Tree</h2>
-                <br>
-                <p>Automatically fits a neural network to your dataset. Target detection, preprocessing, and scoring are done by default.</p>
-                <br>
-                <table style="width:100%">
-                    <tr>
-                        <td colspan="2">Arguments</td>
-                    </tr>
-                    <tr>
-                        <td>Instruction</td>
-                        <td>An English language statement of what you’d like to do, eg: predict the median house value</td>
-                    </tr>
-                </table>
-                <pre>print("hello world")
-//random code stuff here, tabs are important though</pre>
-            </div>
+            <div id="space"></div>
     </div>
 </body>
