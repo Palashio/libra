@@ -1,12 +1,11 @@
 import os
 import pandas as pd
 import tensorflow as tf
-from sklearn.model_selection import train_test_split
 from tensorflow.python.client import device_lib
-
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
 class DataReader():
-    def __init__(self, filepath, trim=False, trim_format='random', trim_ratio=0.20, strat_col_index=0):
+    def __init__(self, filepath, trim=False, trim_format='random', trim_ratio=0.20, strat_col=None):
         '''
         Constructor for the DataReader class.
 
@@ -19,14 +18,14 @@ class DataReader():
         :param trim: Whether the dataset should be trimmed or not (bool)
         :param trim_format: The format/type of trimming (str)
         :param trim_ratio: The proportion of the dataset that needs to be trimmed (float)
-        :param strat_col_index: The index of the column that the dataset will be sampled against using the
+        :param strat_col: The name of the column that the dataset will be sampled against using the
         stratified sampling technique (int)
         '''
         self.filepath = filepath
         self.trim = trim
         self.trim_format = trim_format
         self.trim_ratio = trim_ratio
-        self.strat_col_index = strat_col_index
+        self.strat_col = strat_col
 
     def retrieve_file_size(self):
         '''
@@ -86,14 +85,15 @@ class DataReader():
         if self.trim == True:
             if self.trim_format == 'random':
                 df = df.sample(frac=(1.0 - self.trim_ratio))
-            elif self.trim_format == 'stratify':
-                # ADD STRATIFYING TECHNIQUE HERE
-                y = df[df.columns[self.strat_col_index]]
-                del df[df.columns[self.strat_col_index]]
-
-                x_train, x_test, y_train, y_test = train_test_split(df, y, stratify=y, test_size=self.trim_ratio, random_state=0)
-
-                df = pd.concat([x_test, y_test])
+            # elif self.trim_format == 'stratify':
+            #     # ADD STRATIFYING TECHNIQUE HERE
+            #     y = df[self.strat_col]
+            #     del df[self.strat_col]
+            #     print(df.shape)
+            #     x_train, x_test, y_train, y_test = train_test_split(df, y, stratify=y, test_size=0.1, random_state=0)
+            #
+            #     df = pd.concat([x_test, y_test])
+            #     print(df.shape)
 
         return df
 
@@ -115,19 +115,3 @@ class DataReader():
         '''
         return tf.test.gpu_device_name() != ''
 
-# print(len(pd.read_csv("./tools/data/structured_data/housing.csv")))
-
-# dataReader = DataReader("./tools/data/structured_data/housing.csv", trim=False, trim_format='stratify', trim_ratio=0.5)
-# data = dataReader.data_generator()
-
-# print(data)
-
-############################
-
-# data_reader = DataReader('./data/housing.csv', trim=True, trim_ratio=0.5)
-
-# print("Is GPU Available:", data_reader.is_gpu_available())
-# print("Available GPUs:", data_reader.get_available_gpus())
-
-# print("Before Trimming:", data_reader.data_generator().shape)
-# print("After Trimming:", data_reader.trim_gpu().shape)
