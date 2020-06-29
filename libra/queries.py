@@ -137,9 +137,6 @@ class client:
         return predictions
 
 
-
-# query to create a neural network model for the client 
-    # will build either a regression ANN or a classification ANN
     def neural_network_query(self,
                              instruction,
                              text=[],
@@ -218,6 +215,11 @@ class client:
             maximizer="val_loss",
             save_model=True,
             save_path=os.getcwd()):
+        '''
+        Calls the body of the regression_query__ code in the supplementaries.py file. Used for a regression feed forward neural network.
+        :param many params: all used as hyperparameters for the algorithm.
+        :return: a model and information to along with it stored in the self.models dictionary.
+        '''
 
         self.models['regression_ANN'] = regression_ann(
             instruction=instruction,
@@ -254,6 +256,11 @@ class client:
             maximizer="val_loss",
             save_model=False,
             save_path=os.getcwd()):
+        '''
+        Calls the body of the classification code in the supplementaries.py file. Used for a classification feed forward neural network.
+        :param many params: all used as hyperparameters for the algorithm.
+        :return: a model and information to along with it stored in the self.models dictionary.
+        '''
 
         self.models['classification_ANN'] = classification_ann(
             instruction=instruction,
@@ -285,6 +292,11 @@ class client:
                                 random_state=42,
                                 text=[]
                                 ):
+        '''
+        Calls the body of the kmeans_clustering code in the supplementaries.py file. Can be used without any preprocessing and/or parameters.
+        :param many params: all used as hyperparameters for the algorithm.
+        :return: a model and information to along with it stored in the self.models dictionary.
+        '''
 
         self.models['k_means_clustering'] = k_means_clustering(
             dataset=self.dataset,
@@ -315,6 +327,11 @@ class client:
                   coef0=0.0,
                   max_iter=-1
                   ):
+        '''
+        Calls the body of the svm query code in the supplementaries.py file. Used to create a classification support vector machine.
+        :param many params: all used as hyperparameters for the algorithm.
+        :return: a model and information to go along with it stored in the self.models dictionary.
+        '''
 
         self.models['svm'] = train_svm(instruction,
                                        dataset=self.dataset,
@@ -345,6 +362,11 @@ class client:
             p=2,
             algorithm='auto'
     ):
+        '''
+        Calls the body of the nearest neighbor code in the supplementaries.py file. Used to create a nearest neighbor algorithm.
+        :param many params: all used as hyperparameters for the algorithm.
+        :return: a model and information to along with it stored in the self.models dictionary.
+        '''
         self.models['nearest_neighbor'] = nearest_neighbors(
             instruction=instruction,
             text=text,
@@ -377,6 +399,11 @@ class client:
             max_leaf_nodes=None,
             min_impurity_decrease=0.0,
             ccp_alpha=0.0):
+        '''
+        Calls the body of the decision tree code in the classification_models.py file. Used to create a decision tree algorithm.
+        :param many params: all used as hyperparameters for the algorithm.
+        :return: a model and information to along with it stored in the self.models dictionary.
+        '''
 
         self.models['decision_tree'] = decision_tree(instruction=instruction,
                                                      text=text,
@@ -418,6 +445,11 @@ class client:
              verbose=0,
              test_size=0.2
              ):
+        '''
+        Calls the body of the tune identifier which is located in the supplementaries.py which then calls the appropriate tuner depending on the model
+        :param many params: all used as hyperparameters for the algorithm.
+        :return: an updated model and history stored in the models dictionary
+        '''
 
         if model_to_tune == None:
             model_to_tune = self.latest_model
@@ -443,16 +475,6 @@ class client:
             test_size=test_size
         )
 
-    # returns metrics about your dataset including similarity information
-    def stat_analysis(self, column_name="none", drop=None):
-        stats(
-            dataset=self.dataset,
-            drop=drop,
-            column_name=column_name
-        )
-
-        return
-
     # query to build a convolutional neural network
     def convolutional_query(self,
                             instruction=None,
@@ -465,6 +487,11 @@ class client:
                             epochs=10,
                             height=None,
                             width=None):
+        '''
+        Calls the body of the convolutional neural network query which is located in the feedforward.py file
+        :param many params: all used as hyperparameters for the algorithm.
+        :return: an updated model and history stored in the models dictionary
+        '''
 
         # storing values the model dictionary
         self.models["convolutional_NN"] = convolutional(
@@ -484,6 +511,14 @@ class client:
 
     # Sentiment analysis predict wrapper
     def classify_text(self, text):
+
+        '''
+        Calls the body of the text classification neural network query which is located in the nlp_queries.py file. This can only be called
+        if text_classification_query has been called previously.
+        :param many params: all used as hyperparameters for the algorithm.
+        :return: a classification of text that you've provided
+        '''
+
         return classify_text(self=self, text=text)
 
     # sentiment analysis query
@@ -500,6 +535,11 @@ class client:
                                   generate_plots=True,
                                   save_model=False,
                                   save_path=os.getcwd()):
+        '''
+        Calls the body of the text classification query which is located in the nlp_queries.py file
+        :param many params: all used as hyperparameters for the algorithm.
+        :return: an updated model and history stored in the models dictionary
+        '''
 
         # storing values the model dictionary
         self.models["Text Classification"] = text_classification_query(
