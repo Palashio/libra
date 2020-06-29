@@ -429,27 +429,39 @@ class client:
         print(models_avail)
 
     # shows the keys in the models dictionary
-    def model_data(self, model):
+    def model_data(self, model=None):
+        if model == None:
+            model = self.latest_model
         get_model_data(self,model)
 
     # returns all operators applicable to the client's models dictionary
-    def operators(self, model):
+    def operators(self, model=None):
+        if model == None:
+            model = self.latest_model
         get_operators(self, model)
 
     # show accuracy scores for client's model
-    def accuracy(self, model):
+    def accuracy(self, model=None):
+        if model == None:
+            model = self.latest_model
         return get_accuracy(self, model)
 
     # show losses for client's model
-    def losses(self, model): 
+    def losses(self, model=None): 
+        if model == None:
+            model = self.latest_model
         return get_losses(self, model)
     
     # return client model's target
-    def target(self, model):
+    def target(self, model=None):
+        if model == None:
+            model = self.latest_model
         return get_target(self,model)
     
     # return NLP model's vocabulary
-    def vocab(self, model):
+    def vocab(self, model=None):
+        if model == None:
+            model = self.latest_model
         return get_vocab(self,model)
     
     # plotting for client
