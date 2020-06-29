@@ -231,3 +231,49 @@ history = model.fit_generator(
 #         if i.isspace():
 #             spaces += 1
 #     return False
+
+
+"""
+        trainingImages = []
+        train_labels = []
+        validationImages = []
+        test_labels = []
+
+        for path in imgPaths:
+        classLabel = path.split(os.path.sep)[-2]
+        classes.add(classLabel)
+        img = img_to_array(load_img(path, target_size=(64, 64)))
+
+        if path.split(os.path.sep)[-3] == 'training_set':
+            trainingImages.append(img)
+            train_labels.append(classLabel)
+        else:
+            validationImages.append(img)
+            test_labels.append(classLabel)
+
+        trainingImages = np.array(trainingImages)
+        train_labels = to_categorical(np.array(train_labels))
+        validationImages = np.array(validationImages)
+        test_labels = to_categorical(np.array(test_labels))
+        model.compile(loss=’categorical_crossentropy’,
+                  optimizer=’sgd’,
+                  metrics=[‘accuracy’])
+        history=model.fit(train_images, train_labels,
+                  batch_size=100,
+                  epochs=5,
+                  verbose=1)
+        """
+
+
+# Seperates the color channels and then reshapes each of the channels to
+# (224, 224)
+# def processColorChanel(img):
+#     b, g, r = cv2.split(img)
+#     # seperating each value into a color channel and resizing to a standard
+#     # size of 224, 224, 3 <- because of RGB color channels. If it's not 3
+#     # color channels it'll pad with zeroes
+#     b = cv2.resize(b, dsize=(224, 224), interpolation=cv2.INTER_CUBIC)
+#     g = cv2.resize(g, dsize=(224, 224), interpolation=cv2.INTER_CUBIC)
+#     r = cv2.resize(r, dsize=(224, 224), interpolation=cv2.INTER_CUBIC)
+#     img = cv2.merge((b, g, r))
+#     return img

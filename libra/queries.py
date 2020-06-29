@@ -219,14 +219,26 @@ class client:
                                 preprocess=True,
                                 generate_plots=True,
                                 drop=None,
-                                base_clusters=2):
+                                base_clusters=2,
+                                verbose=0,
+                                n_init=10,
+                                max_iter=300,
+                                random_state=42,
+                                text=[]
+                                ):
 
         self.models['k_means_clustering'] = k_means_clustering(
             dataset=self.dataset,
             preprocess=preprocess,
             generate_plots=generate_plots,
             drop=drop,
-            base_clusters=base_clusters)
+            base_clusters=base_clusters,
+            verbose=verbose,
+            n_init=n_init,
+            max_iter=max_iter,
+            random_state=random_state,
+            text=text
+        )
 
         self.latest_model = 'k_means_clustering'
 
@@ -237,7 +249,12 @@ class client:
                   kernel='linear',
                   preprocess=True,
                   drop=None,
-                  cross_val_size=0.3):
+                  cross_val_size=0.3,
+                  degree=3,
+                  gamma='scale',
+                  coef0=0.0,
+                  max_iter=-1
+                  ):
 
         self.models['svm'] = train_svm(instruction,
                                        dataset=self.dataset,
@@ -246,7 +263,12 @@ class client:
                                        kernel=kernel,
                                        preprocess=preprocess,
                                        drop=drop,
-                                       cross_val_size=cross_val_size)
+                                       cross_val_size=cross_val_size,
+                                       degree=degree,
+                                       gamma=gamma,
+                                       coef0=coef0,
+                                       max_iter=max_iter
+                                       )
 
         self.latest_model = 'svm'
 
@@ -257,15 +279,23 @@ class client:
             preprocess=True,
             drop=None,
             min_neighbors=3,
-            max_neighbors=10):
-        self.models['nearest_neigbor'] = nearest_neighbors(
+            max_neighbors=10,
+            leaf_size=30,
+            p=2,
+            algorithm='auto'
+    ):
+        self.models['nearest_neighbor'] = nearest_neighbors(
             instruction=instruction,
             text=text,
             dataset=self.dataset,
             preprocess=preprocess,
             drop=drop,
             min_neighbors=min_neighbors,
-            max_neighbors=max_neighbors)
+            max_neighbors=max_neighbors,
+            leaf_size=leaf_size,
+            p=p,
+            algorithm=algorithm
+        )
 
         self.latest_model = 'nearest_neighbor'
 
@@ -274,14 +304,34 @@ class client:
             instruction,
             preprocess=True,
             test_size=0.2,
-            drop=None):
+            text=[],
+            drop=None,
+            criterion='gini',
+            splitter='best',
+            max_depth=None,
+            min_samples_split=2,
+            min_samples_leaf=1,
+            min_weight_fraction_leaf=0.0,
+            max_leaf_nodes=None,
+            min_impurity_decrease=0.0,
+            ccp_alpha=0.0):
 
-        self.models['decision_tree'] = decision_tree(instruction,
-                                                     text=[],
+        self.models['decision_tree'] = decision_tree(instruction=instruction,
+                                                     text=text,
                                                      dataset=self.dataset,
-                                                     preprocess=True,
-                                                     test_size=0.2,
-                                                     drop=None)
+                                                     preprocess=preprocess,
+                                                     test_size=test_size,
+                                                     drop=drop,
+                                                     criterion=criterion,
+                                                     splitter=splitter,
+                                                     max_depth=max_depth,
+                                                     min_samples_split=min_samples_split,
+                                                     min_samples_leaf=min_samples_leaf,
+                                                     min_weight_fraction_leaf =min_weight_fraction_leaf,
+                                                     max_leaf_nodes=max_leaf_nodes,
+                                                     min_impurity_decrease =min_impurity_decrease,
+                                                     ccp_alpha=ccp_alpha)
+
 
         self.latest_model = 'decision_tree'
 
@@ -340,18 +390,28 @@ class client:
     def convolutional_query(self,
                             instruction=None,
                             read_mode=None,
+                            preprocess=True,
                             new_folders=True,
                             image_column=None,
-                            training_ratio=0.8):
+                            training_ratio=0.8,
+                            augmentation=True,
+                            epochs=10,
+                            height=None,
+                            width=None):
 
         # storing values the model dictionary
         self.models["convolutional_NN"] = convolutional(
             instruction=instruction,
             read_mode=read_mode,
+            preprocess=preprocess,
             data_path=self.dataset,
             new_folders=new_folders,
             image_column=image_column,
-            training_ratio=training_ratio)
+            training_ratio=training_ratio,
+            augmentation=augmentation,
+            epochs=epochs,
+            height=height,
+            width=width)
 
         self.latest_model = 'convolutional_NN'
 
@@ -530,8 +590,10 @@ class client:
 # epochs=1) newClient.neural_network_query("Model median house value") newClient = client(
 # 'tools/data/structured_data/landslides_after_rainfall.csv').neural_network_query(instruction='Model distance',
 # drop=['id', 'geolocation', 'source_link', 'source_name'])
-
 # newClient = client('tools/data/structured_data/fake_job_postings.csv').neural_network_query(instruction='Classify
 # fraudulent', drop=['job_id'], text=['department','description', 'company_profile','requirements', 'benefits'])
-newClient = client('/Users/anasawadalla/PycharmProjects/libra/tools/data/nlp_data/image-caption.csv')
-newClient.image_caption_query("caption", epochs=3)
+
+#newClient = client('tools/data/structured_data/fake_job_postings.csv').neural_network_query(instruction='Classify fraudulent',
+#                                                                                            drop=['job_id'],
+#                                                                                            text=['department','description', 'company_profile','requirements', 'benefits'])
+
