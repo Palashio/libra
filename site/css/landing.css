@@ -129,17 +129,17 @@ body{
     z-index: 5;
     position: absolute;
     top: 450px;
-    left: 100px;
+    left: 50px;
     
-    width: 700px;
+    width: 750px;
     height: 300px;
     
     background-color: white;
     border: 2px solid white;
     border-radius: 15px;
     box-shadow: 0px 0px 20px #a8d7ff;
-    padding-left: 50px;
-    padding-right: 50px;
+    padding-left: 20px;
+    padding-right: 20px;
     box-sizing: border-box;
 }
 
@@ -151,27 +151,29 @@ body{
 }
 
 .des_nav_line{
+    margin: 0px;
     margin-top: 10px;
 }
 
 .des_tab{
-    width: 89px;
-    padding-right: 10px;
+    margin-right: 20px;
+    margin-left: 15px;
     padding-top: 10px;
     
     float:left;
     text-align: center;
     font-weight: 500;
-    color: #464646;
+    font-size: 14px;
+    color: #5d5d5d;
 }
 
 .des_tab:hover{
-    animation-name: navBorder;
+    animation-name: desNavBorder;
     cursor: pointer;
 }
 
 .des_tab.active{
-    animation-name: navBorder;
+    animation-name: desNavBorder;
 }
 
 .description{
@@ -183,11 +185,12 @@ body{
     font-size: 30px;
     font-weight: 400;
     opacity: 0%;
+    padding: 20px;
 }
 
 .description.slideIn{
     animation-name: slideIn;
-    animation-duration: 1s;
+    animation-duration: 0.5s;
     animation-fill-mode: forwards;
 }
 
@@ -197,16 +200,16 @@ body{
     position: absolute;
 }
 
-/*coin*/
-#g0{
+/*pencil*/
+#g1{
     z-index: 4;
     position: absolute;
     left: 1402px;
     top: 70px;
 }
 
-/*pencil*/
-#g1{
+/*coin*/
+#g0{
     z-index: 6;
     position: absolute;
     left: 1527px;
@@ -292,4 +295,9 @@ body{
 @keyframes navBorder{
     from{width:0%}
     to{width:80%}
+}
+
+@keyframes desNavBorder{
+    from{width:0%}
+    to{width:100%}
 }

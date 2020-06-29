@@ -277,3 +277,13 @@ history = model.fit_generator(
 #     r = cv2.resize(r, dsize=(224, 224), interpolation=cv2.INTER_CUBIC)
 #     img = cv2.merge((b, g, r))
 #     return img
+
+# # returns metrics about your dataset including similarity information
+# def stat_analysis(self, column_name="none", drop=None):
+#     stats(
+#         dataset=self.dataset,
+#         drop=drop,
+#         column_name=column_name
+#     )
+#
+#     return
