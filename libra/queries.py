@@ -628,3 +628,12 @@ class client:
 #newClient = client('tools/data/structured_data/fake_job_postings.csv').neural_network_query(instruction='Classify fraudulent',
 #                                                                                            drop=['job_id'],
 #                                                                                            text=['department','description', 'company_profile','requirements', 'benefits'])
+
+newClient = client('/Users/ramyabhaskara/PycharmProjects/libra/tools/data/structured_data/housing.csv')
+newClient.decision_tree_query('model ocean proximity')
+newClient.analyze()
+newClient.kmeans_clustering_query()
+newClient.analyze()
+newClient.decision_tree_query('model ocean proximity')
+newClient.analyze()
+

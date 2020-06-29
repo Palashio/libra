@@ -82,6 +82,7 @@ def generate_clustering_plots(kmeans, dataPandas, dataset):
                     dataPandas.columns[x] +
                     "_vs_" +
                     dataPandas.columns[y])
+                plt.close(img)
     return plots, plot_names
 
 # generates all of the plots for regression
@@ -206,7 +207,7 @@ def plot_mc_roc(y_test, y_score, interpreter=None):
     roc_auc["macro"] = sklearn.metrics.auc(fpr["macro"], tpr["macro"])
 
     # Plot all ROC curves
-    plt.figure()
+    img = plt.figure()
     plt.plot(fpr["micro"], tpr["micro"],
              label='micro-average ROC curve (area = {0:0.2f})'
                    ''.format(roc_auc["micro"]),
@@ -241,10 +242,11 @@ def plot_mc_roc(y_test, y_score, interpreter=None):
     plt.ylabel('True Positive Rate')
     plt.title('ROC Curves')
     plt.legend(loc="lower right")
-    plt.show()
+    return img
 
 # Analysis of model
 def analyze(client, model=None):
+    plt.clf()
     logger(" ", ("Analyzing {}".format(model)))
 
     modeldict = client.models[model]
@@ -252,7 +254,10 @@ def analyze(client, model=None):
         logger(" ", "Displaying associated plots")
         # TODO: plot separately instead of on top of each other
         for key in modeldict['plots']:
-            modeldict['plots'][key].show()
+            if key != 'roc_curve':
+                modeldict['plots'][key].show()
+                print('im here')
+
     if modeldict.get('test_data'):
         logger("->", "Making predictions for test data...")
         data = modeldict['test_data']['X']
@@ -266,6 +271,7 @@ def analyze(client, model=None):
                 preds).reshape(1, -1)[0]
             real = enc.fit_transform(real)
             preds = enc.transform(preds)
+
     if model == 'k_means_clustering':
         logger("->", "Reporting metrics: ")
         inertia = modeldict['model'].inertia_
@@ -273,31 +279,42 @@ def analyze(client, model=None):
         logger(" ", ("Total Clusters: {}".format(str(len(centers)))))
         logger("->", ("KMeans centroids: {}".format(str(centers))))
         logger("->", ("KMeans Sum Squared Dist of points to center (inertia): {}".format(str(inertia))))
+        modeldict['n_centers'] = len(centers)
+        modeldict['centroids'] = centers
+        modeldict['inertia'] = inertia
     elif model == 'regression_ANN':
         logger("->", "Reporting metrics: ")
         MSE = sklearn.metrics.mean_squared_error(real, preds)
         MAE = sklearn.metrics.mean_absolute_error(real, preds)
         logger(" ", ("MSE on test set: {}".format(str(MSE))))
         logger("->", ("MAE on test set: {}".format(str(MAE))))
+        modeldict['MSE'] = MSE
+        modeldict['MAE'] = MAE
     # classification models
     elif model in ['svm', 'nearest_neighbor', 'decision_tree', 'classification_ANN']:
         logger("->", "Plotting ROC curves and creating confusion matrix...")
         if model in ['svm', 'nearest_neighbor',
                      'decision_tree']:  # sklearn models ONLY
-            plot_mc_roc(real, preds, modeldict['interpreter'])
+            roc = plot_mc_roc(real, preds, modeldict['interpreter'])
+            roc
+            plt.show()
             labels = list(modeldict['interpreter'].keys())
-            plot_confusion_matrix(
+            cm = plot_confusion_matrix(
                 modeldict['model'], data, real, display_labels=labels)
+            cm
             plt.show()
 
             accuracy = modeldict['accuracy_score']
         else:  # classification_ANN
-            plot_mc_roc(real, preds, enc)
+            roc = plot_mc_roc(real, preds, enc)
+            roc
+            plt.show()
             cm = confusion_matrix(real, preds)
             labels = enc.classes_
-            ConfusionMatrixDisplay(
+            cm = ConfusionMatrixDisplay(
                 confusion_matrix=cm,
                 display_labels=labels).plot()
+            cm
             plt.show()
 
             accuracy = modeldict['accuracy']['validation_accuracy']
@@ -310,5 +327,12 @@ def analyze(client, model=None):
         logger("->", ("Recall on test set: {}".format(str(recall))))
         logger("->", ("Precision on test set: {}".format(str(precision))))
         logger("->", ("F1 Score on test set: {}".format(str(f1))))
-    elif model != 'k_means_clustering':
+        if not modeldict.get('plots'):
+            modeldict['plots'] = {}
+        modeldict['plots']['roc_curve'] = roc
+        modeldict['confusion_matrix'] = cm
+        modeldict['recall_score'] = recall
+        modeldict['precision_score'] = precision
+        modeldict['f1_score'] = f1
+    else:
         print("further analysis is not supported for {}".format(model))
