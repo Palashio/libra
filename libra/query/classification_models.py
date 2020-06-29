@@ -67,9 +67,11 @@ def k_means_clustering(dataset= None,
             generate_plots=True,
             drop=None,
             base_clusters=1,
-            verbosity=0,
+            verbose=0,
             n_init=10,
-            max_iter=300):
+            max_iter=300,
+            random_state=42,
+            text=[]):
         logger("Reading dataset...")
         # loads dataset and replaces n/a with zero
         # data = pd.read_csv(self.dataset)
@@ -95,7 +97,7 @@ def k_means_clustering(dataset= None,
         # baseline
         i = base_clusters
         logger("Creating unsupervised clustering task...")
-        kmeans = KMeans(n_clusters=i, random_state=0, verbosity=0, n_init=10, max_iter=300).fit(data)
+        kmeans = KMeans(n_clusters=i, random_state=random_state, verbose=verbose, n_init=n_init, max_iter=max_iter).fit(data)
         modelStorage.append(kmeans)
 
         # stores SSE values in an array for later comparison
@@ -107,7 +109,7 @@ def k_means_clustering(dataset= None,
         # 1000 - this value was decided based on precedence
         while (all(earlier >= later for earlier,
                                         later in zip(inertiaStor, inertiaStor[1:]))):
-            kmeans = KMeans(n_clusters=i, random_state=0, verbosity=0, n_init=10, max_iter=300).fit(data)
+            kmeans = KMeans(n_clusters=i, random_state=random_state, verbose=verbose, n_init=n_init, max_iter=max_iter).fit(data)
             modelStorage.append(kmeans)
             inertiaStor.append(kmeans.inertia_)
             # minimize inertia up to 10000

@@ -1,7 +1,7 @@
-from libra.query.nlp_queries import (image_caption_query,
-                                     generate_caption, predict_text_sentiment,
-                                     text_classification_query, get_summary,
-                                     summarization_query)
+# from libra.query.nlp_queries import (image_caption_query,
+#                                      generate_caption, predict_text_sentiment,
+#                                      text_classification_query, get_summary,
+#                                      summarization_query)
 from libra.query.classification_models import (k_means_clustering,
                                                train_svm, nearest_neighbors,
                                                decision_tree)
@@ -221,14 +221,26 @@ class client:
                                 preprocess=True,
                                 generate_plots=True,
                                 drop=None,
-                                base_clusters=2):
+                                base_clusters=2,
+                                verbose=0,
+                                n_init=10,
+                                max_iter=300,
+                                random_state=42,
+                                text=[]
+                                ):
 
         self.models['k_means_clustering'] = k_means_clustering(
             dataset=self.dataset,
             preprocess=preprocess,
             generate_plots=generate_plots,
             drop=drop,
-            base_clusters=base_clusters)
+            base_clusters=base_clusters,
+            verbose=verbose,
+            n_init=n_init,
+            max_iter=max_iter,
+            random_state=random_state,
+            text=text
+        )
 
         self.latest_model = 'k_means_clustering'
 
@@ -260,7 +272,7 @@ class client:
             drop=None,
             min_neighbors=3,
             max_neighbors=10):
-        self.models['nearest_neigbor'] = nearest_neighbors(
+        self.models['nearest_neighbor'] = nearest_neighbors(
             instruction=instruction,
             text=text,
             dataset=self.dataset,
@@ -476,5 +488,5 @@ class client:
 #newClient = client('tools/data/structured_data/fake_job_postings.csv').neural_network_query(instruction='Classify fraudulent',
 #                                                                                            drop=['job_id'],
 #                                                                                            text=['department','description', 'company_profile','requirements', 'benefits'])
-newClient = client('../../tools/data/structured_data/housing.csv')
-newClient.neural_network_query("Model median house value", epochs=3)
+newClient = client('/Users/palashshah/Desktop/housing.csv')
+newClient.kmeans_clustering_query()
