@@ -29,7 +29,7 @@ def setwise_preprocessing(data_path, new_folder, height, width):
 
     classification = int(classification/2)
     if classification < 2:
-        raise BaseException(f"Need at least two classes of images.")
+        raise BaseException("Directory only has {} class in it. Need at least two classes of images.".format(classification))
     height1, width1 = calculate_medians(heights, widths)
     if height is None:
         height = height1
@@ -127,7 +127,7 @@ def csv_preprocessing(csv_file,
     widths = []
     classifications = df[label].nunique()
     if classifications < 2:
-        raise BaseException(f"Need at least two classes of images.")
+        raise BaseException("Directory only has {} class in it. Need at least two classes of images.".format(classification))
     image_list = []
 
     # get the median heights and widths
@@ -199,7 +199,7 @@ def classwise_preprocessing(data_path, training_ratio, height, width):
         width = width1
     num_classifications = info[2]
     if num_classifications < 2:
-        raise BaseException(f"Need at least two classes of images.")
+        raise BaseException("Directory only has {} class in it. Need at least two classes of images.".format(num_classifications))
     img_dict = info[3]
 
     # create training and testing folders

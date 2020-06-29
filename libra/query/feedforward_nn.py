@@ -474,6 +474,7 @@ def convolutional(instruction=None,
         optimizer="adam",
         loss=loss_func,
         metrics=['accuracy'])
+    logger("Loading images and augmenting if applicable")
     if augmentation:
         train_data = ImageDataGenerator(rescale=1. / 255,
                                         shear_range=0.2,
@@ -497,6 +498,7 @@ def convolutional(instruction=None,
                                            class_mode=loss_func[:loss_func.find("_")])
 
     if epochs < 0: raise BaseException("Number of epochs has to be greater than 0.")
+
     history = model.fit(
         X_train,
         steps_per_epoch=X_train.n //
@@ -506,6 +508,8 @@ def convolutional(instruction=None,
         X_test.batch_size,
         epochs=epochs)
     # storing values the model dictionary
+
+    logger("Stored model under 'convolutional_NN' key")
     return {
         'id': generate_id(),
         "model": model,
