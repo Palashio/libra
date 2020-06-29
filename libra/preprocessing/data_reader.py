@@ -5,27 +5,23 @@ from tensorflow.python.client import device_lib
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
 class DataReader():
-    def __init__(self, filepath, trim=False, trim_format='random', trim_ratio=0.20, strat_col=None):
+    def __init__(self, filepath, trim=False, trim_format='random', trim_ratio=0.20):
         '''
         Constructor for the DataReader class.
 
         The DataReader class creates a Pandas DataFrame object
         based off of the datset's file extension, the format of trimming that needs to be applied to the
-        dataset (i.e. random sampling or stratified sampling), how much of the dataset needs to be trimmed,
-        and the index of the column that the dataset will be sampled against using the stratified sampling technique.
+        dataset (i.e. random sampling), and how much of the dataset needs to be trimmed.
 
         :param filepath: The file path to the dataset (str)
         :param trim: Whether the dataset should be trimmed or not (bool)
         :param trim_format: The format/type of trimming (str)
         :param trim_ratio: The proportion of the dataset that needs to be trimmed (float)
-        :param strat_col: The name of the column that the dataset will be sampled against using the
-        stratified sampling technique (int)
         '''
         self.filepath = filepath
         self.trim = trim
         self.trim_format = trim_format
         self.trim_ratio = trim_ratio
-        self.strat_col = strat_col
 
     def retrieve_file_size(self):
         '''
@@ -45,8 +41,6 @@ class DataReader():
         ext_index = self.filepath.rindex('.')
         return self.filepath[ext_index:]
 
-    # Creates a Pandas DataFrame object based off of what the inputted
-    # dataset's extension is
     def data_generator(self):
         '''
         Creates a Pandas DataFrame object based off of the dataset's file extension, whether a GPU is available or not,
@@ -64,9 +58,6 @@ class DataReader():
 
         If the user doesn't specify a proportion/ratio of how much of the dataset needs to be trimmed, 20% of the
         dataset will be trimmed by default.
-
-        If the user specifies that they want to apply "stratified sampling" to the dataset and they haven't specified a
-        column's index that they want to stratify against, the first column (index of 0) will be chosen by default.
 
         :return: The dataset after being trimmed/pre-processed (Pandas DataFrame)
         '''
@@ -114,4 +105,3 @@ class DataReader():
         :return: Whether the current device has a GPU or not (bool)
         '''
         return tf.test.gpu_device_name() != ''
-
