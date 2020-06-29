@@ -281,7 +281,11 @@ class client:
             preprocess=True,
             drop=None,
             min_neighbors=3,
-            max_neighbors=10):
+            max_neighbors=10,
+            leaf_size=30,
+            p=2,
+            algorithm='auto'
+    ):
         self.models['nearest_neighbor'] = nearest_neighbors(
             instruction=instruction,
             text=text,
@@ -289,7 +293,11 @@ class client:
             preprocess=preprocess,
             drop=drop,
             min_neighbors=min_neighbors,
-            max_neighbors=max_neighbors)
+            max_neighbors=max_neighbors,
+            leaf_size=leaf_size,
+            p=p,
+            algorithm=algorithm
+        )
 
         self.latest_model = 'nearest_neighbor'
 
@@ -298,14 +306,34 @@ class client:
             instruction,
             preprocess=True,
             test_size=0.2,
-            drop=None):
+            text=[],
+            drop=None,
+            criterion='gini',
+            splitter='best',
+            max_depth=None,
+            min_samples_split=2,
+            min_samples_leaf=1,
+            min_weight_fraction_leaf=0.0,
+            max_leaf_nodes=None,
+            min_impurity_decrease=0.0,
+            ccp_alpha=0.0):
 
-        self.models['decision_tree'] = decision_tree(instruction,
-                                                     text=[],
+        self.models['decision_tree'] = decision_tree(instruction=instruction,
+                                                     text=text,
                                                      dataset=self.dataset,
-                                                     preprocess=True,
-                                                     test_size=0.2,
-                                                     drop=None)
+                                                     preprocess=preprocess,
+                                                     test_size=test_size,
+                                                     drop=drop,
+                                                     criterion=criterion,
+                                                     splitter=splitter,
+                                                     max_depth=max_depth,
+                                                     min_samples_split=min_samples_split,
+                                                     min_samples_leaf=min_samples_leaf,
+                                                     min_weight_fraction_leaf =min_weight_fraction_leaf,
+                                                     max_leaf_nodes=max_leaf_nodes,
+                                                     min_impurity_decrease =min_impurity_decrease,
+                                                     ccp_alpha=ccp_alpha)
+
 
         self.latest_model = 'decision_tree'
 
@@ -499,4 +527,4 @@ class client:
 #                                                                                            drop=['job_id'],
 #                                                                                            text=['department','description', 'company_profile','requirements', 'benefits'])
 newClient = client('/Users/palashshah/Desktop/housing.csv')
-newClient.kmeans_clustering_query()
+newClient.decision_tree_query('model median house value')
