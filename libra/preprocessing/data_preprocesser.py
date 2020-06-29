@@ -5,6 +5,7 @@ import numpy as np
 import pandas as pd
 import tensorflow as tf
 from sklearn.compose import ColumnTransformer
+from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.impute import SimpleImputer
 from sklearn.model_selection import train_test_split
 from sklearn.pipeline import Pipeline
@@ -272,7 +273,7 @@ def clustering_preprocessor(data):
 
     data = full_pipeline.fit_transform(data)
 
-    new_columns = generate_column_labels(full_pipeline, numeric_columns)
+    new_columns = generate_column_labels(full_pipeline, numeric_columns, text_cols=[])
 
     return pd.DataFrame(data, columns=new_columns), full_pipeline
 

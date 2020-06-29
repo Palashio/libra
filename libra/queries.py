@@ -1,5 +1,5 @@
 from libra.query.nlp_queries import (image_caption_query,
-                                     generate_caption, predict_text_sentiment,
+                                     generate_caption, classify_text,
                                      text_classification_query, get_summary,
                                      summarization_query)
 from libra.query.classification_models import (k_means_clustering,
@@ -11,15 +11,14 @@ from libra.query.feedforward_nn import (regression_ann,
                                         convolutional)
 from libra.query.dimensionality_red_queries import dimensionality_reduc
 from libra.data_generation.grammartree import get_value_instruction
-from libra.data_generation.dataset_labelmatcher import (get_similar_column, 
-     get_similar_model)
+from libra.data_generation.dataset_labelmatcher import (get_similar_column,
+                                                        get_similar_model)
 import pandas as pd
 from pandas.core.common import SettingWithCopyWarning
 import warnings
 import os
 
-
-#supressing warnings for cleaner dialogue box
+# supressing warnings for cleaner dialogue box
 warnings.simplefilter(action='error', category=FutureWarning)
 warnings.simplefilter(action="ignore", category=SettingWithCopyWarning)
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
@@ -29,8 +28,7 @@ currLog = ""
 counter = 0
 
 
-
-#clears log when needed - currently not being used
+# clears log when needed - currently not being used
 def clearLog():
     global currLog
     global counter
@@ -91,7 +89,8 @@ class client:
                 predictions)
         return predictions
 
-    # query to create a neural network model for the client 
+
+# query to create a neural network model for the client 
     # will build either a regression ANN or a classification ANN
     def neural_network_query(self,
                              instruction,
@@ -114,7 +113,10 @@ class client:
 
             remove = get_similar_column(
                 get_value_instruction(instruction), data)
-            if data[remove].dtype.name == 'object':
+
+            if len(data) < 50:
+                raise Exception("Only datasets larger then 50 rows are supported for neural networks")
+            if len(data[remove].value_counts()) <= 50:
                 callback_mode = 'max'
                 maximizer = "val_accuracy"
                 self.classification_query_ann(
@@ -223,14 +225,26 @@ class client:
                                 preprocess=True,
                                 generate_plots=True,
                                 drop=None,
-                                base_clusters=2):
+                                base_clusters=2,
+                                verbose=0,
+                                n_init=10,
+                                max_iter=300,
+                                random_state=42,
+                                text=[]
+                                ):
 
         self.models['k_means_clustering'] = k_means_clustering(
             dataset=self.dataset,
             preprocess=preprocess,
             generate_plots=generate_plots,
             drop=drop,
-            base_clusters=base_clusters)
+            base_clusters=base_clusters,
+            verbose=verbose,
+            n_init=n_init,
+            max_iter=max_iter,
+            random_state=random_state,
+            text=text
+        )
 
         self.latest_model = 'k_means_clustering'
 
@@ -242,7 +256,12 @@ class client:
                   kernel='linear',
                   preprocess=True,
                   drop=None,
-                  cross_val_size=0.3):
+                  cross_val_size=0.3,
+                  degree=3,
+                  gamma='scale',
+                  coef0=0.0,
+                  max_iter=-1
+                  ):
 
         self.models['svm'] = train_svm(instruction,
                                        dataset=self.dataset,
@@ -251,7 +270,12 @@ class client:
                                        kernel=kernel,
                                        preprocess=preprocess,
                                        drop=drop,
-                                       cross_val_size=cross_val_size)
+                                       cross_val_size=cross_val_size,
+                                       degree=degree,
+                                       gamma=gamma,
+                                       coef0=coef0,
+                                       max_iter=max_iter
+                                       )
 
         self.latest_model = 'svm'
     
@@ -263,15 +287,23 @@ class client:
             preprocess=True,
             drop=None,
             min_neighbors=3,
-            max_neighbors=10):
-        self.models['nearest_neigbor'] = nearest_neighbors(
+            max_neighbors=10,
+            leaf_size=30,
+            p=2,
+            algorithm='auto'
+    ):
+        self.models['nearest_neighbor'] = nearest_neighbors(
             instruction=instruction,
             text=text,
             dataset=self.dataset,
             preprocess=preprocess,
             drop=drop,
             min_neighbors=min_neighbors,
-            max_neighbors=max_neighbors)
+            max_neighbors=max_neighbors,
+            leaf_size=leaf_size,
+            p=p,
+            algorithm=algorithm
+        )
 
         self.latest_model = 'nearest_neighbor'
 
@@ -281,14 +313,35 @@ class client:
             instruction,
             preprocess=True,
             test_size=0.2,
-            drop=None):
+            text=[],
+            drop=None,
+            criterion='gini',
+            splitter='best',
+            max_depth=None,
+            min_samples_split=2,
+            min_samples_leaf=1,
+            min_weight_fraction_leaf=0.0,
+            max_leaf_nodes=None,
+            min_impurity_decrease=0.0,
+            ccp_alpha=0.0):
 
-        self.models['decision_tree'] = decision_tree(instruction,
-                                                     text=[],
+        self.models['decision_tree'] = decision_tree(instruction=instruction,
+                                                     text=text,
                                                      dataset=self.dataset,
-                                                     preprocess=True,
-                                                     test_size=0.2,
-                                                     drop=None)
+                                                     preprocess=preprocess,
+                                                     test_size=test_size,
+                                                     drop=drop,
+                                                     criterion=criterion,
+                                                     splitter=splitter,
+                                                     max_depth=max_depth,
+                                                     min_samples_split=min_samples_split,
+                                                     min_samples_leaf=min_samples_leaf,
+                                                     min_weight_fraction_leaf =min_weight_fraction_leaf,
+                                                     max_leaf_nodes=max_leaf_nodes,
+                                                     min_impurity_decrease =min_impurity_decrease,
+                                                     ccp_alpha=ccp_alpha)
+
+
 
         self.latest_model = 'decision_tree'
 
@@ -313,7 +366,7 @@ class client:
              ):
 
         if model_to_tune == None:
-            model_to_tune =  self.latest_model
+            model_to_tune = self.latest_model
 
         self.models = tune_helper(
             model_to_tune=model_to_tune,
@@ -350,48 +403,99 @@ class client:
     def convolutional_query(self,
                             instruction=None,
                             read_mode=None,
+                            preprocess=True,
                             new_folders=True,
                             image_column=None,
-                            training_ratio=0.8):
+                            training_ratio=0.8,
+                            augmentation=True,
+                            epochs=10,
+                            height=None,
+                            width=None):
 
         # storing values the model dictionary
         self.models["convolutional_NN"] = convolutional(
             instruction=instruction,
             read_mode=read_mode,
+            preprocess=preprocess,
             data_path=self.dataset,
             new_folders=new_folders,
             image_column=image_column,
-            training_ratio=training_ratio)
+            training_ratio=training_ratio,
+            augmentation=augmentation,
+            epochs=epochs,
+            height=height,
+            width=width)
 
         self.latest_model = 'convolutional_NN'
 
-
     # Sentiment analysis predict wrapper
-    def predict_text_sentiment(self, text):
-        return predict_text_sentiment(self=self, text=text)
+    def classify_text(self, text):
+        return classify_text(self=self, text=text)
 
     # sentiment analysis query
-    def text_classification_query(self, instruction):
+    def text_classification_query(self, instruction, drop=None,
+                                  preprocess=True,
+                                  test_size=0.2,
+                                  validation_size=0.1,
+                                  random_state=49,
+                                  learning_rate=1e-2,
+                                  epochs=20,
+                                  maximizer="val_loss",
+                                  batch_size=32,
+                                  maxTextLength=200,
+                                  generate_plots=True,
+                                  save_model=False,
+                                  save_path=os.getcwd()):
 
         # storing values the model dictionary
-        self.models["Text Classification LSTM"] = text_classification_query(
-            self=self, instruction=instruction)
-        self.latest_model = 'Text Classification LSTM'
+        self.models["Text Classification"] = text_classification_query(
+            self=self, instruction=instruction, drop=drop,
+            preprocess=preprocess,
+            test_size=test_size,
+            val_size=validation_size,
+            random_state=random_state,
+            learning_rate=learning_rate,
+            maximizer=maximizer,
+            epochs=epochs,
+            batch_size=batch_size,
+            maxTextLength=maxTextLength,
+            generate_plots=generate_plots,
+            save_model=save_model,
+            save_path=save_path)
+        self.latest_model = 'Text Classification'
 
     # Document summarization predict wrapper
     def get_summary(self, text):
         return get_summary(self=self, text=text)
 
     # text summarization query
-    def summarization_query(self, instruction,
-                            preprocess=True,
+    def summarization_query(self, instruction, preprocess=True,
+                            drop=None,
+                            epochs=10,
+                            batch_size=64,
+                            learning_rate=1e-4,
+                            max_text_length=512,
+                            max_summary_length=150,
                             test_size=0.2,
                             random_state=49,
-                            epochs=1,
-                            generate_plots=True):
+                            generate_plots=True,
+                            save_model=False,
+                            save_path=os.getcwd()):
 
         self.models["Document Summarization"] = summarization_query(
-            self=self, instruction=instruction)
+            self=self, instruction=instruction, preprocess=preprocess,
+            drop=drop,
+            epochs=epochs,
+            batch_size=batch_size,
+            learning_rate=learning_rate,
+            max_text_length=max_text_length,
+            max_summary_length=max_summary_length,
+            test_size=test_size,
+            random_state=random_state,
+            generate_plots=generate_plots,
+            save_model=save_model,
+            save_path=save_path)
+
         self.latest_model = 'Document Summarization'
 
     # Image caption prediction
@@ -400,16 +504,37 @@ class client:
         return ' '.join(caption[:len(caption) - 1])
 
     # Image Caption query
-    def image_caption_query(self, instruction, epochs, random_state,
+    def image_caption_query(self, instruction,
+                            drop=None,
+                            epochs=10,
                             preprocess=True,
-                            generate_plots=True):
+                            random_state=49,
+                            top_k=5000,
+                            batch_size=1,
+                            buffer_size=1000,
+                            embedding_dim=256,
+                            units=512,
+                            generate_plots=True,
+                            save_model_decoder=False,
+                            save_path_decoder=os.getcwd(),
+                            save_model_encoder=False,
+                            save_path_encoder=os.getcwd()):
         self.models["Image Caption"] = image_caption_query(
-            self=self,
+            self, instruction=instruction,
+            drop=drop,
             epochs=epochs,
-            instruction=instruction,
-            random_state=random_state,
             preprocess=preprocess,
-            generate_plots=generate_plots)
+            random_state=random_state,
+            top_k=top_k,
+            batch_size=batch_size,
+            buffer_size=buffer_size,
+            embedding_dim=embedding_dim,
+            units=units,
+            generate_plots=generate_plots,
+            save_model_decoder=save_model_decoder,
+            save_path_decoder=save_path_decoder,
+            save_model_encoder=save_model_encoder,
+            save_path_encoder=save_path_encoder)
         self.latest_model = 'Image Caption'
 
     # performs dimensionality reduction on your dataset 
@@ -460,15 +585,22 @@ class client:
 # Easier to comment the one you don't want to run instead of typing them
 # out every time
 
-# newClient = client('/Users/palashshah/Desktop')
-# newClient.convolutional_query()
-# newClient.tune('convolutional_NN', epochs=1)
-# newClient.neural_network_query("Model median house value")
-# newClient = client('tools/data/structured_data/landslides_after_rainfall.csv').neural_network_query(instruction='Model distance',
+# newClient = client('/Users/palashshah/Desktop') newClient.convolutional_query() newClient.tune('convolutional_NN',
+# epochs=1) newClient.neural_network_query("Model median house value") newClient = client(
+# 'tools/data/structured_data/landslides_after_rainfall.csv').neural_network_query(instruction='Model distance',
 # drop=['id', 'geolocation', 'source_link', 'source_name'])
+# newClient = client('tools/data/structured_data/fake_job_postings.csv')
+# newClient.neural_network_query(instruction='predict fraudulent',
+#                                drop=['job_id'],
+#                                text=['department', 'description', 'company_profile', 'requirements', 'benefits'])
+
+# newClient = client('tools/data/structured_data/fake_job_postings.csv').neural_network_query(instruction='Classify
+# fraudulent', drop=['job_id'], text=['department','description', 'company_profile','requirements', 'benefits'])
+
 #newClient = client('tools/data/structured_data/fake_job_postings.csv').neural_network_query(instruction='Classify fraudulent',
 #                                                                                            drop=['job_id'],
 #                                                                                            text=['department','description', 'company_profile','requirements', 'benefits'])
 newClient = client('../../tools/data/structured_data/housing.csv')
 newClient.neural_network_query("Model median house value", epochs=3)
 newClient.plots()
+
