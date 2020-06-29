@@ -19,7 +19,6 @@ import warnings
 import os
 
 # supressing warnings for cleaner dialogue box
-
 warnings.simplefilter(action='error', category=FutureWarning)
 warnings.simplefilter(action="ignore", category=SettingWithCopyWarning)
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
@@ -111,7 +110,10 @@ class client:
 
             remove = get_similar_column(
                 get_value_instruction(instruction), data)
-            if data[remove].dtype.name == 'object':
+
+            if len(data) < 50:
+                raise Exception("Only datasets larger then 50 rows are supported for neural networks")
+            if len(data[remove].value_counts()) <= 50:
                 callback_mode = 'max'
                 maximizer = "val_accuracy"
                 self.classification_query_ann(
@@ -333,7 +335,9 @@ class client:
                                                      ccp_alpha=ccp_alpha)
 
 
+
         self.latest_model = 'decision_tree'
+
 
     def tune(self,
              model_to_tune=None,
@@ -590,10 +594,14 @@ class client:
 # epochs=1) newClient.neural_network_query("Model median house value") newClient = client(
 # 'tools/data/structured_data/landslides_after_rainfall.csv').neural_network_query(instruction='Model distance',
 # drop=['id', 'geolocation', 'source_link', 'source_name'])
+# newClient = client('tools/data/structured_data/fake_job_postings.csv')
+# newClient.neural_network_query(instruction='predict fraudulent',
+#                                drop=['job_id'],
+#                                text=['department', 'description', 'company_profile', 'requirements', 'benefits'])
+
 # newClient = client('tools/data/structured_data/fake_job_postings.csv').neural_network_query(instruction='Classify
 # fraudulent', drop=['job_id'], text=['department','description', 'company_profile','requirements', 'benefits'])
 
 #newClient = client('tools/data/structured_data/fake_job_postings.csv').neural_network_query(instruction='Classify fraudulent',
 #                                                                                            drop=['job_id'],
 #                                                                                            text=['department','description', 'company_profile','requirements', 'benefits'])
-

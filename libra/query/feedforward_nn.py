@@ -360,9 +360,13 @@ def classification_ann(instruction,
                       [len(history.history[maximizer]) - 1])
         accuracies.append(history.history['val_accuracy']
                           [len(history.history['val_accuracy']) - 1])
+
+        model_data.append(model)
+
         i += 1
     #print((" " * 2 * counter)+ tabulate(datax, headers=col_name, tablefmt='orgtbl'))
     #del values, datax
+    
     final_model = model_data[losses.index(min(losses))]
     final_hist = models[losses.index(min(losses))]
     print("")
