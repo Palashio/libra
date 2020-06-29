@@ -343,18 +343,28 @@ class client:
     def convolutional_query(self,
                             instruction=None,
                             read_mode=None,
+                            preprocess=True,
                             new_folders=True,
                             image_column=None,
-                            training_ratio=0.8):
+                            training_ratio=0.8,
+                            augmentation=True,
+                            epochs=10,
+                            height=None,
+                            width=None):
 
         # storing values the model dictionary
         self.models["convolutional_NN"] = convolutional(
             instruction=instruction,
             read_mode=read_mode,
+            preprocess=preprocess,
             data_path=self.dataset,
             new_folders=new_folders,
             image_column=image_column,
-            training_ratio=training_ratio)
+            training_ratio=training_ratio,
+            augmentation=augmentation,
+            epochs=epochs,
+            height=height,
+            width=width)
 
         self.latest_model = 'convolutional_NN'
 
@@ -476,5 +486,5 @@ class client:
 #newClient = client('tools/data/structured_data/fake_job_postings.csv').neural_network_query(instruction='Classify fraudulent',
 #                                                                                            drop=['job_id'],
 #                                                                                            text=['department','description', 'company_profile','requirements', 'benefits'])
-newClient = client('../../tools/data/structured_data/housing.csv')
-newClient.neural_network_query("Model median house value", epochs=3)
+#
+
