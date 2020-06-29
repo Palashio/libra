@@ -592,7 +592,8 @@ class client:
     # plotting for client
     def plots(self, model = "", plot = "", save = False):
         get_plots(self, model, plot, save)
-    
+
+        
 
 # Easier to comment the one you don't want to run instead of typing them
 # out every time
