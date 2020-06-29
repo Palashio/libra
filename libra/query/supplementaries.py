@@ -1,5 +1,5 @@
-from libra.modeling.tuner import (tuneReg, 
-                                  tuneClass, 
+from libra.modeling.tuner import (tuneReg,
+                                  tuneClass,
                                   tuneCNN)
 import os
 from libra.preprocessing.data_reader import DataReader
@@ -8,6 +8,7 @@ from libra.preprocessing.image_preprocesser import (setwise_preprocessing,
                                                     set_distinguisher)
 
 import uuid
+from PIL import Image
 
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
@@ -104,12 +105,12 @@ def tune_helper(
             test_size=test_size
         )
         models['regression_ANN'] = {
-               'model': returned_model,
-               'hyperparametes' : returned_pms,
-               'losses': {
-                        'training_loss': history.history['loss'],
-                        'val_loss': history.history['val_loss']}
-               }
+            'model': returned_model,
+            'hyperparametes': returned_pms,
+            'losses': {
+                'training_loss': history.history['loss'],
+                'val_loss': history.history['val_loss']}
+        }
 
         # processing for classification feed forward NN
     elif model_to_tune == "classification_ANN":
@@ -137,14 +138,14 @@ def tune_helper(
             step=step,
             verbose=verbose,
             test_size=test_size
-            )
+        )
         models['classification_ANN'] = {
-               'model': returned_model,
-               'hyperparametes' : returned_pms,
-               'losses': {
-                          'training_loss': history.history['loss'],
-                           'val_loss': history.history['val_loss']}
-               }
+            'model': returned_model,
+            'hyperparametes': returned_pms,
+            'losses': {
+                'training_loss': history.history['loss'],
+                'val_loss': history.history['val_loss']}
+        }
         # processing for convolutional NN
     elif model_to_tune == "convolutional_NN":
         logger("Tuning model hyperparameters...")
@@ -167,8 +168,8 @@ def tune_helper(
         models["convolutional_NN"]["model"] = model
         models["convolutional_NN"]["hyperparametes"] = returned_pms,
         models["convolutional_NN"]["losses"] = {
-                                'training_loss': history.history['loss'],
-                                'val_loss': history.history['val_loss']}
+            'training_loss': history.history['loss'],
+            'val_loss': history.history['val_loss']}
 
     return models
 
@@ -187,7 +188,7 @@ def save(model, save_model, save_path=os.getcwd()):
         # serialize weights to HDF5
         model.save_weights(save_path + "/weights" + str(number) + ".h5")
         logger("->", "Saved model to disk as model" + str(number))
-    number= number+1
+    number = number + 1
 
 
 def generate_id():
@@ -230,3 +231,139 @@ def get_image_data(data_path, read_mode=None, training_ratio=0.8):
                                            class_mode=loss_func[:loss_func.find("_")])
 
     return X_train, X_test, process_info['height'], process_info['width'], num_classes
+
+
+# shows the keys in the models dictionary
+def get_model_data(self, model):
+    if model in self.models:
+        data = [key for key in self.models[model].keys()]
+        print(data)
+    else:
+        raise Exception("The requested model has not been applied to the client.")
+
+# returns all operators applicable to the client's models dictionary
+def get_operators(self, model):
+    defined = ['plots', 'accuracy', 'losses']
+    if model in self.models:
+        operations = [func + "()" for func in self.models[model].keys() if func in defined]
+        if len(operations) > 0:
+            print(operations)
+        else:
+            raise Exception("There are no built-in operators defined for this model. Please refer to the models dictionary.")
+    else: 
+        raise Exception("The requested model has not been applied to the client.")
+    
+# show accuracy scores for client's model
+def get_accuracy(self, model):
+    if model in self.models:
+        if 'accuracy' in self.models[model].keys():
+            return self.models[model]['accuracy']
+        elif 'cross_val_score' in self.models[model].keys():
+            return {'cross_val_score' : self.models[model]['cross_val_score']}
+        else:
+            raise Exception("Accuracy is not defined for {}".format(model))
+    else:
+        raise Exception("The requested model has not been applied to the client.")
+
+# show losses for client's model
+def get_losses(self, model): 
+    if model in self.models:
+        if 'losses' in self.models[model].keys():
+            return self.models[model]['losses']
+        else:
+            raise Exception("Losses are not defined for {}".format(model))
+    else:
+        raise Exception("The requested model has not been applied to the client.")
+
+# return client models' target
+def get_target(self, model):
+    if model in self.models:
+        if 'target' in self.models[model].keys():
+            return self.models[model]['target']
+        else:
+            raise Exception("Target is not defined for {}".format(model))
+    else:
+        raise Exception("The requested model has not been applied to the client.")
+
+# return NLP model's vocabulary
+def get_vocab(self, model):
+    if model in self.models:
+        if 'vocabulary' in self.models[model].keys():
+            return self.models[model]['vocabulary']
+        else:
+            raise Exception("Vocabulary is not defined for {}".format(model))
+    else:
+        raise Exception("The requested model has not been applied to the client.")
+
+# plotting for the client 
+def get_plots(self, model = "", plot = "", save = False):
+    # no model or plot specified so plot all
+    if model == "" and plot == "":
+        for each_model in self.models:
+            for each_plot in self.models[each_model]["plots"]:
+                save_and_plot(self, each_model, each_plot, save)
+    # show plots for specified model
+    elif model != "" and plot == "":
+        if "plots" in self.models[model].keys():
+            for each_plot in self.models[model]['plots']:
+                save_and_plot(self, model, each_plot, save)
+        else:
+            raise Exception("{} does not have plots".format(model))
+    # show specified plot for specified model
+    elif model != "" and plot != "":
+        if plot in self.models[model]['plots'].keys():
+            theplot = self.models[model]['plots'][plot]
+            save_and_plot(self, model, theplot, save) 
+        else:
+            raise Exception("{} is not available for {}".format(plot, model))
+    else:
+        raise Exception ("Invalid plotting input")
+
+# function to save and plot 
+def save_and_plot(self, modelname, plotname, save):
+    figure.savefig('{}_{}.png'.format(model, plot))
+    img = self.models[modelname]['plots'][plotname]
+    path = "{}_{}.png".format(modelname, plotname)
+    img.savefig(path)
+    saved = Image.open(path)
+    saved.show()
+    if (save == False):
+        currpath = os.getcwd()
+        os.remove(currpath + '\\' + path)
+
+
+def get_standard_training_output_keras(epochs, history):
+    result = ""
+    print("Epochs | Training Loss | Validation Loss")
+    for i, j, k in zip(range(epochs), history.history["loss"], history.history["val_loss"]):
+        i = str(i)
+        while len(i) < 7:
+            i = i + " "
+        j = str(j)
+        while len(j) < 16:
+            j = j + " "
+
+        k = str(k)
+        while len(k) < 16:
+            k = k + " "
+        result = result + i + "|" + j[:15] + "| " + k[:15] + "\n"
+    return result
+
+
+def get_standard_training_output_generic(epochs, loss, val_loss):
+    result = ""
+    print("Epochs | Training Loss | Validation Loss")
+    for i, j, k in zip(range(epochs), loss, val_loss):
+        i = str(i)
+        while len(i) < 7:
+            i = i + " "
+
+        j = str(j)
+        while len(j) < 16:
+            j = j + " "
+
+        k = str(k)
+        while len(k) < 16:
+            k = k + " "
+        result = result + i + "|" + j[:15] + "| " + k[:15] + "\n"
+    return result

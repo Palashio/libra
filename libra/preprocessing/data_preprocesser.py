@@ -5,21 +5,15 @@ import numpy as np
 import pandas as pd
 import tensorflow as tf
 from sklearn.compose import ColumnTransformer
+from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.impute import SimpleImputer
 from sklearn.model_selection import train_test_split
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import ( OneHotEncoder, 
                                     StandardScaler, 
                                     FunctionTransformer)
-from tensorflow import keras
-from tensorflow.python.keras.layers import Dense, Input
-from keras.callbacks import EarlyStopping
-from matplotlib import pyplot
-from os import listdir
-from PIL import Image as PImage
 from libra.data_generation.dataset_labelmatcher import get_similar_column
 from libra.data_generation.grammartree import get_value_instruction
-import cv2
 from prince.ca import CA
 
 from nltk.stem import WordNetLemmatizer
@@ -101,7 +95,6 @@ def structured_preprocesser(data, ca_threshold, text):
         full_pipeline.transformers.append(("num", num_pipeline, numeric_columns))
 
     if len(text) != 0:
-        print(categorical_columns)
         # Each text col needs a separate pipeline
         for x in range(len(text)):
             full_pipeline.transformers.append((f"text_{x}",
@@ -164,7 +157,6 @@ def structured_preprocesser(data, ca_threshold, text):
             test,
             np.ndarray) else test),
         columns=test_cols)
-    print(data['train'])
     return data, full_pipeline
 
 
@@ -281,7 +273,7 @@ def clustering_preprocessor(data):
 
     data = full_pipeline.fit_transform(data)
 
-    new_columns = generate_column_labels(full_pipeline, numeric_columns)
+    new_columns = generate_column_labels(full_pipeline, numeric_columns, text_cols = [])
 
     return pd.DataFrame(data, columns=new_columns), full_pipeline
 

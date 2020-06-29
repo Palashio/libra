@@ -4,10 +4,66 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 import warnings
+import sklearn
+import numpy as np
+from sklearn.metrics import roc_curve, auc
+from sklearn.preprocessing import label_binarize
+from numpy import interp
+import pandas as pd
+import sklearn
+import matplotlib.pyplot as plt
+from sklearn.metrics import confusion_matrix, plot_confusion_matrix, recall_score, precision_score, f1_score, ConfusionMatrixDisplay
+import numpy as np
 
-warnings.filterwarnings("ignore", category=RuntimeWarning) 
+warnings.filterwarnings("ignore", category=RuntimeWarning)
+
+
+currLog = ""
+counter = 0
+number = 0
+# current_dir=os.getcw()
+
+# allows for all columns to be displayed when printing()
+pd.options.display.width = None
+
+
+# clears the log when new process is started up
+
+
+def clearLog():
+    global currLog
+    global counter
+
+    currLog = ""
+    counter = 0
+
+
+# logging function that creates hierarchial display of the processes of
+# different functions. Copied into different python files to maintain
+# global variable parallels
+
+
+def logger(instruction, found=""):
+    global currLog
+    global counter
+    if counter == 0:
+        currLog += (" " * 2 * counter) + str(instruction) + str(found)
+    elif instruction == "->":
+        counter = counter - 1
+        currLog += (" " * 2 * counter) + str(instruction) + str(found)
+    else:
+        #currLog += (" " * 2 * counter) + "|" + "\n"
+        currLog += (" " * 2 * counter) + "|- " + str(instruction) + str(found)
+        if instruction == "done...":
+            currLog += "\n" + "\n"
+
+    counter += 1
+    print(currLog)
+    currLog = ""
+
 
 # generates all of the plots in clustering
+
 
 def generate_clustering_plots(kmeans, dataPandas, dataset):
     plots = []
@@ -16,16 +72,18 @@ def generate_clustering_plots(kmeans, dataPandas, dataset):
     # columns with each other based on the cluster they're in
     for x in range(len(dataPandas.columns) - 1):
         for y in range(len(dataPandas.columns) - 1):
-            img = plt.figure()
-            plt.scatter(dataset[:, x], dataset[:, y],
-                        c=kmeans.labels_, cmap='rainbow')
-            plt.xlabel(str(dataPandas.columns[x]))
-            plt.ylabel(str(dataPandas.columns[y]))
-            plots.append(img)
-            plot_names.append(
-                dataPandas.columns[x] +
-                "_vs_" +
-                dataPandas.columns[y])
+            if dataPandas.columns[x] != dataPandas.columns[y]:
+                img = plt.figure()
+                plt.scatter(dataset[:, x], dataset[:, y],
+                            c=kmeans.labels_, cmap='rainbow')
+                plt.xlabel(str(dataPandas.columns[x]))
+                plt.ylabel(str(dataPandas.columns[y]))
+                plots.append(img)
+                plot_names.append(
+                    dataPandas.columns[x] +
+                    "_vs_" +
+                    dataPandas.columns[y])
+                plt.close(img)
     return plots, plot_names
 
 # generates all of the plots for regression

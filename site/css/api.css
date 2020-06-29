@@ -3,6 +3,10 @@ body{
     font-family: "Montserrat", sans-serif;
 }
 
+:root{
+    --scrollPos: 1;
+}
+
 #side-nav{
     max-width: 300px;
     position: fixed;
@@ -18,8 +22,8 @@ body{
 
 .nav-tab{
     margin-top: -1px;
-    padding: 7px;
-    padding-left: 20px;
+    padding: 10px;
+    padding-left: 15px;
     
     border-top: 1px solid rgb(221, 221, 221);
     
@@ -35,23 +39,11 @@ body{
     border-right-style: solid;
     border-right-color: rgb(0, 125, 217);
     border-right-width: 3px;
-    border-radius: 3px;
 }
 
 .nav-tab.selected{
     background-color: rgb(0, 125, 217);
     color: white;
-}
-
-.dropdown-item.selected{
-    visibility: visible;
-    animation-name: drop;
-    animation-fill-mode: forwards;
-    animation-duration: 300ms;
-}
-
-.dropdown-item:hover{
-    background-color: rgb(229, 229, 229);
 }
 
 .dropdown-item{
@@ -61,11 +53,25 @@ body{
     padding-left: 40px;
     color: rgb(90, 90, 90);
     
-    visibility: hidden;
+    visibility: visible;
+    animation-name: drop;
+    animation-fill-mode: forwards;
+    animation-duration: 300ms;
+}
+
+.dropdown-item:hover{
+    background-color: #f8f8f8;
+    cursor: pointer;
+}
+
+.dropdown-item.selected{
+    background-color: rgb(229, 229, 229);
 }
 
 #nav-bar{
-    position: absolute;
+    position: fixed;
+    z-index: 1;
+    background-color: white;
     left:300px;
     width: 1000px;
     height: 70px;
@@ -99,14 +105,22 @@ body{
 h2{
     padding:0px;
     margin:0px;
+    margin-bottom: 10px;
     font-weight: 600;
+    color: white;
 }
 
 .box{
     border: 1px solid rgb(206, 206, 206);
     margin: 25px;
     padding: 30px;
+    padding-top: 20px;
     border-radius: 15px;
+    background-image: linear-gradient(to bottom, rgb(77, 193, 255) 70px, white 70px, white 100%);
+}
+
+#space{
+    height: 300px;
 }
 
 td {

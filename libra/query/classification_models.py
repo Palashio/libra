@@ -13,7 +13,7 @@ from sklearn.neighbors import KNeighborsClassifier
 from sklearn.model_selection import train_test_split
 from sklearn.model_selection import cross_val_score
 import numpy as np
-from libra.queries.supplementaries import generate_id
+from libra.query.supplementaries import generate_id
 from libra.plotting.generate_plots import (generate_clustering_plots,
                            generate_regression_plots,
                            generate_classification_plots)
@@ -66,7 +66,12 @@ def k_means_clustering(dataset= None,
             preprocess=True,
             generate_plots=True,
             drop=None,
-            base_clusters=1):
+            base_clusters=1,
+            verbose=0,
+            n_init=10,
+            max_iter=300,
+            random_state=42,
+            text=[]):
         logger("Reading dataset...")
         # loads dataset and replaces n/a with zero
         # data = pd.read_csv(self.dataset)
@@ -92,7 +97,7 @@ def k_means_clustering(dataset= None,
         # baseline
         i = base_clusters
         logger("Creating unsupervised clustering task...")
-        kmeans = KMeans(n_clusters=i, random_state=0).fit(data)
+        kmeans = KMeans(n_clusters=i, random_state=random_state, verbose=verbose, n_init=n_init, max_iter=max_iter).fit(data)
         modelStorage.append(kmeans)
 
         # stores SSE values in an array for later comparison
@@ -104,7 +109,7 @@ def k_means_clustering(dataset= None,
         # 1000 - this value was decided based on precedence
         while (all(earlier >= later for earlier,
                                         later in zip(inertiaStor, inertiaStor[1:]))):
-            kmeans = KMeans(n_clusters=i, random_state=0).fit(data)
+            kmeans = KMeans(n_clusters=i, random_state=random_state, verbose=verbose, n_init=n_init, max_iter=max_iter).fit(data)
             modelStorage.append(kmeans)
             inertiaStor.append(kmeans.inertia_)
             # minimize inertia up to 10000
@@ -147,11 +152,13 @@ def train_svm(instruction,
               preprocess=True,
               ca_threshold=None,
               drop=None,
-              cross_val_size=0.3):
+              cross_val_size=0.3,
+              degree=3,
+              gamma='scale',
+              coef0=0.0,
+              max_iter=-1):
 
         logger("Reading in dataset....")
-        # reads dataset and fills n/a values with zeroes
-        #data = pd.read_csv(self.dataset)
 
         dataReader = DataReader(dataset)
         data = dataReader.data_generator()
@@ -184,7 +191,7 @@ def train_svm(instruction,
 
         # Fitting to SVM and storing in the model dictionary
         logger("Fitting Support Vector Machine...")
-        clf = svm.SVC(kernel=kernel)
+        clf = svm.SVC(kernel=kernel, degree=degree, gamma=gamma, coef0=coef0, max_iter=max_iter)
         clf.fit(X_train, y_train)
 
         score = accuracy_score(
@@ -203,6 +210,7 @@ def train_svm(instruction,
             "target": target,
             "preprocesser": full_pipeline,
             "interpreter": label_mappings,
+            'test_data': {'X': X_test, 'y': y_test},
             "cross_val_score": cross_val_score(
                 clf,
                 X_train,
@@ -216,7 +224,10 @@ def nearest_neighbors(instruction=None,
                       preprocess=True,
                       drop=None,
                       min_neighbors=3,
-                      max_neighbors=10):
+                      max_neighbors=10,
+                      leaf_size=30,
+                      p=2,
+                      algorithm='auto'):
         logger("Reading in dataset....")
         # Reads in dataset
         # data = pd.read_csv(self.dataset)
@@ -247,7 +258,7 @@ def nearest_neighbors(instruction=None,
         # Tries all neighbor possibilities, based on either defaults or user
         # specified values
         for x in range(min_neighbors, max_neighbors):
-            knn = KNeighborsClassifier(n_neighbors=x)
+            knn = KNeighborsClassifier(n_neighbors=x, leaf_size=leaf_size, p=p, algorithm=algorithm)
             knn.fit(X_train, y_train)
             models.append(knn)
             scores.append(accuracy_score(knn.predict(X_test), y_test))
@@ -259,6 +270,7 @@ def nearest_neighbors(instruction=None,
                 min(scores)),
             "preprocesser": full_pipeline,
             "interpreter": label_mappings,
+            'test_data': {'X': X_test, 'y': y_test},
             "target": remove, "cross_val_score": cross_val_score(
                 knn, X_train, y_train, cv=3)}
         clearLog()
@@ -269,7 +281,16 @@ def decision_tree(instruction,
                   ca_threshold=None,
                   text=None,
                   test_size=0.2,
-                  drop=None):
+                  drop=None,
+                  criterion='gini',
+                  splitter='best',
+                  max_depth=None,
+                  min_samples_split=2,
+                  min_samples_leaf=1,
+                  min_weight_fraction_leaf=0.0,
+                  max_leaf_nodes=None,
+                  min_impurity_decrease=0.0,
+                  ccp_alpha=0.0):
     logger("Reading in dataset....")
 
     dataReader = DataReader(dataset)
@@ -304,7 +325,7 @@ def decision_tree(instruction,
     # fitting and storing
     logger("Fitting Decision Tree...")
 
-    clf = tree.DecisionTreeClassifier()
+    clf = tree.DecisionTreeClassifier(criterion=criterion, splitter=splitter, max_depth=max_depth, min_samples_split=min_samples_split,min_samples_leaf=min_samples_leaf, min_weight_fraction_leaf=min_weight_fraction_leaf, max_leaf_nodes=max_leaf_nodes, min_impurity_decrease=min_impurity_decrease, ccp_alpha=ccp_alpha)
     clf = clf.fit(X_train, y_train)
 
     score = accuracy_score(
@@ -321,7 +342,8 @@ def decision_tree(instruction,
             "target": remove,
             "accuracy_score": score,
             "preprocesser": full_pipeline,
-            "interpeter": label_mappings,
+            "interpreter": label_mappings,
+            'test_data': {'X': X_test, 'y': y_test},
             "cross_val_score": cross_val_score(
                 clf,
                 X_train,

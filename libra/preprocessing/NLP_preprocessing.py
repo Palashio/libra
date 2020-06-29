@@ -8,7 +8,7 @@ from keras_preprocessing.text import Tokenizer
 from spacy.lang.en import English
 from nltk.corpus import stopwords
 from libra.data_generation.dataset_labelmatcher import get_similar_column
-from libra.queries.dimensionality_red_queries import logger
+from libra.query.dimensionality_red_queries import logger
 from libra.data_generation.grammartree import get_value_instruction
 
 
@@ -19,7 +19,7 @@ def get_target_values(data, instruction, yLabel):
     del data[target]
     #labels
     Y = data[get_similar_column(get_value_instruction(yLabel), data)]
-    return X, Y
+    return X, Y, get_similar_column(get_value_instruction(yLabel), data)
 
 
 def lemmatize_text(dataset):
