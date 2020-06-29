@@ -210,6 +210,7 @@ def train_svm(instruction,
             "target": target,
             "preprocesser": full_pipeline,
             "interpreter": label_mappings,
+            'test_data': {'X': X_test, 'y': y_test},
             "cross_val_score": cross_val_score(
                 clf,
                 X_train,
@@ -269,6 +270,7 @@ def nearest_neighbors(instruction=None,
                 min(scores)),
             "preprocesser": full_pipeline,
             "interpreter": label_mappings,
+            'test_data': {'X': X_test, 'y': y_test},
             "target": remove, "cross_val_score": cross_val_score(
                 knn, X_train, y_train, cv=3)}
         clearLog()
@@ -340,7 +342,8 @@ def decision_tree(instruction,
             "target": remove,
             "accuracy_score": score,
             "preprocesser": full_pipeline,
-            "interpeter": label_mappings,
+            "interpreter": label_mappings,
+            'test_data': {'X': X_test, 'y': y_test},
             "cross_val_score": cross_val_score(
                 clf,
                 X_train,

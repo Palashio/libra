@@ -13,6 +13,8 @@ from libra.query.dimensionality_red_queries import dimensionality_reduc
 from libra.data_generation.grammartree import get_value_instruction
 from libra.data_generation.dataset_labelmatcher import (get_similar_column,
                                                         get_similar_model)
+from libra.plotting.generate_plots import (analyze)
+
 import pandas as pd
 from pandas.core.common import SettingWithCopyWarning
 import warnings
@@ -65,7 +67,6 @@ def logger(instruction, found="", slash=''):
     currLog = ""
 
 
-
 class client:
     '''
     class to store all query information. Currently, old_models is not being used.
@@ -85,6 +86,9 @@ class client:
         logger("done...")
         clearLog()
 
+
+    # returns models with a specific string - currently deprecated, should not
+    # be used.
     def get_models(self, model_requested):
         '''
         returns models with a specific string - currently deprecated, should not be used.
@@ -109,9 +113,21 @@ class client:
         modeldict = self.models[modelKey]
         data = modeldict['preprocesser'].transform(data)
         predictions = modeldict['model'].predict(data)
+        return self.interpret(modelKey, predictions)
+
+    def interpret(self, modelKey, predictions):
+        modeldict = self.models[modelKey]
         if modeldict.get('interpreter'):
-            predictions = modeldict['interpreter'].inverse_transform(
-                predictions)
+            if isinstance(modeldict['interpreter'], dict):
+                inverted_interpreter = dict(
+                    map(reversed, modeldict['interpreter'].items()))
+                toRet = []
+                for each in predictions:
+                    toRet.append(inverted_interpreter[each])
+                predictions = toRet
+            else:
+                predictions = modeldict['interpreter'].inverse_transform(
+                    predictions)
         return predictions
 
 
@@ -313,8 +329,8 @@ class client:
     # query to create a nearest neighbors model
     def nearest_neighbor_query(
             self,
-            text=[],
             instruction=None,
+            text=[],
             preprocess=True,
             drop=None,
             min_neighbors=3,
@@ -375,6 +391,7 @@ class client:
 
 
         self.latest_model = 'decision_tree'
+
 
     # tunes a specific neural network based on the input model_to_tune
     def tune(self,
@@ -586,19 +603,19 @@ class client:
 
     # shows the keys in the models dictionary
     def model_data(self, model=None):
-        if model == None:
+        if model is None:
             model = self.latest_model
         get_model_data(self,model)
 
     # returns all operators applicable to the client's models dictionary
     def operators(self, model=None):
-        if model == None:
+        if model is None:
             model = self.latest_model
         get_operators(self, model)
 
     # show accuracy scores for client's model
     def accuracy(self, model=None):
-        if model == None:
+        if model is None:
             model = self.latest_model
         return get_accuracy(self, model)
 
@@ -643,6 +660,7 @@ class client:
 #newClient = client('tools/data/structured_data/fake_job_postings.csv').neural_network_query(instruction='Classify fraudulent',
 #                                                                                            drop=['job_id'],
 #                                                                                            text=['department','description', 'company_profile','requirements', 'benefits'])
+
 newClient = client('../../tools/data/structured_data/housing.csv')
 newClient.neural_network_query("Model median house value", epochs=3)
 newClient.plots()

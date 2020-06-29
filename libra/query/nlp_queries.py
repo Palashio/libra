@@ -23,7 +23,7 @@ from libra.query.dimensionality_red_queries import logger
 
 # Sentiment analysis predict wrapper
 from libra.query.supplementaries import save, get_standard_training_output_keras, get_standard_training_output_generic
-from nonkeras_generate_plots import plot_loss
+from libra.plotting.generate_plots import plot_loss
 
 
 def classify_text(self, text):
