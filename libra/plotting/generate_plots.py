@@ -173,14 +173,3 @@ def plot_acc(history):
     plt.xlabel('epoch')
     plt.legend(['train', 'test'], loc='upper left')
     return img
-
-
-def feature_importance(model,data):
-    features = data.columns
-    importances = model.feature_importances_
-    indices = np.argsort(importances)
-    plt.title('Feature Importance Graph:')
-    plt.barh(range(len(indices)), importances[indices], color='g', align='center')
-    plt.yticks(range(len(indices)), [features[i] for i in indices])
-    plt.xlabel('Relative Importance')
-    plt.show()
