@@ -2,7 +2,8 @@ import os
 from libra.preprocessing.image_preprocesser import (setwise_preprocessing,
                                                     csv_preprocessing,
                                                     classwise_preprocessing,
-                                                    set_distinguisher)
+                                                    set_distinguisher,
+                                                    already_processed)
 from libra.preprocessing.data_reader import DataReader
 from keras.models import Sequential
 from keras.layers import (Dense, Conv2D, Flatten, MaxPooling2D, )
@@ -401,38 +402,49 @@ def classification_ann(instruction,
 
 def convolutional(instruction=None,
                   read_mode=None,
-                  text=None,
+                  preprocess=True,
                   data_path=os.getcwd(),
                   new_folders=True,
                   image_column=None,
                   training_ratio=0.8,
-                  augmentation=True):
+                  augmentation=True,
+                  epochs=10,
+                  height=None,
+                  width=None):
 
     logger("Generating datasets for classes...")
 
-    read_mode_info = set_distinguisher(data_path, read_mode)
-    read_mode = read_mode_info["read_mode"]
+    if preprocess:
+        read_mode_info = set_distinguisher(data_path, read_mode)
+        read_mode = read_mode_info["read_mode"]
 
-    training_path = "/proc_training_set"
-    testing_path = "/proc_testing_set"
+        training_path = "/proc_training_set"
+        testing_path = "/proc_testing_set"
 
-    if read_mode == "setwise":
-        processInfo = setwise_preprocessing(data_path, new_folders)
-        if not new_folders:
-            training_path = "/training_set"
-            testing_path = "/testing_set"
+        if read_mode == "setwise":
+            processInfo = setwise_preprocessing(data_path, new_folders, height, width)
+            if not new_folders:
+                training_path = "/training_set"
+                testing_path = "/testing_set"
 
-    # if image dataset in form of csv
-    elif read_mode == "pathwise or namewise":
-        processInfo = csv_preprocessing(read_mode_info["csv_path"],
-                                        data_path,
-                                        instruction,
-                                        image_column,
-                                        training_ratio)
+        # if image dataset in form of csv
+        elif read_mode == "pathwise or namewise":
+            processInfo = csv_preprocessing(read_mode_info["csv_path"],
+                                            data_path,
+                                            instruction,
+                                            image_column,
+                                            training_ratio,
+                                            height,
+                                            width)
 
-    # if image dataset in form of one folder containing class folders
-    elif read_mode == "classwise":
-        processInfo = classwise_preprocessing(data_path, training_ratio)
+        # if image dataset in form of one folder containing class folders
+        elif read_mode == "classwise":
+            processInfo = classwise_preprocessing(data_path, training_ratio, height, width)
+
+    else:
+        training_path = "/training_set"
+        testing_path = "/testing_set"
+        processInfo = already_processed(data_path)
 
     input_shape = (processInfo["height"], processInfo["width"], 3)
     input_single = (processInfo["height"], processInfo["width"])
@@ -462,6 +474,7 @@ def convolutional(instruction=None,
         optimizer="adam",
         loss=loss_func,
         metrics=['accuracy'])
+    logger("Loading images and augmenting if applicable")
     if augmentation:
         train_data = ImageDataGenerator(rescale=1. / 255,
                                         shear_range=0.2,
@@ -472,36 +485,6 @@ def convolutional(instruction=None,
     else:
         train_data = ImageDataGenerator()
         test_data = ImageDataGenerator()
-        """
-        trainingImages = []
-        train_labels = []
-        validationImages = []
-        test_labels = []
-
-        for path in imgPaths:
-        classLabel = path.split(os.path.sep)[-2]
-        classes.add(classLabel)
-        img = img_to_array(load_img(path, target_size=(64, 64)))
-
-        if path.split(os.path.sep)[-3] == 'training_set':
-            trainingImages.append(img)
-            train_labels.append(classLabel)
-        else:
-            validationImages.append(img)
-            test_labels.append(classLabel)
-
-        trainingImages = np.array(trainingImages)
-        train_labels = to_categorical(np.array(train_labels))
-        validationImages = np.array(validationImages)
-        test_labels = to_categorical(np.array(test_labels))
-        model.compile(loss=’categorical_crossentropy’,
-                  optimizer=’sgd’,
-                  metrics=[‘accuracy’])
-        history=model.fit(train_images, train_labels,
-                  batch_size=100,
-                  epochs=5,
-                  verbose=1)
-        """
 
     X_train = train_data.flow_from_directory(data_path + training_path,
                                              target_size=input_single,
@@ -514,7 +497,8 @@ def convolutional(instruction=None,
                                            batch_size=(32 if processInfo["test_size"] >= 32 else 1),
                                            class_mode=loss_func[:loss_func.find("_")])
 
-    # print(X_train)
+    if epochs < 0: raise BaseException("Number of epochs has to be greater than 0.")
+
     history = model.fit(
         X_train,
         steps_per_epoch=X_train.n //
@@ -522,8 +506,10 @@ def convolutional(instruction=None,
         validation_data=X_test,
         validation_steps=X_test.n //
         X_test.batch_size,
-        epochs=1)
+        epochs=epochs)
     # storing values the model dictionary
+
+    logger("Stored model under 'convolutional_NN' key")
     return {
         'id': generate_id(),
         "model": model,

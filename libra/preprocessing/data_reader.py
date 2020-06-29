@@ -70,7 +70,7 @@ class DataReader():
             return self.random_trim()
 
 # print(len(pd.read_csv("./data/housing.csv")))
-
+#
 # dataReader = DataReader("./data/housing.csv", trim=True)
 # data = dataReader.data_generator()
 
