@@ -1,5 +1,5 @@
-from libra.modeling.tuner import (tuneReg, 
-                                  tuneClass, 
+from libra.modeling.tuner import (tuneReg,
+                                  tuneClass,
                                   tuneCNN)
 import os
 from libra.preprocessing.data_reader import DataReader
@@ -104,12 +104,12 @@ def tune_helper(
             test_size=test_size
         )
         models['regression_ANN'] = {
-               'model': returned_model,
-               'hyperparametes' : returned_pms,
-               'losses': {
-                        'training_loss': history.history['loss'],
-                        'val_loss': history.history['val_loss']}
-               }
+            'model': returned_model,
+            'hyperparametes': returned_pms,
+            'losses': {
+                'training_loss': history.history['loss'],
+                'val_loss': history.history['val_loss']}
+        }
 
         # processing for classification feed forward NN
     elif model_to_tune == "classification_ANN":
@@ -137,14 +137,14 @@ def tune_helper(
             step=step,
             verbose=verbose,
             test_size=test_size
-            )
+        )
         models['classification_ANN'] = {
-               'model': returned_model,
-               'hyperparametes' : returned_pms,
-               'losses': {
-                          'training_loss': history.history['loss'],
-                           'val_loss': history.history['val_loss']}
-               }
+            'model': returned_model,
+            'hyperparametes': returned_pms,
+            'losses': {
+                'training_loss': history.history['loss'],
+                'val_loss': history.history['val_loss']}
+        }
         # processing for convolutional NN
     elif model_to_tune == "convolutional_NN":
         logger("Tuning model hyperparameters...")
@@ -167,8 +167,8 @@ def tune_helper(
         models["convolutional_NN"]["model"] = model
         models["convolutional_NN"]["hyperparametes"] = returned_pms,
         models["convolutional_NN"]["losses"] = {
-                                'training_loss': history.history['loss'],
-                                'val_loss': history.history['val_loss']}
+            'training_loss': history.history['loss'],
+            'val_loss': history.history['val_loss']}
 
     return models
 
@@ -187,7 +187,7 @@ def save(model, save_model, save_path=os.getcwd()):
         # serialize weights to HDF5
         model.save_weights(save_path + "/weights" + str(number) + ".h5")
         logger("->", "Saved model to disk as model" + str(number))
-    number= number+1
+    number = number + 1
 
 
 def generate_id():
@@ -230,3 +230,40 @@ def get_image_data(data_path, read_mode=None, training_ratio=0.8):
                                            class_mode=loss_func[:loss_func.find("_")])
 
     return X_train, X_test, process_info['height'], process_info['width'], num_classes
+
+
+def get_standard_training_output_keras(epochs, history):
+    result = ""
+    print("Epochs | Training Loss | Validation Loss")
+    for i, j, k in zip(range(epochs), history.history["loss"], history.history["val_loss"]):
+        i = str(i)
+        while len(i) < 7:
+            i = i + " "
+        j = str(j)
+        while len(j) < 16:
+            j = j + " "
+
+        k = str(k)
+        while len(k) < 16:
+            k = k + " "
+        result = result + i + "|" + j[:15] + "| " + k[:15] + "\n"
+    return result
+
+
+def get_standard_training_output_generic(epochs, loss, val_loss):
+    result = ""
+    print("Epochs | Training Loss | Validation Loss")
+    for i, j, k in zip(range(epochs), loss, val_loss):
+        i = str(i)
+        while len(i) < 7:
+            i = i + " "
+
+        j = str(j)
+        while len(j) < 16:
+            j = j + " "
+
+        k = str(k)
+        while len(k) < 16:
+            k = k + " "
+        result = result + i + "|" + j[:15] + "| " + k[:15] + "\n"
+    return result

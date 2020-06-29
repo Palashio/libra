@@ -1,5 +1,5 @@
 from libra.query.nlp_queries import (image_caption_query,
-                                     generate_caption, predict_text_sentiment,
+                                     generate_caption, classify_text,
                                      text_classification_query, get_summary,
                                      summarization_query)
 from libra.query.classification_models import (k_means_clustering,
@@ -11,15 +11,15 @@ from libra.query.feedforward_nn import (regression_ann,
                                         convolutional)
 from libra.query.dimensionality_red_queries import dimensionality_reduc
 from libra.data_generation.grammartree import get_value_instruction
-from libra.data_generation.dataset_labelmatcher import (get_similar_column, 
-     get_similar_model)
+from libra.data_generation.dataset_labelmatcher import (get_similar_column,
+                                                        get_similar_model)
 import pandas as pd
 from pandas.core.common import SettingWithCopyWarning
 import warnings
 import os
 
+# supressing warnings for cleaner dialogue box
 
-#supressing warnings for cleaner dialogue box
 warnings.simplefilter(action='error', category=FutureWarning)
 warnings.simplefilter(action="ignore", category=SettingWithCopyWarning)
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
@@ -29,8 +29,7 @@ currLog = ""
 counter = 0
 
 
-
-#clears log when needed - currently not being used
+# clears log when needed - currently not being used
 def clearLog():
     global currLog
     global counter
@@ -90,7 +89,6 @@ class client:
             predictions = modeldict['interpreter'].inverse_transform(
                 predictions)
         return predictions
-
 
     def neural_network_query(self,
                              instruction,
@@ -337,7 +335,6 @@ class client:
 
         self.latest_model = 'decision_tree'
 
-
     def tune(self,
              model_to_tune=None,
              max_layers=10,
@@ -358,7 +355,7 @@ class client:
              ):
 
         if model_to_tune == None:
-            model_to_tune =  self.latest_model
+            model_to_tune = self.latest_model
 
         self.models = tune_helper(
             model_to_tune=model_to_tune,
@@ -418,33 +415,74 @@ class client:
 
         self.latest_model = 'convolutional_NN'
 
-
     # Sentiment analysis predict wrapper
-    def predict_text_sentiment(self, text):
-        return predict_text_sentiment(self=self, text=text)
+    def classify_text(self, text):
+        return classify_text(self=self, text=text)
 
     # sentiment analysis query
-    def text_classification_query(self, instruction):
+    def text_classification_query(self, instruction, drop=None,
+                                  preprocess=True,
+                                  test_size=0.2,
+                                  validation_size=0.1,
+                                  random_state=49,
+                                  learning_rate=1e-2,
+                                  epochs=20,
+                                  maximizer="val_loss",
+                                  batch_size=32,
+                                  maxTextLength=200,
+                                  generate_plots=True,
+                                  save_model=False,
+                                  save_path=os.getcwd()):
 
         # storing values the model dictionary
-        self.models["Text Classification LSTM"] = text_classification_query(
-            self=self, instruction=instruction)
-        self.latest_model = 'Text Classification LSTM'
+        self.models["Text Classification"] = text_classification_query(
+            self=self, instruction=instruction, drop=drop,
+            preprocess=preprocess,
+            test_size=test_size,
+            val_size=validation_size,
+            random_state=random_state,
+            learning_rate=learning_rate,
+            maximizer=maximizer,
+            epochs=epochs,
+            batch_size=batch_size,
+            maxTextLength=maxTextLength,
+            generate_plots=generate_plots,
+            save_model=save_model,
+            save_path=save_path)
+        self.latest_model = 'Text Classification'
 
     # Document summarization predict wrapper
     def get_summary(self, text):
         return get_summary(self=self, text=text)
 
     # text summarization query
-    def summarization_query(self, instruction,
-                            preprocess=True,
+    def summarization_query(self, instruction, preprocess=True,
+                            drop=None,
+                            epochs=10,
+                            batch_size=64,
+                            learning_rate=1e-4,
+                            max_text_length=512,
+                            max_summary_length=150,
                             test_size=0.2,
                             random_state=49,
-                            epochs=1,
-                            generate_plots=True):
+                            generate_plots=True,
+                            save_model=False,
+                            save_path=os.getcwd()):
 
         self.models["Document Summarization"] = summarization_query(
-            self=self, instruction=instruction)
+            self=self, instruction=instruction, preprocess=preprocess,
+            drop=drop,
+            epochs=epochs,
+            batch_size=batch_size,
+            learning_rate=learning_rate,
+            max_text_length=max_text_length,
+            max_summary_length=max_summary_length,
+            test_size=test_size,
+            random_state=random_state,
+            generate_plots=generate_plots,
+            save_model=save_model,
+            save_path=save_path)
+
         self.latest_model = 'Document Summarization'
 
     # Image caption prediction
@@ -453,16 +491,37 @@ class client:
         return ' '.join(caption[:len(caption) - 1])
 
     # Image Caption query
-    def image_caption_query(self, instruction, epochs, random_state,
+    def image_caption_query(self, instruction,
+                            drop=None,
+                            epochs=10,
                             preprocess=True,
-                            generate_plots=True):
+                            random_state=49,
+                            top_k=5000,
+                            batch_size=1,
+                            buffer_size=1000,
+                            embedding_dim=256,
+                            units=512,
+                            generate_plots=True,
+                            save_model_decoder=False,
+                            save_path_decoder=os.getcwd(),
+                            save_model_encoder=False,
+                            save_path_encoder=os.getcwd()):
         self.models["Image Caption"] = image_caption_query(
-            self=self,
+            self, instruction=instruction,
+            drop=drop,
             epochs=epochs,
-            instruction=instruction,
-            random_state=random_state,
             preprocess=preprocess,
-            generate_plots=generate_plots)
+            random_state=random_state,
+            top_k=top_k,
+            batch_size=batch_size,
+            buffer_size=buffer_size,
+            embedding_dim=embedding_dim,
+            units=units,
+            generate_plots=generate_plots,
+            save_model_decoder=save_model_decoder,
+            save_path_decoder=save_path_decoder,
+            save_model_encoder=save_model_encoder,
+            save_path_encoder=save_path_encoder)
         self.latest_model = 'Image Caption'
 
     def dimensionality_reducer(self, instruction):
@@ -497,7 +556,7 @@ class client:
             print(operations)
         else:
             raise Exception(
-                "There are no built-in operators defined for this model." 
+                "There are no built-in operators defined for this model."
                 " Please refer to the models dictionary.")
 
     # show accuracy scores for client's model
@@ -527,12 +586,14 @@ class client:
 # Easier to comment the one you don't want to run instead of typing them
 # out every time
 
-# newClient = client('/Users/palashshah/Desktop')
-# newClient.convolutional_query()
-# newClient.tune('convolutional_NN', epochs=1)
-# newClient.neural_network_query("Model median house value")
-# newClient = client('tools/data/structured_data/landslides_after_rainfall.csv').neural_network_query(instruction='Model distance',
+# newClient = client('/Users/palashshah/Desktop') newClient.convolutional_query() newClient.tune('convolutional_NN',
+# epochs=1) newClient.neural_network_query("Model median house value") newClient = client(
+# 'tools/data/structured_data/landslides_after_rainfall.csv').neural_network_query(instruction='Model distance',
 # drop=['id', 'geolocation', 'source_link', 'source_name'])
+# newClient = client('tools/data/structured_data/fake_job_postings.csv').neural_network_query(instruction='Classify
+# fraudulent', drop=['job_id'], text=['department','description', 'company_profile','requirements', 'benefits'])
+
 #newClient = client('tools/data/structured_data/fake_job_postings.csv').neural_network_query(instruction='Classify fraudulent',
 #                                                                                            drop=['job_id'],
 #                                                                                            text=['department','description', 'company_profile','requirements', 'benefits'])
+
