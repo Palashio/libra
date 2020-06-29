@@ -9,8 +9,57 @@ from sklearn.metrics import roc_curve, auc
 from sklearn.preprocessing import label_binarize
 from numpy import interp
 import pandas as pd
+import sklearn
+import matplotlib.pyplot as plt
+from sklearn.metrics import confusion_matrix, plot_confusion_matrix, recall_score, precision_score, f1_score, ConfusionMatrixDisplay
+import numpy as np
 
 warnings.filterwarnings("ignore", category=RuntimeWarning)
+
+
+currLog = ""
+counter = 0
+number = 0
+# current_dir=os.getcw()
+
+# allows for all columns to be displayed when printing()
+pd.options.display.width = None
+
+
+# clears the log when new process is started up
+
+
+def clearLog():
+    global currLog
+    global counter
+
+    currLog = ""
+    counter = 0
+
+
+# logging function that creates hierarchial display of the processes of
+# different functions. Copied into different python files to maintain
+# global variable parallels
+
+
+def logger(instruction, found=""):
+    global currLog
+    global counter
+    if counter == 0:
+        currLog += (" " * 2 * counter) + str(instruction) + str(found)
+    elif instruction == "->":
+        counter = counter - 1
+        currLog += (" " * 2 * counter) + str(instruction) + str(found)
+    else:
+        #currLog += (" " * 2 * counter) + "|" + "\n"
+        currLog += (" " * 2 * counter) + "|- " + str(instruction) + str(found)
+        if instruction == "done...":
+            currLog += "\n" + "\n"
+
+    counter += 1
+    print(currLog)
+    currLog = ""
+
 
 # generates all of the plots in clustering
 
@@ -193,3 +242,73 @@ def plot_mc_roc(y_test, y_score, interpreter=None):
     plt.title('ROC Curves')
     plt.legend(loc="lower right")
     plt.show()
+
+# Analysis of model
+def analyze(client, model=None):
+    logger(" ", ("Analyzing {}".format(model)))
+
+    modeldict = client.models[model]
+    if modeldict.get('plots') and model != 'k_means_clustering':
+        logger(" ", "Displaying associated plots")
+        # TODO: plot separately instead of on top of each other
+        for key in modeldict['plots']:
+            modeldict['plots'][key].show()
+    if modeldict.get('test_data'):
+        logger("->", "Making predictions for test data...")
+        data = modeldict['test_data']['X']
+        real = modeldict['test_data']['y']
+        preds = modeldict['model'].predict(data)
+        if model == 'classification_ANN':  # formats labels column
+            enc = sklearn.preprocessing.LabelEncoder()
+            real = modeldict['interpreter'].inverse_transform(
+                real).reshape(1, -1)[0]
+            preds = modeldict['interpreter'].inverse_transform(
+                preds).reshape(1, -1)[0]
+            real = enc.fit_transform(real)
+            preds = enc.transform(preds)
+    if model == 'k_means_clustering':
+        logger("->", "Reporting metrics: ")
+        inertia = modeldict['model'].inertia_
+        centers = modeldict['model'].cluster_centers_
+        logger(" ", ("Total Clusters: {}".format(str(len(centers)))))
+        logger("->", ("KMeans centroids: {}".format(str(centers))))
+        logger("->", ("KMeans Sum Squared Dist of points to center (inertia): {}".format(str(inertia))))
+    elif model == 'regression_ANN':
+        logger("->", "Reporting metrics: ")
+        MSE = sklearn.metrics.mean_squared_error(real, preds)
+        MAE = sklearn.metrics.mean_absolute_error(real, preds)
+        logger(" ", ("MSE on test set: {}".format(str(MSE))))
+        logger("->", ("MAE on test set: {}".format(str(MAE))))
+    # classification models
+    elif model in ['svm', 'nearest_neighbor', 'decision_tree', 'classification_ANN']:
+        logger("->", "Plotting ROC curves and creating confusion matrix...")
+        if model in ['svm', 'nearest_neighbor',
+                     'decision_tree']:  # sklearn models ONLY
+            plot_mc_roc(real, preds, modeldict['interpreter'])
+            labels = list(modeldict['interpreter'].keys())
+            plot_confusion_matrix(
+                modeldict['model'], data, real, display_labels=labels)
+            plt.show()
+
+            accuracy = modeldict['accuracy_score']
+        else:  # classification_ANN
+            plot_mc_roc(real, preds, enc)
+            cm = confusion_matrix(real, preds)
+            labels = enc.classes_
+            ConfusionMatrixDisplay(
+                confusion_matrix=cm,
+                display_labels=labels).plot()
+            plt.show()
+
+            accuracy = modeldict['accuracy']['validation_accuracy']
+        logger("->", "Reporting metrics: ")
+        recall = recall_score(real, preds, average='micro')
+        precision = precision_score(real, preds, average='micro')
+        f1 = f1_score(real, preds, average='micro')
+
+        logger(" ", ("Accuracy on test set: {}".format(str(accuracy))))
+        logger("->", ("Recall on test set: {}".format(str(recall))))
+        logger("->", ("Precision on test set: {}".format(str(precision))))
+        logger("->", ("F1 Score on test set: {}".format(str(f1))))
+    elif model != 'k_means_clustering':
+        print("further analysis is not supported for {}".format(model))
