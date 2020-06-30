@@ -38,7 +38,7 @@ import pandas as pd
 import numpy as np
 import keras
 import sys
-
+from colorama import Fore,Style
 # function imports from other files
 
 counter = 0
@@ -131,9 +131,9 @@ def dimensionality_reduc(
     accs = []
     logger("->","Baseline Accuracy: " + str(finals[0][1]))
     #print("----------------------------")
+    col_name=[["Permutation ","| Final Accuracy "]]
+    printtable(col_name,max(len(word) for row in col_name for word in row) + 5)
     for i, element in product(range(len(finals)), finals):
-        col_name=[["Permutation ","| Final Accuracy "]]
-        printtable(col_name,max(len(word) for row in col_name for word in row) + 5)
         values = []
         values.append(str(perms[i]))
         values.append("| " + str(element[2]))
@@ -141,12 +141,6 @@ def dimensionality_reduc(
         datax.append(values)
         printtable(datax,max(len(word) for row in col_name for word in row) + 5)
         del values,datax
-        """
-        print("Permutation --> " +
-              str(perms[i]) +
-              " | Final Accuracy --> " +
-              str(element[2]))
-        """
         if finals[0][1] < element[2]:
             accs.append(list([str(perms[i]) ,
                               "| " + str(element[2])]))

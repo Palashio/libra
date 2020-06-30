@@ -17,19 +17,15 @@ from libra.query.supplementaries import generate_id
 from libra.plotting.generate_plots import (generate_clustering_plots,
                            generate_regression_plots,
                            generate_classification_plots)
-
+from colorama import Fore,Style
 import warnings
 warnings.filterwarnings("ignore", category=UserWarning)
 
-currLog = ""
 counter = 0
 number = 0
 
 def clearLog():
-    global currLog
     global counter
-
-    currLog = ""
     counter = 0
 
 
@@ -38,28 +34,19 @@ def clearLog():
 # global variable parallels
 
 
-def logger(instruction, found="", slash=''):
-    global currLog
+def logger(instruction, found=""):
     global counter
     if counter == 0:
-        currLog += (" " * 2 * counter) + str(instruction) + str(found)
+        print((" " * 2 * counter) + str(instruction) + str(found))
     elif instruction == "->":
         counter = counter - 1
-        if slash == '|':
-            currLog += (" " * 2 * counter) + slash + str(found)
-        else:
-            currLog += (" " * 2 * counter) + str(instruction) + str(found)
+        print(Fore.BLUE + (" " * 2 * counter) + str(instruction) + str(found)+(Style.RESET_ALL)) 
     else:
-        currLog += (" " * 2 * counter) + "|- " + str(instruction) + str(found)
+        print((" " * 2 * counter) + "|- " + str(instruction) + str(found)) 
         if instruction == "done...":
-            currLog += "\n" + "\n"
+            print(\n" + "\n")
 
     counter += 1
-    if instruction == "|":
-        print(currLog, end="")
-    else:
-        print(currLog)
-    currLog = ""
 
 def k_means_clustering(dataset= None,
             preprocess=True,
