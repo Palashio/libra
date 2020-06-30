@@ -194,10 +194,10 @@ def regression_ann(
                                      [len(final_hist.history['val_loss']) - 1]))
 
     # calls function to generate plots in plot generation
+    plots = {}
     if generate_plots:
         init_plots, plot_names = generate_regression_plots(
             models[len(models) - 1], data, y)
-        plots = {}
         for x in range(len(plot_names)):
             plots[str(plot_names[x])] = init_plots[x]
 
@@ -368,8 +368,10 @@ def classification_ann(instruction,
         len(final_hist.history['val_accuracy']) - 1]))
 
     # genreates appropriate classification plots by feeding all information
-    plots = generate_classification_plots(
-        models[len(models) - 1], data, y, model, X_test, y_test)
+    plots = {}
+    if generate_plots=True:
+        plots = generate_classification_plots(
+            models[len(models) - 1], data, y, model, X_test, y_test)
 
     if save_model:
         save(final_model, save_model)
