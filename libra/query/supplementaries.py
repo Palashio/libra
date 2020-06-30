@@ -9,10 +9,10 @@ from libra.preprocessing.image_preprocesser import (setwise_preprocessing,
 
 import uuid
 from PIL import Image
+from colorama import Fore, Style 
 
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
-currLog = ""
 counter = 0
 number = 0
 
@@ -25,10 +25,8 @@ number = 0
 
 
 def clearLog():
-    global currLog
     global counter
 
-    currLog = ""
     counter = 0
 
 
@@ -38,21 +36,18 @@ def clearLog():
 
 
 def logger(instruction, found=""):
-    global currLog
     global counter
     if counter == 0:
-        currLog += (" " * 2 * counter) + str(instruction) + str(found)
+        print((" " * 2 * counter) + str(instruction) + str(found)) 
     elif instruction == "->":
         counter = counter - 1
-        currLog += (" " * 2 * counter) + str(instruction) + str(found)
+        print(Fore.BLUE + (" " * 2 * counter) + str(instruction) + str(found)+(Style.RESET_ALL)) 
     else:
-        currLog += (" " * 2 * counter) + "|- " + str(instruction) + str(found)
+        print((" " * 2 * counter) + "|- " + str(instruction) + str(found))
         if instruction == "done...":
-            currLog += "\n" + "\n"
+            print( "\n" + "\n")
 
     counter += 1
-    print(currLog)
-    currLog = ""
 
 
 def tune_helper(

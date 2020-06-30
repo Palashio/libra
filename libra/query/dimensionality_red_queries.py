@@ -41,8 +41,6 @@ import sys
 
 # function imports from other files
 
-
-currLog = ""
 counter = 0
 
 # allows for all columns to be displayed when printing()
@@ -50,20 +48,18 @@ pd.options.display.width = None
 
 
 def logger(instruction, found=""):
-    global currLog
     global counter
-
     if counter == 0:
-        currLog += (" " * 2 * counter) + instruction + found + "\n"
+        print((" " * 2 * counter) + str(instruction) + str(found))
+    elif instruction == "->":
+        counter = counter - 1
+        print(Fore.BLUE + (" " * 2 * counter) + str(instruction) + str(found)+(Style.RESET_ALL)) 
     else:
-        currLog += (" " * 2 * counter) + "|" + "\n"
-        currLog += (" " * 2 * counter) + "|- " + instruction + found + "\n"
+        print((" " * 2 * counter) + "|- " + str(instruction) + str(found)) 
         if instruction == "done...":
-            currLog += "\n" + "\n"
+            print(\n" + "\n")
 
     counter += 1
-    print(currLog)
-    currLog = ""
 
 
 def printtable(col_name,col_width):
@@ -82,7 +78,6 @@ def dimensionality_reduc(
             "KPCA",
             "ICA"],
         inplace=False):
-    global currLog
     global counter
 
     dataReader = DataReader(dataset)
@@ -167,7 +162,6 @@ def dimensionality_reduc(
 
 
 def dimensionality_RF(instruction, dataset, target="", y="", n_features=10):
-    global currLog
     global counter
 
     dataReader = DataReader("./data/" + get_last_file()[0])
@@ -224,7 +218,6 @@ def dimensionality_RF(instruction, dataset, target="", y="", n_features=10):
 
 
 def dimensionality_PCA(instruction, dataset, ca_threshold=None):
-    global currLog
     global counter
 
     pca = PCA(0.92)
@@ -267,7 +260,6 @@ def dimensionality_PCA(instruction, dataset, ca_threshold=None):
 
 
 def dimensionality_ICA(instruction, dataset, target="", y=""):
-    global currLog
     global counter
 
     dataReader = DataReader("./data/" + get_last_file()[0])
@@ -328,7 +320,6 @@ def get_last_file():
 
 
 def dimensionality_KPCA(instruction, dataset, target="", y=""):
-    global currLog
     global counter
 
     dataReader = DataReader("./data/" + get_last_file()[0])
