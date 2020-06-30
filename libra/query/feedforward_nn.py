@@ -234,7 +234,7 @@ def classification_ann(instruction,
                        save_model=True,
                        save_path=os.getcwd()):
 
-    logger("Reading in dataset...")
+    logger("reading in dataset...")
 
     dataReader = DataReader(dataset)
     data = dataReader.data_generator()

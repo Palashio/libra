@@ -137,7 +137,7 @@ class client:
 
     def neural_network_query(self,
                              instruction,
-                             text=[],
+                             text=None,
                              ca_threshold=None,
                              drop=None,
                              preprocess=True,
@@ -201,7 +201,7 @@ class client:
     def regression_query_ann(
             self,
             instruction,
-            text=[],
+            text=None,
             drop=None,
             ca_threshold=None,
             preprocess=True,
@@ -242,7 +242,7 @@ class client:
     def classification_query_ann(
             self,
             instruction,
-            text=[],
+            text=None,
             ca_threshold=None,
             preprocess=True,
             callback_mode='min',
@@ -288,7 +288,7 @@ class client:
                                 n_init=10,
                                 max_iter=300,
                                 random_state=42,
-                                text=[]
+                                text=None
                                 ):
         '''
         Calls the body of the kmeans_clustering code in the supplementaries.py file. Can be used without any preprocessing and/or parameters.
@@ -315,7 +315,7 @@ class client:
     def svm_query(self,
                   instruction,
                   test_size=0.2,
-                  text=[],
+                  text=None,
                   kernel='linear',
                   preprocess=True,
                   drop=None,
@@ -351,7 +351,7 @@ class client:
     def nearest_neighbor_query(
             self,
             instruction=None,
-            text=[],
+            text=None,
             preprocess=True,
             drop=None,
             min_neighbors=3,
@@ -386,7 +386,7 @@ class client:
             instruction,
             preprocess=True,
             test_size=0.2,
-            text=[],
+            text=None,
             drop=None,
             criterion='gini',
             splitter='best',
@@ -723,7 +723,7 @@ class client:
     def target(self, model=None):
         '''
         Function that retrieves all of the targets in the self.models dictionary for the key.
-        :param model: default to the latest model, but essentailly the model key
+        :param model: default to the latest model, but essentially the model key
         '''
         if model == None:
             model = self.latest_model
