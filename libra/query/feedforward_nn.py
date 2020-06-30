@@ -60,7 +60,7 @@ def logger(instruction, found=""):
 def regression_ann(
         instruction,
         ca_threshold=None,
-        text=None,
+        text=[],
         dataset=None,
         drop=None,
         preprocess=True,
@@ -221,7 +221,7 @@ def regression_ann(
 
 def classification_ann(instruction,
                        dataset=None,
-                       text=None,
+                       text=[],
                        ca_threshold=None,
                        preprocess=True,
                        callback_mode='min',

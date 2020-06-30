@@ -49,7 +49,7 @@ def k_means_clustering(dataset= None,
             n_init=10,
             max_iter=300,
             random_state=42,
-            text=None):
+            text=[]):
         logger("reading dataset...")
         # loads dataset and replaces n/a with zero
         # data = pd.read_csv(self.dataset)
@@ -126,7 +126,7 @@ def train_svm(instruction,
               dataset=None,
               test_size=0.2,
               kernel='linear',
-              text=None,
+              text=[],
               preprocess=True,
               ca_threshold=None,
               drop=None,
@@ -206,7 +206,7 @@ def nearest_neighbors(instruction=None,
                       leaf_size=30,
                       p=2,
                       algorithm='auto',
-                      text=None):
+                      text=[]):
         logger("reading in dataset....")
         # Reads in dataset
         # data = pd.read_csv(self.dataset)
@@ -258,7 +258,7 @@ def decision_tree(instruction,
                   dataset=None,
                   preprocess=True,
                   ca_threshold=None,
-                  text=None,
+                  text=[],
                   test_size=0.2,
                   drop=None,
                   criterion='gini',

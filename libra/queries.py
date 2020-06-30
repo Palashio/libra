@@ -137,7 +137,7 @@ class client:
 
     def neural_network_query(self,
                              instruction,
-                             text=None,
+                             text=[],
                              ca_threshold=None,
                              drop=None,
                              preprocess=True,
@@ -201,7 +201,7 @@ class client:
     def regression_query_ann(
             self,
             instruction,
-            text=None,
+            text=[],
             drop=None,
             ca_threshold=None,
             preprocess=True,
@@ -236,13 +236,13 @@ class client:
             save_path=save_path)
 
         self.latest_model = 'regression_ANN'
-
+        return self
     # query for multilabel classification query, does not work for
     # binaryclassification, fits to feed-forward neural network
     def classification_query_ann(
             self,
             instruction,
-            text=None,
+            text=[],
             ca_threshold=None,
             preprocess=True,
             callback_mode='min',
@@ -277,8 +277,8 @@ class client:
             save_path=save_path)
 
         self.latest_model = 'classification_ANN'
-
-    # query to perform k-means clustering
+        return self
+        # query to perform k-means clustering
     def kmeans_clustering_query(self,
                                 preprocess=True,
                                 generate_plots=True,
@@ -288,7 +288,7 @@ class client:
                                 n_init=10,
                                 max_iter=300,
                                 random_state=42,
-                                text=None
+                                text=[]
                                 ):
         '''
         Calls the body of the kmeans_clustering code in the supplementaries.py file. Can be used without any preprocessing and/or parameters.
@@ -310,12 +310,12 @@ class client:
         )
 
         self.latest_model = 'k_means_clustering'
-
-    # query to create a support vector machine
+        return self
+        # query to create a support vector machine
     def svm_query(self,
                   instruction,
                   test_size=0.2,
-                  text=None,
+                  text=[],
                   kernel='linear',
                   preprocess=True,
                   drop=None,
@@ -346,12 +346,12 @@ class client:
                                        )
 
         self.latest_model = 'svm'
-    
-    # query to create a nearest neighbors model
+        return self
+        # query to create a nearest neighbors model
     def nearest_neighbor_query(
             self,
             instruction=None,
-            text=None,
+            text=[],
             preprocess=True,
             drop=None,
             min_neighbors=3,
@@ -379,14 +379,14 @@ class client:
         )
 
         self.latest_model = 'nearest_neighbor'
-
-    # query to create a decision tree model
+        return self
+        # query to create a decision tree model
     def decision_tree_query(
             self,
             instruction,
             preprocess=True,
             test_size=0.2,
-            text=None,
+            text=[],
             drop=None,
             criterion='gini',
             splitter='best',
@@ -422,9 +422,9 @@ class client:
 
 
         self.latest_model = 'decision_tree'
+        return self
 
-
-    # tunes a specific neural network based on the input model_to_tune
+        # tunes a specific neural network based on the input model_to_tune
     def tune(self,
              model_to_tune=None,
              max_layers=10,
@@ -473,6 +473,7 @@ class client:
             test_size=test_size
         )
 
+        return self
     # query to build a convolutional neural network
     def convolutional_query(self,
                             instruction=None,
@@ -506,8 +507,8 @@ class client:
             width=width)
 
         self.latest_model = 'convolutional_NN'
-
-    # Sentiment analysis predict wrapper
+        return self
+        # Sentiment analysis predict wrapper
     def classify_text(self, text):
 
         '''
@@ -555,8 +556,8 @@ class client:
             save_model=save_model,
             save_path=save_path)
         self.latest_model = 'Text Classification'
-
-    # Document summarization predict wrapper
+        return self
+        # Document summarization predict wrapper
     def get_summary(self, text):
 
         '''
@@ -600,8 +601,8 @@ class client:
             save_path=save_path)
 
         self.latest_model = 'Document Summarization'
-
-    # Image caption prediction
+        return self
+        # Image caption prediction
     def generate_caption(self, image):
         '''
         Calls the body of the caption generator which is located in the nlp_queries.py file.
@@ -650,8 +651,8 @@ class client:
             save_model_encoder=save_model_encoder,
             save_path_encoder=save_path_encoder)
         self.latest_model = 'Image Caption'
-
-    # performs dimensionality reduction on your dataset 
+        return self
+        # performs dimensionality reduction on your dataset
     # based on user instruction for target variable 
     def dimensionality_reducer(self, instruction):
         '''
