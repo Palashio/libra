@@ -385,7 +385,6 @@ def get_standard_training_output_keras(epochs, history):
     helper output for logger
     :param epochs: is the number of epochs model was running for
     :param history: the keras history object
-    :return string of the output
     '''
     global counter
     col_name=[["Epochs","| Training Loss ","| Validation Loss "]]
@@ -412,14 +411,13 @@ def get_standard_training_output_generic(epochs, loss, val_loss):
     :param epochs: is the number of epochs model was running for
     :param loss: is the amount of loss in the training instance
     :param val_loss: just validation loss
-    :return string of the output
     '''
     global counter
     col_name=[["Epochs ","| Training Loss ","| Validation Loss "]]
     col_width = max(len(word) for row in col_name for word in row) + 2
     for row in col_name:
         print((" " * 2 * counter) + "| " + ("".join(word.ljust(col_width)
-                                                    for word in row)) + " |")
+                                                for word in row)) + " |")
 
     for i, j, k in zip(range(epochs), loss, val_loss):
         values = []
