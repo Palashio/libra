@@ -560,6 +560,12 @@ class client:
 
     # Document summarization predict wrapper
     def get_summary(self, text):
+
+        '''
+        Calls the body of the summarizer which is located in the nlp_queries.py file
+        :param text: set of text that you want to summarize.
+        :return: a summary of text inputted in the text field.
+        '''
         return get_summary(self=self, text=text)
 
     # text summarization query
@@ -575,6 +581,11 @@ class client:
                             generate_plots=True,
                             save_model=False,
                             save_path=os.getcwd()):
+        '''
+        Calls the body of the summarization  query which is located in the nlp_queries.py file
+        :param many params: all used as hyperparameters for the algorithm.
+        :return: an updated model and history stored in the models dictionary
+        '''
 
         self.models["Document Summarization"] = summarization_query(
             self=self, instruction=instruction, preprocess=preprocess,
@@ -594,6 +605,11 @@ class client:
 
     # Image caption prediction
     def generate_caption(self, image):
+        '''
+        Calls the body of the caption generator which is located in the nlp_queries.py file.
+        :param image: the image that you want to generate a caption for.
+        :return: a caption for the image inputted in the image field.
+        '''
         caption = generate_caption(self=self, image=image)
         return ' '.join(caption[:len(caption) - 1])
 
@@ -613,6 +629,12 @@ class client:
                             save_path_decoder=os.getcwd(),
                             save_model_encoder=False,
                             save_path_encoder=os.getcwd()):
+        '''
+        Calls the body of the image caption query which is located in the nlp_queries.py file
+        :param many params: all used as hyperparameters for the algorithm.
+        :return: an updated model and history stored in the models dictionary
+        '''
+
         self.models["Image Caption"] = image_caption_query(
             self, instruction=instruction,
             drop=drop,
@@ -634,10 +656,19 @@ class client:
     # performs dimensionality reduction on your dataset 
     # based on user instruction for target variable 
     def dimensionality_reducer(self, instruction):
+        '''
+        Unused function for dimensionality reduction
+        :param instruction: the objective that you want to reduce dimensions to maximize
+        :return: the most optimal dataset
+        '''
         dimensionality_reduc(instruction, self.dataset)
 
     # shows the names of plots associated with a specific model
     def plot_names(self, model=None):
+        '''
+        Function to get names of plots given the name of the model you want
+        :param model: the model that you want to get the plots for
+        '''
         if model == None:
             model = self.latest_model
         print(self.models[model]['plots'].keys())
