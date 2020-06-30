@@ -747,6 +747,3 @@ class client:
         :param model: default to the latest model, but essentailly the model key
         '''
         get_plots(self, model, plot, save)
-
-newClient = client('/Users/palashshah/Desktop/housing.csv')
-# newClient.neural_network_query('Predict median house value')

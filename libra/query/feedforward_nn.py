@@ -369,7 +369,7 @@ def classification_ann(instruction,
 
     # genreates appropriate classification plots by feeding all information
     plots = {}
-    if generate_plots=True:
+    if generate_plots:
         plots = generate_classification_plots(
             models[len(models) - 1], data, y, model, X_test, y_test)
 
