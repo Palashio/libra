@@ -5,7 +5,7 @@ from libra.query.nlp_queries import (image_caption_query,
 from libra.query.classification_models import (k_means_clustering,
                                                train_svm, nearest_neighbors,
                                                decision_tree)
-from libra.query.supplementaries import tune_helper, stats, get_model_data, get_operators, get_accuracy, get_losses, get_target, get_plots
+from libra.query.supplementaries import tune_helper, get_model_data, get_operators, get_accuracy, get_losses, get_target, get_plots
 from libra.query.feedforward_nn import (regression_ann,
                                         classification_ann,
                                         convolutional)
@@ -748,3 +748,6 @@ class client:
         :param model: default to the latest model, but essentailly the model key
         '''
         get_plots(self, model, plot, save)
+
+newClient = client('/Users/palashshah/Desktop/housing.csv')
+# newClient.neural_network_query('Predict median house value')
