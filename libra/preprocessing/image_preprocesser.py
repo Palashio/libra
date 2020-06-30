@@ -19,17 +19,21 @@ def setwise_preprocessing(data_path, new_folder, height, width):
     paths = [training_path, testing_path]
     dict = []
     data_size = []
+    num_classes = [0,0]
     for index in range(2):
         info = process_class_folders(paths[index])
         data_size.append(len(info[0]))
         heights += info[0]
         widths += info[1]
-        classification += info[2]
+        if info[2] < 2:
+            raise BaseException(f"Directory: {paths[index]} contains {info[2]} classes. Need at least two classification folders.")
+        num_classes[index] += info[2]
         dict.append(info[3])
 
-    classification = int(classification/2)
-    if classification < 2:
-        raise BaseException("Directory only has {} class in it. Need at least two classes of images.".format(classification))
+    if num_classes[0] != num_classes[1]:
+        raise BaseException(f"Number of classes in testing_set and training_set are not equal. Training set has {num_classes[0]} and testing set has {num_classes[1]}")
+
+    classification = num_classes[0]
     height1, width1 = calculate_medians(heights, widths)
     if height is None:
         height = height1
@@ -71,7 +75,7 @@ def csv_preprocessing(csv_file,
                       height,
                       width):
     df = pd.read_csv(csv_file)
-
+    df = df.head(5)
     if instruction is None:
         raise BaseException("Instruction was not given.")
 
@@ -92,7 +96,7 @@ def csv_preprocessing(csv_file,
         random_row = df.sample()
         for column, value in random_row.iloc[0].items():
             if type(value) is str:
-                if os.path.exists(data_path + "/" + value):
+                if os.path.exists(data_path + "/" + (value if value[0] != "/" else value[1:])):
                     path_included = True
                     image_column = column
                     break
@@ -125,15 +129,15 @@ def csv_preprocessing(csv_file,
 
     heights = []
     widths = []
-    classifications = df[label].nunique()
-    if classifications < 2:
-        raise BaseException("Directory only has {} class in it. Need at least two classes of images.".format(classification))
+    classifications = df[label].value_counts()
+    # if len(classifications) < 2:
+    #     raise BaseException(f"{csv_file} contains {len(classifications)} classes. Need at least two classification labels.")
     image_list = []
 
     # get the median heights and widths
     for index, row in df.iterrows():
         if path_included:
-            p = data_path + "/" + row[image_column]
+            p = data_path + "/" + (row[image_column][1:] if row[image_column][0] == "/" else row[image_column])
             img = cv2.imread(p)
         else:
             for path in data_paths:
@@ -164,25 +168,31 @@ def csv_preprocessing(csv_file,
     create_folder(data_path, "proc_training_set")
     create_folder(data_path, "proc_testing_set")
     # create classification folders
-    for classification in df[label].unique():
+    for classification in classifications.keys():
         create_folder(data_path + "/proc_training_set", classification)
         create_folder(data_path + "/proc_testing_set", classification)
 
     data_size = [0,0]
+    class_count = dict.fromkeys(classifications.keys(), 0)
+
     # save images into correct folder
     for index, row in df.iterrows():
         # resize images
         img = process_color_channel(image_list[index], height, width)
-        p = "proc_" + (os.path.basename(row[image_column]) 
+        p = "proc_" + (os.path.basename(row[image_column])
                             if path_included else row[image_column])
-        if (index / df.shape[0]) < training_ratio:
+        if need_file_extension:
+            p += ".jpg"
+        if class_count[row[label]] / classifications[row[label]] < training_ratio:
             data_size[0] += 1
+            class_count[row[label]] += 1
             save_image(data_path + "/proc_training_set", img, p, row[label])
         else:
             data_size[1] += 1
+            class_count[row[label]] += 1
             save_image(data_path + "/proc_testing_set", img, p, row[label])
 
-    return {"num_categories": classifications, 
+    return {"num_categories": len(classifications),
             "height": height, 
             "width": width, 
             "train_size": data_size[0], 
@@ -192,6 +202,8 @@ def csv_preprocessing(csv_file,
 # preprocesses images when given a folder containing class folders
 def classwise_preprocessing(data_path, training_ratio, height, width):
     info = process_class_folders(data_path)
+    if info[2] < 2:
+        raise BaseException(f"Directory: {data_path} contains {info[2]} classes. Need at least two classification folders.")
     height1, width1 = calculate_medians(info[0], info[1])
     if height is None:
         height = height1
@@ -254,9 +266,9 @@ def process_class_folders(data_path):
         folder_width = []
 
         for image in os.listdir(data_path + "/" + class_folder):
+            if image == ".DS_Store":
+                continue
             try:
-                if image == ".DS_Store":
-                    continue
                 img = cv2.imread(data_path + "/" + class_folder + "/" + image)
                 folder_height.append(img.shape[0])
                 folder_width.append(img.shape[1])
@@ -385,8 +397,6 @@ def set_distinguisher(data_path, read_mode):
         return {"read_mode":"pathwise or namewise", "csv_path":csv_path[0]}
     elif len(csv_path) > 1:
         raise BaseException(f"Too many csv files in directory: {[os.path.basename(path) for path in csv_path]}")
-    elif len(csv_path) == 0:
-        raise BaseException(f"No csv file in {data_path}")
 
     return {"read_mode":"classwise"}
 
@@ -396,24 +406,30 @@ def already_processed(data_path):
     training_path = data_path + "/training_set"
     testing_path = data_path + "/testing_set"
 
-    num_categories = 0
-    train_size = 0
-    for directory in os.listdir(training_path):
-        class_path = training_path + "/" + directory
-        if os.path.isdir(class_path):
-            num_categories += 1
-            train_size += len([img for img in os.listdir(class_path) if img != ".DS_Store"])
+    if not os.path.isdir(training_path) or not os.path.isdir(testing_path):
+        raise BaseException(f"Missing training_set or testing_set folder in directory: {data_path}")
 
-    test_size = 0
-    for directory in os.listdir(testing_path):
-        class_path = testing_path + "/" + directory
-        if os.path.isdir(class_path):
-            images = [img for img in os.listdir(class_path) if img != ".DS_Store"]
-            height, width, _ = cv2.imread(class_path + "/" + images[0]).shape
-            test_size += len(images)
+    paths = [training_path, testing_path]
+    num_categories = [0,0]
+    sizes = [0,0]
+    for index, path in enumerate(paths):
+        for directory in os.listdir(path):
+            class_path = path + "/" + directory
+            if os.path.isdir(class_path):
+                num_categories[index] += 1
+                images = [img for img in os.listdir(class_path) if img != ".DS_Store"]
+                if len(images) == 0:
+                    raise BaseException(f"Class: {directory} in {path} contains no images.")
+                height, width, _ = cv2.imread(class_path + "/" + images[0]).shape
+                sizes[index] += len(images)
+        if num_categories[index] < 2:
+            raise BaseException(f"Directory: {path} contains {num_categories[index]} classes. Need at least two classification folders.")
 
-    return {"num_categories": num_categories,
+    if num_categories[0] != num_categories[1]:
+        raise BaseException(f"Number of classes in testing_set and training_set are not equal. Training set has {num_categories[0]} and testing set has {num_categories[1]}")
+
+    return {"num_categories": num_categories[0],
             "height": height,
             "width": width,
-            "train_size": train_size,
-            "test_size": test_size}
+            "train_size": sizes[0],
+            "test_size": sizes[1]}
