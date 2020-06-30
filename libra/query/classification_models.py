@@ -1,7 +1,6 @@
 import pandas as pd
 from libra.preprocessing.data_reader import DataReader
-from sklearn import preprocessing, svm
-from sklearn import preprocessing, tree
+from sklearn import svm, tree
 from sklearn.metrics import accuracy_score
 from libra.preprocessing.data_preprocesser import initial_preprocesser, clustering_preprocessor
 from sklearn.cluster import KMeans
