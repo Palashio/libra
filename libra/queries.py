@@ -13,7 +13,6 @@ from libra.query.dimensionality_red_queries import dimensionality_reduc
 from libra.data_generation.grammartree import get_value_instruction
 from libra.data_generation.dataset_labelmatcher import (get_similar_column,
                                                         get_similar_model)
-from libra.plotting.generate_plots import (analyze)
 
 import pandas as pd
 from pandas.core.common import SettingWithCopyWarning
