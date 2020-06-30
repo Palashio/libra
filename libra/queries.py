@@ -673,73 +673,78 @@ class client:
             model = self.latest_model
         print(self.models[model]['plots'].keys())
 
-   # shows names of models associated with the client
+
     def model_names(self):
+        '''
+        Function that shows names of models associated with the client
+        '''
         models_avail = [key for key in self.models.keys()]
         print(models_avail)
 
     # shows the keys in the models dictionary
     def model_data(self, model=None):
+        '''
+        Function that retrieves the model_data; all the information in self.models for that model
+        :param model: default to the latest model, but essentailly the model key
+        '''
         if model is None:
             model = self.latest_model
         get_model_data(self,model)
 
     # returns all operators applicable to the client's models dictionary
     def operators(self, model=None):
+        '''
+        Function that retrieves all of the operators; pipelines that were used to model the dataset
+        :param model: default to the latest model, but essentailly the model key
+        '''
         if model is None:
             model = self.latest_model
         get_operators(self, model)
 
     # show accuracy scores for client's model
     def accuracy(self, model=None):
+        '''
+        Function that retrieves all of the accuracies in the self.models dictionary for the key.
+        :param model: default to the latest model, but essentailly the model key
+        '''
         if model is None:
             model = self.latest_model
         return get_accuracy(self, model)
 
     # show losses for client's model
-    def losses(self, model=None): 
+    def losses(self, model=None):
+        '''
+        Function that retrieves all of the losses in the self.models dictionary for the key.
+        :param model: default to the latest model, but essentailly the model key
+        '''
         if model == None:
             model = self.latest_model
         return get_losses(self, model)
     
     # return client model's target
     def target(self, model=None):
+        '''
+        Function that retrieves all of the targets in the self.models dictionary for the key.
+        :param model: default to the latest model, but essentailly the model key
+        '''
         if model == None:
             model = self.latest_model
         return get_target(self,model)
     
     # return NLP model's vocabulary
     def vocab(self, model=None):
+        '''
+        Function that retrieves the NLP models vocabulary.
+        :param model: default to the latest model, but essentailly the model key
+        '''
         if model == None:
             model = self.latest_model
         return get_vocab(self,model)
     
     # plotting for client
     def plots(self, model = "", plot = "", save = False):
+        '''
+        Function that retrieves all of plots in the self.models dictionary for the key.
+        :param model: default to the latest model, but essentailly the model key
+        '''
         get_plots(self, model, plot, save)
-
-        
-
-# Easier to comment the one you don't want to run instead of typing them
-# out every time
-
-# newClient = client('/Users/palashshah/Desktop') newClient.convolutional_query() newClient.tune('convolutional_NN',
-# epochs=1) newClient.neural_network_query("Model median house value") newClient = client(
-# 'tools/data/structured_data/landslides_after_rainfall.csv').neural_network_query(instruction='Model distance',
-# drop=['id', 'geolocation', 'source_link', 'source_name'])
-# newClient = client('tools/data/structured_data/fake_job_postings.csv')
-# newClient.neural_network_query(instruction='predict fraudulent',
-#                                drop=['job_id'],
-#                                text=['department', 'description', 'company_profile', 'requirements', 'benefits'])
-
-# newClient = client('tools/data/structured_data/fake_job_postings.csv').neural_network_query(instruction='Classify
-# fraudulent', drop=['job_id'], text=['department','description', 'company_profile','requirements', 'benefits'])
-
-#newClient = client('tools/data/structured_data/fake_job_postings.csv').neural_network_query(instruction='Classify fraudulent',
-#                                                                                            drop=['job_id'],
-#                                                                                            text=['department','description', 'company_profile','requirements', 'benefits'])
-
-newClient = client('../../tools/data/structured_data/housing.csv')
-newClient.neural_network_query("Model median house value", epochs=3)
-newClient.plots()
-
