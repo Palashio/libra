@@ -5,7 +5,7 @@ from libra.query.nlp_queries import (image_caption_query,
 from libra.query.classification_models import (k_means_clustering,
                                                train_svm, nearest_neighbors,
                                                decision_tree)
-from libra.query.supplementaries import tune_helper, stats, get_model_data, get_operators, get_accuracy, get_losses, get_target, get_plots
+from libra.query.supplementaries import tune_helper, get_model_data, get_operators, get_accuracy, get_losses, get_target, get_plots
 from libra.query.feedforward_nn import (regression_ann,
                                         classification_ann,
                                         convolutional)
@@ -39,7 +39,7 @@ def clearLog():
     counter = 0
 
 
-def logger(instruction, found="", slash=''):
+def logger(instruction, found=""):
     '''
     logging function that creates hierarchial display of the processes of
     different functions. Copied into different python files to maintain
@@ -47,7 +47,6 @@ def logger(instruction, found="", slash=''):
 
     :param instruction: what you want to be displayed
     :param found: if you want to display something found like target column
-    :param slash: if you're displaying accuracies in a table format
 
     '''
     global currLog
@@ -560,6 +559,12 @@ class client:
 
     # Document summarization predict wrapper
     def get_summary(self, text):
+
+        '''
+        Calls the body of the summarizer which is located in the nlp_queries.py file
+        :param text: set of text that you want to summarize.
+        :return: a summary of text inputted in the text field.
+        '''
         return get_summary(self=self, text=text)
 
     # text summarization query
@@ -575,6 +580,11 @@ class client:
                             generate_plots=True,
                             save_model=False,
                             save_path=os.getcwd()):
+        '''
+        Calls the body of the summarization  query which is located in the nlp_queries.py file
+        :param many params: all used as hyperparameters for the algorithm.
+        :return: an updated model and history stored in the models dictionary
+        '''
 
         self.models["Document Summarization"] = summarization_query(
             self=self, instruction=instruction, preprocess=preprocess,
@@ -594,6 +604,11 @@ class client:
 
     # Image caption prediction
     def generate_caption(self, image):
+        '''
+        Calls the body of the caption generator which is located in the nlp_queries.py file.
+        :param image: the image that you want to generate a caption for.
+        :return: a caption for the image inputted in the image field.
+        '''
         caption = generate_caption(self=self, image=image)
         return ' '.join(caption[:len(caption) - 1])
 
@@ -613,6 +628,12 @@ class client:
                             save_path_decoder=os.getcwd(),
                             save_model_encoder=False,
                             save_path_encoder=os.getcwd()):
+        '''
+        Calls the body of the image caption query which is located in the nlp_queries.py file
+        :param many params: all used as hyperparameters for the algorithm.
+        :return: an updated model and history stored in the models dictionary
+        '''
+
         self.models["Image Caption"] = image_caption_query(
             self, instruction=instruction,
             drop=drop,
@@ -634,81 +655,98 @@ class client:
     # performs dimensionality reduction on your dataset 
     # based on user instruction for target variable 
     def dimensionality_reducer(self, instruction):
+        '''
+        Unused function for dimensionality reduction
+        :param instruction: the objective that you want to reduce dimensions to maximize
+        :return: the most optimal dataset
+        '''
         dimensionality_reduc(instruction, self.dataset)
 
     # shows the names of plots associated with a specific model
     def plot_names(self, model=None):
+        '''
+        Function to get names of plots given the name of the model you want
+        :param model: the model that you want to get the plots for
+        '''
         if model == None:
             model = self.latest_model
         print(self.models[model]['plots'].keys())
 
-   # shows names of models associated with the client
+
     def model_names(self):
+        '''
+        Function that shows names of models associated with the client
+        '''
         models_avail = [key for key in self.models.keys()]
         print(models_avail)
 
     # shows the keys in the models dictionary
     def model_data(self, model=None):
+        '''
+        Function that retrieves the model_data; all the information in self.models for that model
+        :param model: default to the latest model, but essentailly the model key
+        '''
         if model is None:
             model = self.latest_model
         get_model_data(self,model)
 
     # returns all operators applicable to the client's models dictionary
     def operators(self, model=None):
+        '''
+        Function that retrieves all of the operators; pipelines that were used to model the dataset
+        :param model: default to the latest model, but essentailly the model key
+        '''
         if model is None:
             model = self.latest_model
         get_operators(self, model)
 
     # show accuracy scores for client's model
     def accuracy(self, model=None):
+        '''
+        Function that retrieves all of the accuracies in the self.models dictionary for the key.
+        :param model: default to the latest model, but essentailly the model key
+        '''
         if model is None:
             model = self.latest_model
         return get_accuracy(self, model)
 
     # show losses for client's model
-    def losses(self, model=None): 
+    def losses(self, model=None):
+        '''
+        Function that retrieves all of the losses in the self.models dictionary for the key.
+        :param model: default to the latest model, but essentailly the model key
+        '''
         if model == None:
             model = self.latest_model
         return get_losses(self, model)
     
     # return client model's target
     def target(self, model=None):
+        '''
+        Function that retrieves all of the targets in the self.models dictionary for the key.
+        :param model: default to the latest model, but essentailly the model key
+        '''
         if model == None:
             model = self.latest_model
         return get_target(self,model)
     
     # return NLP model's vocabulary
     def vocab(self, model=None):
+        '''
+        Function that retrieves the NLP models vocabulary.
+        :param model: default to the latest model, but essentailly the model key
+        '''
         if model == None:
             model = self.latest_model
         return get_vocab(self,model)
     
     # plotting for client
     def plots(self, model = "", plot = "", save = False):
+        '''
+        Function that retrieves all of plots in the self.models dictionary for the key.
+        :param model: default to the latest model, but essentailly the model key
+        '''
         get_plots(self, model, plot, save)
 
-        
-
-# Easier to comment the one you don't want to run instead of typing them
-# out every time
-
-# newClient = client('/Users/palashshah/Desktop') newClient.convolutional_query() newClient.tune('convolutional_NN',
-# epochs=1) newClient.neural_network_query("Model median house value") newClient = client(
-# 'tools/data/structured_data/landslides_after_rainfall.csv').neural_network_query(instruction='Model distance',
-# drop=['id', 'geolocation', 'source_link', 'source_name'])
-# newClient = client('tools/data/structured_data/fake_job_postings.csv')
-# newClient.neural_network_query(instruction='predict fraudulent',
-#                                drop=['job_id'],
-#                                text=['department', 'description', 'company_profile', 'requirements', 'benefits'])
-
-# newClient = client('tools/data/structured_data/fake_job_postings.csv').neural_network_query(instruction='Classify
-# fraudulent', drop=['job_id'], text=['department','description', 'company_profile','requirements', 'benefits'])
-
-#newClient = client('tools/data/structured_data/fake_job_postings.csv').neural_network_query(instruction='Classify fraudulent',
-#                                                                                            drop=['job_id'],
-#                                                                                            text=['department','description', 'company_profile','requirements', 'benefits'])
-
-newClient = client('../../tools/data/structured_data/housing.csv')
-newClient.neural_network_query("Model median house value", epochs=3)
-newClient.plots()
-
+newClient = client('/Users/palashshah/Desktop/housing.csv')
+# newClient.neural_network_query('Predict median house value')
