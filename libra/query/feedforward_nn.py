@@ -19,9 +19,8 @@ from sklearn.preprocessing import StandardScaler
 import numpy as np
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 from tensorflow.keras.callbacks import EarlyStopping
+from colorama import Fore, Style 
 
-
-currLog = ""
 counter = 0
 number = 0
 # current_dir=os.getcw()
@@ -34,10 +33,7 @@ pd.options.display.width = None
 
 
 def clearLog():
-    global currLog
     global counter
-
-    currLog = ""
     counter = 0
 
 
@@ -47,22 +43,18 @@ def clearLog():
 
 
 def logger(instruction, found=""):
-    global currLog
     global counter
     if counter == 0:
-        currLog += (" " * 2 * counter) + str(instruction) + str(found)
+        print((" " * 2 * counter) + str(instruction) + str(found))
     elif instruction == "->":
         counter = counter - 1
-        currLog += (" " * 2 * counter) + str(instruction) + str(found)
+        print(Fore.BLUE + (" " * 2 * counter) + str(instruction) + str(found)+(Style.RESET_ALL)) 
     else:
-        #currLog += (" " * 2 * counter) + "|" + "\n"
-        currLog += (" " * 2 * counter) + "|- " + str(instruction) + str(found)
+        print((" " * 2 * counter) + "|- " + str(instruction) + str(found)) 
         if instruction == "done...":
-            currLog += "\n" + "\n"
+            print("\n" + "\n")
 
     counter += 1
-    print(currLog)
-    currLog = ""
 
 
 def regression_ann(
@@ -81,7 +73,6 @@ def regression_ann(
         save_model=True,
         save_path=os.getcwd()):
 
-    global currLog
     logger("reading in dataset...")
 
     dataReader = DataReader(dataset)
@@ -157,7 +148,6 @@ def regression_ann(
     # keeps running model and fit functions until the validation loss stops
     # decreasing
     logger("Testing number of layers...")
-    print(currLog)
     col_name = [["Current number of layers", "| Training Loss", "| Test Loss"]]
     col_width = max(len(word) for row in col_name for word in row) + 2
     for row in col_name:
@@ -244,7 +234,6 @@ def classification_ann(instruction,
                        save_model=True,
                        save_path=os.getcwd()):
 
-    global currLog
     logger("Reading in dataset...")
 
     dataReader = DataReader(dataset)
@@ -361,9 +350,9 @@ def classification_ann(instruction,
                       [len(history.history[maximizer]) - 1])
         accuracies.append(history.history['val_accuracy']
                           [len(history.history['val_accuracy']) - 1])
-
+        models.append(history)
         model_data.append(model)
-
+        
         i += 1
     #print((" " * 2 * counter)+ tabulate(datax, headers=col_name, tablefmt='orgtbl'))
     #del values, datax

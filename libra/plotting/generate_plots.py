@@ -1,5 +1,6 @@
 import sys
-
+import numpy as np
+import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 import warnings
@@ -51,7 +52,6 @@ def logger(instruction, found=""):
         counter = counter - 1
         currLog += (" " * 2 * counter) + str(instruction) + str(found)
     else:
-        #currLog += (" " * 2 * counter) + "|" + "\n"
         currLog += (" " * 2 * counter) + "|- " + str(instruction) + str(found)
         if instruction == "done...":
             currLog += "\n" + "\n"

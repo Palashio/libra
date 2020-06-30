@@ -38,11 +38,9 @@ import pandas as pd
 import numpy as np
 import keras
 import sys
-
+from colorama import Fore,Style
 # function imports from other files
 
-
-currLog = ""
 counter = 0
 
 # allows for all columns to be displayed when printing()
@@ -50,20 +48,25 @@ pd.options.display.width = None
 
 
 def logger(instruction, found=""):
-    global currLog
     global counter
-
     if counter == 0:
-        currLog += (" " * 2 * counter) + instruction + found + "\n"
+        print((" " * 2 * counter) + str(instruction) + str(found))
+    elif instruction == "->":
+        counter = counter - 1
+        print(Fore.BLUE + (" " * 2 * counter) + str(instruction) + str(found)+(Style.RESET_ALL)) 
     else:
-        currLog += (" " * 2 * counter) + "|" + "\n"
-        currLog += (" " * 2 * counter) + "|- " + instruction + found + "\n"
+        print((" " * 2 * counter) + "|- " + str(instruction) + str(found)) 
         if instruction == "done...":
-            currLog += "\n" + "\n"
+            print("\n" + "\n")
 
     counter += 1
-    print(currLog)
-    currLog = ""
+
+
+def printtable(col_name,col_width):
+    global counter
+    for row in col_name:
+        print((" " * 2 * counter) + "| " + ("".join(word.ljust(col_width)
+                                                for word in row)) + " |")
 
 
 def dimensionality_reduc(
@@ -75,7 +78,6 @@ def dimensionality_reduc(
             "KPCA",
             "ICA"],
         inplace=False):
-    global currLog
     global counter
 
     dataReader = DataReader(dataset)
@@ -127,31 +129,33 @@ def dimensionality_reduc(
 
     logger("Fetching Best Accuracies...")
     accs = []
-    print("")
-    print("Baseline Accuracy: " + str(finals[0][1]))
-    print("----------------------------")
+    logger("->","Baseline Accuracy: " + str(finals[0][1]))
+    #print("----------------------------")
+    col_name=[["Permutation ","| Final Accuracy "]]
+    printtable(col_name,max(len(word) for row in col_name for word in row) + 5)
     for i, element in product(range(len(finals)), finals):
-        print("Permutation --> " +
-              str(perms[i]) +
-              " | Final Accuracy --> " +
-              str(element[2]))
+        values = []
+        values.append(str(perms[i]))
+        values.append("| " + str(element[2]))
+        datax = []
+        datax.append(values)
+        printtable(datax,max(len(word) for row in col_name for word in row) + 5)
+        del values,datax
         if finals[0][1] < element[2]:
-            accs.append(list(["Permutation --> " +
-                              str(perms[i]) +
-                              " | Final Accuracy --> " +
-                              str(element[2])]))
+            accs.append(list([str(perms[i]) ,
+                              "| " + str(element[2])]))
     print("")
-    print("Best Accuracies")
-    print("----------------------------")
-    for element in accs:
-        print(element)
-
+    logger("->"," Best Accuracies")
+    #print("----------------------------")
+    col_name=[["Permutation ","| Final Accuracy "]]
+    printtable(col_name,max(len(word) for row in col_name for word in row) + 5)
+    printtable(accs,col_width)
+    
     if inplace:
         data.to_csv(dataset)
 
 
 def dimensionality_RF(instruction, dataset, target="", y="", n_features=10):
-    global currLog
     global counter
 
     dataReader = DataReader("./data/" + get_last_file()[0])
@@ -208,7 +212,6 @@ def dimensionality_RF(instruction, dataset, target="", y="", n_features=10):
 
 
 def dimensionality_PCA(instruction, dataset, ca_threshold=None):
-    global currLog
     global counter
 
     pca = PCA(0.92)
@@ -251,7 +254,6 @@ def dimensionality_PCA(instruction, dataset, ca_threshold=None):
 
 
 def dimensionality_ICA(instruction, dataset, target="", y=""):
-    global currLog
     global counter
 
     dataReader = DataReader("./data/" + get_last_file()[0])
@@ -312,7 +314,6 @@ def get_last_file():
 
 
 def dimensionality_KPCA(instruction, dataset, target="", y=""):
-    global currLog
     global counter
 
     dataReader = DataReader("./data/" + get_last_file()[0])

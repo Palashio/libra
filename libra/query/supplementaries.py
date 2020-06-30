@@ -9,10 +9,10 @@ from libra.preprocessing.image_preprocesser import (setwise_preprocessing,
 
 import uuid
 from PIL import Image
+from colorama import Fore, Style 
 
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
-currLog = ""
 counter = 0
 number = 0
 
@@ -25,10 +25,8 @@ number = 0
 
 
 def clearLog():
-    global currLog
     global counter
 
-    currLog = ""
     counter = 0
 
 
@@ -38,21 +36,18 @@ def clearLog():
 
 
 def logger(instruction, found=""):
-    global currLog
     global counter
     if counter == 0:
-        currLog += (" " * 2 * counter) + str(instruction) + str(found)
+        print((" " * 2 * counter) + str(instruction) + str(found)) 
     elif instruction == "->":
         counter = counter - 1
-        currLog += (" " * 2 * counter) + str(instruction) + str(found)
+        print(Fore.BLUE + (" " * 2 * counter) + str(instruction) + str(found)+(Style.RESET_ALL)) 
     else:
-        currLog += (" " * 2 * counter) + "|- " + str(instruction) + str(found)
+        print((" " * 2 * counter) + "|- " + str(instruction) + str(found))
         if instruction == "done...":
-            currLog += "\n" + "\n"
+            print( "\n" + "\n")
 
     counter += 1
-    print(currLog)
-    currLog = ""
 
 
 def tune_helper(
@@ -205,7 +200,8 @@ def generate_id():
 
 def get_image_data(data_path, read_mode=None, training_ratio=0.8):
     '''
-    function to get image data from a certain folder specifically for CNN tuning. Assumes CNN query has already been called.
+    function to get image data from a certain folder specifically for CNN tuning. 
+    Assumes CNN query has already been called.
     :param data_path: represents the location of the two training/testing folders.
     :param read_mode: represents the type of reading it does: setwise, pathwise, or classwise
     :param training_ratio: represents the size of the training / testing set.
@@ -389,23 +385,24 @@ def get_standard_training_output_keras(epochs, history):
     helper output for logger
     :param epochs: is the number of epochs model was running for
     :param history: the keras history object
-    :return string of the output
     '''
-    result = ""
-    print("Epochs | Training Loss | Validation Loss")
+    global counter
+    col_name=[["Epochs","| Training Loss ","| Validation Loss "]]
+    col_width = max(len(word) for row in col_name for word in row) + 2
+    for row in col_name:
+        print((" " * 2 * counter) + "| " + ("".join(word.ljust(col_width)
+                                                    for word in row)) + " |")
+    
     for i, j, k in zip(range(epochs), history.history["loss"], history.history["val_loss"]):
-        i = str(i)
-        while len(i) < 7:
-            i = i + " "
-        j = str(j)
-        while len(j) < 16:
-            j = j + " "
-
-        k = str(k)
-        while len(k) < 16:
-            k = k + " "
-        result = result + i + "|" + j[:15] + "| " + k[:15] + "\n"
-    return result
+        values = []
+        values.append(str(i))
+        values.append("| " + str(j))
+        values.append( "| " + str(k))
+        datax = []
+        datax.append(values)
+        for row in datax:
+            print((" " * 2 * counter) + "| " + ("".join(word.ljust(col_width)
+                                                    for word in row)) + " |")
 
 
 def get_standard_training_output_generic(epochs, loss, val_loss):
@@ -414,21 +411,22 @@ def get_standard_training_output_generic(epochs, loss, val_loss):
     :param epochs: is the number of epochs model was running for
     :param loss: is the amount of loss in the training instance
     :param val_loss: just validation loss
-    :return string of the output
     '''
-    result = ""
-    print("Epochs | Training Loss | Validation Loss")
+    global counter
+    col_name=[["Epochs ","| Training Loss ","| Validation Loss "]]
+    col_width = max(len(word) for row in col_name for word in row) + 2
+    for row in col_name:
+        print((" " * 2 * counter) + "| " + ("".join(word.ljust(col_width)
+                                                for word in row)) + " |")
+
     for i, j, k in zip(range(epochs), loss, val_loss):
-        i = str(i)
-        while len(i) < 7:
-            i = i + " "
+        values = []
+        values.append(str(i))
+        values.append("| " + str(j))
+        values.append( "| " + str(k))
+        datax = []
+        datax.append(values)
+        for row in datax:
+            print((" " * 2 * counter) + "| " + ("".join(word.ljust(col_width)
+                                                    for word in row)) + " |")
 
-        j = str(j)
-        while len(j) < 16:
-            j = j + " "
-
-        k = str(k)
-        while len(k) < 16:
-            k = k + " "
-        result = result + i + "|" + j[:15] + "| " + k[:15] + "\n"
-    return result
