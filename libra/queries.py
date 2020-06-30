@@ -39,7 +39,7 @@ def clearLog():
     counter = 0
 
 
-def logger(instruction, found="", slash=''):
+def logger(instruction, found=""):
     '''
     logging function that creates hierarchial display of the processes of
     different functions. Copied into different python files to maintain
@@ -47,7 +47,6 @@ def logger(instruction, found="", slash=''):
 
     :param instruction: what you want to be displayed
     :param found: if you want to display something found like target column
-    :param slash: if you're displaying accuracies in a table format
 
     '''
     global currLog

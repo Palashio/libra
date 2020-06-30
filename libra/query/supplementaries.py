@@ -333,37 +333,41 @@ def save_and_plot(self, modelname, plotname, save):
 
 
 def get_standard_training_output_keras(epochs, history):
-    result = ""
-    print("Epochs | Training Loss | Validation Loss")
+    global counter
+    col_name=[["Epochs","| Training Loss ","| Validation Loss "]]
+    col_width = max(len(word) for row in col_name for word in row) + 2
+    for row in col_name:
+        print((" " * 2 * counter) + "| " + ("".join(word.ljust(col_width)
+                                                    for word in row)) + " |")
+    
     for i, j, k in zip(range(epochs), history.history["loss"], history.history["val_loss"]):
-        i = str(i)
-        while len(i) < 7:
-            i = i + " "
-        j = str(j)
-        while len(j) < 16:
-            j = j + " "
-
-        k = str(k)
-        while len(k) < 16:
-            k = k + " "
-        result = result + i + "|" + j[:15] + "| " + k[:15] + "\n"
-    return result
+        values = []
+        values.append(str(i))
+        values.append("| " + str(j))
+        values.append( "| " + str(k))
+        datax = []
+        datax.append(values)
+        for row in datax:
+            print((" " * 2 * counter) + "| " + ("".join(word.ljust(col_width)
+                                                    for word in row)) + " |")
 
 
 def get_standard_training_output_generic(epochs, loss, val_loss):
-    result = ""
-    print("Epochs | Training Loss | Validation Loss")
+    global counter
+    col_name=[["Epochs","| Training Loss ","| Validation Loss "]]
+    col_width = max(len(word) for row in col_name for word in row) + 2
+    for row in col_name:
+        print((" " * 2 * counter) + "| " + ("".join(word.ljust(col_width)
+                                                    for word in row)) + " |")
+
     for i, j, k in zip(range(epochs), loss, val_loss):
-        i = str(i)
-        while len(i) < 7:
-            i = i + " "
+        values = []
+        values.append(str(i))
+        values.append("| " + str(j))
+        values.append( "| " + str(k))
+        datax = []
+        datax.append(values)
+        for row in datax:
+            print((" " * 2 * counter) + "| " + ("".join(word.ljust(col_width)
+                                                    for word in row)) + " |")
 
-        j = str(j)
-        while len(j) < 16:
-            j = j + " "
-
-        k = str(k)
-        while len(k) < 16:
-            k = k + " "
-        result = result + i + "|" + j[:15] + "| " + k[:15] + "\n"
-    return result

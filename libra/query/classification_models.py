@@ -50,7 +50,6 @@ def logger(instruction, found="", slash=''):
         else:
             currLog += (" " * 2 * counter) + str(instruction) + str(found)
     else:
-        #currLog += (" " * 2 * counter) + "|" + "\n"
         currLog += (" " * 2 * counter) + "|- " + str(instruction) + str(found)
         if instruction == "done...":
             currLog += "\n" + "\n"

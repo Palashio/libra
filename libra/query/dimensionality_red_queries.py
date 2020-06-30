@@ -66,6 +66,13 @@ def logger(instruction, found=""):
     currLog = ""
 
 
+def printtable(col_name,col_width):
+    global counter
+    for row in col_name:
+        print((" " * 2 * counter) + "| " + ("".join(word.ljust(col_width)
+                                                for word in row)) + " |")
+
+
 def dimensionality_reduc(
         instruction,
         dataset,
@@ -127,25 +134,34 @@ def dimensionality_reduc(
 
     logger("Fetching Best Accuracies...")
     accs = []
-    print("")
-    print("Baseline Accuracy: " + str(finals[0][1]))
-    print("----------------------------")
+    logger("->","Baseline Accuracy: " + str(finals[0][1]))
+    #print("----------------------------")
     for i, element in product(range(len(finals)), finals):
+        col_name=[["Permutation ","| Final Accuracy "]]
+        printtable(col_name,max(len(word) for row in col_name for word in row) + 5)
+        values = []
+        values.append(str(perms[i]))
+        values.append("| " + str(element[2]))
+        datax = []
+        datax.append(values)
+        printtable(datax,max(len(word) for row in col_name for word in row) + 5)
+        del values,datax
+        """
         print("Permutation --> " +
               str(perms[i]) +
               " | Final Accuracy --> " +
               str(element[2]))
+        """
         if finals[0][1] < element[2]:
-            accs.append(list(["Permutation --> " +
-                              str(perms[i]) +
-                              " | Final Accuracy --> " +
-                              str(element[2])]))
+            accs.append(list([str(perms[i]) ,
+                              "| " + str(element[2])]))
     print("")
-    print("Best Accuracies")
-    print("----------------------------")
-    for element in accs:
-        print(element)
-
+    logger("->"," Best Accuracies")
+    #print("----------------------------")
+    col_name=[["Permutation ","| Final Accuracy "]]
+    printtable(col_name,max(len(word) for row in col_name for word in row) + 5)
+    printtable(accs,col_width)
+    
     if inplace:
         data.to_csv(dataset)
 
