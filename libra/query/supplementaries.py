@@ -76,6 +76,11 @@ def tune_helper(
         verbose=0,
         test_size=0.2
 ):
+    '''
+    Helper function that calls the appropriate tuning function
+    :param instruction: the objective that you want to reduce dimensions to maximize
+    :return the updated models dictionary
+    '''
     logger("Getting target model for tuning...")
 
     # checks to see which requested model is in the self.models
@@ -146,7 +151,7 @@ def tune_helper(
                 'training_loss': history.history['loss'],
                 'val_loss': history.history['val_loss']}
         }
-        # processing for convolutional NN
+
     elif model_to_tune == "convolutional_NN":
         logger("Tuning model hyperparameters...")
         X_train, X_test, height, width, num_classes = get_image_data(dataset)
@@ -174,13 +179,13 @@ def tune_helper(
     return models
 
 
-def stats(dataset=None,
-          drop=None,
-          column_name=None):
-    return
-
-
 def save(model, save_model, save_path=os.getcwd()):
+    '''
+    function used to save a model with its .h5 file and .json instance
+    :param modeL; the models dictionary used
+    :param save_model, whether you want to save the model
+    :param save_path: location where you want to save the model
+    '''
     global number
     model_json = model.to_json()
     with open(save_path + "/model" + str(number) + ".json", "w") as json_file:
@@ -192,10 +197,19 @@ def save(model, save_model, save_path=os.getcwd()):
 
 
 def generate_id():
+    '''
+    function to generate a unique id.
+    '''
     return str(uuid.uuid4())
 
 
 def get_image_data(data_path, read_mode=None, training_ratio=0.8):
+    '''
+    function to get image data from a certain folder specifically for CNN tuning. Assumes CNN query has already been called.
+    :param data_path: represents the location of the two training/testing folders.
+    :param read_mode: represents the type of reading it does: setwise, pathwise, or classwise
+    :param training_ratio: represents the size of the training / testing set.
+    '''
     training_path = "/proc_training_set"
     testing_path = "/proc_testing_set"
 
@@ -233,40 +247,56 @@ def get_image_data(data_path, read_mode=None, training_ratio=0.8):
     return X_train, X_test, process_info['height'], process_info['width'], num_classes
 
 
-# shows the keys in the models dictionary
 def get_model_data(self, model):
+    '''
+    function to print out model dictionary information
+    :param modeL: represents the specific model key that you're using to index dictionary
+    '''
     if model in self.models:
         data = [key for key in self.models[model].keys()]
         print(data)
     else:
         raise Exception("The requested model has not been applied to the client.")
 
-# returns all operators applicable to the client's models dictionary
+
 def get_operators(self, model):
+    '''
+    gets the operators that were used to preprocess the dataset for prediction.
+    :param modeL; the key in the models dictionary.
+    '''
     defined = ['plots', 'accuracy', 'losses']
     if model in self.models:
         operations = [func + "()" for func in self.models[model].keys() if func in defined]
         if len(operations) > 0:
             print(operations)
         else:
-            raise Exception("There are no built-in operators defined for this model. Please refer to the models dictionary.")
-    else: 
+            raise Exception(
+                "There are no built-in operators defined for this model. Please refer to the models dictionary.")
+    else:
         raise Exception("The requested model has not been applied to the client.")
-    
-# show accuracy scores for client's model
+
+
 def get_accuracy(self, model):
+    '''
+    gets the accuracies for a specific model
+    :param modeL; the key in the models dictionary.
+    '''
     if model in self.models:
         if 'accuracy' in self.models[model].keys():
             return self.models[model]['accuracy']
         elif 'cross_val_score' in self.models[model].keys():
-            return {'cross_val_score' : self.models[model]['cross_val_score']}
+            return {'cross_val_score': self.models[model]['cross_val_score']}
         else:
             raise Exception("Accuracy is not defined for {}".format(model))
     else:
         raise Exception("The requested model has not been applied to the client.")
 
-# show losses for client's model
-def get_losses(self, model): 
+
+def get_losses(self, model):
+    '''
+    gets the losses for that specific model
+    :param modeL; the key in the models dictionary.
+    '''
     if model in self.models:
         if 'losses' in self.models[model].keys():
             return self.models[model]['losses']
@@ -275,8 +305,12 @@ def get_losses(self, model):
     else:
         raise Exception("The requested model has not been applied to the client.")
 
-# return client models' target
+
 def get_target(self, model):
+    '''
+    gets the target for that specific model if it exists.
+    :param modeL; the key in the models dictionary.
+    '''
     if model in self.models:
         if 'target' in self.models[model].keys():
             return self.models[model]['target']
@@ -285,8 +319,12 @@ def get_target(self, model):
     else:
         raise Exception("The requested model has not been applied to the client.")
 
-# return NLP model's vocabulary
+
 def get_vocab(self, model):
+    '''
+    gets the vocab that was used in the nlp queries
+    :param modeL; the key in the models dictionary.
+    '''
     if model in self.models:
         if 'vocabulary' in self.models[model].keys():
             return self.models[model]['vocabulary']
@@ -295,8 +333,15 @@ def get_vocab(self, model):
     else:
         raise Exception("The requested model has not been applied to the client.")
 
-# plotting for the client 
-def get_plots(self, model = "", plot = "", save = False):
+
+
+def get_plots(self, model="", plot="", save=False):
+    '''
+    function to get plots and then save them if appropriate
+    :param modeL; the key in the models dictionary.
+    :param plot: specific plot to get if applicable
+    :param save: whether to save the file as a .png
+    '''
     # no model or plot specified so plot all
     if model == "" and plot == "":
         for each_model in self.models:
@@ -313,14 +358,21 @@ def get_plots(self, model = "", plot = "", save = False):
     elif model != "" and plot != "":
         if plot in self.models[model]['plots'].keys():
             theplot = self.models[model]['plots'][plot]
-            save_and_plot(self, model, theplot, save) 
+            save_and_plot(self, model, theplot, save)
         else:
             raise Exception("{} is not available for {}".format(plot, model))
     else:
-        raise Exception ("Invalid plotting input")
+        raise Exception("Invalid plotting input")
 
-# function to save and plot 
+
+# function to save and plot
 def save_and_plot(self, modelname, plotname, save):
+    '''
+    helper function to save the model as a .png
+    :param modelname: represents the model from which to save
+    :param plotname: specific plot to save
+    :param save: whether to save it or not
+    '''
     figure.savefig('{}_{}.png'.format(model, plot))
     img = self.models[modelname]['plots'][plotname]
     path = "{}_{}.png".format(modelname, plotname)
@@ -333,6 +385,12 @@ def save_and_plot(self, modelname, plotname, save):
 
 
 def get_standard_training_output_keras(epochs, history):
+    '''
+    helper output for logger
+    :param epochs: is the number of epochs model was running for
+    :param history: the keras history object
+    :return string of the output
+    '''
     result = ""
     print("Epochs | Training Loss | Validation Loss")
     for i, j, k in zip(range(epochs), history.history["loss"], history.history["val_loss"]):
@@ -351,6 +409,13 @@ def get_standard_training_output_keras(epochs, history):
 
 
 def get_standard_training_output_generic(epochs, loss, val_loss):
+    '''
+    helper output for logger
+    :param epochs: is the number of epochs model was running for
+    :param loss: is the amount of loss in the training instance
+    :param val_loss: just validation loss
+    :return string of the output
+    '''
     result = ""
     print("Epochs | Training Loss | Validation Loss")
     for i, j, k in zip(range(epochs), loss, val_loss):
