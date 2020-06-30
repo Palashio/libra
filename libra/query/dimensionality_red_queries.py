@@ -57,7 +57,7 @@ def logger(instruction, found=""):
     else:
         print((" " * 2 * counter) + "|- " + str(instruction) + str(found)) 
         if instruction == "done...":
-            print(\n" + "\n")
+            print("\n" + "\n")
 
     counter += 1
 
