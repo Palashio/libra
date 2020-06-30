@@ -205,7 +205,8 @@ def generate_id():
 
 def get_image_data(data_path, read_mode=None, training_ratio=0.8):
     '''
-    function to get image data from a certain folder specifically for CNN tuning. Assumes CNN query has already been called.
+    function to get image data from a certain folder specifically for CNN tuning. 
+    Assumes CNN query has already been called.
     :param data_path: represents the location of the two training/testing folders.
     :param read_mode: represents the type of reading it does: setwise, pathwise, or classwise
     :param training_ratio: represents the size of the training / testing set.
@@ -419,7 +420,7 @@ def get_standard_training_output_generic(epochs, loss, val_loss):
     :return string of the output
     '''
     global counter
-    col_name=[["Epochs","| Training Loss ","| Validation Loss "]]
+    col_name=[["Epochs ","| Training Loss ","| Validation Loss "]]
     col_width = max(len(word) for row in col_name for word in row) + 2
     for row in col_name:
         print((" " * 2 * counter) + "| " + ("".join(word.ljust(col_width)
