@@ -424,6 +424,8 @@ def convolutional(instruction=None,
 
         # if image dataset in form of csv
         elif read_mode == "pathwise or namewise":
+            if training_ratio <= 0 or training_ratio >= 1:
+                raise BaseException(f"Test ratio must be between 0 and 1.")
             processInfo = csv_preprocessing(read_mode_info["csv_path"],
                                             data_path,
                                             instruction,
@@ -434,6 +436,8 @@ def convolutional(instruction=None,
 
         # if image dataset in form of one folder containing class folders
         elif read_mode == "classwise":
+            if training_ratio <= 0 or training_ratio >= 1:
+                raise BaseException(f"Test ratio must be between 0 and 1.")
             processInfo = classwise_preprocessing(data_path, training_ratio, height, width)
 
     else:
