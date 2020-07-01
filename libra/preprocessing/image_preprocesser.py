@@ -13,7 +13,6 @@ def setwise_preprocessing(data_path, new_folder, height, width):
 
     heights = []
     widths = []
-    classification = 0
 
     # first dictionary is training and second is testing set
     paths = [training_path, testing_path]
@@ -28,6 +27,9 @@ def setwise_preprocessing(data_path, new_folder, height, width):
         if info[2] < 2:
             raise BaseException(f"Directory: {paths[index]} contains {info[2]} classes. Need at least two classification folders.")
         num_classes[index] += info[2]
+        for key, value in info[3].items():
+            if len(value) == 0:
+                raise BaseException(f"Class: {key} contans {len(value)} images. Need at least one image in this class.")
         dict.append(info[3])
 
     if num_classes[0] != num_classes[1]:
@@ -74,10 +76,10 @@ def csv_preprocessing(csv_file,
                       training_ratio,
                       height,
                       width):
+
     df = pd.read_csv(csv_file)
-    df = df.head(5)
     if instruction is None:
-        raise BaseException("Instruction was not given.")
+        raise BaseException("Instruction was not given for csv file to be processed.")
 
     label = get_similar_column(get_value_instruction(instruction), df)
     avoid_directories = ["proc_training_set", "proc_testing_set"]
@@ -130,8 +132,12 @@ def csv_preprocessing(csv_file,
     heights = []
     widths = []
     classifications = df[label].value_counts()
-    # if len(classifications) < 2:
-    #     raise BaseException(f"{csv_file} contains {len(classifications)} classes. Need at least two classification labels.")
+    if len(classifications) < 2:
+        raise BaseException(f"{csv_file} contains {len(classifications)} classes. Need at least two classification labels.")
+    for key, value in classifications.items():
+        if value < 2:
+            raise BaseException(f"Class: {key} contans {value} images. Need at least two images in this class.")
+
     image_list = []
 
     # get the median heights and widths
@@ -204,15 +210,16 @@ def classwise_preprocessing(data_path, training_ratio, height, width):
     info = process_class_folders(data_path)
     if info[2] < 2:
         raise BaseException(f"Directory: {data_path} contains {info[2]} classes. Need at least two classification folders.")
+    img_dict = info[3]
+    for key, value in img_dict.items():
+        if len(value) < 2:
+            raise BaseException(f"Class: {key} contans {len(value)} images. Need at least two images in this class.")
     height1, width1 = calculate_medians(info[0], info[1])
     if height is None:
         height = height1
     if width is None:
         width = width1
     num_classifications = info[2]
-    if num_classifications < 2:
-        raise BaseException("Directory only has {} class in it. Need at least two classes of images.".format(num_classifications))
-    img_dict = info[3]
 
     # create training and testing folders
     create_folder(data_path, "proc_training_set")
@@ -381,7 +388,7 @@ def set_distinguisher(data_path, read_mode):
             if len(csv_path) == 1:
                 return {"read_mode":"pathwise or namewise", "csv_path":csv_path[0]}
             elif len(csv_path) > 1:
-                raise BaseException(f"Too many csv files in directory: {[os.path.basename(path) for path in csv_path]}")
+                raise BaseException(f"Too many csv files in {data_path}: {[os.path.basename(path) for path in csv_path]}")
             else:
                 raise BaseException(f"No csv file in {data_path}")
         else:
