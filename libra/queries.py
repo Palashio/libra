@@ -13,7 +13,6 @@ from libra.query.dimensionality_red_queries import dimensionality_reduc
 from libra.data_generation.grammartree import get_value_instruction
 from libra.data_generation.dataset_labelmatcher import (get_similar_column,
                                                         get_similar_model)
-from libra.plotting.generate_plots import (analyze)
 
 import pandas as pd
 from pandas.core.common import SettingWithCopyWarning
@@ -196,6 +195,7 @@ class client:
                     drop=drop,
                     save_model=save_model,
                     save_path=save_path)
+        return self
 
     # single regression query using a feed-forward neural network
     # instruction should be the value of a column
@@ -237,7 +237,7 @@ class client:
             save_path=save_path)
 
         self.latest_model = 'regression_ANN'
-
+        return self
     # query for multilabel classification query, does not work for
     # binaryclassification, fits to feed-forward neural network
     def classification_query_ann(
@@ -278,8 +278,8 @@ class client:
             save_path=save_path)
 
         self.latest_model = 'classification_ANN'
-
-    # query to perform k-means clustering
+        return self
+        # query to perform k-means clustering
     def kmeans_clustering_query(self,
                                 preprocess=True,
                                 generate_plots=True,
@@ -311,8 +311,8 @@ class client:
         )
 
         self.latest_model = 'k_means_clustering'
-
-    # query to create a support vector machine
+        return self
+        # query to create a support vector machine
     def svm_query(self,
                   instruction,
                   test_size=0.2,
@@ -347,8 +347,8 @@ class client:
                                        )
 
         self.latest_model = 'svm'
-    
-    # query to create a nearest neighbors model
+        return self
+        # query to create a nearest neighbors model
     def nearest_neighbor_query(
             self,
             instruction=None,
@@ -380,8 +380,8 @@ class client:
         )
 
         self.latest_model = 'nearest_neighbor'
-
-    # query to create a decision tree model
+        return self
+        # query to create a decision tree model
     def decision_tree_query(
             self,
             instruction,
@@ -423,9 +423,9 @@ class client:
 
 
         self.latest_model = 'decision_tree'
+        return self
 
-
-    # tunes a specific neural network based on the input model_to_tune
+        # tunes a specific neural network based on the input model_to_tune
     def tune(self,
              model_to_tune=None,
              max_layers=10,
@@ -474,6 +474,7 @@ class client:
             test_size=test_size
         )
 
+        return self
     # query to build a convolutional neural network
     def convolutional_query(self,
                             instruction=None,
@@ -507,8 +508,8 @@ class client:
             width=width)
 
         self.latest_model = 'convolutional_NN'
-
-    # Sentiment analysis predict wrapper
+        return self
+        # Sentiment analysis predict wrapper
     def classify_text(self, text):
 
         '''
@@ -556,8 +557,8 @@ class client:
             save_model=save_model,
             save_path=save_path)
         self.latest_model = 'Text Classification'
-
-    # Document summarization predict wrapper
+        return self
+        # Document summarization predict wrapper
     def get_summary(self, text):
 
         '''
@@ -601,8 +602,8 @@ class client:
             save_path=save_path)
 
         self.latest_model = 'Document Summarization'
-
-    # Image caption prediction
+        return self
+        # Image caption prediction
     def generate_caption(self, image):
         '''
         Calls the body of the caption generator which is located in the nlp_queries.py file.
@@ -651,8 +652,8 @@ class client:
             save_model_encoder=save_model_encoder,
             save_path_encoder=save_path_encoder)
         self.latest_model = 'Image Caption'
-
-    # performs dimensionality reduction on your dataset 
+        return self
+        # performs dimensionality reduction on your dataset
     # based on user instruction for target variable 
     def dimensionality_reducer(self, instruction):
         '''
@@ -668,7 +669,7 @@ class client:
         Function to get names of plots given the name of the model you want
         :param model: the model that you want to get the plots for
         '''
-        if model == None:
+        if model is None:
             model = self.latest_model
         print(self.models[model]['plots'].keys())
 
@@ -716,7 +717,7 @@ class client:
         Function that retrieves all of the losses in the self.models dictionary for the key.
         :param model: default to the latest model, but essentailly the model key
         '''
-        if model == None:
+        if model is None:
             model = self.latest_model
         return get_losses(self, model)
     
@@ -724,9 +725,9 @@ class client:
     def target(self, model=None):
         '''
         Function that retrieves all of the targets in the self.models dictionary for the key.
-        :param model: default to the latest model, but essentailly the model key
+        :param model: default to the latest model, but essentially the model key
         '''
-        if model == None:
+        if model is None:
             model = self.latest_model
         return get_target(self,model)
     
@@ -736,7 +737,7 @@ class client:
         Function that retrieves the NLP models vocabulary.
         :param model: default to the latest model, but essentailly the model key
         '''
-        if model == None:
+        if model is None:
             model = self.latest_model
         return get_vocab(self,model)
     
@@ -748,5 +749,6 @@ class client:
         '''
         get_plots(self, model, plot, save)
 
+
 newClient = client('/Users/palashshah/Desktop/housing.csv')
-# newClient.neural_network_query('Predict median house value')
+newClient.neural_network_query('predict median house value', epochs=2).plots()

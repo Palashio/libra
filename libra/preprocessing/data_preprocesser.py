@@ -1,9 +1,5 @@
-import keras
-import os
-import shutil
 import numpy as np
 import pandas as pd
-import tensorflow as tf
 from sklearn.compose import ColumnTransformer
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.impute import SimpleImputer

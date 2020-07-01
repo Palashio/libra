@@ -2,6 +2,7 @@ from libra.modeling.tuner import (tuneReg,
                                   tuneClass,
                                   tuneCNN)
 import os
+import matplotlib.pyplot as plt
 from libra.preprocessing.data_reader import DataReader
 from keras.preprocessing.image import ImageDataGenerator
 from libra.preprocessing.image_preprocesser import (setwise_preprocessing,
@@ -369,15 +370,15 @@ def save_and_plot(self, modelname, plotname, save):
     :param plotname: specific plot to save
     :param save: whether to save it or not
     '''
-    figure.savefig('{}_{}.png'.format(model, plot))
+    plt.savefig('{}_{}.png'.format(modelname, plotname))
     img = self.models[modelname]['plots'][plotname]
     path = "{}_{}.png".format(modelname, plotname)
     img.savefig(path)
     saved = Image.open(path)
     saved.show()
-    if (save == False):
+    if save is False:
         currpath = os.getcwd()
-        os.remove(currpath + '\\' + path)
+        os.remove(currpath + '/' + path)
 
 
 def get_standard_training_output_keras(epochs, history):

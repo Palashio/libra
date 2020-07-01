@@ -43,6 +43,15 @@ def clearLog():
 
 
 def logger(instruction, found=""):
+    '''
+    logging function that creates hierarchial display of the processes of
+    different functions. Copied into different python files to maintain
+    global variables.
+
+    :param instruction: what you want to be displayed
+    :param found: if you want to display something found like target column
+
+    '''
     global counter
     if counter == 0:
         print((" " * 2 * counter) + str(instruction) + str(found))
@@ -60,7 +69,7 @@ def logger(instruction, found=""):
 def regression_ann(
         instruction,
         ca_threshold=None,
-        text=None,
+        text=[],
         dataset=None,
         drop=None,
         preprocess=True,
@@ -72,6 +81,13 @@ def regression_ann(
         maximizer="val_loss",
         save_model=True,
         save_path=os.getcwd()):
+
+    '''
+    Body of the regression function used that is called in the neural network query
+    if the data is numerical.
+    :param many parameters: used to preprocess, tune, plot generation, and parameterizing the neural network trained.
+    :return dictionary that holds all the information for the finished model.
+    '''
 
     logger("reading in dataset...")
 
@@ -194,10 +210,10 @@ def regression_ann(
                                      [len(final_hist.history['val_loss']) - 1]))
 
     # calls function to generate plots in plot generation
+    plots = {}
     if generate_plots:
         init_plots, plot_names = generate_regression_plots(
             models[len(models) - 1], data, y)
-        plots = {}
         for x in range(len(plot_names)):
             plots[str(plot_names[x])] = init_plots[x]
 
@@ -221,7 +237,7 @@ def regression_ann(
 
 def classification_ann(instruction,
                        dataset=None,
-                       text=None,
+                       text=[],
                        ca_threshold=None,
                        preprocess=True,
                        callback_mode='min',
@@ -233,8 +249,13 @@ def classification_ann(instruction,
                        maximizer="val_loss",
                        save_model=True,
                        save_path=os.getcwd()):
-
-    logger("Reading in dataset...")
+    '''
+    Body of the classification function used that is called in the neural network query
+    if the data is categorical.
+    :param many parameters: used to preprocess, tune, plot generation, and parameterizing the neural network trained.
+    :return dictionary that holds all the information for the finished model.
+    '''
+    logger("reading in dataset...")
 
     dataReader = DataReader(dataset)
     data = dataReader.data_generator()
@@ -368,8 +389,10 @@ def classification_ann(instruction,
         len(final_hist.history['val_accuracy']) - 1]))
 
     # genreates appropriate classification plots by feeding all information
-    plots = generate_classification_plots(
-        models[len(models) - 1], data, y, model, X_test, y_test)
+    plots = {}
+    if generate_plots:
+        plots = generate_classification_plots(
+            models[len(models) - 1], data, y, model, X_test, y_test)
 
     if save_model:
         save(final_model, save_model)
@@ -406,6 +429,12 @@ def convolutional(instruction=None,
                   epochs=10,
                   height=None,
                   width=None):
+    '''
+    Body of the convolutional function used that is called in the neural network query
+    if the data is presented in images.
+    :param many parameters: used to preprocess, tune, plot generation, and parameterizing the convolutional neural network trained.
+    :return dictionary that holds all the information for the finished model.
+    '''
 
     logger("Generating datasets for classes...")
 

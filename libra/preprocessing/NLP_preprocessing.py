@@ -1,14 +1,10 @@
 # Lemmatizer for text
 import re
 import tensorflow as tf
-import numpy as np
 import spacy
-from keras_preprocessing.sequence import pad_sequences
-from keras_preprocessing.text import Tokenizer
 from spacy.lang.en import English
 from nltk.corpus import stopwords
 from libra.data_generation.dataset_labelmatcher import get_similar_column
-from libra.query.dimensionality_red_queries import logger
 from libra.data_generation.grammartree import get_value_instruction
 
 

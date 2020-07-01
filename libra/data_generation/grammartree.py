@@ -1,7 +1,4 @@
-import os
 from textblob import TextBlob
-import pandas as pd
-
 
 def get_value_instruction(sent):
 
