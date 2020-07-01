@@ -1,11 +1,6 @@
-import sys
-import numpy as np
-import pandas as pd
-import matplotlib.pyplot as plt
+
 import seaborn as sns
 import warnings
-import sklearn
-import numpy as np
 from sklearn.metrics import roc_curve, auc
 from sklearn.preprocessing import label_binarize
 from numpy import interp

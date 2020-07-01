@@ -27,6 +27,15 @@ def clearLog():
 
 
 def logger(instruction, found=""):
+    '''
+    logging function that creates hierarchial display of the processes of
+    different functions. Copied into different python files to maintain
+    global variables.
+
+    :param instruction: what you want to be displayed
+    :param found: if you want to display something found like target column
+
+    '''
     global counter
     if counter == 0:
         print((" " * 2 * counter) + str(instruction) + str(found))
@@ -50,6 +59,11 @@ def k_means_clustering(dataset= None,
             max_iter=300,
             random_state=42,
             text=[]):
+        '''
+        function to train a k means clustering algorithm
+        :param many params: used to hyperparametrize the function.
+        :return a dictionary object with all of the information for the algorithm.
+        '''
         logger("reading dataset...")
         # loads dataset and replaces n/a with zero
         # data = pd.read_csv(self.dataset)
@@ -135,7 +149,11 @@ def train_svm(instruction,
               gamma='scale',
               coef0=0.0,
               max_iter=-1):
-
+        '''
+        function to train a support vector machine clustering algorithm
+        :param many params: used to hyperparametrize the function.
+        :return a dictionary object with all of the information for the algorithm.
+        '''
         logger("reading in dataset....")
 
         dataReader = DataReader(dataset)
@@ -207,6 +225,11 @@ def nearest_neighbors(instruction=None,
                       p=2,
                       algorithm='auto',
                       text=[]):
+        '''
+        function to train a nearest neighbor algorithm
+        :param many params: used to hyperparametrize the function.
+        :return a dictionary object with all of the information for the algorithm.
+        '''
         logger("reading in dataset....")
         # Reads in dataset
         # data = pd.read_csv(self.dataset)
@@ -270,6 +293,11 @@ def decision_tree(instruction,
                   max_leaf_nodes=None,
                   min_impurity_decrease=0.0,
                   ccp_alpha=0.0):
+    '''
+    function to train a decision tree algorithm.
+    :param many params: used to hyperparametrize the function.
+    :return a dictionary object with all of the information for the algorithm.
+    '''
     logger("reading in dataset....")
 
     dataReader = DataReader(dataset)

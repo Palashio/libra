@@ -43,6 +43,15 @@ def clearLog():
 
 
 def logger(instruction, found=""):
+    '''
+    logging function that creates hierarchial display of the processes of
+    different functions. Copied into different python files to maintain
+    global variables.
+
+    :param instruction: what you want to be displayed
+    :param found: if you want to display something found like target column
+
+    '''
     global counter
     if counter == 0:
         print((" " * 2 * counter) + str(instruction) + str(found))
@@ -72,6 +81,13 @@ def regression_ann(
         maximizer="val_loss",
         save_model=True,
         save_path=os.getcwd()):
+
+    '''
+    Body of the regression function used that is called in the neural network query
+    if the data is numerical.
+    :param many parameters: used to preprocess, tune, plot generation, and parameterizing the neural network trained.
+    :return dictionary that holds all the information for the finished model.
+    '''
 
     logger("reading in dataset...")
 
@@ -233,7 +249,12 @@ def classification_ann(instruction,
                        maximizer="val_loss",
                        save_model=True,
                        save_path=os.getcwd()):
-
+    '''
+    Body of the classification function used that is called in the neural network query
+    if the data is categorical.
+    :param many parameters: used to preprocess, tune, plot generation, and parameterizing the neural network trained.
+    :return dictionary that holds all the information for the finished model.
+    '''
     logger("reading in dataset...")
 
     dataReader = DataReader(dataset)
@@ -408,6 +429,12 @@ def convolutional(instruction=None,
                   epochs=10,
                   height=None,
                   width=None):
+    '''
+    Body of the convolutional function used that is called in the neural network query
+    if the data is presented in images.
+    :param many parameters: used to preprocess, tune, plot generation, and parameterizing the convolutional neural network trained.
+    :return dictionary that holds all the information for the finished model.
+    '''
 
     logger("Generating datasets for classes...")
 
