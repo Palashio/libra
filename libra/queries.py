@@ -195,6 +195,7 @@ class client:
                     drop=drop,
                     save_model=save_model,
                     save_path=save_path)
+        return self
 
     # single regression query using a feed-forward neural network
     # instruction should be the value of a column
@@ -668,7 +669,7 @@ class client:
         Function to get names of plots given the name of the model you want
         :param model: the model that you want to get the plots for
         '''
-        if model == None:
+        if model is None:
             model = self.latest_model
         print(self.models[model]['plots'].keys())
 
@@ -716,7 +717,7 @@ class client:
         Function that retrieves all of the losses in the self.models dictionary for the key.
         :param model: default to the latest model, but essentailly the model key
         '''
-        if model == None:
+        if model is None:
             model = self.latest_model
         return get_losses(self, model)
     
@@ -726,7 +727,7 @@ class client:
         Function that retrieves all of the targets in the self.models dictionary for the key.
         :param model: default to the latest model, but essentially the model key
         '''
-        if model == None:
+        if model is None:
             model = self.latest_model
         return get_target(self,model)
     
@@ -736,7 +737,7 @@ class client:
         Function that retrieves the NLP models vocabulary.
         :param model: default to the latest model, but essentailly the model key
         '''
-        if model == None:
+        if model is None:
             model = self.latest_model
         return get_vocab(self,model)
     
@@ -747,3 +748,7 @@ class client:
         :param model: default to the latest model, but essentailly the model key
         '''
         get_plots(self, model, plot, save)
+
+
+newClient = client('/Users/palashshah/Desktop/housing.csv')
+newClient.neural_network_query('predict median house value', epochs=2).plots()
