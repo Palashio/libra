@@ -18,9 +18,13 @@ from nltk.corpus import stopwords
 from autocorrect import Speller
 
 
-def initial_preprocesser(data, instruction, preprocess, ca_threshold, text):
+def initial_preprocesser(data, instruction, preprocess, ca_threshold, text, test_size=0.2, random_state=49):
     # Scans for object columns just in case we have a datetime column that
     # isn't detected
+
+    if test_size < 0 or test_size > 1:
+        raise Exception('Test size cannot be {}, it should be a proportion between 0 and 1'.format(test_size))
+
     object_columns = [
         col for col,
                 col_type in data.dtypes.iteritems() if col_type == 'object']
@@ -43,7 +47,7 @@ def initial_preprocesser(data, instruction, preprocess, ca_threshold, text):
 
     del data[target]
     X_train, X_test, y_train, y_test = train_test_split(
-        data, y, test_size=0.2, random_state=49)
+        data, y, test_size=test_size, random_state=random_state)
 
     data = {
         'train': pd.concat([X_train], axis=1),

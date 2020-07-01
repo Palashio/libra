@@ -24,8 +24,6 @@ def clearLog():
 # logging function that creates hierarchial display of the processes of
 # different functions. Copied into different python files to maintain
 # global variable parallels
-
-
 def logger(instruction, found=""):
     '''
     logging function that creates hierarchial display of the processes of

@@ -137,6 +137,7 @@ class client:
 
     def neural_network_query(self,
                              instruction,
+                             callback=False,
                              text=[],
                              ca_threshold=None,
                              drop=None,
@@ -170,6 +171,7 @@ class client:
                 self.classification_query_ann(
                     instruction,
                     text=text,
+                    callback=callback,
                     ca_threshold=ca_threshold,
                     preprocess=preprocess,
                     test_size=test_size,
@@ -183,6 +185,7 @@ class client:
             else:
                 self.regression_query_ann(
                     instruction,
+                    callback=callback,
                     text=text,
                     ca_threshold=ca_threshold,
                     preprocess=preprocess,
@@ -202,6 +205,7 @@ class client:
     def regression_query_ann(
             self,
             instruction,
+            callback=False,
             text=[],
             drop=None,
             ca_threshold=None,
@@ -222,6 +226,7 @@ class client:
 
         self.models['regression_ANN'] = regression_ann(
             instruction=instruction,
+            callback=False,
             ca_threshold=.25 if ca_threshold is None else ca_threshold,
             dataset=self.dataset,
             text=text,
@@ -243,6 +248,7 @@ class client:
     def classification_query_ann(
             self,
             instruction,
+            callback=False,
             text=[],
             ca_threshold=None,
             preprocess=True,
@@ -263,6 +269,7 @@ class client:
 
         self.models['classification_ANN'] = classification_ann(
             instruction=instruction,
+            callback=callback,
             dataset=self.dataset,
             text=text,
             ca_threshold=.25 if ca_threshold is None else ca_threshold,
@@ -748,7 +755,3 @@ class client:
         :param model: default to the latest model, but essentailly the model key
         '''
         get_plots(self, model, plot, save)
-
-
-newClient = client('/Users/palashshah/Desktop/housing.csv')
-newClient.neural_network_query('predict median house value', epochs=2).plots()
