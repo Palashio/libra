@@ -1,16 +1,7 @@
-# Multiclass text classification algorithm here
-from keras.models import Model
-from keras.layers import Input, LSTM, Dense
-import numpy as np
-import pandas as pd
 import string
-from libra.data_generation.grammartree import get_value_instruction
-from sklearn.metrics.pairwise import cosine_similarity
 import Levenshtein
 
-# generates mask for sequence to sequence processing
-
-
+# generates mask for sequence to sequence processinng
 def produceMask(instruction_label):
     # creates a mask for a string with representation [1, 0, 2] based on
     # character frequencies

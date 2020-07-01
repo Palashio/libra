@@ -1,22 +1,14 @@
-import sys
-import os 
 import pandas as pd
-
 from libra.preprocessing.data_reader import DataReader
-from libra.data_generation.grammartree import get_value_instruction
-from sklearn import preprocessing, svm
-from sklearn import preprocessing, tree
+from sklearn import svm, tree
 from sklearn.metrics import accuracy_score
-from libra.preprocessing.data_preprocesser import structured_preprocesser, initial_preprocesser, clustering_preprocessor
+from libra.preprocessing.data_preprocesser import initial_preprocesser, clustering_preprocessor
 from sklearn.cluster import KMeans
 from sklearn.neighbors import KNeighborsClassifier
-from sklearn.model_selection import train_test_split
 from sklearn.model_selection import cross_val_score
 import numpy as np
 from libra.query.supplementaries import generate_id
-from libra.plotting.generate_plots import (generate_clustering_plots,
-                           generate_regression_plots,
-                           generate_classification_plots)
+from libra.plotting.generate_plots import (generate_clustering_plots)
 from colorama import Fore,Style
 import warnings
 warnings.filterwarnings("ignore", category=UserWarning)
@@ -35,6 +27,15 @@ def clearLog():
 
 
 def logger(instruction, found=""):
+    '''
+    logging function that creates hierarchial display of the processes of
+    different functions. Copied into different python files to maintain
+    global variables.
+
+    :param instruction: what you want to be displayed
+    :param found: if you want to display something found like target column
+
+    '''
     global counter
     if counter == 0:
         print((" " * 2 * counter) + str(instruction) + str(found))
@@ -58,7 +59,12 @@ def k_means_clustering(dataset= None,
             max_iter=300,
             random_state=42,
             text=[]):
-        logger("Reading dataset...")
+        '''
+        function to train a k means clustering algorithm
+        :param many params: used to hyperparametrize the function.
+        :return a dictionary object with all of the information for the algorithm.
+        '''
+        logger("reading dataset...")
         # loads dataset and replaces n/a with zero
         # data = pd.read_csv(self.dataset)
 
@@ -134,7 +140,7 @@ def train_svm(instruction,
               dataset=None,
               test_size=0.2,
               kernel='linear',
-              text=None,
+              text=[],
               preprocess=True,
               ca_threshold=None,
               drop=None,
@@ -143,8 +149,12 @@ def train_svm(instruction,
               gamma='scale',
               coef0=0.0,
               max_iter=-1):
-
-        logger("Reading in dataset....")
+        '''
+        function to train a support vector machine clustering algorithm
+        :param many params: used to hyperparametrize the function.
+        :return a dictionary object with all of the information for the algorithm.
+        '''
+        logger("reading in dataset....")
 
         dataReader = DataReader(dataset)
         data = dataReader.data_generator()
@@ -213,8 +223,14 @@ def nearest_neighbors(instruction=None,
                       max_neighbors=10,
                       leaf_size=30,
                       p=2,
-                      algorithm='auto'):
-        logger("Reading in dataset....")
+                      algorithm='auto',
+                      text=[]):
+        '''
+        function to train a nearest neighbor algorithm
+        :param many params: used to hyperparametrize the function.
+        :return a dictionary object with all of the information for the algorithm.
+        '''
+        logger("reading in dataset....")
         # Reads in dataset
         # data = pd.read_csv(self.dataset)
         dataReader = DataReader(dataset)
@@ -265,7 +281,7 @@ def decision_tree(instruction,
                   dataset=None,
                   preprocess=True,
                   ca_threshold=None,
-                  text=None,
+                  text=[],
                   test_size=0.2,
                   drop=None,
                   criterion='gini',
@@ -277,7 +293,12 @@ def decision_tree(instruction,
                   max_leaf_nodes=None,
                   min_impurity_decrease=0.0,
                   ccp_alpha=0.0):
-    logger("Reading in dataset....")
+    '''
+    function to train a decision tree algorithm.
+    :param many params: used to hyperparametrize the function.
+    :return a dictionary object with all of the information for the algorithm.
+    '''
+    logger("reading in dataset....")
 
     dataReader = DataReader(dataset)
     data = dataReader.data_generator()

@@ -1,7 +1,6 @@
 import torch
 from torch.utils.data import Dataset
 
-from libra.query.supplementaries import logger
 
 
 def train(epoch, tokenizer, model, device, loader, val_loader, optimizer):
