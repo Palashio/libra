@@ -1,7 +1,9 @@
-from tensorflow.keras.layers import (Conv2D, 
-                                     MaxPooling2D, 
-                                     Dense, 
-                                     Flatten, 
+from kerastuner.applications import HyperResNet
+import tensorflow as tf
+from tensorflow.keras.layers import (Conv2D,
+                                     MaxPooling2D,
+                                     Dense,
+                                     Flatten,
                                      Dropout)
 from kerastuner import HyperModel
 from kerastuner.tuners import RandomSearch, Hyperband
@@ -11,10 +13,6 @@ from sklearn.model_selection import train_test_split
 
 import os
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
-
-
-import tensorflow as tf
-from kerastuner.applications import HyperResNet
 
 
 # creates hypermodel class for CNN tuning
@@ -133,7 +131,7 @@ def tuneReg(
         epochs=10,
         activation='relu',
         step=32,
-        verbose = 0,
+        verbose=0,
         test_size=0.2
 ):
 
@@ -173,10 +171,17 @@ def tuneReg(
                  callbacks=[tf.keras.callbacks.TensorBoard('my_dir')])
 
     models = tuner.get_best_models(num_models=1)
-    hyp = tuner.get_best_hyperparameters(num_trials = 1)[0]
+    hyp = tuner.get_best_hyperparameters(num_trials=1)[0]
     #hyp = tuner.oracle.get_best_trials(num_trials=1)[0].hyperparameters.values
     #best_hps = np.stack(hyp).astype(None)
-    history = tuner_hist(data,target,tuner,hyp, epochs=epochs, verbose = verbose, test_size=test_size)
+    history = tuner_hist(
+        data,
+        target,
+        tuner,
+        hyp,
+        epochs=epochs,
+        verbose=verbose,
+        test_size=test_size)
     """
     Return:
         models[0] : best model obtained after tuning
@@ -244,10 +249,17 @@ def tuneClass(
                  epochs=epochs,
                  validation_data=(X_test, y_test))
     models = tuner.get_best_models(num_models=1)
-    hyp = tuner.get_best_hyperparameters(num_trials = 1)[0]
+    hyp = tuner.get_best_hyperparameters(num_trials=1)[0]
     #hyp = tuner.oracle.get_best_trials(num_trials=1)[0].hyperparameters.values
     #best_hps = np.stack(hyp).astype(None)
-    history = tuner_hist(X,y,tuner,hyp, epochs=epochs, verbose = verbose, test_size=test_size)
+    history = tuner_hist(
+        X,
+        y,
+        tuner,
+        hyp,
+        epochs=epochs,
+        verbose=verbose,
+        test_size=test_size)
     """
     Return:
         models[0] : best model obtained after tuning
@@ -295,10 +307,18 @@ def tuneCNN(
                  epochs=epochs)
 
     # best hyperparamters
-    hyp = tuner.get_best_hyperparameters(num_trials = 1)[0]
+    hyp = tuner.get_best_hyperparameters(num_trials=1)[0]
     #hyp = tuner.oracle.get_best_trials(num_trials=1)[0].hyperparameters.values
     #best_hps = np.stack(hyp).astype(None)
-    history = tuner_hist(X_train,X_test,tuner,hyp,img=1, epochs=epochs, verbose = verbose, test_size=test_size)
+    history = tuner_hist(
+        X_train,
+        X_test,
+        tuner,
+        hyp,
+        img=1,
+        epochs=epochs,
+        verbose=verbose,
+        test_size=test_size)
 
     """
     Return:
@@ -312,7 +332,7 @@ def tuneCNN(
 def tuneHyperband(X,
                   y,
                   max_trials=3):
-    """ 
+    """
     Perform Hyperband Tuning to search for the best model and Hyperparameters
     Arguments:
         X: Input dataset
@@ -335,11 +355,11 @@ def tuneHyperband(X,
     tuner.search(X_train, y_train,
                  epochs=5,
                  validation_data=(X_test, y_test))
-    hyp = tuner.get_best_hyperparameters(num_trials = 1)[0]
+    hyp = tuner.get_best_hyperparameters(num_trials=1)[0]
     #hyp = tuner.oracle.get_best_trials(num_trials=1)[0].hyperparameters.values
     #best_hps = np.stack(hyp).astype(None)
 
-    history = tuner_hist(X,y,tuner,hyp)
+    history = tuner_hist(X, y, tuner, hyp)
     """
     Return:
         models[0] : best model obtained after tuning
@@ -347,19 +367,28 @@ def tuneHyperband(X,
         history : history of the data executed from the given model
     """
     return tuner.get_best_models(1)[0], hyp, history
-    
-def tuner_hist(X,y,tuner,best_hps,img=0, epochs=5, test_size=0.2, verbose=0):
+
+
+def tuner_hist(
+        X,
+        y,
+        tuner,
+        best_hps,
+        img=0,
+        epochs=5,
+        test_size=0.2,
+        verbose=0):
     model = tuner.hypermodel.build(best_hps)
-    if img==0:
+    if img == 0:
         X_train, X_test, y_train, y_test = train_test_split(
             X, y, test_size=test_size, random_state=49)
-        history = model.fit(X_train, y_train, 
-                        epochs = epochs,
-                        validation_data = (X_test, y_test), 
-                        verbose=verbose)
+        history = model.fit(X_train, y_train,
+                            epochs=epochs,
+                            validation_data=(X_test, y_test),
+                            verbose=verbose)
     else:
-        history=model.fit_generator(X, 
-                        epochs = epochs,
-                        validation_data = y, 
-                        verbose=verbose)
+        history = model.fit_generator(X,
+                                      epochs=epochs,
+                                      validation_data=y,
+                                      verbose=verbose)
     return history

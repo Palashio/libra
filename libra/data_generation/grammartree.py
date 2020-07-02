@@ -1,5 +1,6 @@
 from textblob import TextBlob
 
+
 def get_value_instruction(sent):
 
     # Textblob part of speech identification algorithm

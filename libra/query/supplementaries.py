@@ -10,7 +10,7 @@ from libra.preprocessing.image_preprocesser import (setwise_preprocessing,
 
 import uuid
 from PIL import Image
-from colorama import Fore, Style 
+from colorama import Fore, Style
 
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
@@ -39,14 +39,15 @@ def clearLog():
 def logger(instruction, found=""):
     global counter
     if counter == 0:
-        print((" " * 2 * counter) + str(instruction) + str(found)) 
+        print((" " * 2 * counter) + str(instruction) + str(found))
     elif instruction == "->":
         counter = counter - 1
-        print(Fore.BLUE + (" " * 2 * counter) + str(instruction) + str(found)+(Style.RESET_ALL)) 
+        print(Fore.BLUE + (" " * 2 * counter) +
+              str(instruction) + str(found) + (Style.RESET_ALL))
     else:
         print((" " * 2 * counter) + "|- " + str(instruction) + str(found))
         if instruction == "done...":
-            print( "\n" + "\n")
+            print("\n" + "\n")
 
     counter += 1
 
@@ -201,7 +202,7 @@ def generate_id():
 
 def get_image_data(data_path, read_mode=None, training_ratio=0.8):
     '''
-    function to get image data from a certain folder specifically for CNN tuning. 
+    function to get image data from a certain folder specifically for CNN tuning.
     Assumes CNN query has already been called.
     :param data_path: represents the location of the two training/testing folders.
     :param read_mode: represents the type of reading it does: setwise, pathwise, or classwise
@@ -253,7 +254,8 @@ def get_model_data(self, model):
         data = [key for key in self.models[model].keys()]
         print(data)
     else:
-        raise Exception("The requested model has not been applied to the client.")
+        raise Exception(
+            "The requested model has not been applied to the client.")
 
 
 def get_operators(self, model):
@@ -263,14 +265,17 @@ def get_operators(self, model):
     '''
     defined = ['plots', 'accuracy', 'losses']
     if model in self.models:
-        operations = [func + "()" for func in self.models[model].keys() if func in defined]
+        operations = [
+            func +
+            "()" for func in self.models[model].keys() if func in defined]
         if len(operations) > 0:
             print(operations)
         else:
             raise Exception(
                 "There are no built-in operators defined for this model. Please refer to the models dictionary.")
     else:
-        raise Exception("The requested model has not been applied to the client.")
+        raise Exception(
+            "The requested model has not been applied to the client.")
 
 
 def get_accuracy(self, model):
@@ -286,7 +291,8 @@ def get_accuracy(self, model):
         else:
             raise Exception("Accuracy is not defined for {}".format(model))
     else:
-        raise Exception("The requested model has not been applied to the client.")
+        raise Exception(
+            "The requested model has not been applied to the client.")
 
 
 def get_losses(self, model):
@@ -300,7 +306,8 @@ def get_losses(self, model):
         else:
             raise Exception("Losses are not defined for {}".format(model))
     else:
-        raise Exception("The requested model has not been applied to the client.")
+        raise Exception(
+            "The requested model has not been applied to the client.")
 
 
 def get_target(self, model):
@@ -314,7 +321,8 @@ def get_target(self, model):
         else:
             raise Exception("Target is not defined for {}".format(model))
     else:
-        raise Exception("The requested model has not been applied to the client.")
+        raise Exception(
+            "The requested model has not been applied to the client.")
 
 
 def get_vocab(self, model):
@@ -328,8 +336,8 @@ def get_vocab(self, model):
         else:
             raise Exception("Vocabulary is not defined for {}".format(model))
     else:
-        raise Exception("The requested model has not been applied to the client.")
-
+        raise Exception(
+            "The requested model has not been applied to the client.")
 
 
 def get_plots(self, model="", plot="", save=False):
@@ -388,22 +396,23 @@ def get_standard_training_output_keras(epochs, history):
     :param history: the keras history object
     '''
     global counter
-    col_name=[["Epochs","| Training Loss ","| Validation Loss "]]
+    col_name = [["Epochs", "| Training Loss ", "| Validation Loss "]]
     col_width = max(len(word) for row in col_name for word in row) + 2
     for row in col_name:
         print((" " * 2 * counter) + "| " + ("".join(word.ljust(col_width)
                                                     for word in row)) + " |")
-    
-    for i, j, k in zip(range(epochs), history.history["loss"], history.history["val_loss"]):
+
+    for i, j, k in zip(
+            range(epochs), history.history["loss"], history.history["val_loss"]):
         values = []
         values.append(str(i))
         values.append("| " + str(j))
-        values.append( "| " + str(k))
+        values.append("| " + str(k))
         datax = []
         datax.append(values)
         for row in datax:
             print((" " * 2 * counter) + "| " + ("".join(word.ljust(col_width)
-                                                    for word in row)) + " |")
+                                                        for word in row)) + " |")
 
 
 def get_standard_training_output_generic(epochs, loss, val_loss):
@@ -414,20 +423,19 @@ def get_standard_training_output_generic(epochs, loss, val_loss):
     :param val_loss: just validation loss
     '''
     global counter
-    col_name=[["Epochs ","| Training Loss ","| Validation Loss "]]
+    col_name = [["Epochs ", "| Training Loss ", "| Validation Loss "]]
     col_width = max(len(word) for row in col_name for word in row) + 2
     for row in col_name:
         print((" " * 2 * counter) + "| " + ("".join(word.ljust(col_width)
-                                                for word in row)) + " |")
+                                                    for word in row)) + " |")
 
     for i, j, k in zip(range(epochs), loss, val_loss):
         values = []
         values.append(str(i))
         values.append("| " + str(j))
-        values.append( "| " + str(k))
+        values.append("| " + str(k))
         datax = []
         datax.append(values)
         for row in datax:
             print((" " * 2 * counter) + "| " + ("".join(word.ljust(col_width)
-                                                    for word in row)) + " |")
-
+                                                        for word in row)) + " |")

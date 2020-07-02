@@ -69,6 +69,7 @@ class client:
     '''
     class to store all query information. Currently, old_models is not being used.
     '''
+
     def __init__(self, data):
         '''
         initializer for the client class, reads in dataset and records by calling logger function
@@ -78,15 +79,14 @@ class client:
         logger("Creating client object")
         self.dataset = data
         logger("Reading in dataset")
+        print("")
         self.models = {}
-        self.old_models = {}
         self.latest_model = None
-        logger("done...")
         clearLog()
-
 
     # returns models with a specific string - currently deprecated, should not
     # be used.
+
     def get_models(self, model_requested):
         '''
         returns models with a specific string - currently deprecated, should not be used.
@@ -106,7 +106,7 @@ class client:
         :param modelKey: is the specific model you want to use to predict
         :return: a prediction, most likely an array
         '''
-        if modelKey == None:
+        if modelKey is None:
             modelKey = self.latest_model
         modeldict = self.models[modelKey]
         data = modeldict['preprocesser'].transform(data)
@@ -133,7 +133,6 @@ class client:
                 predictions = modeldict['interpreter'].inverse_transform(
                     predictions)
         return predictions
-
 
     def neural_network_query(self,
                              instruction,
@@ -164,7 +163,8 @@ class client:
                 get_value_instruction(instruction), data)
 
             if len(data) < 50:
-                raise Exception("Only datasets larger then 50 rows are supported for neural networks")
+                raise Exception(
+                    "Only datasets larger then 50 rows are supported for neural networks")
             if len(data[remove].value_counts()) <= 50:
                 callback_mode = 'max'
                 maximizer = "val_accuracy"
@@ -245,6 +245,7 @@ class client:
         return self
     # query for multilabel classification query, does not work for
     # binaryclassification, fits to feed-forward neural network
+
     def classification_query_ann(
             self,
             instruction,
@@ -287,6 +288,7 @@ class client:
         self.latest_model = 'classification_ANN'
         return self
         # query to perform k-means clustering
+
     def kmeans_clustering_query(self,
                                 preprocess=True,
                                 scatters=[],
@@ -322,10 +324,12 @@ class client:
         self.latest_model = 'k_means_clustering'
         return self
         # query to create a support vector machine
+
     def svm_query(self,
                   instruction,
                   test_size=0.2,
                   text=[],
+                  random_state=49,
                   kernel='linear',
                   preprocess=True,
                   drop=None,
@@ -344,6 +348,7 @@ class client:
         self.models['svm'] = train_svm(instruction,
                                        dataset=self.dataset,
                                        text=text,
+                                       random_state=random_state,
                                        test_size=test_size,
                                        kernel=kernel,
                                        preprocess=preprocess,
@@ -358,10 +363,13 @@ class client:
         self.latest_model = 'svm'
         return self
         # query to create a nearest neighbors model
+
     def nearest_neighbor_query(
             self,
             instruction=None,
             text=[],
+            random_state=49,
+            test_size=0.2,
             preprocess=True,
             drop=None,
             min_neighbors=3,
@@ -378,6 +386,8 @@ class client:
         self.models['nearest_neighbor'] = nearest_neighbors(
             instruction=instruction,
             text=text,
+            random_state=random_state,
+            test_size=test_size,
             dataset=self.dataset,
             preprocess=preprocess,
             drop=drop,
@@ -391,6 +401,7 @@ class client:
         self.latest_model = 'nearest_neighbor'
         return self
         # query to create a decision tree model
+
     def decision_tree_query(
             self,
             instruction,
@@ -413,23 +424,22 @@ class client:
         :return: a model and information to along with it stored in the self.models dictionary.
         '''
 
-        self.models['decision_tree'] = decision_tree(instruction=instruction,
-                                                     text=text,
-                                                     dataset=self.dataset,
-                                                     preprocess=preprocess,
-                                                     test_size=test_size,
-                                                     drop=drop,
-                                                     criterion=criterion,
-                                                     splitter=splitter,
-                                                     max_depth=max_depth,
-                                                     min_samples_split=min_samples_split,
-                                                     min_samples_leaf=min_samples_leaf,
-                                                     min_weight_fraction_leaf =min_weight_fraction_leaf,
-                                                     max_leaf_nodes=max_leaf_nodes,
-                                                     min_impurity_decrease =min_impurity_decrease,
-                                                     ccp_alpha=ccp_alpha)
-
-
+        self.models['decision_tree'] = decision_tree(
+            instruction=instruction,
+            text=text,
+            dataset=self.dataset,
+            preprocess=preprocess,
+            test_size=test_size,
+            drop=drop,
+            criterion=criterion,
+            splitter=splitter,
+            max_depth=max_depth,
+            min_samples_split=min_samples_split,
+            min_samples_leaf=min_samples_leaf,
+            min_weight_fraction_leaf=min_weight_fraction_leaf,
+            max_leaf_nodes=max_leaf_nodes,
+            min_impurity_decrease=min_impurity_decrease,
+            ccp_alpha=ccp_alpha)
 
         self.latest_model = 'decision_tree'
         return self
@@ -459,7 +469,7 @@ class client:
         :return: an updated model and history stored in the models dictionary
         '''
 
-        if model_to_tune == None:
+        if model_to_tune is None:
             model_to_tune = self.latest_model
 
         self.models = tune_helper(
@@ -485,6 +495,7 @@ class client:
 
         return self
     # query to build a convolutional neural network
+
     def convolutional_query(self,
                             instruction=None,
                             read_mode=None,
@@ -519,8 +530,8 @@ class client:
         self.latest_model = 'convolutional_NN'
         return self
         # Sentiment analysis predict wrapper
-    def classify_text(self, text):
 
+    def classify_text(self, text):
         '''
         Calls the body of the text classification neural network query which is located in the nlp_queries.py file. This can only be called
         if text_classification_query has been called previously.
@@ -568,8 +579,8 @@ class client:
         self.latest_model = 'Text Classification'
         return self
         # Document summarization predict wrapper
-    def get_summary(self, text):
 
+    def get_summary(self, text):
         '''
         Calls the body of the summarizer which is located in the nlp_queries.py file
         :param text: set of text that you want to summarize.
@@ -613,6 +624,7 @@ class client:
         self.latest_model = 'Document Summarization'
         return self
         # Image caption prediction
+
     def generate_caption(self, image):
         '''
         Calls the body of the caption generator which is located in the nlp_queries.py file.
@@ -663,7 +675,8 @@ class client:
         self.latest_model = 'Image Caption'
         return self
         # performs dimensionality reduction on your dataset
-    # based on user instruction for target variable 
+    # based on user instruction for target variable
+
     def dimensionality_reducer(self, instruction):
         '''
         Unused function for dimensionality reduction
@@ -682,7 +695,6 @@ class client:
             model = self.latest_model
         print(self.models[model]['plots'].keys())
 
-
     def model_names(self):
         '''
         Function that shows names of models associated with the client
@@ -698,7 +710,7 @@ class client:
         '''
         if model is None:
             model = self.latest_model
-        get_model_data(self,model)
+        get_model_data(self, model)
 
     # returns all operators applicable to the client's models dictionary
     def operators(self, model=None):
@@ -729,7 +741,7 @@ class client:
         if model is None:
             model = self.latest_model
         return get_losses(self, model)
-    
+
     # return client model's target
     def target(self, model=None):
         '''
@@ -738,8 +750,8 @@ class client:
         '''
         if model is None:
             model = self.latest_model
-        return get_target(self,model)
-    
+        return get_target(self, model)
+
     # return NLP model's vocabulary
     def vocab(self, model=None):
         '''
@@ -748,13 +760,12 @@ class client:
         '''
         if model is None:
             model = self.latest_model
-        return get_vocab(self,model)
-    
+        return get_vocab(self, model)
+
     # plotting for client
-    def plots(self, model = "", plot = "", save = False):
+    def plots(self, model="", plot="", save=False):
         '''
         Function that retrieves all of plots in the self.models dictionary for the key.
         :param model: default to the latest model, but essentailly the model key
         '''
         get_plots(self, model, plot, save)
-

@@ -4,7 +4,7 @@ $(function(){
         $([document.documentElement, document.body]).animate({
             scrollTop: $("#" + $(this).attr("data")).offset().top - 115
         }, 500);
-    });
+    });    
 });
 
 function color(index){ //indices start at 0
