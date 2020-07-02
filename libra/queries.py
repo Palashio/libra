@@ -78,10 +78,9 @@ class client:
         logger("Creating client object")
         self.dataset = data
         logger("Reading in dataset")
+        print("")
         self.models = {}
-        self.old_models = {}
         self.latest_model = None
-        logger("done...")
         clearLog()
 
 
