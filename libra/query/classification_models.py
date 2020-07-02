@@ -144,12 +144,14 @@ def train_svm(instruction,
               degree=3,
               gamma='scale',
               coef0=0.0,
-              max_iter=-1):
+              max_iter=-1,
+              random_state=49):
         '''
         function to train a support vector machine clustering algorithm
         :param many params: used to hyperparametrize the function.
         :return a dictionary object with all of the information for the algorithm.
         '''
+
         logger("Reading in dataset")
 
         dataReader = DataReader(dataset)
@@ -158,7 +160,8 @@ def train_svm(instruction,
         if drop is not None:
             data.drop(drop, axis=1, inplace=True)
 
-        data, y, target, full_pipeline = initial_preprocesser(data, instruction, preprocess, ca_threshold, text)
+        logger("Preprocessing data")
+        data, y, target, full_pipeline = initial_preprocesser(data, instruction, preprocess, ca_threshold, text, test_size=test_size, random_state=random_state)
         logger("->", "Target column found: {}".format(target))
 
 
@@ -174,6 +177,7 @@ def train_svm(instruction,
         # Can still be inverse transformed, just a bit of extra work
         y_vals = np.unique(pd.concat([y['train'], y['test']], axis=0))
         label_mappings = {}
+        logger("Labels being mapped to appropriate classes")
         for i in range(len(y_vals)):
             label_mappings[y_vals[i]] = i
 
@@ -196,17 +200,11 @@ def train_svm(instruction,
         return {
             'id': generate_id(),
             "model": clf,
-            "accuracy_score": accuracy_score(
-                clf.predict(X_test),
-                y_test),
+            "accuracy": {'cross_val_score': cross_val_score(clf, X_train, y_train), 'accuracy_score': accuracy_score(clf.predict(X_test), y_test)},
             "target": target,
             "preprocesser": full_pipeline,
             "interpreter": label_mappings,
-            'test_data': {'X': X_test, 'y': y_test},
-            "cross_val_score": cross_val_score(
-                clf,
-                X_train,
-                y_train)}
+            'test_data': {'X': X_test, 'y': y_test}}
         clearLog()
 
 

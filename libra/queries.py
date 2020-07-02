@@ -1,7 +1,7 @@
-from libra.query.nlp_queries import (image_caption_query,
-                                     generate_caption, classify_text,
-                                     text_classification_query, get_summary,
-                                     summarization_query)
+# from libra.query.nlp_queries import (image_caption_query,
+#                                      generate_caption, classify_text,
+#                                      text_classification_query, get_summary,
+#                                      summarization_query)
 from libra.query.classification_models import (k_means_clustering,
                                                train_svm, nearest_neighbors,
                                                decision_tree)
@@ -326,6 +326,7 @@ class client:
                   instruction,
                   test_size=0.2,
                   text=[],
+                  random_state=49,
                   kernel='linear',
                   preprocess=True,
                   drop=None,
@@ -344,6 +345,7 @@ class client:
         self.models['svm'] = train_svm(instruction,
                                        dataset=self.dataset,
                                        text=text,
+                                       random_state=random_state,
                                        test_size=test_size,
                                        kernel=kernel,
                                        preprocess=preprocess,
@@ -758,3 +760,5 @@ class client:
         '''
         get_plots(self, model, plot, save)
 
+newClient = client('/Users/palashshah/Desktop/housing.csv')
+print(newClient.svm_query('predict ocean proximity', kernel='rbf', max_iter=4).accuracy())
