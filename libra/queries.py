@@ -289,7 +289,7 @@ class client:
         self.latest_model = 'classification_ANN'
         return self
         
-        # query to perform k-means clustering
+    # query to perform k-means clustering
     def kmeans_clustering_query(self,
                                 preprocess=True,
                                 scatters=[],
@@ -325,7 +325,7 @@ class client:
         self.latest_model = 'k_means_clustering'
         return self
         
-        # query to create a support vector machine
+    # query to create a support vector machine
     def svm_query(self,
                   instruction,
                   test_size=0.2,
@@ -362,7 +362,7 @@ class client:
         self.latest_model = 'svm'
         return self
         
-        # query to create a nearest neighbors model
+    # query to create a nearest neighbors model
     def nearest_neighbor_query(
             self,
             instruction=None,
@@ -396,7 +396,7 @@ class client:
         self.latest_model = 'nearest_neighbor'
         return self
         
-        # query to create a decision tree model
+    # query to create a decision tree model
     def decision_tree_query(
             self,
             instruction,
@@ -440,7 +440,7 @@ class client:
         self.latest_model = 'decision_tree'
         return self
 
-        # tunes a specific neural network based on the input model_to_tune
+    # tunes a specific neural network based on the input model_to_tune
     def tune(self,
              model_to_tune=None,
              max_layers=10,
@@ -491,7 +491,7 @@ class client:
 
         return self
     
-        # query to build a convolutional neural network
+    # query to build a convolutional neural network
     def convolutional_query(self,
                             instruction=None,
                             read_mode=None,
@@ -526,7 +526,7 @@ class client:
         self.latest_model = 'convolutional_NN'
         return self
 
-        # Text classification prediction wrapper 
+    # text classification prediction wrapper 
     def classify_text(self, text):
 
         '''
@@ -538,7 +538,7 @@ class client:
 
         return classify_text(self=self, text=text)
 
-        # sentiment analysis query
+    # sentiment analysis query
     def text_classification_query(self, instruction, drop=None,
                                   preprocess=True,
                                   test_size=0.2,
@@ -576,7 +576,7 @@ class client:
         self.latest_model = 'Text Classification'
         return self
       
-        # Document summarization predict wrapper
+    # document summarization predict wrapper
     def get_summary(self, text):
 
         '''
@@ -586,7 +586,7 @@ class client:
         '''
         return get_summary(self=self, text=text)
 
-        # text summarization query
+    # text summarization query
     def summarization_query(self, instruction, preprocess=True,
                             drop=None,
                             epochs=10,
@@ -622,7 +622,7 @@ class client:
         self.latest_model = 'Document Summarization'
         return self
         
-        # Image caption generator wrapper
+    # image caption generator wrapper
     def generate_caption(self, image):
         '''
         Calls the body of the caption generator which is located in the nlp_queries.py file.
@@ -632,7 +632,7 @@ class client:
         caption = generate_caption(self=self, image=image)
         return ' '.join(caption[:len(caption) - 1])
 
-        # Image caption prediction query
+    # image caption prediction query
     def image_caption_query(self, instruction,
                             drop=None,
                             epochs=10,
@@ -766,8 +766,8 @@ class client:
         '''
         Function that retrieves all of plots in the self.models dictionary for the key.
         :param model: default to the latest model, but essentially the model key
-        :param plot: 
-        :param save: option to save plots after client session is done (default is 
+        :param plot: plot specified during the client session to be procured
+        :param save: option to save plots after client session is done (default is false, or
         '''
         get_plots(self, model, plot, save)
 
