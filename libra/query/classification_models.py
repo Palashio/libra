@@ -200,7 +200,7 @@ def train_svm(instruction,
         return {
             'id': generate_id(),
             "model": clf,
-            "accuracy": {'cross_val_score': cross_val_score(clf, X_train, y_train), 'accuracy_score': accuracy_score(clf.predict(X_test), y_test)},
+            "accuracy": {'cross_val_score': cross_val_score(clf, X_train, y_train), 'accuracy_score': score},
             "target": target,
             "preprocesser": full_pipeline,
             "interpreter": label_mappings,
@@ -217,6 +217,8 @@ def nearest_neighbors(instruction=None,
                       max_neighbors=10,
                       leaf_size=30,
                       p=2,
+                      test_size=0.2,
+                      random_state=49,
                       algorithm='auto',
                       text=[]):
         '''
@@ -231,8 +233,9 @@ def nearest_neighbors(instruction=None,
         data = dataReader.data_generator()
         if drop is not None:
             data.drop(drop, axis=1, inplace=True)
+        logger("Preprocessing data")
         data, y, remove, full_pipeline = initial_preprocesser(
-            data, instruction, preprocess, ca_threshold, text)
+            data, instruction, preprocess, ca_threshold, text, test_size=test_size, random_state=random_state)
         logger("->", "Target column found: {}".format(remove))
         X_train = data['train']
         y_train = y['train']
@@ -247,28 +250,35 @@ def nearest_neighbors(instruction=None,
             label_mappings[y_vals[i]] = i
         y_train = y_train.apply(lambda x: label_mappings[x]).values
         y_test = y_test.apply(lambda x: label_mappings[x]).values
+        logger("Labels being mapped to appropriate classes")
         models = []
         scores = []
-        logger("Fitting Nearest Neighbor")
+        logger("Fitting nearest neighbors model")
         logger("Identifying optimal number of neighbors")
         # Tries all neighbor possibilities, based on either defaults or user
         # specified values
+        num_neighbors = []
         for x in range(min_neighbors, max_neighbors):
             knn = KNeighborsClassifier(n_neighbors=x, leaf_size=leaf_size, p=p, algorithm=algorithm)
             knn.fit(X_train, y_train)
             models.append(knn)
             scores.append(accuracy_score(knn.predict(X_test), y_test))
+            num_neighbors.append(x)
+
+        logger("->", "Optimal number of neighbors found: {}".format(num_neighbors[scores.index(max(scores))]))
+        logger("->", "Accuracy found on testing set: {}".format(scores[scores.index(max(scores))]))
         logger("Stored model under 'nearest_neighbors' key")
         knn = models[scores.index(min(scores))]
+
         return {
             'id': generate_id(),
-            "model": knn, "accuracy_score": scores.index(
-                min(scores)),
+            "model": knn,
+            "accuracy": {'accuracy_score' : scores[scores.index(max(scores))], 'cross_val_score' : cross_val_score(
+                knn, X_train, y_train, cv=3)},
             "preprocesser": full_pipeline,
             "interpreter": label_mappings,
             'test_data': {'X': X_test, 'y': y_test},
-            "target": remove, "cross_val_score": cross_val_score(
-                knn, X_train, y_train, cv=3)}
+            "target": remove}
         clearLog()
 
 def decision_tree(instruction,

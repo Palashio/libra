@@ -364,6 +364,8 @@ class client:
             self,
             instruction=None,
             text=[],
+            random_state=49,
+            test_size=0.2,
             preprocess=True,
             drop=None,
             min_neighbors=3,
@@ -380,6 +382,8 @@ class client:
         self.models['nearest_neighbor'] = nearest_neighbors(
             instruction=instruction,
             text=text,
+            random_state=random_state,
+            test_size=test_size,
             dataset=self.dataset,
             preprocess=preprocess,
             drop=drop,
@@ -759,6 +763,3 @@ class client:
         :param model: default to the latest model, but essentailly the model key
         '''
         get_plots(self, model, plot, save)
-
-newClient = client('/Users/palashshah/Desktop/housing.csv')
-print(newClient.svm_query('predict ocean proximity', kernel='rbf', max_iter=4).accuracy())
