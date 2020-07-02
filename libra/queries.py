@@ -19,7 +19,7 @@ from pandas.core.common import SettingWithCopyWarning
 import warnings
 import os
 
-# supressing warnings for cleaner dialogue box
+# suppressing warnings for cleaner dialogue box
 warnings.simplefilter(action='error', category=FutureWarning)
 warnings.simplefilter(action="ignore", category=SettingWithCopyWarning)
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
@@ -85,8 +85,8 @@ class client:
         clearLog()
 
 
-    # returns models with a specific string - currently deprecated, should not
-    # be used.
+    # param model_requested: string representation of the name of the model user seeks to retrieve
+    # returns models with a specific string - currently deprecated, should not be used.
     def get_models(self, model_requested):
         '''
         returns models with a specific string - currently deprecated, should not be used.
@@ -134,7 +134,8 @@ class client:
                     predictions)
         return predictions
 
-
+    # determines type of solution based of type of problem posed by query using a feed-forward neural network
+    # instruction should be the value of a column
     def neural_network_query(self,
                              instruction,
                              callback=False,
@@ -243,6 +244,7 @@ class client:
 
         self.latest_model = 'regression_ANN'
         return self
+    
     # query for multilabel classification query, does not work for
     # binaryclassification, fits to feed-forward neural network
     def classification_query_ann(
@@ -286,6 +288,7 @@ class client:
 
         self.latest_model = 'classification_ANN'
         return self
+        
         # query to perform k-means clustering
     def kmeans_clustering_query(self,
                                 preprocess=True,
@@ -321,6 +324,7 @@ class client:
 
         self.latest_model = 'k_means_clustering'
         return self
+        
         # query to create a support vector machine
     def svm_query(self,
                   instruction,
@@ -357,6 +361,7 @@ class client:
 
         self.latest_model = 'svm'
         return self
+        
         # query to create a nearest neighbors model
     def nearest_neighbor_query(
             self,
@@ -390,6 +395,7 @@ class client:
 
         self.latest_model = 'nearest_neighbor'
         return self
+        
         # query to create a decision tree model
     def decision_tree_query(
             self,
@@ -484,7 +490,8 @@ class client:
         )
 
         return self
-    # query to build a convolutional neural network
+    
+        # query to build a convolutional neural network
     def convolutional_query(self,
                             instruction=None,
                             read_mode=None,
@@ -502,7 +509,7 @@ class client:
         :return: an updated model and history stored in the models dictionary
         '''
 
-        # storing values the model dictionary
+        # storing values in the model dictionary
         self.models["convolutional_NN"] = convolutional(
             instruction=instruction,
             read_mode=read_mode,
@@ -518,7 +525,8 @@ class client:
 
         self.latest_model = 'convolutional_NN'
         return self
-        # Sentiment analysis predict wrapper
+
+        # Text classification prediction wrapper 
     def classify_text(self, text):
 
         '''
@@ -530,7 +538,7 @@ class client:
 
         return classify_text(self=self, text=text)
 
-    # sentiment analysis query
+        # sentiment analysis query
     def text_classification_query(self, instruction, drop=None,
                                   preprocess=True,
                                   test_size=0.2,
@@ -567,6 +575,7 @@ class client:
             save_path=save_path)
         self.latest_model = 'Text Classification'
         return self
+      
         # Document summarization predict wrapper
     def get_summary(self, text):
 
@@ -577,7 +586,7 @@ class client:
         '''
         return get_summary(self=self, text=text)
 
-    # text summarization query
+        # text summarization query
     def summarization_query(self, instruction, preprocess=True,
                             drop=None,
                             epochs=10,
@@ -612,7 +621,8 @@ class client:
 
         self.latest_model = 'Document Summarization'
         return self
-        # Image caption prediction
+        
+        # Image caption generator wrapper
     def generate_caption(self, image):
         '''
         Calls the body of the caption generator which is located in the nlp_queries.py file.
@@ -622,7 +632,7 @@ class client:
         caption = generate_caption(self=self, image=image)
         return ' '.join(caption[:len(caption) - 1])
 
-    # Image Caption query
+        # Image caption prediction query
     def image_caption_query(self, instruction,
                             drop=None,
                             epochs=10,
@@ -662,7 +672,8 @@ class client:
             save_path_encoder=save_path_encoder)
         self.latest_model = 'Image Caption'
         return self
-        # performs dimensionality reduction on your dataset
+    
+    # performs dimensionality reduction on your dataset
     # based on user instruction for target variable 
     def dimensionality_reducer(self, instruction):
         '''
@@ -682,7 +693,7 @@ class client:
             model = self.latest_model
         print(self.models[model]['plots'].keys())
 
-
+    # shows names of models in model dictionary
     def model_names(self):
         '''
         Function that shows names of models associated with the client
@@ -694,7 +705,7 @@ class client:
     def model_data(self, model=None):
         '''
         Function that retrieves the model_data; all the information in self.models for that model
-        :param model: default to the latest model, but essentailly the model key
+        :param model: default to the latest model, but essentially the model key
         '''
         if model is None:
             model = self.latest_model
@@ -704,7 +715,7 @@ class client:
     def operators(self, model=None):
         '''
         Function that retrieves all of the operators; pipelines that were used to model the dataset
-        :param model: default to the latest model, but essentailly the model key
+        :param model: default to the latest model, but essentially the model key
         '''
         if model is None:
             model = self.latest_model
@@ -714,7 +725,7 @@ class client:
     def accuracy(self, model=None):
         '''
         Function that retrieves all of the accuracies in the self.models dictionary for the key.
-        :param model: default to the latest model, but essentailly the model key
+        :param model: default to the latest model, but essentially the model key
         '''
         if model is None:
             model = self.latest_model
@@ -724,7 +735,7 @@ class client:
     def losses(self, model=None):
         '''
         Function that retrieves all of the losses in the self.models dictionary for the key.
-        :param model: default to the latest model, but essentailly the model key
+        :param model: default to the latest model, but essentially the model key
         '''
         if model is None:
             model = self.latest_model
@@ -744,7 +755,7 @@ class client:
     def vocab(self, model=None):
         '''
         Function that retrieves the NLP models vocabulary.
-        :param model: default to the latest model, but essentailly the model key
+        :param model: default to the latest model, but essentially the model key
         '''
         if model is None:
             model = self.latest_model
@@ -754,7 +765,9 @@ class client:
     def plots(self, model = "", plot = "", save = False):
         '''
         Function that retrieves all of plots in the self.models dictionary for the key.
-        :param model: default to the latest model, but essentailly the model key
+        :param model: default to the latest model, but essentially the model key
+        :param plot: 
+        :param save: option to save plots after client session is done (default is 
         '''
         get_plots(self, model, plot, save)
 
