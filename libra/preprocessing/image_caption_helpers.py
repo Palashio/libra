@@ -84,10 +84,12 @@ class RNN_Decoder(tf.keras.Model):
         # defining attention as a separate model
         context_vector, attention_weights = self.attention(features, hidden)
 
-        # x shape after passing through embedding == (batch_size, 1, embedding_dim)
+        # x shape after passing through embedding == (batch_size, 1,
+        # embedding_dim)
         x = self.embedding(x)
 
-        # x shape after concatenation == (batch_size, 1, embedding_dim + hidden_size)
+        # x shape after concatenation == (batch_size, 1, embedding_dim +
+        # hidden_size)
         x = tf.concat([tf.expand_dims(context_vector, 1), x], axis=-1)
 
         # passing the concatenated vector to the GRU
@@ -109,16 +111,16 @@ class RNN_Decoder(tf.keras.Model):
 
 
 def generate_caption_helper(image,
-                            decoder, 
-                            encoder, 
-                            tokenizer, 
-                            image_features_extract_model, 
+                            decoder,
+                            encoder,
+                            tokenizer,
+                            image_features_extract_model,
                             max_length=500):
     hidden = decoder.reset_state(batch_size=1)
 
     temp_input = tf.expand_dims(load_image(image)[0], 0)
     img_tensor_val = image_features_extract_model(temp_input)
-    img_tensor_val = tf.reshape(img_tensor_val, (img_tensor_val.shape[0], -1, 
+    img_tensor_val = tf.reshape(img_tensor_val, (img_tensor_val.shape[0], -1,
                                                  img_tensor_val.shape[3]))
 
     features = encoder(img_tensor_val)
@@ -127,7 +129,8 @@ def generate_caption_helper(image,
     result = []
 
     for i in range(max_length):
-        predictions, hidden, attention_weights = decoder(dec_input, features, hidden)
+        predictions, hidden, attention_weights = decoder(
+            dec_input, features, hidden)
 
         predicted_id = tf.random.categorical(predictions, 1)[0][0].numpy()
         result.append(tokenizer.index_word[predicted_id])

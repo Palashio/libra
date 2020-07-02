@@ -94,9 +94,12 @@ def text_classification_query(self, instruction, drop=None,
                         epochs=epochs, callbacks=[es], verbose=0)
     # Print Epoch-History Table
     get_standard_training_output_keras(epochs, history)
-    logger("Final Training Loss:", history.history["loss"][len(history.history["loss"])-1])
-    logger("Final Validation Loss:", history.history["val_loss"][len(history.history["val_loss"]) - 1])
-    logger("Final Accuracy:", history.history["val_accuracy"][len(history.history["val_accuracy"]) - 1])
+    logger("Final Training Loss:",
+           history.history["loss"][len(history.history["loss"]) - 1])
+    logger("Final Validation Loss:",
+           history.history["val_loss"][len(history.history["val_loss"]) - 1])
+    logger("Final Accuracy:", history.history["val_accuracy"][len(
+        history.history["val_accuracy"]) - 1])
 
     if generate_plots:
         # generates appropriate classification plots by feeding all
@@ -109,18 +112,19 @@ def text_classification_query(self, instruction, drop=None,
 
     logger("Storing information in client object under key 'Text Classification' ...")
     # storing values the model dictionary
-    self.models["Text Classification"] = {"model": model,
-                                          "classes": classes,
-                                          "plots": plots,
-                                          "target": Y,
-                                          "vocabulary": vocab,
-                                          "maxTextLength": maxTextLength,
-                                          'losses': {
-                                              'training_loss': history.history['loss'],
-                                              'val_loss': history.history['val_loss']},
-                                          'accuracy': {
-                                              'training_accuracy': history.history['accuracy'],
-                                              'validation_accuracy': history.history['val_accuracy']}}
+    self.models["Text Classification"] = {
+        "model": model,
+        "classes": classes,
+        "plots": plots,
+        "target": Y,
+        "vocabulary": vocab,
+        "maxTextLength": maxTextLength,
+        'losses': {
+            'training_loss': history.history['loss'],
+            'val_loss': history.history['val_loss']},
+        'accuracy': {
+            'training_accuracy': history.history['accuracy'],
+            'validation_accuracy': history.history['val_accuracy']}}
     return self.models["Text Classification"]
 
 
@@ -136,7 +140,13 @@ def get_summary(self, text):
         'shuffle': True,
         'num_workers': 0
     }
-    loader = DataLoader(CustomDataset(df, tokenizer, modelInfo["maxTextLength"], modelInfo["maxSumLength"]), **params)
+    loader = DataLoader(
+        CustomDataset(
+            df,
+            tokenizer,
+            modelInfo["maxTextLength"],
+            modelInfo["maxSumLength"]),
+        **params)
     predictions, truth = inference(tokenizer, model, "cpu", loader)
     return predictions
 
@@ -183,7 +193,11 @@ def summarization_query(self, instruction, preprocess=True,
 
     training_set = CustomDataset(
         train_dataset, tokenizer, max_text_length, max_summary_length)
-    val_set = CustomDataset(val_dataset, tokenizer, max_text_length, max_summary_length)
+    val_set = CustomDataset(
+        val_dataset,
+        tokenizer,
+        max_text_length,
+        max_summary_length)
     train_params = {
         'batch_size': batch_size,
         'shuffle': True,
@@ -209,11 +223,13 @@ def summarization_query(self, instruction, preprocess=True,
     total_loss_train = []
     total_loss_val = []
     for epoch in range(epochs):
-        loss_train, loss_val = train(epoch, tokenizer, model, device, training_loader, val_loader, optimizer)
+        loss_train, loss_val = train(
+            epoch, tokenizer, model, device, training_loader, val_loader, optimizer)
         total_loss_train.append(loss_train)
         total_loss_val.append(loss_val)
     # Print Epoch-Loss Table
-    get_standard_training_output_generic(epochs, total_loss_train, total_loss_val)
+    get_standard_training_output_generic(
+        epochs, total_loss_train, total_loss_val)
     logger("Final Training Loss: ", loss_train)
     logger("Final Validation Loss: ", loss_val)
 
@@ -247,7 +263,12 @@ def generate_caption(self, image):
     encoder = modelInfo['encoder']
     tokenizer = modelInfo['tokenizer']
     image_features_extract_model = modelInfo['feature_extraction']
-    return generate_caption_helper(image, decoder, encoder, tokenizer, image_features_extract_model)
+    return generate_caption_helper(
+        image,
+        decoder,
+        encoder,
+        tokenizer,
+        image_features_extract_model)
 
 
 # Image Caption Generation query
@@ -299,41 +320,40 @@ def image_caption_query(self, instruction,
 
     image_features_extract_model = tf.keras.Model(new_input, hidden_layer)
 
-    image_dataset = tf.data.Dataset.from_tensor_slices(sorted(set(img_name_vector)))
+    image_dataset = tf.data.Dataset.from_tensor_slices(
+        sorted(set(img_name_vector)))
     image_dataset = image_dataset.map(
         load_image, num_parallel_calls=tf.data.experimental.AUTOTUNE).batch(16)
 
     for img, path in image_dataset:
         batch_features = image_features_extract_model(img)
-        batch_features = tf.reshape(batch_features,
-                                    (batch_features.shape[0], -1, batch_features.shape[3]))
+        batch_features = tf.reshape(
+            batch_features, (batch_features.shape[0], -1, batch_features.shape[3]))
 
         for bf, p in zip(batch_features, path):
             path_of_feature = p.numpy().decode("utf-8")
             np.save(path_of_feature, bf.numpy())
 
-    tokenizer = tf.keras.preprocessing.text.Tokenizer(num_words=top_k,
-                                                      oov_token="<unk>",
-                                                      filters='!"#$%&()*+.,-/:;=?@[\]^_`{|}~ ')
+    tokenizer = tf.keras.preprocessing.text.Tokenizer(
+        num_words=top_k, oov_token="<unk>", filters='!"#$%&()*+.,-/:;=?@[\]^_`{|}~ ')
     tokenizer.fit_on_texts(train_captions)
     tokenizer.word_index['<pad>'] = 0
     tokenizer.index_word[0] = '<pad>'
     train_seqs = tokenizer.texts_to_sequences(train_captions)
-    cap_vector = tf.keras.preprocessing.sequence.pad_sequences(train_seqs, padding='post')
+    cap_vector = tf.keras.preprocessing.sequence.pad_sequences(
+        train_seqs, padding='post')
 
     vocab_size = top_k + 1
     num_steps = len(img_name_vector) // batch_size
 
-    img_name_train, img_name_val, cap_train, cap_val = train_test_split(img_name_vector,
-                                                                        cap_vector,
-                                                                        test_size=0.2,
-                                                                        random_state=0)
+    img_name_train, img_name_val, cap_train, cap_val = train_test_split(
+        img_name_vector, cap_vector, test_size=0.2, random_state=0)
 
     dataset = tf.data.Dataset.from_tensor_slices((img_name_train, cap_train))
 
     dataset = dataset.map(lambda item1, item2: tf.numpy_function(
         map_func, [item1, item2], [tf.float32, tf.int32]),
-                          num_parallel_calls=tf.data.experimental.AUTOTUNE)
+        num_parallel_calls=tf.data.experimental.AUTOTUNE)
 
     # Shuffle and batch
     dataset = dataset.shuffle(buffer_size).batch(batch_size)
@@ -343,11 +363,12 @@ def image_caption_query(self, instruction,
 
     dataset_val = dataset_val.map(lambda item1, item2: tf.numpy_function(
         map_func, [item1, item2], [tf.float32, tf.int32]),
-                                  num_parallel_calls=tf.data.experimental.AUTOTUNE)
+        num_parallel_calls=tf.data.experimental.AUTOTUNE)
 
     # Shuffle and batch
     dataset_val = dataset_val.shuffle(buffer_size).batch(batch_size)
-    dataset_val = dataset_val.prefetch(buffer_size=tf.data.experimental.AUTOTUNE)
+    dataset_val = dataset_val.prefetch(
+        buffer_size=tf.data.experimental.AUTOTUNE)
 
     encoder = CNN_Encoder(embedding_dim)
     decoder = RNN_Decoder(embedding_dim, units, vocab_size)
@@ -373,7 +394,8 @@ def image_caption_query(self, instruction,
         # because the captions are not related from image to image
         hidden = decoder.reset_state(batch_size=target.shape[0])
 
-        dec_input = tf.expand_dims([tokenizer.word_index['<start>']] * target.shape[0], 1)
+        dec_input = tf.expand_dims(
+            [tokenizer.word_index['<start>']] * target.shape[0], 1)
 
         with tf.GradientTape() as tape:
             features = encoder(img_tensor)
@@ -405,7 +427,8 @@ def image_caption_query(self, instruction,
         # because the captions are not related from image to image
         hidden = decoder.reset_state(batch_size=target.shape[0])
 
-        dec_input = tf.expand_dims([tokenizer.word_index['<start>']] * target.shape[0], 1)
+        dec_input = tf.expand_dims(
+            [tokenizer.word_index['<start>']] * target.shape[0], 1)
 
         with tf.GradientTape() as tape:
             features = encoder(img_tensor)
@@ -442,7 +465,8 @@ def image_caption_query(self, instruction,
 
         loss_plot_val.append(total_loss_val.numpy() / num_steps)
     # Print Epoch-Loss Table
-    get_standard_training_output_generic(epochs, loss_plot_train, loss_plot_val)
+    get_standard_training_output_generic(
+        epochs, loss_plot_train, loss_plot_val)
 
     logger("Storing information in client object under key 'Image Caption' ...")
 
@@ -457,9 +481,8 @@ def image_caption_query(self, instruction,
     if generate_plots:
         plots.update({"loss": plot_loss(loss_plot_train, loss_plot_val)})
 
-    logger("Final Training Loss: ", str(total_loss.numpy()/ num_steps))
-    logger("Final Validation Loss: ", str(total_loss_val.numpy()/ num_steps))
-
+    logger("Final Training Loss: ", str(total_loss.numpy() / num_steps))
+    logger("Final Validation Loss: ", str(total_loss_val.numpy() / num_steps))
 
     if save_model_decoder:
         logger("Saving decoder...")
@@ -481,4 +504,3 @@ def image_caption_query(self, instruction,
         }
     }
     return self.models["Image Caption"]
-

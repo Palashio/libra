@@ -1,3 +1,5 @@
+from colorama import Fore, Style
+from tensorflow.keras.callbacks import EarlyStopping
 import os
 from libra.preprocessing.image_preprocesser import (setwise_preprocessing,
                                                     csv_preprocessing,
@@ -19,8 +21,6 @@ from sklearn.preprocessing import StandardScaler
 import numpy as np
 
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
-from tensorflow.keras.callbacks import EarlyStopping
-from colorama import Fore, Style
 
 counter = 0
 number = 0
@@ -58,7 +58,8 @@ def logger(instruction, found=""):
         print((" " * 2 * counter) + str(instruction) + str(found))
     elif instruction == "->":
         counter = counter - 1
-        print(Fore.BLUE + (" " * 2 * counter) + str(instruction) + str(found) + (Style.RESET_ALL))
+        print(Fore.BLUE + (" " * 2 * counter) +
+              str(instruction) + str(found) + (Style.RESET_ALL))
     else:
         print((" " * 2 * counter) + "|- " + str(instruction) + str(found))
         if instruction == "done...":
@@ -98,8 +99,8 @@ def regression_ann(
 
     if drop is not None:
         data.drop(drop, axis=1, inplace=True)
-    data, y, target, full_pipeline = initial_preprocesser(data, instruction, preprocess, ca_threshold, text,
-                                                          test_size=test_size, random_state=random_state)
+    data, y, target, full_pipeline = initial_preprocesser(
+        data, instruction, preprocess, ca_threshold, text, test_size=test_size, random_state=random_state)
     logger("->", "Target column found: {}".format(target))
 
     X_train = data['train']
@@ -321,8 +322,14 @@ def classification_ann(instruction,
     logger("Training initial model...")
 
     history = model.fit(
-        X_train, y_train, callbacks=callback_value, epochs=epochs, validation_data=(
-            X_test, y_test), verbose=0)
+        X_train,
+        y_train,
+        callbacks=callback_value,
+        epochs=epochs,
+        validation_data=(
+            X_test,
+            y_test),
+        verbose=0)
 
     model_data.append(model)
     models.append(history)
@@ -350,7 +357,8 @@ def classification_ann(instruction,
     # decreasing
 
     logger("Testing number of layers...")
-    col_name = [["Current number of layers", "| Training Accuracy", "| Test Accuracy"]]
+    col_name = [["Current number of layers",
+                 "| Training Accuracy", "| Test Accuracy"]]
     col_width = max(len(word) for row in col_name for word in row) + 2
 
     for row in col_name:
@@ -401,7 +409,7 @@ def classification_ann(instruction,
     logger('->', "Training Accuracy: " + str(final_hist.history['accuracy']
                                              [len(final_hist.history['val_accuracy']) - 1]))
     logger('->', "Test Accuracy: " + str(final_hist.history['val_accuracy'][
-                                             len(final_hist.history['val_accuracy']) - 1]))
+        len(final_hist.history['val_accuracy']) - 1]))
 
     # genreates appropriate classification plots by feeding all information
     plots = {}
@@ -461,7 +469,8 @@ def convolutional(instruction=None,
         testing_path = "/proc_testing_set"
 
         if read_mode == "setwise":
-            processInfo = setwise_preprocessing(data_path, new_folders, height, width)
+            processInfo = setwise_preprocessing(
+                data_path, new_folders, height, width)
             if not new_folders:
                 training_path = "/training_set"
                 testing_path = "/testing_set"
@@ -482,7 +491,8 @@ def convolutional(instruction=None,
         elif read_mode == "classwise":
             if training_ratio <= 0 or training_ratio >= 1:
                 raise BaseException(f"Test ratio must be between 0 and 1.")
-            processInfo = classwise_preprocessing(data_path, training_ratio, height, width)
+            processInfo = classwise_preprocessing(
+                data_path, training_ratio, height, width)
 
     else:
         training_path = "/training_set"
@@ -540,15 +550,16 @@ def convolutional(instruction=None,
                                            batch_size=(32 if processInfo["test_size"] >= 32 else 1),
                                            class_mode=loss_func[:loss_func.find("_")])
 
-    if epochs < 0: raise BaseException("Number of epochs has to be greater than 0.")
+    if epochs < 0:
+        raise BaseException("Number of epochs has to be greater than 0.")
 
     history = model.fit(
         X_train,
         steps_per_epoch=X_train.n //
-                        X_train.batch_size,
+        X_train.batch_size,
         validation_data=X_test,
         validation_steps=X_test.n //
-                         X_test.batch_size,
+        X_test.batch_size,
         epochs=epochs)
     # storing values the model dictionary
 

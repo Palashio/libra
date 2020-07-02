@@ -41,7 +41,8 @@ def logger(instruction, found=""):
         print((" " * 2 * counter) + str(instruction) + str(found))
     elif instruction == "->":
         counter = counter - 1
-        print(Fore.BLUE + (" " * 2 * counter) + str(instruction) + str(found) + (Style.RESET_ALL))
+        print(Fore.BLUE + (" " * 2 * counter) +
+              str(instruction) + str(found) + (Style.RESET_ALL))
     else:
         print((" " * 2 * counter) + "|- " + str(instruction) + str(found))
         if instruction == "done...":
@@ -89,8 +90,12 @@ def k_means_clustering(dataset=None,
     # baseline
     i = base_clusters
     logger("Creating unsupervised clustering task")
-    kmeans = KMeans(n_clusters=i, random_state=random_state, verbose=verbose, n_init=n_init, max_iter=max_iter).fit(
-        data)
+    kmeans = KMeans(
+        n_clusters=i,
+        random_state=random_state,
+        verbose=verbose,
+        n_init=n_init,
+        max_iter=max_iter).fit(data)
     modelStorage.append(kmeans)
 
     # stores SSE values in an array for later comparison
@@ -101,9 +106,13 @@ def k_means_clustering(dataset=None,
     # continues to increase cluster size until SSE values don't decrease by
     # 1000 - this value was decided based on precedence
     while (all(earlier >= later for earlier,
-                                    later in zip(inertiaStor, inertiaStor[1:]))):
-        kmeans = KMeans(n_clusters=i, random_state=random_state, verbose=verbose, n_init=n_init, max_iter=max_iter).fit(
-            data)
+               later in zip(inertiaStor, inertiaStor[1:]))):
+        kmeans = KMeans(
+            n_clusters=i,
+            random_state=random_state,
+            verbose=verbose,
+            n_init=n_init,
+            max_iter=max_iter).fit(data)
         modelStorage.append(kmeans)
         inertiaStor.append(kmeans.inertia_)
         # minimize inertia up to 10000
@@ -116,13 +125,14 @@ def k_means_clustering(dataset=None,
             break
     # generates the clustering plots approiately
     logger("->", "Optimal number of clusters found: {}".format(i))
-    logger("->", "Final inertia of {}".format(inertiaStor[len(inertiaStor) - 1]))
+    logger(
+        "->", "Final inertia of {}".format(inertiaStor[len(inertiaStor) - 1]))
 
     plots = {}
     if generate_plots:
         logger("Generating plots and storing in model")
-        init_plots, plot_names, elbow = generate_clustering_plots(
-            modelStorage[len(modelStorage) - 1], dataPandas, data, scatters, inertiaStor, base_clusters)
+        init_plots, plot_names, elbow = generate_clustering_plots(modelStorage[len(
+            modelStorage) - 1], dataPandas, data, scatters, inertiaStor, base_clusters)
         for x in range(len(plot_names)):
             plots[str(plot_names[x])] = init_plots[x]
         plots['elbow'] = elbow
@@ -166,8 +176,8 @@ def train_svm(instruction,
         data.drop(drop, axis=1, inplace=True)
 
     logger("Preprocessing data")
-    data, y, target, full_pipeline = initial_preprocesser(data, instruction, preprocess, ca_threshold, text,
-                                                          test_size=test_size, random_state=random_state)
+    data, y, target, full_pipeline = initial_preprocesser(
+        data, instruction, preprocess, ca_threshold, text, test_size=test_size, random_state=random_state)
     logger("->", "Target column found: {}".format(target))
 
     X_train = data['train']
@@ -191,7 +201,12 @@ def train_svm(instruction,
 
     # Fitting to SVM and storing in the model dictionary
     logger("Fitting Support Vector Machine")
-    clf = svm.SVC(kernel=kernel, degree=degree, gamma=gamma, coef0=coef0, max_iter=max_iter)
+    clf = svm.SVC(
+        kernel=kernel,
+        degree=degree,
+        gamma=gamma,
+        coef0=coef0,
+        max_iter=max_iter)
     clf.fit(X_train, y_train)
 
     score = accuracy_score(
@@ -204,11 +219,18 @@ def train_svm(instruction,
     return {
         'id': generate_id(),
         "model": clf,
-        "accuracy": {'cross_val_score': cross_val_score(clf, X_train, y_train), 'accuracy_score': score},
+        "accuracy": {
+            'cross_val_score': cross_val_score(
+                clf,
+                X_train,
+                y_train),
+            'accuracy_score': score},
         "target": target,
         "preprocesser": full_pipeline,
         "interpreter": label_mappings,
-        'test_data': {'X': X_test, 'y': y_test}}
+        'test_data': {
+            'X': X_test,
+            'y': y_test}}
     clearLog()
 
 
@@ -263,26 +285,35 @@ def nearest_neighbors(instruction=None,
     # specified values
     num_neighbors = []
     for x in range(min_neighbors, max_neighbors):
-        knn = KNeighborsClassifier(n_neighbors=x, leaf_size=leaf_size, p=p, algorithm=algorithm)
+        knn = KNeighborsClassifier(
+            n_neighbors=x,
+            leaf_size=leaf_size,
+            p=p,
+            algorithm=algorithm)
         knn.fit(X_train, y_train)
         models.append(knn)
         scores.append(accuracy_score(knn.predict(X_test), y_test))
         num_neighbors.append(x)
 
-    logger("->", "Optimal number of neighbors found: {}".format(num_neighbors[scores.index(max(scores))]))
-    logger("->", "Accuracy found on testing set: {}".format(scores[scores.index(max(scores))]))
+    logger("->", "Optimal number of neighbors found: {}".format(
+        num_neighbors[scores.index(max(scores))]))
+    logger(
+        "->", "Accuracy found on testing set: {}".format(scores[scores.index(max(scores))]))
     logger("Stored model under 'nearest_neighbors' key")
     knn = models[scores.index(min(scores))]
 
-    return {
-        'id': generate_id(),
-        "model": knn,
-        "accuracy": {'accuracy_score': scores[scores.index(max(scores))], 'cross_val_score': cross_val_score(
-            knn, X_train, y_train, cv=3)},
-        "preprocesser": full_pipeline,
-        "interpreter": label_mappings,
-        'test_data': {'X': X_test, 'y': y_test},
-        "target": remove}
+    return {'id': generate_id(),
+            "model": knn,
+            "accuracy": {'accuracy_score': scores[scores.index(max(scores))],
+                         'cross_val_score': cross_val_score(knn,
+                                                            X_train,
+                                                            y_train,
+                                                            cv=3)},
+            "preprocesser": full_pipeline,
+            "interpreter": label_mappings,
+            'test_data': {'X': X_test,
+                          'y': y_test},
+            "target": remove}
     clearLog()
 
 
@@ -343,10 +374,16 @@ def decision_tree(instruction,
     # fitting and storing
     logger("Fitting Decision Tree")
 
-    clf = tree.DecisionTreeClassifier(criterion=criterion, splitter=splitter, max_depth=max_depth,
-                                      min_samples_split=min_samples_split, min_samples_leaf=min_samples_leaf,
-                                      min_weight_fraction_leaf=min_weight_fraction_leaf, max_leaf_nodes=max_leaf_nodes,
-                                      min_impurity_decrease=min_impurity_decrease, ccp_alpha=ccp_alpha)
+    clf = tree.DecisionTreeClassifier(
+        criterion=criterion,
+        splitter=splitter,
+        max_depth=max_depth,
+        min_samples_split=min_samples_split,
+        min_samples_leaf=min_samples_leaf,
+        min_weight_fraction_leaf=min_weight_fraction_leaf,
+        max_leaf_nodes=max_leaf_nodes,
+        min_impurity_decrease=min_impurity_decrease,
+        ccp_alpha=ccp_alpha)
     clf = clf.fit(X_train, y_train)
 
     score = accuracy_score(

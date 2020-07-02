@@ -4,8 +4,14 @@ import tensorflow as tf
 from tensorflow.python.client import device_lib
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
+
 class DataReader():
-    def __init__(self, filepath, trim=False, trim_format='random', trim_ratio=0.20):
+    def __init__(
+            self,
+            filepath,
+            trim=False,
+            trim_format='random',
+            trim_ratio=0.20):
         '''
         Constructor for the DataReader class.
 
@@ -73,7 +79,7 @@ class DataReader():
 
         if self.is_gpu_available() == False:
             self.trim = True
-        if self.trim == True:
+        if self.trim:
             if self.trim_format == 'random':
                 df = df.sample(frac=(1.0 - self.trim_ratio))
             # elif self.trim_format == 'stratify':
