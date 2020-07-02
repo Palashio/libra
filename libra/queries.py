@@ -75,9 +75,9 @@ class client:
         :param data: represents the dataset that you're trying to read
         :return: a completely initialized client class
         '''
-        logger("creating object...")
+        logger("Creating client object")
         self.dataset = data
-        logger("Loading dataset...")
+        logger("Reading in dataset")
         self.models = {}
         self.old_models = {}
         self.latest_model = None
@@ -137,6 +137,7 @@ class client:
 
     def neural_network_query(self,
                              instruction,
+                             callback=False,
                              text=[],
                              ca_threshold=None,
                              drop=None,
@@ -170,6 +171,7 @@ class client:
                 self.classification_query_ann(
                     instruction,
                     text=text,
+                    callback=callback,
                     ca_threshold=ca_threshold,
                     preprocess=preprocess,
                     test_size=test_size,
@@ -183,6 +185,7 @@ class client:
             else:
                 self.regression_query_ann(
                     instruction,
+                    callback=callback,
                     text=text,
                     ca_threshold=ca_threshold,
                     preprocess=preprocess,
@@ -202,6 +205,7 @@ class client:
     def regression_query_ann(
             self,
             instruction,
+            callback=False,
             text=[],
             drop=None,
             ca_threshold=None,
@@ -222,6 +226,7 @@ class client:
 
         self.models['regression_ANN'] = regression_ann(
             instruction=instruction,
+            callback=False,
             ca_threshold=.25 if ca_threshold is None else ca_threshold,
             dataset=self.dataset,
             text=text,
@@ -243,6 +248,7 @@ class client:
     def classification_query_ann(
             self,
             instruction,
+            callback=False,
             text=[],
             ca_threshold=None,
             preprocess=True,
@@ -263,6 +269,7 @@ class client:
 
         self.models['classification_ANN'] = classification_ann(
             instruction=instruction,
+            callback=callback,
             dataset=self.dataset,
             text=text,
             ca_threshold=.25 if ca_threshold is None else ca_threshold,
@@ -282,6 +289,7 @@ class client:
         # query to perform k-means clustering
     def kmeans_clustering_query(self,
                                 preprocess=True,
+                                scatters=[],
                                 generate_plots=True,
                                 drop=None,
                                 base_clusters=2,
@@ -299,6 +307,7 @@ class client:
 
         self.models['k_means_clustering'] = k_means_clustering(
             dataset=self.dataset,
+            scatters=scatters,
             preprocess=preprocess,
             generate_plots=generate_plots,
             drop=drop,
@@ -482,7 +491,7 @@ class client:
                             preprocess=True,
                             new_folders=True,
                             image_column=None,
-                            training_ratio=0.8,
+                            testing_ratio=0.2,
                             augmentation=True,
                             epochs=10,
                             height=None,
@@ -501,7 +510,7 @@ class client:
             data_path=self.dataset,
             new_folders=new_folders,
             image_column=image_column,
-            training_ratio=training_ratio,
+            training_ratio=1 - testing_ratio,
             augmentation=augmentation,
             epochs=epochs,
             height=height,
@@ -749,6 +758,3 @@ class client:
         '''
         get_plots(self, model, plot, save)
 
-
-newClient = client('/Users/palashshah/Desktop/housing.csv')
-newClient.neural_network_query('predict median house value', epochs=2).plots()

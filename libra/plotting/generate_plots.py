@@ -1,4 +1,3 @@
-
 import seaborn as sns
 import warnings
 from sklearn.metrics import roc_curve, auc
@@ -11,7 +10,6 @@ from sklearn.metrics import confusion_matrix, plot_confusion_matrix, recall_scor
 import numpy as np
 
 warnings.filterwarnings("ignore", category=RuntimeWarning)
-
 
 currLog = ""
 counter = 0
@@ -33,12 +31,15 @@ def clearLog():
     counter = 0
 
 
-# logging function that creates hierarchial display of the processes of
-# different functions. Copied into different python files to maintain
-# global variable parallels
-
-
 def logger(instruction, found=""):
+    '''
+    logging function that creates hierarchial display of the processes of
+    different functions. Copied into different python files to maintain
+    global variables.
+
+    :param instruction: what you want to be displayed
+    :param found: if you want to display something found like target column
+    '''
     global currLog
     global counter
     if counter == 0:
@@ -59,14 +60,26 @@ def logger(instruction, found=""):
 # generates all of the plots in clustering
 
 
-def generate_clustering_plots(kmeans, dataPandas, dataset):
+def generate_clustering_plots(kmeans, dataPandas, dataset, scatters, inertia_sor, base_clusters):
+    '''
+    plotting function that generates all plots for the clustering algorithm
+
+    :param base_clusters: is the number of clusters testing began at
+    :param inertia_sor: the array that has all the inertia values
+    :param scatters: which scatter plots you want to generate of columns compared to each other
+    :param dataset: is the dataset that you want to generate plots for
+    :param dataPandas: a pandas version of that same set
+    :param kmeans: is the actual kmeans algorithm you're generating for
+    :return an array with all of the plots stored as figures inside of it
+    '''
+
     plots = []
     plot_names = []
     # for all of the columns that're present in clustering it plots the
     # columns with each other based on the cluster they're in
     for x in range(len(dataPandas.columns) - 1):
         for y in range(len(dataPandas.columns) - 1):
-            if dataPandas.columns[x] != dataPandas.columns[y]:
+            if dataPandas.columns[x].replace(" ", "_") + "_vs_" + dataPandas.columns[y].replace(" ", "_") in scatters:
                 img = plt.figure()
                 plt.scatter(dataset[:, x], dataset[:, y],
                             c=kmeans.labels_, cmap='rainbow')
@@ -78,12 +91,40 @@ def generate_clustering_plots(kmeans, dataPandas, dataset):
                     "_vs_" +
                     dataPandas.columns[y])
                 plt.close(img)
-    return plots, plot_names
+    return plots, plot_names, elbow_cluster_graph(inertia_sor, base_clusters)
+
 
 # generates all of the plots for regression
+def elbow_cluster_graph(inertia_stor, base_clusters):
+    '''
+    plotting function that generates the elbow graph
+
+    :param base_clusters: number of clusters you begin testing at
+    :param inertia_stor: the array of inertia values
+    :return the elbow graph
+    '''
+    print(base_clusters)
+    print(len(inertia_stor))
+    ranged = []
+    for i in range(base_clusters, len(inertia_stor) + base_clusters):
+        ranged.append(i + 1)
+
+    img = plt.figure()
+    plt.plot(ranged, inertia_stor, marker='o')
+    # plt.plot(inertia_stor)
+    plt.title('Elbow Graph for Clustering')
+    plt.ylabel('SSE/Inertia')
+    plt.xlabel('Number of Clusters')
+    return img
 
 
 def generate_regression_plots(history, data, label):
+    '''
+    plotting function that generates regression plots
+
+    :param history: the keras history object
+    :return the names and actual regression plots
+    '''
     plots = []
     plot_names = []
     # generating plots for loss
@@ -94,6 +135,12 @@ def generate_regression_plots(history, data, label):
 
 
 def generate_classification_plots(history, data, label, model, X_test, y_test):
+    '''
+    plotting function that generates classification plots
+
+    :param history: the keras history object
+    :return the names and actual classification plots
+    '''
     plots = []
     plot_names = []
 
@@ -111,10 +158,18 @@ def generate_classification_plots(history, data, label, model, X_test, y_test):
 
     return return_plots
 
+
 # function to return both val and accuracy plots on one pane
 
 
 def generate_classification_together(history, data, model, X_test, y_test):
+    '''
+    unused plotting function that generates multiple plots on one pane when defaulted
+
+    :param history: is the history object of keras
+    :param many params: information that is given to the plots for specifications
+    :return plots on the same pane
+    '''
     plots = []
     plot_names = []
 
@@ -133,6 +188,12 @@ def generate_classification_together(history, data, model, X_test, y_test):
 
 
 def plot_loss(history):
+    '''
+    plotting function that generates loss plots
+
+    :param history: is the history object from keras
+    :return a plot of validation vs training loss
+    '''
     img = plt.figure()
     plt.plot(history.history['loss'])
     plt.plot(history.history['val_loss'])
@@ -144,9 +205,14 @@ def plot_loss(history):
 
 
 def plot_corr(data, col=[]):
-    # Here, col is a string list which indicates the columns between
-    # which the correlation is required. if left empty it shows the
-    # correlation heatmap for all the variables.
+    '''
+    correlation matrix for plot roc
+
+    :param data: is the data to find correlations for
+    :param col: is the specific column you want to find correlations to
+    :return correlation matrix
+    '''
+
     img = plt.figure()
     if col:
         data = data.loc[:, data.columns.intersection(['a', 'b'])]
@@ -159,6 +225,12 @@ def plot_corr(data, col=[]):
 
 
 def plot_acc(history):
+    '''
+    plotting function that generates accuracy plots
+
+    :param history: is the history object from keras
+    :return a plot of validation vs training accuracy
+    '''
     img = plt.figure()
     plt.plot(history.history['accuracy'])
     plt.plot(history.history['val_accuracy'])
@@ -170,6 +242,14 @@ def plot_acc(history):
 
 
 def plot_mc_roc(y_test, y_score, interpreter=None):
+    '''
+    plotting function that generates roc curves for data given to it.
+
+    :param y_test: is the testing data used
+    :param y_score: is the score when the testing data was called
+    :param interpreter: is what was used to preprocess
+    :return a roc plot
+    '''
     lw = 2
     n_classes = len(np.unique(y_test))
     classes = pd.unique(y_test)
@@ -225,7 +305,7 @@ def plot_mc_roc(y_test, y_score, interpreter=None):
                 tpr[i],
                 lw=lw,
                 label='ROC curve of class {0} (area = {1:0.2f})'
-                ''.format(
+                      ''.format(
                     interpreter.inverse_transform(
                         [[i]])[0],
                     roc_auc[i]))
@@ -239,8 +319,14 @@ def plot_mc_roc(y_test, y_score, interpreter=None):
     plt.legend(loc="lower right")
     return img
 
+
 # Analysis of model
 def analyze(client, model=None):
+    '''
+    the body of the analyze function in queries.py. Used to generate ROC, confusion matrix etc.
+    :param model: is the actual model that you want to analyze for and against
+    :param client: is the whole client object :)
+    '''
     plt.clf()
     logger(" ", ("Analyzing {}".format(model)))
 
