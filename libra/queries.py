@@ -759,6 +759,3 @@ class client:
         :param model: default to the latest model, but essentailly the model key
         '''
         get_plots(self, model, plot, save)
-
-newClient = client('/Users/palashshah/Desktop/housing.csv')
-print(newClient.svm_query('predict ocean proximity', kernel='rbf', max_iter=4).accuracy())
