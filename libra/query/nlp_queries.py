@@ -36,7 +36,7 @@ def classify_text(self, text):
     text = sequence.pad_sequences(text, sentimentInfo["maxTextLength"])
     model = sentimentInfo["model"]
     prediction = tf.keras.backend.argmax(model.predict(text))
-    return sentimentInfo["classes"][tf.keras.backend.get_value(prediction)[0]]
+    return int(sentimentInfo["classes"][tf.keras.backend.get_value(prediction)[0]])
 
 
 # Sentiment analysis query
@@ -80,6 +80,14 @@ def text_classification_query(self, instruction, drop=None,
     X_train = sequence.pad_sequences(X_train, maxlen=maxTextLength)
     X_test = sequence.pad_sequences(X_test, maxlen=maxTextLength)
 
+    y_vals = np.unique(np.append(y_train, y_test))
+    label_mappings = {}
+    for i in range(len(y_vals)):
+        label_mappings[y_vals[i]] = i
+    map_func = np.vectorize(lambda x: label_mappings[x])
+    y_train = map_func(y_train)
+    y_test = map_func(y_test)
+
     logger("Training Model...")
 
     # early stopping callback
@@ -114,7 +122,9 @@ def text_classification_query(self, instruction, drop=None,
                                           "plots": plots,
                                           "target": Y,
                                           "vocabulary": vocab,
+                                          "interpreter": label_mappings,
                                           "maxTextLength": maxTextLength,
+                                          'test_data': {'X': X_test, 'y': y_test},
                                           'losses': {
                                               'training_loss': history.history['loss'],
                                               'val_loss': history.history['val_loss']},

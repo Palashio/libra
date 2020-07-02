@@ -331,8 +331,7 @@ def analyze(client, model=None):
         model = client.latest_model
 
     if not model in client.models:
-        # exception
-        pass
+        raise NameError('Model name is not valid or has not been created yet.')
 
     plt.clf()
     logger(" ", ("Analyzing {}".format(model)))
