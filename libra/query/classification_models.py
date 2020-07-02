@@ -48,6 +48,7 @@ def logger(instruction, found=""):
     counter += 1
 
 def k_means_clustering(dataset= None,
+            scatters=[],
             preprocess=True,
             generate_plots=True,
             drop=None,
@@ -62,9 +63,7 @@ def k_means_clustering(dataset= None,
         :param many params: used to hyperparametrize the function.
         :return a dictionary object with all of the information for the algorithm.
         '''
-        logger("reading dataset...")
-        # loads dataset and replaces n/a with zero
-        # data = pd.read_csv(self.dataset)
+        logger("Reading in dataset")
 
         dataReader = DataReader(dataset)
         data = dataReader.data_generator()
@@ -76,7 +75,7 @@ def k_means_clustering(dataset= None,
 
         full_pipeline = None
         if preprocess:
-            logger("Preprocessing data...")
+            logger("Preprocessing data")
             data, full_pipeline = clustering_preprocessor(data)
             data = np.array(data)
 
@@ -86,7 +85,7 @@ def k_means_clustering(dataset= None,
         # processes dataset and runs KMeans algorithm on one cluster as
         # baseline
         i = base_clusters
-        logger("Creating unsupervised clustering task...")
+        logger("Creating unsupervised clustering task")
         kmeans = KMeans(n_clusters=i, random_state=random_state, verbose=verbose, n_init=n_init, max_iter=max_iter).fit(data)
         modelStorage.append(kmeans)
 
@@ -112,16 +111,17 @@ def k_means_clustering(dataset= None,
                 break
         # generates the clustering plots approiately
         logger("->", "Optimal number of clusters found: {}".format(i))
+        logger("->", "Final inertia of {}".format(inertiaStor[len(inertiaStor) - 1]))
 
+        plots = {}
         if generate_plots:
             logger("Generating plots and storing in model")
-            init_plots, plot_names = generate_clustering_plots(
-                modelStorage[len(modelStorage) - 1], dataPandas, data)
-
-            plots = {}
-
+            init_plots, plot_names, elbow = generate_clustering_plots(
+                modelStorage[len(modelStorage) - 1], dataPandas, data, scatters, inertiaStor)
             for x in range(len(plot_names)):
                 plots[str(plot_names[x])] = init_plots[x]
+            plots['elbow'] = elbow
+
 
         logger("Stored model under 'k_means_clustering' key")
 
@@ -131,8 +131,6 @@ def k_means_clustering(dataset= None,
             "model": modelStorage[len(modelStorage) - 1],
             "preprocesser": full_pipeline,
             "plots": plots}
-        clearLog()
-
 
 def train_svm(instruction,
               dataset=None,
@@ -152,7 +150,7 @@ def train_svm(instruction,
         :param many params: used to hyperparametrize the function.
         :return a dictionary object with all of the information for the algorithm.
         '''
-        logger("reading in dataset....")
+        logger("Reading in dataset")
 
         dataReader = DataReader(dataset)
         data = dataReader.data_generator()
@@ -161,7 +159,7 @@ def train_svm(instruction,
             data.drop(drop, axis=1, inplace=True)
 
         data, y, target, full_pipeline = initial_preprocesser(data, instruction, preprocess, ca_threshold, text)
-        logger("->", "Target Column Found: {}".format(target))
+        logger("->", "Target column found: {}".format(target))
 
 
         X_train = data['train']
@@ -184,7 +182,7 @@ def train_svm(instruction,
 
 
         # Fitting to SVM and storing in the model dictionary
-        logger("Fitting Support Vector Machine...")
+        logger("Fitting Support Vector Machine")
         clf = svm.SVC(kernel=kernel, degree=degree, gamma=gamma, coef0=coef0, max_iter=max_iter)
         clf.fit(X_train, y_train)
 
@@ -228,7 +226,7 @@ def nearest_neighbors(instruction=None,
         :param many params: used to hyperparametrize the function.
         :return a dictionary object with all of the information for the algorithm.
         '''
-        logger("reading in dataset....")
+        logger("Reading in dataset")
         # Reads in dataset
         # data = pd.read_csv(self.dataset)
         dataReader = DataReader(dataset)
@@ -237,7 +235,7 @@ def nearest_neighbors(instruction=None,
             data.drop(drop, axis=1, inplace=True)
         data, y, remove, full_pipeline = initial_preprocesser(
             data, instruction, preprocess, ca_threshold, text)
-        logger("->", "Target Column Found: {}".format(remove))
+        logger("->", "Target column found: {}".format(remove))
         X_train = data['train']
         y_train = y['train']
         X_test = data['test']
@@ -253,8 +251,8 @@ def nearest_neighbors(instruction=None,
         y_test = y_test.apply(lambda x: label_mappings[x]).values
         models = []
         scores = []
-        logger("Fitting Nearest Neighbor...")
-        logger("Identifying optimal number of neighbors...")
+        logger("Fitting Nearest Neighbor")
+        logger("Identifying optimal number of neighbors")
         # Tries all neighbor possibilities, based on either defaults or user
         # specified values
         for x in range(min_neighbors, max_neighbors):
@@ -296,7 +294,7 @@ def decision_tree(instruction,
     :param many params: used to hyperparametrize the function.
     :return a dictionary object with all of the information for the algorithm.
     '''
-    logger("reading in dataset....")
+    logger("Reading in dataset")
 
     dataReader = DataReader(dataset)
     data = dataReader.data_generator()
@@ -306,7 +304,7 @@ def decision_tree(instruction,
 
     data, y, remove, full_pipeline = initial_preprocesser(
         data, instruction, preprocess, ca_threshold, text)
-    logger("->", "Target Column Found: {}".format(remove))
+    logger("->", "Target column found: {}".format(remove))
 
     X_train = data['train']
     y_train = y['train']
@@ -328,7 +326,7 @@ def decision_tree(instruction,
     num_classes = len(np.unique(y))
 
     # fitting and storing
-    logger("Fitting Decision Tree...")
+    logger("Fitting Decision Tree")
 
     clf = tree.DecisionTreeClassifier(criterion=criterion, splitter=splitter, max_depth=max_depth, min_samples_split=min_samples_split,min_samples_leaf=min_samples_leaf, min_weight_fraction_leaf=min_weight_fraction_leaf, max_leaf_nodes=max_leaf_nodes, min_impurity_decrease=min_impurity_decrease, ccp_alpha=ccp_alpha)
     clf = clf.fit(X_train, y_train)

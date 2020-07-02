@@ -81,7 +81,7 @@ def regression_ann(
         generate_plots=True,
         callback_mode='min',
         maximizer="val_loss",
-        save_model=True,
+        save_model=False,
         save_path=os.getcwd()):
     '''
     Body of the regression function used that is called in the neural network query
@@ -90,7 +90,7 @@ def regression_ann(
     :return dictionary that holds all the information for the finished model.
     '''
 
-    logger("reading in dataset...")
+    logger("Reading in dataset...")
 
     dataReader = DataReader(dataset)
     data = dataReader.data_generator()
@@ -100,7 +100,7 @@ def regression_ann(
         data.drop(drop, axis=1, inplace=True)
     data, y, target, full_pipeline = initial_preprocesser(data, instruction, preprocess, ca_threshold, text,
                                                           test_size=test_size, random_state=random_state)
-    logger("->", "Target Column Found: {}".format(target))
+    logger("->", "Target column found: {}".format(target))
 
     X_train = data['train']
     X_test = data['test']
@@ -254,8 +254,8 @@ def classification_ann(instruction,
                        test_size=0.2,
                        epochs=50,
                        generate_plots=True,
-                       maximizer="val_loss",
-                       save_model=True,
+                       maximizer="val_accuracy",
+                       save_model=False,
                        save_path=os.getcwd()):
     '''
     Body of the classification function used that is called in the neural network query
@@ -263,7 +263,7 @@ def classification_ann(instruction,
     :param many parameters: used to preprocess, tune, plot generation, and parameterizing the neural network trained.
     :return dictionary that holds all the information for the finished model.
     '''
-    logger("reading in dataset...")
+    logger("Reading in dataset...")
 
     dataReader = DataReader(dataset)
     data = dataReader.data_generator()
@@ -273,7 +273,7 @@ def classification_ann(instruction,
 
     data, y, remove, full_pipeline = initial_preprocesser(
         data, instruction, preprocess, ca_threshold, text, test_size=test_size, random_state=random_state)
-    logger("->", "Target Column Found: {}".format(remove))
+    logger("->", "Target column found: {}".format(remove))
 
     # Needed to make a custom label encoder due to train test split changes
     # Can still be inverse transformed, just a bit of extra work
@@ -308,7 +308,7 @@ def classification_ann(instruction,
     # early stopping callback
     es = EarlyStopping(
         monitor=maximizer,
-        mode='min',
+        mode='max',
         verbose=0,
         patience=5)
 
@@ -319,7 +319,7 @@ def classification_ann(instruction,
     i = 0
     model = get_keras_model_class(data, i, num_classes)
     logger("Training initial model...")
-    print(epochs)
+
     history = model.fit(
         X_train, y_train, callbacks=callback_value, epochs=epochs, validation_data=(
             X_test, y_test), verbose=0)
@@ -327,7 +327,7 @@ def classification_ann(instruction,
     model_data.append(model)
     models.append(history)
     col_name = [["Initial number of layers ",
-                 "| Training Loss ", "| Test Loss "]]
+                 "| Training Accuracy ", "| Test Accuracy "]]
     col_width = max(len(word) for row in col_name for word in row) + 2
     for row in col_name:
         print((" " * 2 * counter) + "| " + ("".join(word.ljust(col_width)
@@ -335,9 +335,9 @@ def classification_ann(instruction,
     values = []
     values.append(str(len(model.layers)))
     values.append(
-        "| " + str(history.history['loss'][len(history.history['val_loss']) - 1]))
+        "| " + str(history.history['accuracy'][len(history.history['val_accuracy']) - 1]))
     values.append(
-        "| " + str(history.history['val_loss'][len(history.history['val_loss']) - 1]))
+        "| " + str(history.history['val_accuracy'][len(history.history['val_accuracy']) - 1]))
     datax = []
     datax.append(values)
     for row in datax:
@@ -350,14 +350,14 @@ def classification_ann(instruction,
     # decreasing
 
     logger("Testing number of layers...")
-    col_name = [["Current number of layers", "| Training Loss", "| Test Loss"]]
+    col_name = [["Current number of layers", "| Training Accuracy", "| Test Accuracy"]]
     col_width = max(len(word) for row in col_name for word in row) + 2
 
     for row in col_name:
         print((" " * 2 * counter) + "| " + ("".join(word.ljust(col_width)
                                                     for word in row)) + " |")
     datax = []
-    while all(x > y for x, y in zip(losses, losses[1:])):
+    while all(x < y for x, y in zip(accuracies, accuracies[1:])):
         model = get_keras_model_class(data, i, num_classes)
         history = model.fit(
             X_train,
@@ -368,19 +368,19 @@ def classification_ann(instruction,
                 X_test,
                 y_test),
             verbose=0)
-        print(epochs)
 
         values = []
         datax = []
         values.append(str(len(model.layers)))
         values.append(
-            "| " + str(history.history['loss'][len(history.history['val_loss']) - 1]))
+            "| " + str(history.history['accuracy'][len(history.history['val_accuracy']) - 1]))
         values.append(
-            "| " + str(history.history['val_loss'][len(history.history['val_loss']) - 1]))
+            "| " + str(history.history['accuracy'][len(history.history['val_accuracy']) - 1]))
         datax.append(values)
         for row in datax:
             print((" " * 2 * counter) + "| " +
                   ("".join(word.ljust(col_width) for word in row)) + " |")
+        del values, datax
         losses.append(history.history[maximizer]
                       [len(history.history[maximizer]) - 1])
         accuracies.append(history.history['val_accuracy']
@@ -392,8 +392,9 @@ def classification_ann(instruction,
     # print((" " * 2 * counter)+ tabulate(datax, headers=col_name, tablefmt='orgtbl'))
     # del values, datax
 
-    final_model = model_data[losses.index(min(losses))]
-    final_hist = models[losses.index(min(losses))]
+    final_model = model_data[losses.index(max(accuracies))]
+    final_hist = models[losses.index(max(accuracies))]
+
     print("")
     logger('->', "Best number of layers found: " +
            str(len(final_model.layers)))

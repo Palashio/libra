@@ -75,9 +75,9 @@ class client:
         :param data: represents the dataset that you're trying to read
         :return: a completely initialized client class
         '''
-        logger("creating object...")
+        logger("Creating client object")
         self.dataset = data
-        logger("Loading dataset...")
+        logger("Reading in dataset")
         self.models = {}
         self.old_models = {}
         self.latest_model = None
@@ -289,6 +289,7 @@ class client:
         # query to perform k-means clustering
     def kmeans_clustering_query(self,
                                 preprocess=True,
+                                scatters=[],
                                 generate_plots=True,
                                 drop=None,
                                 base_clusters=2,
@@ -306,6 +307,7 @@ class client:
 
         self.models['k_means_clustering'] = k_means_clustering(
             dataset=self.dataset,
+            scatters=scatters,
             preprocess=preprocess,
             generate_plots=generate_plots,
             drop=drop,
@@ -755,3 +757,7 @@ class client:
         :param model: default to the latest model, but essentailly the model key
         '''
         get_plots(self, model, plot, save)
+
+newClient = client('/Users/palashshah/Desktop/housing.csv')
+newClient.kmeans_clustering_query(generate_plots=True, scatters=['longitude_vs_latitude'])
+print(newClient.plots())

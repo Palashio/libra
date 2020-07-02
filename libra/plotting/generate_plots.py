@@ -59,14 +59,14 @@ def logger(instruction, found=""):
 # generates all of the plots in clustering
 
 
-def generate_clustering_plots(kmeans, dataPandas, dataset):
+def generate_clustering_plots(kmeans, dataPandas, dataset, scatters, inertia_sor):
     plots = []
     plot_names = []
     # for all of the columns that're present in clustering it plots the
     # columns with each other based on the cluster they're in
     for x in range(len(dataPandas.columns) - 1):
         for y in range(len(dataPandas.columns) - 1):
-            if dataPandas.columns[x] != dataPandas.columns[y]:
+            if dataPandas.columns[x].replace(" ", "_") + "_vs_" + dataPandas.columns[y].replace(" ", "_") in scatters:
                 img = plt.figure()
                 plt.scatter(dataset[:, x], dataset[:, y],
                             c=kmeans.labels_, cmap='rainbow')
@@ -78,10 +78,20 @@ def generate_clustering_plots(kmeans, dataPandas, dataset):
                     "_vs_" +
                     dataPandas.columns[y])
                 plt.close(img)
-    return plots, plot_names
+    return plots, plot_names, elbow_cluster_graph(inertia_sor)
 
 # generates all of the plots for regression
 
+def elbow_cluster_graph(inertia_stor):
+    ranged = range(1, len(inertia_stor) + 1)
+
+    img = plt.figure()
+    plt.plot(ranged, inertia_stor)
+    # plt.plot(inertia_stor)
+    plt.title('Elbow Graph for Clustering')
+    plt.ylabel('SSE/Inertia')
+    plt.xlabel('Number of Clusters')
+    return img
 
 def generate_regression_plots(history, data, label):
     plots = []
