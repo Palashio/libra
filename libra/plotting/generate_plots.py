@@ -327,11 +327,19 @@ def analyze(client, model=None):
     :param model: is the actual model that you want to analyze for and against
     :param client: is the whole client object :)
     '''
+    if model is None:
+        model = client.latest_model
+
+    if not model in client.models:
+        # exception
+        pass
+
     plt.clf()
     logger(" ", ("Analyzing {}".format(model)))
 
+
     modeldict = client.models[model]
-    if modeldict.get('plots') and model != 'k_means_clustering':
+    if 'plots' in modeldict and model != 'k_means_clustering':
         logger(" ", "Displaying associated plots")
         # TODO: plot separately instead of on top of each other
         for key in modeldict['plots']:
@@ -339,7 +347,7 @@ def analyze(client, model=None):
                 modeldict['plots'][key].show()
                 print('im here')
 
-    if modeldict.get('test_data'):
+    if 'test_data' in modeldict:
         logger("->", "Making predictions for test data...")
         data = modeldict['test_data']['X']
         real = modeldict['test_data']['y']
@@ -384,8 +392,10 @@ def analyze(client, model=None):
                 modeldict['model'], data, real, display_labels=labels)
             cm
             plt.show()
-
-            accuracy = modeldict['accuracy_score']
+            if model is 'svm':
+                accuracy = modeldict['accuracy']['accuracy_score']
+            else:
+                accuracy = modeldict['accuracy_score']
         else:  # classification_ANN
             roc = plot_mc_roc(real, preds, enc)
             roc
@@ -408,7 +418,7 @@ def analyze(client, model=None):
         logger("->", ("Recall on test set: {}".format(str(recall))))
         logger("->", ("Precision on test set: {}".format(str(precision))))
         logger("->", ("F1 Score on test set: {}".format(str(f1))))
-        if not modeldict.get('plots'):
+        if not 'plots' in modeldict:
             modeldict['plots'] = {}
         modeldict['plots']['roc_curve'] = roc
         modeldict['confusion_matrix'] = cm
