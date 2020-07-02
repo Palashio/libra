@@ -117,7 +117,7 @@ def k_means_clustering(dataset= None,
         if generate_plots:
             logger("Generating plots and storing in model")
             init_plots, plot_names, elbow = generate_clustering_plots(
-                modelStorage[len(modelStorage) - 1], dataPandas, data, scatters, inertiaStor)
+                modelStorage[len(modelStorage) - 1], dataPandas, data, scatters, inertiaStor, base_clusters)
             for x in range(len(plot_names)):
                 plots[str(plot_names[x])] = init_plots[x]
             plots['elbow'] = elbow

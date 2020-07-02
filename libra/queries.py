@@ -758,6 +758,3 @@ class client:
         '''
         get_plots(self, model, plot, save)
 
-newClient = client('/Users/palashshah/Desktop/housing.csv')
-newClient.kmeans_clustering_query(generate_plots=True, scatters=['longitude_vs_latitude'])
-print(newClient.plots())
