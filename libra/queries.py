@@ -1,7 +1,7 @@
-# from libra.query.nlp_queries import (image_caption_query,
-#                                      generate_caption, classify_text,
-#                                      text_classification_query, get_summary,
-#                                      summarization_query)
+from libra.query.nlp_queries import (image_caption_query,
+                                     generate_caption, classify_text,
+                                     text_classification_query, get_summary,
+                                     summarization_query)
 from libra.query.classification_models import (k_means_clustering,
                                                train_svm, nearest_neighbors,
                                                decision_tree)
