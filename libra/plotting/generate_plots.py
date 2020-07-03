@@ -110,8 +110,6 @@ def elbow_cluster_graph(inertia_stor, base_clusters):
     :param inertia_stor: the array of inertia values
     :return the elbow graph
     '''
-    print(base_clusters)
-    print(len(inertia_stor))
     ranged = []
     for i in range(base_clusters, len(inertia_stor) + base_clusters):
         ranged.append(i + 1)
@@ -400,12 +398,12 @@ def analyze(client, model=None):
         if model in ['svm', 'nearest_neighbor',
                      'decision_tree']:  # sklearn models ONLY
             roc = plot_mc_roc(real, preds, modeldict['interpreter'])
-
+            roc
             plt.show()
             labels = list(modeldict['interpreter'].keys())
             cm = plot_confusion_matrix(
                 modeldict['model'], data, real, display_labels=labels)
-
+            cm
             plt.show()
             if model == 'svm':
                 accuracy = modeldict['accuracy']['accuracy_score']
@@ -413,27 +411,27 @@ def analyze(client, model=None):
                 accuracy = modeldict['accuracy_score']
         elif model == 'Text Classification':
             roc = plot_mc_roc(real, preds, modeldict['interpreter'])
-
+            roc
             plt.show()
             labels = list(modeldict['interpreter'].keys())
             cm = confusion_matrix(real, preds)
             cm = ConfusionMatrixDisplay(
                 confusion_matrix=cm,
                 display_labels=labels).plot()
-
+            cm
             plt.show()
 
             accuracy = modeldict['accuracy']['validation_accuracy']
         elif model == 'classification_ann':  # classification_ANN
             roc = plot_mc_roc(real, preds, enc)
-
+            roc
             plt.show()
             cm = confusion_matrix(real, preds)
             labels = enc.classes_
             cm = ConfusionMatrixDisplay(
                 confusion_matrix=cm,
                 display_labels=labels).plot()
-            
+            cm
             plt.show()
 
             accuracy = modeldict['accuracy']['validation_accuracy']
