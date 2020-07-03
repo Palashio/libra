@@ -50,10 +50,7 @@ def logger(instruction, found=""):
 
     counter += 1
 
-def printtable(columns):
-    col_width = max(len(word) for row in columns for word in row) + 2
-    for i columns[0]:
-    
+def printtable(columns,col_width = max(len(word) for row in columns for word in row) + 2):
     for row in columns:
         print((" " * 2 * counter) + "| " + ("".join(word.ljust(col_width)
                                                     for word in row)) + " |")
@@ -122,15 +119,18 @@ def k_means_clustering(dataset=None,
             max_iter=max_iter).fit(data)
         modelStorage.append(kmeans)
         inertiaStor.append(kmeans.inertia_)
-
-        printtable([["Number of clusters ",
-                     "| Inertia  "]])
+        
+        col_name=[["Number of clusters ",
+                     "| Inertia  "]] 
+        printtable(col_name)
         values = []
         values.append(str(i))
         values.append(
             "| " + str(inertiaStor))
         datax = []
-        printtable(datax.append(values))
+        datax.append(values)
+        printtable(datax,
+                   max(len(word) for row in col_name for word in row) + 2)
 
         # minimize inertia up to 10000
         i += 1
