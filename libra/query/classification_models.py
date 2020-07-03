@@ -75,11 +75,11 @@ def k_means_clustering(dataset=None,
                        max_iter=300,
                        random_state=42,
                        text=[]):
-    '''
-        function to train a k means clustering algorithm
-        :param many params: used to hyperparametrize the function.
-        :return a dictionary object with all of the information for the algorithm.
-        '''
+     '''
+     function to train a k means clustering algorithm
+     :param many params: used to hyperparametrize the function.
+     :return a dictionary object with all of the information for the algorithm.
+     '''
     logger("Reading in dataset")
 
     dataReader = DataReader(dataset)
