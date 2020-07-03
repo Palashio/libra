@@ -9,10 +9,8 @@ from kerastuner import HyperModel
 from kerastuner.tuners import RandomSearch, Hyperband
 from sklearn import preprocessing
 from tensorflow import keras
-from sklearn.model_selection import train_test_split,
-                                    RandomizedSearchCV
-import mlrose
-from scipy.stats import uniform
+from sklearn.model_selection import train_test_split
+
 import os
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
@@ -139,7 +137,6 @@ def tuneReg(
 
     # function build model using hyperparameter
     def build_model(hp):
-        '''
         model = keras.Sequential()
         for i in range(hp.Int('num_layers', min_layers, max_layers)):
             model.add(Dense(units=hp.Int('units_' + str(i),
@@ -148,16 +145,6 @@ def tuneReg(
                                          step=step),
                             activation=activation))
         model.add(Dense(1))
-        '''
-        model = mlrose.NeuralNetwork( hidden_nodes = [ hp.Int('num_layers', min_layers, 
-                                                       max_layers)], 
-                                      activation = activation,
-                                      algorithm = 'random_hill_climb', 
-                                      max_iters = 1000,
-                                      bias = True, learning_rate = 0.0001,
-                                      early_stopping = True, clip_max = 5, 
-                                      max_attempts = 100,
-                                      random_state = 3)
         model.compile(
             optimizer=keras.optimizers.Adam(
                                        hp.Float('learning_rate',
@@ -169,31 +156,18 @@ def tuneReg(
             metrics=[metrics])
         return model
 
-    # Create regularization hyperparameter distribution
-    create_regularizer = uniform(loc=0, scale=4)
-    # Create hyperparameter options
-    hyperparameters = dict(C=create_regularizer, penalty=['l1', 'l2'])
-    # random search for the model
-    tuner = RandomizedSearchCV( build_model, 
-                                hyperparameters, 
-                                random_state=1, 
-                                n_iter=100, 
-                                cv=5, verbose=0, 
-                                n_jobs=-1)
-
-    '''
     # random search for the model
     tuner = RandomSearch(
         build_model,
         objective='loss',
         max_trials=max_trials,
         executions_per_trial=executions_per_trial)
+
     # tuner.search_space_summary()
     # del data[target]
-    '''
     X_train, X_test, y_train, y_test = train_test_split(
         data, target, test_size=0.2, random_state=49)
-    '''
+
     # searches the tuner space defined by hyperparameters (hp) and returns the
     # best model
 
@@ -215,23 +189,13 @@ def tuneReg(
         epochs=epochs,
         verbose=verbose,
         test_size=test_size)
-    '''
-    history = tuner.fit( X_train,
-                         y_train,
-                         epochs=epochs,
-                         validation_data=(
-                                 X_test,
-                                 y_test),
-                         callbacks= [tf.keras.callbacks.TensorBoard('my_dir')],
-                         verbose=0)
     """
     Return:
         models[0] : best model obtained after tuning
         best_hps : best Hyperprameters obtained after tuning, stored as map
         history : history of the data executed from the given model
     """
-    return tuner,best_model.best_estimator_.get_params()['C'], history
-    #return models[0], hyp, history
+    return models[0], hyp, history
 
 
 def tuneClass(
@@ -257,7 +221,6 @@ def tuneClass(
         le.fit_transform(y), num_classes=num_classes)
 
     def build_model(hp):
-        '''
         model = keras.Sequential()
         for i in range(hp.Int('num_layers', min_layers, max_layers)):
             model.add(Dense(units=hp.Int('units_' + str(i),
@@ -266,16 +229,6 @@ def tuneClass(
                                          step=step),
                             activation=activation))
         model.add(Dense(num_classes, activation='softmax'))
-        '''
-        nn_model1 = mlrose.NeuralNetwork( hidden_nodes = [hp.Int('num_layers', min_layers, max_layers)], 
-                                          activation = activation,
-                                          algorithm = 'random_hill_climb', 
-                                          max_iters = 1000,
-                                          bias = True, is_classifier = True, 
-                                          learning_rate = 0.0001,
-                                          early_stopping = True, clip_max = 5, 
-                                          max_attempts = 100,
-				                          random_state = 3)
         model.compile(
             optimizer=keras.optimizers.Adam(
                                        hp.Float('learning_rate',
@@ -287,19 +240,7 @@ def tuneClass(
             metrics=[metrics])
         return model
     
-    # Create regularization hyperparameter distribution
-    create_regularizer = uniform(loc=0, scale=4)
-    # Create hyperparameter options
-    hyperparameters = dict(C=create_regularizer, penalty=['l1', 'l2'])
-    # random search for the model
-    tuner = RandomizedSearchCV( build_model, 
-                                hyperparameters, 
-                                random_state=1, 
-                                n_iter=100, 
-                                cv=5, verbose=0, 
-                                n_jobs=-1)
     # tuners, establish the object to look through the tuner search space
-    '''
     tuner = RandomSearch(
         build_model,
         objective='loss',
@@ -309,10 +250,9 @@ def tuneClass(
         project_name='class_tuned')
 
     # tuner.search_space_summary()
-    '''
     X_train, X_test, y_train, y_test = train_test_split(
         X, y, test_size=0.2, random_state=49)
-    '''
+
     # searches the tuner space defined by hyperparameters (hp) and returns the
     # best model
     tuner.search(X_train, y_train,
@@ -330,15 +270,7 @@ def tuneClass(
         epochs=epochs,
         verbose=verbose,
         test_size=test_size)
-    '''
-    history = tuner.fit( X_train,
-                         y_train,
-                         epochs=epochs,
-                         validation_data=(
-                                 X_test,
-                                 y_test),
-                         callbacks= [tf.keras.callbacks.TensorBoard('my_dir')],
-                         verbose=0)
+
     """
     Return:
         models[0] : best model obtained after tuning
