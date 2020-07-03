@@ -5,7 +5,8 @@ from libra.query.nlp_queries import (image_caption_query,
 from libra.query.classification_models import (k_means_clustering,
                                                train_svm, nearest_neighbors,
                                                decision_tree)
-from libra.query.supplementaries import tune_helper, get_model_data, get_operators, get_accuracy, get_losses, get_target, get_plots
+from libra.query.supplementaries import tune_helper, get_model_data, get_operators, get_accuracy, get_losses, \
+    get_target, get_plots, get_vocab
 from libra.query.feedforward_nn import (regression_ann,
                                         classification_ann,
                                         convolutional)
@@ -610,6 +611,7 @@ class client:
                             max_summary_length=150,
                             test_size=0.2,
                             random_state=49,
+                            gpu=False,
                             generate_plots=True,
                             save_model=False,
                             save_path=os.getcwd()):
@@ -629,6 +631,7 @@ class client:
             max_summary_length=max_summary_length,
             test_size=test_size,
             random_state=random_state,
+            gpu=gpu,
             generate_plots=generate_plots,
             save_model=save_model,
             save_path=save_path)
@@ -657,6 +660,7 @@ class client:
                             buffer_size=1000,
                             embedding_dim=256,
                             units=512,
+                            gpu=False,
                             generate_plots=True,
                             save_model_decoder=False,
                             save_path_decoder=os.getcwd(),
@@ -679,6 +683,7 @@ class client:
             buffer_size=buffer_size,
             embedding_dim=embedding_dim,
             units=units,
+            gpu=gpu,
             generate_plots=generate_plots,
             save_model_decoder=save_model_decoder,
             save_path_decoder=save_path_decoder,
