@@ -793,4 +793,5 @@ class client:
 
 
 x = client("/Users/anasawadalla/PycharmProjects/libra/tools/data/nlp_data/miniDocumentSummarization.csv")
-client.summarization_query(self=x, instruction="text", test_size=0.0)
+client.summarization_query(self=x, instruction="summarize text", test_size=0.0, epochs=3)
+x.models.get("Document Summarization")["plots"].get("loss").show()

@@ -103,8 +103,10 @@ def text_classification_query(self, instruction, drop=None,
     data = pd.read_csv(self.dataset)
     if preprocess:
         data.fillna(0, inplace=True)
+
     if drop is not None:
         data.drop(drop, axis=1, inplace=True)
+
     X, Y, target = get_target_values(data, instruction, "label")
     Y = np.array(Y)
     classes = np.unique(Y)
