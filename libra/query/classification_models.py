@@ -102,12 +102,26 @@ def k_means_clustering(dataset=None,
         n_init=n_init,
         max_iter=max_iter).fit(data)
     modelStorage.append(kmeans)
-
     # stores SSE values in an array for later comparison
     inertiaStor.append(kmeans.inertia_)
-    i += 1
 
     logger("Identifying best centroid count and optimizing accuracy")
+
+    col_name=[["Number of clusters   ",
+                     "| Inertia  "]] 
+    col_width=max(len(word) for row in col_name for word in row) + 2
+    printtable(col_name,col_width)
+    values = []
+    values.append(str(i))
+    values.append(
+        "| " + str(inertiaStor[i-base_clusters]))
+    datax = []
+    datax.append(values)
+    printtable(datax,
+               col_width)
+    
+    i += 1
+
     # continues to increase cluster size until SSE values don't decrease by
     # 1000 - this value was decided based on precedence
     while (all(earlier >= later for earlier,
@@ -121,14 +135,10 @@ def k_means_clustering(dataset=None,
         modelStorage.append(kmeans)
         inertiaStor.append(kmeans.inertia_)
         
-        col_name=[["Number of clusters ",
-                     "| Inertia  "]] 
-        col_width=max(len(word) for row in col_name for word in row) + 2
-        printtable(col_name,col_width)
         values = []
         values.append(str(i))
         values.append(
-            "| " + str(inertiaStor))
+            "| " + str(inertiaStor[i-base_clusters]))
         datax = []
         datax.append(values)
         printtable(datax,
