@@ -67,16 +67,27 @@ def classify_text(self, text):
 def text_classification_query(self, instruction, drop=None,
                               preprocess=True,
                               test_size=0.2,
-                              val_size=0.1,
                               random_state=49,
                               learning_rate=1e-2,
                               epochs=20,
                               maximizer="val_loss",
                               batch_size=32,
-                              maxTextLength=200,
+                              max_text_length=200,
                               generate_plots=True,
                               save_model=False,
                               save_path=os.getcwd()):
+    if epochs < 1:
+        raise Exception("Epoch number is less than 1 (model will not be trained)")
+
+    if batch_size < 1:
+        raise Exception("Batch size must be equal to or greater than 1")
+
+    if max_text_length < 1:
+        raise Exception("Max text length must be equal to or greater than 1")
+
+    if save_model:
+        if not os.path.exists(save_path):
+            raise Exception("Save path does not exists")
 
     data = pd.read_csv(self.dataset)
     if preprocess:
@@ -99,12 +110,12 @@ def text_classification_query(self, instruction, drop=None,
 
     X = np.array(X)
 
-    model = get_keras_text_class(maxTextLength, len(classes), learning_rate)
+    model = get_keras_text_class(max_text_length, len(classes), learning_rate)
     logger("Building Keras LSTM model dynamically")
     X_train, X_test, y_train, y_test = train_test_split(
         X, Y, test_size=test_size, random_state=random_state)
-    X_train = sequence.pad_sequences(X_train, maxlen=maxTextLength)
-    X_test = sequence.pad_sequences(X_test, maxlen=maxTextLength)
+    X_train = sequence.pad_sequences(X_train, maxlen=max_text_length)
+    X_test = sequence.pad_sequences(X_test, maxlen=max_text_length)
 
     y_vals = np.unique(np.append(y_train, y_test))
     label_mappings = {}
@@ -117,20 +128,24 @@ def text_classification_query(self, instruction, drop=None,
     logger("Training initial model")
 
     # early stopping callback
-    es = EarlyStopping(
-        monitor=maximizer,
-        mode='min',
-        verbose=0,
-        patience=5)
+    try:
+        es = EarlyStopping(
+            monitor=maximizer,
+            mode='auto',
+            verbose=0,
+            patience=5)
+    except:
+        print("Maximizer not found")
 
     history = model.fit(X_train, y_train, validation_data=(X_test, y_test),
                         batch_size=batch_size,
                         epochs=epochs, callbacks=[es], verbose=0)
     # Print Epoch-History Table
     get_standard_training_output_keras(epochs, history)
-    logger("->","Final training loss: {}".format(history.history["loss"][len(history.history["loss"]) - 1]))
+    logger("->", "Final training loss: {}".format(history.history["loss"][len(history.history["loss"]) - 1]))
     logger("->", "Final validation loss: {}".format(history.history["val_loss"][len(history.history["val_loss"]) - 1]))
-    logger("->", "Final validation accuracy: {}".format(history.history["val_accuracy"][len(history.history["val_accuracy"]) - 1]))
+    logger("->", "Final validation accuracy: {}".format(
+        history.history["val_accuracy"][len(history.history["val_accuracy"]) - 1]))
 
     plots = {}
     if generate_plots:
@@ -152,7 +167,7 @@ def text_classification_query(self, instruction, drop=None,
                                           "target": Y,
                                           "vocabulary": vocab,
                                           "interpreter": label_mappings,
-                                          "maxTextLength": maxTextLength,
+                                          "max_text_length": max_text_length,
                                           'test_data': {'X': X_test, 'y': y_test},
                                           'losses': {
                                               'training_loss': history.history['loss'],
@@ -200,6 +215,22 @@ def summarization_query(self, instruction, preprocess=True,
                         generate_plots=True,
                         save_model=False,
                         save_path=os.getcwd()):
+    if epochs < 1:
+        raise Exception("Epoch number is less than 1 (model will not be trained)")
+
+    if batch_size < 1:
+        raise Exception("Batch size must be equal to or greater than 1")
+
+    if max_text_length < 1:
+        raise Exception("Max text length must be equal to or greater than 1")
+
+    if max_summary_length < 1:
+        raise Exception("Max summary length must be equal to or greater than 1")
+
+    if save_model:
+        if not os.path.exists(save_path):
+            raise Exception("Save path does not exists")
+
     if gpu:
         device = "cuda"
     else:
@@ -207,6 +238,7 @@ def summarization_query(self, instruction, preprocess=True,
 
     if drop is None:
         drop = []
+
     data = pd.read_csv(self.dataset)
     if preprocess:
         data.fillna(0, inplace=True)
@@ -327,6 +359,32 @@ def image_caption_query(self, instruction,
                         save_path_decoder=os.getcwd(),
                         save_model_encoder=False,
                         save_path_encoder=os.getcwd()):
+    if top_k < 1:
+        raise Exception("Top_k value must be equal to or greater than 1")
+
+    if batch_size < 1:
+        raise Exception("Batch size must be equal to or greater than 1")
+
+    if buffer_size < 1:
+        raise Exception("Buffer size must be equal to or greater than 1")
+
+    if embedding_dim < 1:
+        raise Exception("Embedding dimension must be equal to or greater than 1")
+
+    if units < 1:
+        raise Exception("Units must be equal to or greater than 1")
+
+    if epochs < 1:
+        raise Exception("Epoch number is less than 1 (model will not be trained)")
+
+    if save_model_decoder:
+        if not os.path.exists(save_path_decoder):
+            raise Exception("Decoder save path does not exists")
+
+    if save_model_encoder:
+        if not os.path.exists(save_path_encoder):
+            raise Exception("Encoder sav path does not exists")
+
     if gpu:
         device = '/GPU:0'
     else:
@@ -499,7 +557,7 @@ def image_caption_query(self, instruction,
         for epoch in range(epochs):
             total_loss = 0
             total_loss_val = 0
-    
+
             for (batch, (img_tensor, target)) in enumerate(dataset):
                 batch_loss, t_loss = train_step(img_tensor, target)
                 total_loss += t_loss
