@@ -258,6 +258,7 @@ def tuneClass(
     tuner.search(X_train, y_train,
                  epochs=epochs,
                  validation_data=(X_test, y_test))
+    
     models = tuner.get_best_models(num_models=1)
     hyp = tuner.get_best_hyperparameters(num_trials=1)[0]
     #hyp = tuner.oracle.get_best_trials(num_trials=1)[0].hyperparameters.values
@@ -277,8 +278,7 @@ def tuneClass(
         best_hps : best Hyperprameters obtained after tuning, stored as array
         history : history of the data executed from the given model
     """
-    return tuner,best_model.best_estimator_.get_params()['C'], history
-    #return models[0], hyp, history
+    return models[0], hyp, history
 
 
 def tuneCNN(
