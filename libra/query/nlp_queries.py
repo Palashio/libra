@@ -24,6 +24,17 @@ from libra.preprocessing.image_caption_helpers import load_image, map_func, CNN_
 from libra.query.supplementaries import save, get_standard_training_output_keras, get_standard_training_output_generic
 from libra.plotting.generate_plots import plot_loss
 
+counter = 0
+currLog = 0
+
+
+def clearLog():
+    global currLog
+    global counter
+
+    currLog = ""
+    counter = 0
+
 
 def logger(instruction, found=""):
     '''
@@ -127,9 +138,10 @@ def text_classification_query(self, instruction, drop=None,
                         epochs=epochs, callbacks=[es], verbose=0)
     # Print Epoch-History Table
     get_standard_training_output_keras(epochs, history)
-    logger("->","Final training loss: {}".format(history.history["loss"][len(history.history["loss"]) - 1]))
+    logger("->", "Final training loss: {}".format(history.history["loss"][len(history.history["loss"]) - 1]))
     logger("->", "Final validation loss: {}".format(history.history["val_loss"][len(history.history["val_loss"]) - 1]))
-    logger("->", "Final validation accuracy: {}".format(history.history["val_accuracy"][len(history.history["val_accuracy"]) - 1]))
+    logger("->", "Final validation accuracy: {}".format(
+        history.history["val_accuracy"][len(history.history["val_accuracy"]) - 1]))
 
     plots = {}
     if generate_plots:
@@ -159,6 +171,7 @@ def text_classification_query(self, instruction, drop=None,
                                           'accuracy': {
                                               'training_accuracy': history.history['accuracy'],
                                               'validation_accuracy': history.history['val_accuracy']}}
+    clearLog()
     return self.models["Text Classification"]
 
 
@@ -287,6 +300,7 @@ def summarization_query(self, instruction, preprocess=True,
         'losses': {'training_loss': loss_train,
                    'val_loss': loss_val}
     }
+    clearLog()
     return self.models["Document Summarization"]
 
 
@@ -541,4 +555,5 @@ def image_caption_query(self, instruction,
             'validation_loss': total_loss_val.numpy()
         }
     }
+    clearLog()
     return self.models["Image Caption"]
