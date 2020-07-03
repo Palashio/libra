@@ -117,6 +117,7 @@ class client:
             if modeldict.get('preprocesser'):
                 data = modeldict['preprocesser'].transform(data)
             predictions = modeldict['model'].predict(data)
+        clearLog()
         return self.interpret(modelKey, predictions)
 
     def interpret(self, modelKey, predictions):
@@ -138,6 +139,7 @@ class client:
             else:
                 predictions = modeldict['interpreter'].inverse_transform(
                     predictions)
+        clearLog()
         return predictions
 
     def neural_network_query(self,
@@ -204,6 +206,7 @@ class client:
                     drop=drop,
                     save_model=save_model,
                     save_path=save_path)
+        clearLog()
         return self
 
     # single regression query using a feed-forward neural network
@@ -248,6 +251,7 @@ class client:
             save_path=save_path)
 
         self.latest_model = 'regression_ANN'
+        clearLog()
         return self
     # query for multilabel classification query, does not work for
     # binaryclassification, fits to feed-forward neural network
@@ -292,6 +296,7 @@ class client:
             save_path=save_path)
 
         self.latest_model = 'classification_ANN'
+        clearLog()
         return self
         # query to perform k-means clustering
 
@@ -328,6 +333,7 @@ class client:
         )
 
         self.latest_model = 'k_means_clustering'
+        clearLog()
         return self
         # query to create a support vector machine
 
@@ -367,6 +373,7 @@ class client:
                                        )
 
         self.latest_model = 'svm'
+        clearLog()
         return self
         # query to create a nearest neighbors model
 
@@ -405,6 +412,7 @@ class client:
         )
 
         self.latest_model = 'nearest_neighbor'
+        clearLog()
         return self
         # query to create a decision tree model
 
@@ -448,6 +456,7 @@ class client:
             ccp_alpha=ccp_alpha)
 
         self.latest_model = 'decision_tree'
+        clearLog()
         return self
 
         # tunes a specific neural network based on the input model_to_tune
@@ -502,7 +511,7 @@ class client:
             verbose=verbose,
             test_size=test_size
         )
-
+        clearLog()
         return self
     # query to build a convolutional neural network
 
@@ -540,6 +549,7 @@ class client:
             width=width)
 
         self.latest_model = 'convolutional_NN'
+        clearLog()
         return self
         # Sentiment analysis predict wrapper
 
@@ -550,7 +560,7 @@ class client:
         :param many params: all used as hyperparameters for the algorithm.
         :return: a classification of text that you've provided
         '''
-
+        clearLog()
         return classify_text(self=self, text=text)
 
     # sentiment analysis query
@@ -589,6 +599,7 @@ class client:
             save_model=save_model,
             save_path=save_path)
         self.latest_model = 'Text Classification'
+        clearLog()
         return self
         # Document summarization predict wrapper
 
@@ -598,6 +609,7 @@ class client:
         :param text: set of text that you want to summarize.
         :return: a summary of text inputted in the text field.
         '''
+        clearLog()
         return get_summary(self=self, text=text)
 
     # text summarization query
@@ -634,6 +646,7 @@ class client:
             save_path=save_path)
 
         self.latest_model = 'Document Summarization'
+        clearLog()
         return self
         # Image caption prediction
 
@@ -644,6 +657,7 @@ class client:
         :return: a caption for the image inputted in the image field.
         '''
         caption = generate_caption(self=self, image=image)
+        clearLog()
         return ' '.join(caption[:len(caption) - 1])
 
     # Image Caption query
@@ -685,6 +699,7 @@ class client:
             save_model_encoder=save_model_encoder,
             save_path_encoder=save_path_encoder)
         self.latest_model = 'Image Caption'
+        clearLog()
         return self
         # performs dimensionality reduction on your dataset
     # based on user instruction for target variable
@@ -706,14 +721,14 @@ class client:
         if model is None:
             model = self.latest_model
         print(self.models[model]['plots'].keys())
-
+        clearLog()
     def model_names(self):
         '''
         Function that shows names of models associated with the client
         '''
         models_avail = [key for key in self.models.keys()]
         print(models_avail)
-
+        clearLog()
     # shows the keys in the models dictionary
     def model_data(self, model=None):
         '''
@@ -723,7 +738,7 @@ class client:
         if model is None:
             model = self.latest_model
         get_model_data(self, model)
-
+        clearLog()
     # returns all operators applicable to the client's models dictionary
     def operators(self, model=None):
         '''
@@ -733,7 +748,7 @@ class client:
         if model is None:
             model = self.latest_model
         get_operators(self, model)
-
+        clearLog()
     # show accuracy scores for client's model
     def accuracy(self, model=None):
         '''
@@ -742,6 +757,7 @@ class client:
         '''
         if model is None:
             model = self.latest_model
+        clearLog()
         return get_accuracy(self, model)
 
     # show losses for client's model
@@ -752,6 +768,7 @@ class client:
         '''
         if model is None:
             model = self.latest_model
+        clearLog()
         return get_losses(self, model)
 
     # return client model's target
@@ -762,6 +779,7 @@ class client:
         '''
         if model is None:
             model = self.latest_model
+        clearLog()
         return get_target(self, model)
 
     # return NLP model's vocabulary
@@ -772,6 +790,7 @@ class client:
         '''
         if model is None:
             model = self.latest_model
+        clearLog()
         return get_vocab(self, model)
 
     # plotting for client
@@ -780,6 +799,7 @@ class client:
         Function that retrieves all of plots in the self.models dictionary for the key.
         :param model: default to the latest model, but essentailly the model key
         '''
+        clearLog()
         get_plots(self, model, plot, save)
 
 
