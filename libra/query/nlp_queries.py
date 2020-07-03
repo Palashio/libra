@@ -95,9 +95,8 @@ def text_classification_query(self, instruction, drop=None,
     data = pd.read_csv(self.dataset)
     if preprocess:
         data.fillna(0, inplace=True)
-    if drop is None:
-        drop = []
-    data = data.drop(drop)
+    if drop is not None:
+        data.drop(drop, axis=1, inplace=True)
     X, Y, target = get_target_values(data, instruction, "label")
     Y = np.array(Y)
     classes = np.unique(Y)
@@ -236,13 +235,13 @@ def summarization_query(self, instruction, preprocess=True,
     else:
         device = "cpu"
 
-    if drop is None:
-        drop = []
-
     data = pd.read_csv(self.dataset)
+
+    if drop is not None:
+        data.drop(drop, axis=1, inplace=True)
+
     if preprocess:
         data.fillna(0, inplace=True)
-    data = data.drop(drop)
 
     logger("Preprocessing data...")
 
@@ -397,7 +396,7 @@ def image_caption_query(self, instruction,
     if preprocess:
         df.fillna(0, inplace=True)
     if drop is not None:
-        df = df.drop(drop)
+        df.drop(drop, axis=1, inplace=True)
 
     logger("Preprocessing data")
 
