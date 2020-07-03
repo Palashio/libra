@@ -790,8 +790,3 @@ class client:
         :param model: default to the latest model, but essentially the model key
         '''
         get_plots(self, model, plot, save)
-
-
-x = client("/Users/anasawadalla/PycharmProjects/libra/tools/data/nlp_data/image-caption.csv")
-client.image_caption_query(self=x, instruction="image captioning", test_size=0.2, epochs=3, embedding_dim=17, batch_size= 4, buffer_size= 23, units= 555, gpu=True)
-x.models.get("Image Caption")["plots"].get("loss").show()
