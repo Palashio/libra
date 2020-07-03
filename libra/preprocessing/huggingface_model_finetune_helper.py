@@ -45,7 +45,9 @@ def train(epoch, tokenizer, model, device, loader, val_loader, optimizer, testin
 
                 running_loss_val += loss.item()
 
-    return running_loss / len(loader), running_loss_val / len(val_loader)
+        return running_loss / len(loader), running_loss_val / len(val_loader)
+    else:
+        return running_loss / len(loader), 0
 
 
 class CustomDataset(Dataset):
