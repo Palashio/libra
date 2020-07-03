@@ -297,8 +297,8 @@ def summarization_query(self, instruction, preprocess=True,
         total_loss_train.append(loss_train)
         total_loss_val.append(loss_val)
 
-    logger("Final Training Loss: ", loss_train)
-    logger("Final Validation Loss: ", loss_val)
+    logger("->", "Final training loss: {}".format(loss_train))
+    logger("->", "Final validation loss: {}".format(loss_val))
 
     plots = {}
     if generate_plots:
@@ -579,8 +579,8 @@ def image_caption_query(self, instruction,
     if generate_plots:
         plots.update({"loss": plot_loss(loss_plot_train, loss_plot_val)})
 
-    logger("Final Training Loss: ", str(total_loss.numpy() / num_steps))
-    logger("Final Validation Loss: ", str(total_loss_val.numpy() / num_steps))
+    logger("->", "Final training loss: {}".format(str(total_loss.numpy() / num_steps)))
+    logger("->", "Final validation loss: {}".format(str(total_loss_val.numpy() / num_steps)))
 
     if save_model_decoder:
         logger("Saving decoder checkpoint...")
