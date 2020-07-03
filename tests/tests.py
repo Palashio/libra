@@ -76,6 +76,7 @@ class TestQueries(unittest.TestCase):
         self.newClient.kmeans_clustering_query('predict ocean proximity')
         self.assertTrue('k_means_clustering' in self.newClient.models)
 
+
     """
     TEST ANALYZE() FUNCTION
     

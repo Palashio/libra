@@ -36,7 +36,7 @@ def classify_text(self, text):
     text = sequence.pad_sequences(text, sentimentInfo["maxTextLength"])
     model = sentimentInfo["model"]
     prediction = tf.keras.backend.argmax(model.predict(text))
-    return int(sentimentInfo["classes"][tf.keras.backend.get_value(prediction)[0]])
+    return sentimentInfo["classes"][tf.keras.backend.get_value(prediction)[0]]
 
 
 # Sentiment analysis query

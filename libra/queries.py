@@ -113,6 +113,7 @@ class client:
         if modelKey == 'Text Classification':
             map_func = np.vectorize(lambda x: self.classify_text(x))
             predictions = map_func(data)
+            return predictions
         else:
             modeldict = self.models[modelKey]
             if modeldict.get('preprocesser'):

@@ -253,8 +253,14 @@ def plot_mc_roc(y_test, y_score, interpreter=None):
     lw = 2
     n_classes = len(np.unique(y_test))
     classes = pd.unique(y_test)
-    y_test = label_binarize(y_test, classes=classes)
-    y_score = label_binarize(y_score, classes=classes)
+    if n_classes != 2:
+        y_test = label_binarize(y_test, classes=classes)
+        y_score = label_binarize(y_score, classes=classes)
+    else:
+        n_classes=1
+        y_test = y_test.reshape(-1, 1)
+        y_score = y_score.reshape(-1, 1)
+
     # Compute ROC curve and ROC area for each class
     fpr = dict()
     tpr = dict()
@@ -340,17 +346,17 @@ def analyze(client, model=None):
     modeldict = client.models[model]
     if 'plots' in modeldict and model != 'k_means_clustering':
         logger(" ", "Displaying associated plots")
-        # TODO: plot separately instead of on top of each other
         for key in modeldict['plots']:
             if key != 'roc_curve':
                 modeldict['plots'][key].show()
-                print('im here')
 
     if 'test_data' in modeldict:
         logger("->", "Making predictions for test data...")
         data = modeldict['test_data']['X']
         real = modeldict['test_data']['y']
         preds = modeldict['model'].predict(data)
+        if model == 'Text Classification':
+            preds = np.argmax(preds, axis=-1)
         if model == 'classification_ANN':  # formats labels column
             enc = sklearn.preprocessing.LabelEncoder()
             real = modeldict['interpreter'].inverse_transform(
@@ -379,7 +385,7 @@ def analyze(client, model=None):
         modeldict['MSE'] = MSE
         modeldict['MAE'] = MAE
     # classification models
-    elif model in ['svm', 'nearest_neighbor', 'decision_tree', 'classification_ANN']:
+    elif model in ['svm', 'nearest_neighbor', 'decision_tree', 'classification_ANN', 'Text Classification']:
         logger("->", "Plotting ROC curves and creating confusion matrix...")
         if model in ['svm', 'nearest_neighbor',
                      'decision_tree']:  # sklearn models ONLY
@@ -395,7 +401,20 @@ def analyze(client, model=None):
                 accuracy = modeldict['accuracy']['accuracy_score']
             else:
                 accuracy = modeldict['accuracy_score']
-        else:  # classification_ANN
+        elif model == 'Text Classification':
+            roc = plot_mc_roc(real, preds, modeldict['interpreter'])
+            roc
+            plt.show()
+            labels = list(modeldict['interpreter'].keys())
+            cm = confusion_matrix(real, preds)
+            cm = ConfusionMatrixDisplay(
+                confusion_matrix=cm,
+                display_labels=labels).plot()
+            cm
+            plt.show()
+
+            accuracy = modeldict['accuracy']['validation_accuracy']
+        elif model == 'classification_ann':  # classification_ANN
             roc = plot_mc_roc(real, preds, enc)
             roc
             plt.show()
