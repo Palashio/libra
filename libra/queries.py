@@ -13,12 +13,12 @@ from libra.query.dimensionality_red_queries import dimensionality_reduc
 from libra.data_generation.grammartree import get_value_instruction
 from libra.data_generation.dataset_labelmatcher import (get_similar_column,
                                                         get_similar_model)
-
+from colorama import Fore, Style
 import pandas as pd
 from pandas.core.common import SettingWithCopyWarning
 import warnings
 import os
-import tensorflow as tf
+import tensorflow
 import numpy as np
 
 # supressing warnings for cleaner dialogue box
@@ -50,21 +50,19 @@ def logger(instruction, found=""):
     :param found: if you want to display something found like target column
 
     '''
-    global currLog
     global counter
     if counter == 0:
-        currLog += (" " * 2 * counter) + str(instruction) + str(found)
+        print((" " * 2 * counter) + str(instruction) + str(found))
     elif instruction == "->":
         counter = counter - 1
-        currLog += (" " * 2 * counter) + str(instruction) + str(found)
+        print(Fore.BLUE + (" " * 2 * counter) +
+              str(instruction) + str(found) + (Style.RESET_ALL))
     else:
-        currLog += (" " * 2 * counter) + "|- " + str(instruction) + str(found)
+        print((" " * 2 * counter) + "|- " + str(instruction) + str(found))
         if instruction == "done...":
-            currLog += "\n" + "\n"
+            print("\n" + "\n")
 
     counter += 1
-    print(currLog)
-    currLog = ""
 
 
 class client:

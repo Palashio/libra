@@ -112,7 +112,7 @@ def regression_ann(
     y_train = target_scaler.fit_transform(np.array(y['train']).reshape(-1, 1))
     y_test = target_scaler.transform(np.array(y['test']).reshape(-1, 1))
 
-    logger("Establishing callback function...")
+    logger("Establishing callback function")
 
     models = []
     losses = []
@@ -134,7 +134,7 @@ def regression_ann(
     # get the first 3 layer model
     model = get_keras_model_reg(data, i)
 
-    logger("Training initial model...")
+    logger("Training initial model")
     history = model.fit(
         X_train,
         y_train,

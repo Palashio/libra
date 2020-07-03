@@ -6,8 +6,6 @@ from libra.modeling.tuner import (tuneReg,
 import matplotlib.pyplot as plt
 from libra.preprocessing.data_reader import DataReader
 from keras.preprocessing.image import ImageDataGenerator
-from libra.preprocessing.image_preprocesser import (setwise_preprocessing,
-                                                    set_distinguisher)
 from libra.plotting.generate_plots import (generate_regression_plots,
                                            generate_classification_plots)
 
@@ -39,6 +37,15 @@ def clearLog():
 
 
 def logger(instruction, found=""):
+    '''
+    logging function that creates hierarchial display of the processes of
+    different functions. Copied into different python files to maintain
+    global variables.
+
+    :param instruction: what you want to be displayed
+    :param found: if you want to display something found like target column
+
+    '''
     global counter
     if counter == 0:
         print((" " * 2 * counter) + str(instruction) + str(found))
