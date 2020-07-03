@@ -250,6 +250,7 @@ class client:
 
         self.latest_model = 'regression_ANN'
         return self
+
     # query for multilabel classification query, does not work for
     # binaryclassification, fits to feed-forward neural network
 
@@ -452,6 +453,7 @@ class client:
         return self
 
         # tunes a specific neural network based on the input model_to_tune
+
     def tune(self,
              model_to_tune=None,
              max_layers=10,
@@ -505,6 +507,7 @@ class client:
         )
 
         return self
+
     # query to build a convolutional neural network
 
     def convolutional_query(self,
@@ -561,7 +564,7 @@ class client:
                                   random_state=49,
                                   learning_rate=1e-2,
                                   epochs=20,
-                                  maximizer="val_loss",
+                                  monitor="val_loss",
                                   batch_size=32,
                                   max_text_length=200,
                                   generate_plots=True,
@@ -580,7 +583,7 @@ class client:
             test_size=test_size,
             random_state=random_state,
             learning_rate=learning_rate,
-            maximizer=maximizer,
+            monitor=monitor,
             epochs=epochs,
             batch_size=batch_size,
             max_text_length=max_text_length,
@@ -690,6 +693,7 @@ class client:
         self.latest_model = 'Image Caption'
         return self
         # performs dimensionality reduction on your dataset
+
     # based on user instruction for target variable
 
     def dimensionality_reducer(self, instruction):
@@ -721,7 +725,7 @@ class client:
     def model_data(self, model=None):
         '''
         Function that retrieves the model_data; all the information in self.models for that model
-        :param model: default to the latest model, but essentailly the model key
+        :param model: default to the latest model, but essentially the model key
         '''
         if model is None:
             model = self.latest_model
@@ -731,7 +735,7 @@ class client:
     def operators(self, model=None):
         '''
         Function that retrieves all of the operators; pipelines that were used to model the dataset
-        :param model: default to the latest model, but essentailly the model key
+        :param model: default to the latest model, but essentially the model key
         '''
         if model is None:
             model = self.latest_model
@@ -741,7 +745,7 @@ class client:
     def accuracy(self, model=None):
         '''
         Function that retrieves all of the accuracies in the self.models dictionary for the key.
-        :param model: default to the latest model, but essentailly the model key
+        :param model: default to the latest model, but essentially the model key
         '''
         if model is None:
             model = self.latest_model
@@ -751,7 +755,7 @@ class client:
     def losses(self, model=None):
         '''
         Function that retrieves all of the losses in the self.models dictionary for the key.
-        :param model: default to the latest model, but essentailly the model key
+        :param model: default to the latest model, but essentially the model key
         '''
         if model is None:
             model = self.latest_model
@@ -771,7 +775,7 @@ class client:
     def vocab(self, model=None):
         '''
         Function that retrieves the NLP models vocabulary.
-        :param model: default to the latest model, but essentailly the model key
+        :param model: default to the latest model, but essentially the model key
         '''
         if model is None:
             model = self.latest_model
@@ -781,8 +785,10 @@ class client:
     def plots(self, model="", plot="", save=False):
         '''
         Function that retrieves all of plots in the self.models dictionary for the key.
-        :param model: default to the latest model, but essentailly the model key
+        :param model: default to the latest model, but essentially the model key
         '''
         get_plots(self, model, plot, save)
 
 
+x = client("/Users/anasawadalla/PycharmProjects/libra/tools/data/nlp_data/miniDocumentSummarization.csv")
+client.summarization_query(self=x, instruction="summarize text", save_model=True)

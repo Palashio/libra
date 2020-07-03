@@ -14,6 +14,7 @@ import tensorflow as tf
 from libra.data_generation.dataset_labelmatcher import get_similar_column
 from libra.data_generation.grammartree import get_value_instruction
 from libra.modeling.prediction_model_creation import get_keras_text_class
+import libra.plotting.nonkeras_generate_plots
 from libra.plotting.generate_plots import generate_classification_plots
 from libra.preprocessing.NLP_preprocessing import get_target_values, text_clean_up, lemmatize_text, encode_text
 from libra.preprocessing.huggingface_model_finetune_helper import CustomDataset, train, inference
@@ -23,6 +24,8 @@ from libra.preprocessing.image_caption_helpers import load_image, map_func, CNN_
 # Sentiment analysis predict wrapper
 from libra.query.supplementaries import save, get_standard_training_output_keras, get_standard_training_output_generic
 from libra.plotting.generate_plots import plot_loss
+
+counter = 0
 
 
 def logger(instruction, found=""):
@@ -70,7 +73,7 @@ def text_classification_query(self, instruction, drop=None,
                               random_state=49,
                               learning_rate=1e-2,
                               epochs=20,
-                              maximizer="val_loss",
+                              monitor="val_loss",
                               batch_size=32,
                               max_text_length=200,
                               generate_plots=True,
@@ -128,14 +131,11 @@ def text_classification_query(self, instruction, drop=None,
     logger("Training initial model")
 
     # early stopping callback
-    try:
-        es = EarlyStopping(
-            monitor=maximizer,
-            mode='auto',
-            verbose=0,
-            patience=5)
-    except:
-        print("Maximizer not found")
+    es = EarlyStopping(
+        monitor=monitor,
+        mode='auto',
+        verbose=0,
+        patience=5)
 
     history = model.fit(X_train, y_train, validation_data=(X_test, y_test),
                         batch_size=batch_size,
@@ -306,7 +306,7 @@ def summarization_query(self, instruction, preprocess=True,
 
     plots = {}
     if generate_plots:
-        plots.update({"loss": plot_loss(total_loss_train, total_loss_val)})
+        plots.update({"loss": libra.plotting.nonkeras_generate_plots.plot_loss(total_loss_train, total_loss_val)})
 
     if save_model:
         logger("Saving model")
