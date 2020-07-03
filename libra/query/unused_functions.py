@@ -233,36 +233,36 @@ history = model.fit_generator(
 #     return False
 
 
-"""
-        trainingImages = []
-        train_labels = []
-        validationImages = []
-        test_labels = []
 
-        for path in imgPaths:
-        classLabel = path.split(os.path.sep)[-2]
-        classes.add(classLabel)
-        img = img_to_array(load_img(path, target_size=(64, 64)))
+        # trainingImages = []
+        # train_labels = []
+        # validationImages = []
+        # test_labels = []
+        #
+        # for path in imgPaths:
+        # classLabel = path.split(os.path.sep)[-2]
+        # classes.add(classLabel)
+        # img = img_to_array(load_img(path, target_size=(64, 64)))
+        #
+        # if path.split(os.path.sep)[-3] == 'training_set':
+        #     trainingImages.append(img)
+        #     train_labels.append(classLabel)
+        # else:
+        #     validationImages.append(img)
+        #     test_labels.append(classLabel)
+        #
+        # trainingImages = np.array(trainingImages)
+        # train_labels = to_categorical(np.array(train_labels))
+        # validationImages = np.array(validationImages)
+        # test_labels = to_categorical(np.array(test_labels))
+        # model.compile(loss=’categorical_crossentropy’,
+        #           optimizer=’sgd’,
+        #           metrics=[‘accuracy’])
+        # history=model.fit(train_images, train_labels,
+        #           batch_size=100,
+        #           epochs=5,
+        #           verbose=1)
 
-        if path.split(os.path.sep)[-3] == 'training_set':
-            trainingImages.append(img)
-            train_labels.append(classLabel)
-        else:
-            validationImages.append(img)
-            test_labels.append(classLabel)
-
-        trainingImages = np.array(trainingImages)
-        train_labels = to_categorical(np.array(train_labels))
-        validationImages = np.array(validationImages)
-        test_labels = to_categorical(np.array(test_labels))
-        model.compile(loss=’categorical_crossentropy’,
-                  optimizer=’sgd’,
-                  metrics=[‘accuracy’])
-        history=model.fit(train_images, train_labels,
-                  batch_size=100,
-                  epochs=5,
-                  verbose=1)
-        """
 
 
 # Seperates the color channels and then reshapes each of the channels to
@@ -289,149 +289,204 @@ history = model.fit_generator(
 #     return
 
 
-"""
+
 ### TUNER UPDATE
-def tuneReg(
-        data,
-        target,
-        max_layers=10,
-        min_layers=2,
-        min_dense=32,
-        max_dense=512,
-        executions_per_trial=3,
-        max_trials=3,
-        epochs=10,
-        activation='relu',
-        step=32,
-        verbose=0,
-        test_size=0.2
-):
+# def tuneReg(
+#         data,
+#         target,
+#         max_layers=10,
+#         min_layers=2,
+#         min_dense=32,
+#         max_dense=512,
+#         executions_per_trial=3,
+#         max_trials=3,
+#         epochs=10,
+#         activation='relu',
+#         step=32,
+#         verbose=0,
+#         test_size=0.2
+# ):
+#
+#     # function build model using hyperparameter
+#     def build_model(hp):
+#         model = mlrose.NeuralNetwork( hidden_nodes = [ hp.Int('num_layers', min_layers,
+#                                                        max_layers)],
+#                                       activation = activation,
+#                                       algorithm = 'random_hill_climb',
+#                                       max_iters = 1000,
+#                                       bias = True, learning_rate = 0.0001,
+#                                       early_stopping = True, clip_max = 5,
+#                                       max_attempts = 100,
+#                                       random_state = 3)
+#         model.compile(
+#             optimizer=keras.optimizers.Adam(
+#                                        hp.Float('learning_rate',
+#                                                 min_value=1e-5,
+#                                                 max_value=1e-2,
+#                                                 sampling='LOG',
+#                                                 default=1e-3)),
+#             loss='mean_squared_error',
+#             metrics=[metrics])
+#         return model
+#
+#     # Create regularization hyperparameter distribution
+#     create_regularizer = uniform(loc=0, scale=4)
+#     # Create hyperparameter options
+#     hyperparameters = dict(C=create_regularizer, penalty=['l1', 'l2'])
+#     # random search for the model
+#     tuner = RandomizedSearchCV( build_model,
+#                                 hyperparameters,
+#                                 random_state=1,
+#                                 n_iter=100,
+#                                 cv=5, verbose=0,
+#                                 n_jobs=-1)
+#
+#     X_train, X_test, y_train, y_test = train_test_split(
+#         data, target, test_size=0.2, random_state=49)
+#     history = tuner.fit( X_train,
+#                          y_train,
+#                          epochs=epochs,
+#                          validation_data=(
+#                                  X_test,
+#                                  y_test),
+#                          callbacks= [tf.keras.callbacks.TensorBoard('my_dir')],
+#                          verbose=0)
+#     """
+#     #Return:
+#     #    models[0] : best model obtained after tuning
+#     #    best_hps : best Hyperprameters obtained after tuning, stored as map
+#     #    history : history of the data executed from the given model
+#     """
+#     return tuner,best_model.best_estimator_.get_params()['C'], history
+#
 
-    # function build model using hyperparameter
-    def build_model(hp):
-        model = mlrose.NeuralNetwork( hidden_nodes = [ hp.Int('num_layers', min_layers, 
-                                                       max_layers)], 
-                                      activation = activation,
-                                      algorithm = 'random_hill_climb', 
-                                      max_iters = 1000,
-                                      bias = True, learning_rate = 0.0001,
-                                      early_stopping = True, clip_max = 5, 
-                                      max_attempts = 100,
-                                      random_state = 3)
-        model.compile(
-            optimizer=keras.optimizers.Adam(
-                                       hp.Float('learning_rate',
-                                                min_value=1e-5,
-                                                max_value=1e-2,
-                                                sampling='LOG',
-                                                default=1e-3)),
-            loss='mean_squared_error',
-            metrics=[metrics])
-        return model
-
-    # Create regularization hyperparameter distribution
-    create_regularizer = uniform(loc=0, scale=4)
-    # Create hyperparameter options
-    hyperparameters = dict(C=create_regularizer, penalty=['l1', 'l2'])
-    # random search for the model
-    tuner = RandomizedSearchCV( build_model, 
-                                hyperparameters, 
-                                random_state=1, 
-                                n_iter=100, 
-                                cv=5, verbose=0, 
-                                n_jobs=-1)
-
-    X_train, X_test, y_train, y_test = train_test_split(
-        data, target, test_size=0.2, random_state=49)
-    history = tuner.fit( X_train,
-                         y_train,
-                         epochs=epochs,
-                         validation_data=(
-                                 X_test,
-                                 y_test),
-                         callbacks= [tf.keras.callbacks.TensorBoard('my_dir')],
-                         verbose=0)
-    """
-    #Return:
-    #    models[0] : best model obtained after tuning
-    #    best_hps : best Hyperprameters obtained after tuning, stored as map
-    #    history : history of the data executed from the given model
-    """
-    return tuner,best_model.best_estimator_.get_params()['C'], history
-
-
-def tuneClass(
-        X,
-        y,
-        num_classes,
-        max_layers=10,
-        min_layers=2,
-        min_dense=32,
-        max_dense=512,
-        executions_per_trial=3,
-        max_trials=3,
-        activation='relu',
-        loss='categorical_crossentropy',
-        metrics='accuracy',
-        epochs=10,
-        step=32,
-        verbose=0,
-        test_size=0.2):
-    # function build model using hyperparameter
-    le = preprocessing.LabelEncoder()
-    y = tf.keras.utils.to_categorical(
-        le.fit_transform(y), num_classes=num_classes)
-
-    def build_model(hp):
-        model = mlrose.NeuralNetwork( hidden_nodes = [hp.Int('num_layers', min_layers, max_layers)], 
-                                          activation = activation,
-                                          algorithm = 'random_hill_climb', 
-                                          max_iters = 1000,
-                                          bias = True, is_classifier = True, 
-                                          learning_rate = 0.0001,
-                                          early_stopping = True, clip_max = 5, 
-                                          max_attempts = 100,
-				                          random_state = 3)
-        model.compile(
-            optimizer=keras.optimizers.Adam(
-                                       hp.Float('learning_rate',
-                                                min_value=1e-5,
-                                                max_value=1e-2,
-                                                sampling='LOG',
-                                                default=1e-3)),
-            loss=loss,
-            metrics=[metrics])
-        return model
+# def tuneClass(
+# #         X,
+# #         y,
+# #         num_classes,
+# #         max_layers=10,
+# #         min_layers=2,
+# #         min_dense=32,
+# #         max_dense=512,
+# #         executions_per_trial=3,
+# #         max_trials=3,
+# #         activation='relu',
+# #         loss='categorical_crossentropy',
+# #         metrics='accuracy',
+# #         epochs=10,
+# #         step=32,
+# #         verbose=0,
+# #         test_size=0.2):
+# #     # function build model using hyperparameter
+# #     le = preprocessing.LabelEncoder()
+# #     y = tf.keras.utils.to_categorical(
+# #         le.fit_transform(y), num_classes=num_classes)
+# #
+# #     def build_model(hp):
+# #         model = mlrose.NeuralNetwork( hidden_nodes = [hp.Int('num_layers', min_layers, max_layers)],
+# #                                           activation = activation,
+# #                                           algorithm = 'random_hill_climb',
+# #                                           max_iters = 1000,
+# #                                           bias = True, is_classifier = True,
+# #                                           learning_rate = 0.0001,
+# #                                           early_stopping = True, clip_max = 5,
+# #                                           max_attempts = 100,
+# # 				                          random_state = 3)
+# #         model.compile(
+# #             optimizer=keras.optimizers.Adam(
+# #                                        hp.Float('learning_rate',
+# #                                                 min_value=1e-5,
+# #                                                 max_value=1e-2,
+# #                                                 sampling='LOG',
+# #                                                 default=1e-3)),
+# #             loss=loss,
+# #             metrics=[metrics])
+# #         return model
+# #
+# #     # Create regularization hyperparameter distribution
+# #     create_regularizer = uniform(loc=0, scale=4)
+# #     # Create hyperparameter options
+# #     hyperparameters = dict(C=create_regularizer, penalty=['l1', 'l2'])
+# #     # random search for the model
+# #     tuner = RandomizedSearchCV( build_model,
+# #                                 hyperparameters,
+# #                                 random_state=1,
+# #                                 n_iter=100,
+# #                                 cv=5, verbose=0,
+# #                                 n_jobs=-1)
+# #     # tuners, establish the object to look through the tuner search space
+# #     X_train, X_test, y_train, y_test = train_test_split(
+# #         X, y, test_size=0.2, random_state=49)
+# #     history = tuner.fit( X_train,
+# #                          y_train,
+# #                          epochs=epochs,
+# #                          validation_data=(
+# #                                  X_test,
+# #                                  y_test),
+# #                          callbacks= [tf.keras.callbacks.TensorBoard('my_dir')],
+# #                          verbose=0)
+# #     """
+# #     #Return:
+# #     #    models[0] : best model obtained after tuning
+# #     #    best_hps : best Hyperprameters obtained after tuning, stored as array
+# #     #    history : history of the data executed from the given model
+# #     """
+# #     return tuner,best_model.best_estimator_.get_params()['C'], history
+# #     #return models[0], hyp, history
+# #
+# # """"""
     
-    # Create regularization hyperparameter distribution
-    create_regularizer = uniform(loc=0, scale=4)
-    # Create hyperparameter options
-    hyperparameters = dict(C=create_regularizer, penalty=['l1', 'l2'])
-    # random search for the model
-    tuner = RandomizedSearchCV( build_model, 
-                                hyperparameters, 
-                                random_state=1, 
-                                n_iter=100, 
-                                cv=5, verbose=0, 
-                                n_jobs=-1)
-    # tuners, establish the object to look through the tuner search space
-    X_train, X_test, y_train, y_test = train_test_split(
-        X, y, test_size=0.2, random_state=49)
-    history = tuner.fit( X_train,
-                         y_train,
-                         epochs=epochs,
-                         validation_data=(
-                                 X_test,
-                                 y_test),
-                         callbacks= [tf.keras.callbacks.TensorBoard('my_dir')],
-                         verbose=0)
-    """
-    #Return:
-    #    models[0] : best model obtained after tuning
-    #    best_hps : best Hyperprameters obtained after tuning, stored as array
-    #    history : history of the data executed from the given model
-    """
-    return tuner,best_model.best_estimator_.get_params()['C'], history
-    #return models[0], hyp, history
+#     
+# def get_standard_training_output_keras(epochs, history):
+#     '''
+#     helper output for logger
+#     :param epochs: is the number of epochs model was running for
+#     :param history: the keras history object
+#     '''
+#     global counter
+#     col_name = [["Epochs", "| Training Loss ", "| Validation Loss "]]
+#     col_width = max(len(word) for row in col_name for word in row) + 2
+#     for row in col_name:
+#         print((" " * 2 * counter) + "| " + ("".join(word.ljust(col_width)
+#                                                     for word in row)) + " |")
+# 
+#     for i, j, k in zip(
+#             range(epochs), history.history["loss"], history.history["val_loss"]):
+#         values = []
+#         values.append(str(i))
+#         values.append("| " + str(j))
+#         values.append("| " + str(k))
+#         datax = []
+#         datax.append(values)
+#         for row in datax:
+#             print((" " * 2 * counter) + "| " + ("".join(word.ljust(col_width)
+#                                                         for word in row)) + " |")
+# 
+# 
+# def get_standard_training_output_generic(epochs, loss, val_loss):
+#     '''
+#     helper output for logger
+#     :param epochs: is the number of epochs model was running for
+#     :param loss: is the amount of loss in the training instance
+#     :param val_loss: just validation loss
+#     '''
+#     global counter
+#     col_name = [["Epochs ", "| Training Loss ", "| Validation Loss "]]
+#     col_width = max(len(word) for row in col_name for word in row) + 2
+#     for row in col_name:
+#         print((" " * 2 * counter) + "| " + ("".join(word.ljust(col_width)
+#                                                     for word in row)) + " |")
+# 
+#     for i, j, k in zip(range(epochs), loss, val_loss):
+#         values = []
+#         values.append(str(i))
+#         values.append("| " + str(j))
+#         values.append("| " + str(k))
+#         datax = []
+#         datax.append(values)
+#         for row in datax:
+#             print((" " * 2 * counter) + "| " + ("".join(word.ljust(col_width)
+#                                                         for word in row)) + " |") 
 
-"""
+
+

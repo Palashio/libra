@@ -791,4 +791,4 @@ class client:
 
 
 x = client("/Users/anasawadalla/PycharmProjects/libra/tools/data/nlp_data/miniDocumentSummarization.csv")
-client.summarization_query(self=x, instruction="summarize text", save_model=True, batch_size=7, drop="Time")
+client.summarization_query(self=x, instruction="summarize text", save_model=True, batch_size=7, drop="Text")

@@ -139,8 +139,7 @@ def text_classification_query(self, instruction, drop=None,
     history = model.fit(X_train, y_train, validation_data=(X_test, y_test),
                         batch_size=batch_size,
                         epochs=epochs, callbacks=[es], verbose=0)
-    # Print Epoch-History Table
-    get_standard_training_output_keras(epochs, history)
+
     logger("->", "Final training loss: {}".format(history.history["loss"][len(history.history["loss"]) - 1]))
     logger("->", "Final validation loss: {}".format(history.history["val_loss"][len(history.history["val_loss"]) - 1]))
     logger("->", "Final validation accuracy: {}".format(
@@ -297,9 +296,7 @@ def summarization_query(self, instruction, preprocess=True,
             epoch, tokenizer, model, device, training_loader, val_loader, optimizer)
         total_loss_train.append(loss_train)
         total_loss_val.append(loss_val)
-    # Print Epoch-Loss Table
-    get_standard_training_output_generic(
-        epochs, total_loss_train, total_loss_val)
+
     logger("Final Training Loss: ", loss_train)
     logger("Final Validation Loss: ", loss_val)
 
@@ -568,10 +565,6 @@ def image_caption_query(self, instruction,
                 total_loss_val += t_loss
 
             loss_plot_val.append(total_loss_val.numpy() / num_steps)
-
-    # Print Epoch-Loss Table
-    get_standard_training_output_generic(
-        epochs, loss_plot_train, loss_plot_val)
 
     logger("Storing information in client object under key 'Image Caption' ...")
 
