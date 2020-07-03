@@ -50,6 +50,13 @@ def logger(instruction, found=""):
 
     counter += 1
 
+def printtable(columns):
+    col_width = max(len(word) for row in columns for word in row) + 2
+    for i columns[0]:
+    
+    for row in columns:
+        print((" " * 2 * counter) + "| " + ("".join(word.ljust(col_width)
+                                                    for word in row)) + " |")
 
 def k_means_clustering(dataset=None,
                        scatters=[],
@@ -115,6 +122,16 @@ def k_means_clustering(dataset=None,
             max_iter=max_iter).fit(data)
         modelStorage.append(kmeans)
         inertiaStor.append(kmeans.inertia_)
+
+        printtable([["Number of clusters ",
+                     "| Inertia  "]])
+        values = []
+        values.append(str(i))
+        values.append(
+            "| " + str(inertiaStor))
+        datax = []
+        printtable(datax.append(values))
+
         # minimize inertia up to 10000
         i += 1
 
@@ -122,7 +139,9 @@ def k_means_clustering(dataset=None,
         # algorithm
         if i > 3 and inertiaStor[len(
                 inertiaStor) - 2] - 1000 <= inertiaStor[len(inertiaStor) - 1]:
+            print()
             break
+    
     # generates the clustering plots approiately
     logger("->", "Optimal number of clusters found: {}".format(i))
     logger(
