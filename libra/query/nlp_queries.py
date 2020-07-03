@@ -77,6 +77,7 @@ def text_classification_query(self, instruction, drop=None,
                               generate_plots=True,
                               save_model=False,
                               save_path=os.getcwd()):
+
     data = pd.read_csv(self.dataset)
     if preprocess:
         data.fillna(0, inplace=True)
@@ -195,9 +196,15 @@ def summarization_query(self, instruction, preprocess=True,
                         max_summary_length=150,
                         test_size=0.2,
                         random_state=49,
+                        gpu=False,
                         generate_plots=True,
                         save_model=False,
                         save_path=os.getcwd()):
+    if gpu:
+        device = "cuda"
+    else:
+        device = "cpu"
+
     if drop is None:
         drop = []
     data = pd.read_csv(self.dataset)
@@ -210,8 +217,6 @@ def summarization_query(self, instruction, preprocess=True,
     X, Y, target = get_target_values(data, instruction, "summary")
     df = pd.DataFrame({'text': Y, 'ctext': X})
     logger("->", "Target Column Found: {}".format(target))
-
-    device = 'cpu'
 
     torch.manual_seed(random_state)
     np.random.seed(random_state)
@@ -316,11 +321,17 @@ def image_caption_query(self, instruction,
                         buffer_size=1000,
                         embedding_dim=256,
                         units=512,
+                        gpu=False,
                         generate_plots=True,
                         save_model_decoder=False,
                         save_path_decoder=os.getcwd(),
                         save_model_encoder=False,
                         save_path_encoder=os.getcwd()):
+    if gpu:
+        device = '/GPU:0'
+    else:
+        device = '/CPU:0'
+
     np.random.seed(random_state)
     tf.random.set_seed(random_state)
 
@@ -482,24 +493,25 @@ def image_caption_query(self, instruction,
         return total_loss
 
     logger("Training model...")
+    with tf.device(device):
+        loss_plot_train = []
+        loss_plot_val = []
+        for epoch in range(epochs):
+            total_loss = 0
+            total_loss_val = 0
+    
+            for (batch, (img_tensor, target)) in enumerate(dataset):
+                batch_loss, t_loss = train_step(img_tensor, target)
+                total_loss += t_loss
 
-    loss_plot_train = []
-    loss_plot_val = []
-    for epoch in range(epochs):
-        total_loss = 0
-        total_loss_val = 0
+            loss_plot_train.append(total_loss.numpy() / num_steps)
 
-        for (batch, (img_tensor, target)) in enumerate(dataset):
-            batch_loss, t_loss = train_step(img_tensor, target)
-            total_loss += t_loss
+            for (batch, (img_tensor, target)) in enumerate(dataset_val):
+                batch_loss, t_loss = train_step(img_tensor, target)
+                total_loss_val += t_loss
 
-        loss_plot_train.append(total_loss.numpy() / num_steps)
+            loss_plot_val.append(total_loss_val.numpy() / num_steps)
 
-        for (batch, (img_tensor, target)) in enumerate(dataset_val):
-            batch_loss, t_loss = train_step(img_tensor, target)
-            total_loss_val += t_loss
-
-        loss_plot_val.append(total_loss_val.numpy() / num_steps)
     # Print Epoch-Loss Table
     get_standard_training_output_generic(
         epochs, loss_plot_train, loss_plot_val)
@@ -521,11 +533,11 @@ def image_caption_query(self, instruction,
     logger("Final Validation Loss: ", str(total_loss_val.numpy() / num_steps))
 
     if save_model_decoder:
-        logger("Saving decoder...")
+        logger("Saving decoder checkpoint...")
         encoder.save_weights(save_path_decoder + "decoderImgCap.ckpt")
 
     if save_model_encoder:
-        logger("Saving encoder...")
+        logger("Saving encoder checkpoint...")
         encoder.save_weights(save_path_encoder + "encoderImgCap.ckpt")
 
     logger("Storing information in client object under key 'Image Caption'")
