@@ -365,7 +365,6 @@ def image_caption_query(self, instruction,
                         save_path_encoder=os.getcwd()):
     if test_size < 0:
         raise Exception("Test size must be a float between 0 and 1")
-    Image
     if top_k < 1:
         raise Exception("Top_k value must be equal to or greater than 1")
 
