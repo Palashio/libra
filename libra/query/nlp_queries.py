@@ -82,6 +82,10 @@ def text_classification_query(self, instruction, drop=None,
     if test_size < 0:
         raise Exception("Test size must be a float between 0 and 1")
 
+    if test_size >= 1:
+        raise Exception(
+            "Test size must be a float between 0 and 1 (a test size greater than or equal to 1 results in no training data)")
+
     if epochs < 1:
         raise Exception("Epoch number is less than 1 (model will not be trained)")
 
@@ -219,6 +223,10 @@ def summarization_query(self, instruction, preprocess=True,
     if test_size < 0:
         raise Exception("Test size must be a float between 0 and 1")
 
+    if test_size >= 1:
+        raise Exception(
+            "Test size must be a float between 0 and 1 (a test size greater than or equal to 1 results in no training data)")
+
     if epochs < 1:
         raise Exception("Epoch number is less than 1 (model will not be trained)")
 
@@ -234,6 +242,11 @@ def summarization_query(self, instruction, preprocess=True,
     if save_model:
         if not os.path.exists(save_path):
             raise Exception("Save path does not exists")
+
+    if test_size == 0:
+        testing = False
+    else:
+        testing = True
 
     if gpu:
         device = "cuda"
@@ -264,29 +277,36 @@ def summarization_query(self, instruction, preprocess=True,
         frac=train_size,
         random_state=random_state).reset_index(
         drop=True)
-    val_dataset = df.drop(train_dataset.index).reset_index(drop=True)
+
     logger("Establishing dataset walkers")
     training_set = CustomDataset(
         train_dataset, tokenizer, max_text_length, max_summary_length)
-    val_set = CustomDataset(
-        val_dataset,
-        tokenizer,
-        max_text_length,
-        max_summary_length)
+
+    if testing:
+        val_dataset = df.drop(train_dataset.index).reset_index(drop=True)
+
+        val_set = CustomDataset(
+            val_dataset,
+            tokenizer,
+            max_text_length,
+            max_summary_length)
+
+        val_params = {
+            'batch_size': batch_size,
+            'shuffle': False,
+            'num_workers': 0
+        }
+        val_loader = DataLoader(val_set, **val_params)
+    else:
+        val_loader = None
+
     train_params = {
         'batch_size': batch_size,
         'shuffle': True,
         'num_workers': 0
     }
 
-    val_params = {
-        'batch_size': batch_size,
-        'shuffle': False,
-        'num_workers': 0
-    }
-
     training_loader = DataLoader(training_set, **train_params)
-    val_loader = DataLoader(val_set, **val_params)
     # used small model
     model = T5ForConditionalGeneration.from_pretrained("t5-small")
     model = model.to(device)
@@ -299,7 +319,7 @@ def summarization_query(self, instruction, preprocess=True,
     total_loss_val = []
     for epoch in range(epochs):
         loss_train, loss_val = train(
-            epoch, tokenizer, model, device, training_loader, val_loader, optimizer)
+            epoch, tokenizer, model, device, training_loader, val_loader, optimizer, testing=testing)
         total_loss_train.append(loss_train)
         total_loss_val.append(loss_val)
 
@@ -365,6 +385,11 @@ def image_caption_query(self, instruction,
                         save_path_encoder=os.getcwd()):
     if test_size < 0:
         raise Exception("Test size must be a float between 0 and 1")
+
+    if test_size >= 1:
+        raise Exception(
+            "Test size must be a float between 0 and 1 (a test size greater than or equal to 1 results in no training data)")
+
     if top_k < 1:
         raise Exception("Top_k value must be equal to or greater than 1")
 
@@ -389,7 +414,12 @@ def image_caption_query(self, instruction,
 
     if save_model_encoder:
         if not os.path.exists(save_path_encoder):
-            raise Exception("Encoder sav path does not exists")
+            raise Exception("Encoder save path does not exists")
+
+    if test_size == 0:
+        testing = False
+    else:
+        testing = True
 
     if gpu:
         device = '/GPU:0'
@@ -455,8 +485,12 @@ def image_caption_query(self, instruction,
     vocab_size = top_k + 1
     num_steps = len(img_name_vector) // batch_size
 
-    img_name_train, img_name_val, cap_train, cap_val = train_test_split(
-        img_name_vector, cap_vector, test_size=test_size, random_state=0)
+    if testing:
+        img_name_train, img_name_val, cap_train, cap_val = train_test_split(
+            img_name_vector, cap_vector, test_size=test_size, random_state=0)
+    else:
+        img_name_train = img_name_vector
+        cap_train = cap_vector
 
     dataset = tf.data.Dataset.from_tensor_slices((img_name_train, cap_train))
 
@@ -570,13 +604,12 @@ def image_caption_query(self, instruction,
 
             loss_plot_train.append(total_loss.numpy() / num_steps)
 
-            for (batch, (img_tensor, target)) in enumerate(dataset_val):
-                batch_loss, t_loss = train_step(img_tensor, target)
-                total_loss_val += t_loss
+            if testing:
+                for (batch, (img_tensor, target)) in enumerate(dataset_val):
+                    batch_loss, t_loss = train_step(img_tensor, target)
+                    total_loss_val += t_loss
 
-            loss_plot_val.append(total_loss_val.numpy() / num_steps)
-
-    logger("Storing information in client object under key 'Image Caption' ...")
+                loss_plot_val.append(total_loss_val.numpy() / num_steps)
 
     dir_name = os.path.dirname(img_name_vector[0])
     files = os.listdir(dir_name)

@@ -2,7 +2,7 @@ import torch
 from torch.utils.data import Dataset
 
 
-def train(epoch, tokenizer, model, device, loader, val_loader, optimizer):
+def train(epoch, tokenizer, model, device, loader, val_loader, optimizer, testing=True):
     model.train()
     running_loss = 0.0
     for _, data in enumerate(loader, 0):
@@ -26,23 +26,24 @@ def train(epoch, tokenizer, model, device, loader, val_loader, optimizer):
         optimizer.step()
 
     running_loss_val = 0.0
-    with torch.no_grad():
-        for _, data in enumerate(val_loader, 0):
-            y = data['target_ids'].to(device, dtype=torch.long)
-            y_ids = y[:, :-1].contiguous()
-            lm_labels = y[:, 1:].clone().detach()
-            lm_labels[y[:, 1:] == tokenizer.pad_token_id] = -100
-            ids = data['source_ids'].to(device, dtype=torch.long)
-            mask = data['source_mask'].to(device, dtype=torch.long)
+    if testing:
+        with torch.no_grad():
+            for _, data in enumerate(val_loader, 0):
+                y = data['target_ids'].to(device, dtype=torch.long)
+                y_ids = y[:, :-1].contiguous()
+                lm_labels = y[:, 1:].clone().detach()
+                lm_labels[y[:, 1:] == tokenizer.pad_token_id] = -100
+                ids = data['source_ids'].to(device, dtype=torch.long)
+                mask = data['source_mask'].to(device, dtype=torch.long)
 
-            outputs = model(
-                input_ids=ids,
-                attention_mask=mask,
-                decoder_input_ids=y_ids,
-                lm_labels=lm_labels)
-            loss = outputs[0]
+                outputs = model(
+                    input_ids=ids,
+                    attention_mask=mask,
+                    decoder_input_ids=y_ids,
+                    lm_labels=lm_labels)
+                loss = outputs[0]
 
-            running_loss_val += loss.item()
+                running_loss_val += loss.item()
 
     return running_loss / len(loader), running_loss_val / len(val_loader)
 
