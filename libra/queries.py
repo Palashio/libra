@@ -792,5 +792,5 @@ class client:
         get_plots(self, model, plot, save)
 
 
-x = client("/Users/anasawadalla/PycharmProjects/libra/tools/data/nlp_data/image-caption.csv")
-client.image_caption_query(self=x, instruction="Image captions", test_size=0.0)
+x = client("/Users/anasawadalla/PycharmProjects/libra/tools/data/nlp_data/miniDocumentSummarization.csv")
+client.summarization_query(self=x, instruction="text", test_size=0.1)

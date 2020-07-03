@@ -84,7 +84,8 @@ def text_classification_query(self, instruction, drop=None,
 
     if test_size >= 1:
         raise Exception(
-            "Test size must be a float between 0 and 1 (a test size greater than or equal to 1 results in no training data)")
+            "Test size must be a float between 0 and 1 (a test size greater than or equal to 1 results in no training "
+            "data)")
 
     if epochs < 1:
         raise Exception("Epoch number is less than 1 (model will not be trained)")
@@ -225,7 +226,8 @@ def summarization_query(self, instruction, preprocess=True,
 
     if test_size >= 1:
         raise Exception(
-            "Test size must be a float between 0 and 1 (a test size greater than or equal to 1 results in no training data)")
+            "Test size must be a float between 0 and 1 (a test size greater than or equal to 1 results in no training "
+            "data)")
 
     if epochs < 1:
         raise Exception("Epoch number is less than 1 (model will not be trained)")
@@ -324,7 +326,10 @@ def summarization_query(self, instruction, preprocess=True,
         total_loss_val.append(loss_val)
 
     logger("->", "Final training loss: {}".format(loss_train))
-    logger("->", "Final validation loss: {}".format(loss_val))
+    if testing:
+        logger("->", "Final validation loss: {}".format(loss_val))
+    else:
+        logger("->", "Final validation loss: {}".format("0, No validation done"))
 
     plots = {}
     if generate_plots:
@@ -388,7 +393,8 @@ def image_caption_query(self, instruction,
 
     if test_size >= 1:
         raise Exception(
-            "Test size must be a float between 0 and 1 (a test size greater than or equal to 1 results in no training data)")
+            "Test size must be a float between 0 and 1 (a test size greater than or equal to 1 results in no training "
+            "data)")
 
     if top_k < 1:
         raise Exception("Top_k value must be equal to or greater than 1")
@@ -628,10 +634,13 @@ def image_caption_query(self, instruction,
     logger("->", "Final training loss: {}".format(str(total_loss.numpy() / num_steps)))
     total_loss = total_loss.numpy() / num_steps
     if testing:
-        logger("->", "Final validation loss: {}".format(str(total_loss_val.numpy() / num_steps)))
         total_loss_val = total_loss_val.numpy() / num_steps
+        total_loss_val_str = str(total_loss_val)
     else:
         total_loss_val = 0
+        total_loss_val_str = str("0, No validation done")
+
+    logger("->", "Final validation loss: {}".format(total_loss_val_str))
 
     if save_model_decoder:
         logger("Saving decoder checkpoint...")
