@@ -80,6 +80,14 @@ def text_classification_query(self, instruction, drop=None,
     X_train = sequence.pad_sequences(X_train, maxlen=maxTextLength)
     X_test = sequence.pad_sequences(X_test, maxlen=maxTextLength)
 
+    y_vals = np.unique(np.append(y_train, y_test))
+    label_mappings = {}
+    for i in range(len(y_vals)):
+        label_mappings[y_vals[i]] = i
+    map_func = np.vectorize(lambda x: label_mappings[x])
+    y_train = map_func(y_train)
+    y_test = map_func(y_test)
+
     logger("Training Model...")
 
     # early stopping callback
@@ -112,19 +120,21 @@ def text_classification_query(self, instruction, drop=None,
 
     logger("Storing information in client object under key 'Text Classification' ...")
     # storing values the model dictionary
-    self.models["Text Classification"] = {
-        "model": model,
-        "classes": classes,
-        "plots": plots,
-        "target": Y,
-        "vocabulary": vocab,
-        "maxTextLength": maxTextLength,
-        'losses': {
-            'training_loss': history.history['loss'],
-            'val_loss': history.history['val_loss']},
-        'accuracy': {
-            'training_accuracy': history.history['accuracy'],
-            'validation_accuracy': history.history['val_accuracy']}}
+
+    self.models["Text Classification"] = {"model": model,
+                                          "classes": classes,
+                                          "plots": plots,
+                                          "target": Y,
+                                          "vocabulary": vocab,
+                                          "interpreter": label_mappings,
+                                          "maxTextLength": maxTextLength,
+                                          'test_data': {'X': X_test, 'y': y_test},
+                                          'losses': {
+                                              'training_loss': history.history['loss'],
+                                              'val_loss': history.history['val_loss']},
+                                          'accuracy': {
+                                              'training_accuracy': history.history['accuracy'],
+                                              'validation_accuracy': history.history['val_accuracy']}}
     return self.models["Text Classification"]
 
 
