@@ -18,6 +18,8 @@ import pandas as pd
 from pandas.core.common import SettingWithCopyWarning
 import warnings
 import os
+import tensorflow as tf
+import numpy as np
 
 # supressing warnings for cleaner dialogue box
 warnings.simplefilter(action='error', category=FutureWarning)
@@ -108,9 +110,15 @@ class client:
         '''
         if modelKey is None:
             modelKey = self.latest_model
-        modeldict = self.models[modelKey]
-        data = modeldict['preprocesser'].transform(data)
-        predictions = modeldict['model'].predict(data)
+        if modelKey == 'Text Classification':
+            map_func = np.vectorize(lambda x: self.classify_text(x))
+            predictions = map_func(data)
+            return predictions
+        else:
+            modeldict = self.models[modelKey]
+            if modeldict.get('preprocesser'):
+                data = modeldict['preprocesser'].transform(data)
+            predictions = modeldict['model'].predict(data)
         return self.interpret(modelKey, predictions)
 
     def interpret(self, modelKey, predictions):
