@@ -444,6 +444,7 @@ def classification_ann(instruction,
 def convolutional(instruction=None,
                   read_mode=None,
                   preprocess=True,
+                  verbose=0,
                   data_path=os.getcwd(),
                   new_folders=True,
                   image_column=None,
@@ -527,7 +528,7 @@ def convolutional(instruction=None,
         optimizer="adam",
         loss=loss_func,
         metrics=['accuracy'])
-    logger("Loading images and augmenting if applicable")
+    logger("Located image data")
     if augmentation:
         train_data = ImageDataGenerator(rescale=1. / 255,
                                         shear_range=0.2,
@@ -535,10 +536,12 @@ def convolutional(instruction=None,
                                         horizontal_flip=True)
         test_data = ImageDataGenerator(rescale=1. / 255)
 
+        logger('Dataset augmented through zoom, shear, flip, and rescale')
     else:
         train_data = ImageDataGenerator()
         test_data = ImageDataGenerator()
 
+    logger("->", "Optimal image size identified: {}".format(input_shape))
     X_train = train_data.flow_from_directory(data_path + training_path,
                                              target_size=input_single,
                                              color_mode='rgb',
@@ -550,9 +553,10 @@ def convolutional(instruction=None,
                                            batch_size=(32 if processInfo["test_size"] >= 32 else 1),
                                            class_mode=loss_func[:loss_func.find("_")])
 
+
     if epochs < 0:
         raise BaseException("Number of epochs has to be greater than 0.")
-
+    logger('Training image model')
     history = model.fit(
         X_train,
         steps_per_epoch=X_train.n //
@@ -560,17 +564,27 @@ def convolutional(instruction=None,
         validation_data=X_test,
         validation_steps=X_test.n //
         X_test.batch_size,
-        epochs=epochs)
+        epochs=epochs,
+        verbose=verbose)
+
+    logger('->', 'Final training accuracy: {}'.format(history.history['accuracy'][len(history.history['accuracy']) - 1]))
+    logger('->', 'Final validation accuracy: {}'.format(history.history['val_accuracy'][len(history.history['val_accuracy']) - 1]))
     # storing values the model dictionary
 
     logger("Stored model under 'convolutional_NN' key")
     return {
         'id': generate_id(),
+        'data_type': read_mode,
+        'data_path': data_path,
+        'data': {'train': X_train, 'test': X_test},
+        'shape': input_shape,
         "model": model,
-        'num_classes': (2 if num_classes == 1 else num_classes),
         'losses': {
             'training_loss': history.history['loss'],
             'val_loss': history.history['val_loss']},
         'accuracy': {
             'training_accuracy': history.history['accuracy'],
-            'validation_accuracy': history.history['val_accuracy']}}
+            'validation_accuracy': history.history['val_accuracy']},
+        'num_classes': (2 if num_classes == 1 else num_classes),
+        'data_sizes': {'train_size': processInfo['train_size'], 'test_size': processInfo['test_size']}}
+

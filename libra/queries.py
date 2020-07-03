@@ -461,9 +461,11 @@ class client:
              max_dense=512,
              executions_per_trial=3,
              max_trials=1,
+             generate_plots=True,
              activation='relu',
              loss='categorical_crossentropy',
              metrics='accuracy',
+             patience=1,
              epochs=10,
              objective='val_accuracy',
              seed=42,
@@ -482,8 +484,10 @@ class client:
 
         self.models = tune_helper(
             model_to_tune=model_to_tune,
+            patience=patience,
             dataset=self.dataset,
             models=self.models,
+            generate_plots=generate_plots,
             max_layers=max_layers,
             min_layers=min_layers,
             min_dense=min_dense,
@@ -507,6 +511,7 @@ class client:
     def convolutional_query(self,
                             instruction=None,
                             read_mode=None,
+                            verbose=0,
                             preprocess=True,
                             new_folders=True,
                             image_column=None,
@@ -525,6 +530,7 @@ class client:
         self.models["convolutional_NN"] = convolutional(
             instruction=instruction,
             read_mode=read_mode,
+            verbose=verbose,
             preprocess=preprocess,
             data_path=self.dataset,
             new_folders=new_folders,
@@ -777,3 +783,6 @@ class client:
         :param model: default to the latest model, but essentailly the model key
         '''
         get_plots(self, model, plot, save)
+
+
+
