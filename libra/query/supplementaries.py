@@ -1,18 +1,18 @@
+import os
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 from libra.modeling.tuner import (tuneReg,
                                   tuneClass,
                                   tuneCNN)
-import os
 import matplotlib.pyplot as plt
 from libra.preprocessing.data_reader import DataReader
 from keras.preprocessing.image import ImageDataGenerator
-from libra.preprocessing.image_preprocesser import (setwise_preprocessing,
-                                                    set_distinguisher)
+from libra.plotting.generate_plots import (generate_regression_plots,
+                                           generate_classification_plots)
 
 import uuid
 from PIL import Image
-from colorama import Fore, Style 
+from colorama import Fore, Style
 
-os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
 counter = 0
 number = 0
@@ -37,16 +37,26 @@ def clearLog():
 
 
 def logger(instruction, found=""):
+    '''
+    logging function that creates hierarchial display of the processes of
+    different functions. Copied into different python files to maintain
+    global variables.
+
+    :param instruction: what you want to be displayed
+    :param found: if you want to display something found like target column
+
+    '''
     global counter
     if counter == 0:
-        print((" " * 2 * counter) + str(instruction) + str(found)) 
+        print((" " * 2 * counter) + str(instruction) + str(found))
     elif instruction == "->":
         counter = counter - 1
-        print(Fore.BLUE + (" " * 2 * counter) + str(instruction) + str(found)+(Style.RESET_ALL)) 
+        print(Fore.BLUE + (" " * 2 * counter) +
+              str(instruction) + str(found) + (Style.RESET_ALL))
     else:
         print((" " * 2 * counter) + "|- " + str(instruction) + str(found))
         if instruction == "done...":
-            print( "\n" + "\n")
+            print("\n" + "\n")
 
     counter += 1
 
@@ -66,9 +76,11 @@ def tune_helper(
         metrics='accuracy',
         seed=42,
         objective='val_accuracy',
+        generate_plots=True,
         directory='my_dir',
         epochs=10,
         step=32,
+        patience=1,
         verbose=0,
         test_size=0.2
 ):
@@ -77,12 +89,14 @@ def tune_helper(
     :param instruction: the objective that you want to reduce dimensions to maximize
     :return the updated models dictionary
     '''
+    print("")
     logger("Getting target model for tuning...")
 
     # checks to see which requested model is in the self.models
 
     # processing for regression feed forward NN
     if model_to_tune == 'regression_ANN':
+        logger("Reading in data")
         logger("Tuning model hyperparameters...")
         dataReader = DataReader(dataset)
         data = dataReader.data_generator()
@@ -90,7 +104,7 @@ def tune_helper(
         target_column = data[models['regression_ANN']['target']]
         data = models['regression_ANN']['preprocesser'].transform(
             data.drop(target, axis=1))
-        returned_model, returned_pms, history = tuneReg(
+        returned_model, returned_pms, history, X_test, y_test = tuneReg(
             data,
             target_column,
             max_layers=max_layers,
@@ -102,19 +116,37 @@ def tune_helper(
             epochs=epochs,
             activation=activation,
             step=step,
+            directory=directory,
             verbose=verbose,
             test_size=test_size
         )
+        plots = {}
+        logger("->", 'Best Hyperparameters Found: {}'.format(returned_pms.values))
+        if generate_plots:
+            logger("Generating updated plots")
+            init_plots, plot_names = generate_regression_plots(
+                history, data, target_column)
+            for x in range(len(plot_names)):
+                plots[str(plot_names[x])] = init_plots[x]
+
         models['regression_ANN'] = {
+            'id': models['regression_ANN']['id'],
             'model': returned_model,
-            'hyperparametes': returned_pms,
+            'target': target,
+            "plots": plots,
+            'preprocesser': models['regression_ANN']['preprocesser'],
+            'interpreter': models['regression_ANN']['interpreter'],
+            'test_data': {'X' : X_test, 'y' : y_test},
+            'hyperparameters': returned_pms.values,
             'losses': {
                 'training_loss': history.history['loss'],
                 'val_loss': history.history['val_loss']}
         }
+        logger("Re-stored model under 'regression_ANN' key")
 
         # processing for classification feed forward NN
     elif model_to_tune == "classification_ANN":
+        logger("Reading in data")
         logger("Tuning model hyperparameters...")
         dataReader = DataReader(dataset)
         data = dataReader.data_generator()
@@ -122,7 +154,7 @@ def tune_helper(
         target_column = data[models['classification_ANN']['target']]
         data = models['classification_ANN']['preprocesser'].transform(
             data.drop(target, axis=1))
-        returned_model, returned_pms, history = tuneClass(
+        returned_model, returned_pms, history, X_test, y_test = tuneClass(
             data,
             target_column,
             models['classification_ANN']['num_classes'],
@@ -134,23 +166,44 @@ def tune_helper(
             max_trials=max_trials,
             activation=activation,
             loss=loss,
+            directory=directory,
             metrics=metrics,
             epochs=epochs,
             step=step,
             verbose=verbose,
             test_size=test_size
         )
+        plots = {}
+        logger("->", 'Best Hyperparameters Found: {}'.format(returned_pms.values))
+        if generate_plots:
+            logger("Generating updated plots")
+            plots = generate_classification_plots(
+                    history, data, target_column, returned_model, X_test, y_test)
+
+
+        logger("Re-stored model under 'classification_ANN' key")
         models['classification_ANN'] = {
+            'id': models['classification_ANN']['id'],
             'model': returned_model,
-            'hyperparametes': returned_pms,
+            'hyperparameters': returned_pms.values,
+            'plots': plots,
+            'preprocesser': models['classification_ANN']['preprocesser'],
+            'interpreter': models['classification_ANN']['interpreter'],
+            'test_data': {'X' : X_test, 'y': y_test},
+            'target': target,
             'losses': {
                 'training_loss': history.history['loss'],
-                'val_loss': history.history['val_loss']}
+                'val_loss': history.history['val_loss']},
+            'accuracy': {
+                'training_accuracy': history.history['accuracy'],
+                'validation_accuracy': history.history['val_accuracy']
+            }
         }
 
     elif model_to_tune == "convolutional_NN":
         logger("Tuning model hyperparameters...")
-        X_train, X_test, height, width, num_classes = get_image_data(dataset)
+        X_train, X_test, height, width, num_classes = get_image_data(models)
+        logger('Located image data')
         model, returned_pms, history = tuneCNN(
             X_train,
             X_test,
@@ -162,15 +215,32 @@ def tune_helper(
             seed=seed,
             objective=objective,
             directory=directory,
+            patience=patience,
             epochs=epochs,
             verbose=verbose,
             test_size=test_size
         )
-        models["convolutional_NN"]["model"] = model
-        models["convolutional_NN"]["hyperparametes"] = returned_pms,
-        models["convolutional_NN"]["losses"] = {
-            'training_loss': history.history['loss'],
-            'val_loss': history.history['val_loss']}
+        logger("->", "Optimal image size identified: {}".format((height, width, 3)))
+        logger('Packaging HyperModel')
+        logger("->", 'Best Hyperparameters Found: {}'.format(returned_pms.values))
+        logger("Re-stored model under 'convolutional_NN' key")
+
+        models['convolutional_NN'] = {
+            'id': models['convolutional_NN']['id'],
+            'data_type': models['convolutional_NN']['data_type'],
+            'data_path': models['convolutional_NN']['data_path'],
+            'data': {'train': X_train, 'test': X_test},
+            'shape': models['convolutional_NN']['shape'],
+            'model': model,
+            'num_classes': models['convolutional_NN']['num_classes'],
+            'data_sizes': models['convolutional_NN']['data_sizes'],
+            'losses': {
+                'training_loss': history.history['loss'],
+                'val_loss': history.history['val_loss']},
+            'accuracy': {
+                'training_accuracy': history.history['accuracy'],
+                'validation_accuracy': history.history['val_accuracy']}
+        }
 
     return models
 
@@ -199,9 +269,9 @@ def generate_id():
     return str(uuid.uuid4())
 
 
-def get_image_data(data_path, read_mode=None, training_ratio=0.8):
+def get_image_data(models):
     '''
-    function to get image data from a certain folder specifically for CNN tuning. 
+    function to get image data from a certain folder specifically for CNN tuning.
     Assumes CNN query has already been called.
     :param data_path: represents the location of the two training/testing folders.
     :param read_mode: represents the type of reading it does: setwise, pathwise, or classwise
@@ -210,14 +280,13 @@ def get_image_data(data_path, read_mode=None, training_ratio=0.8):
     training_path = "/proc_training_set"
     testing_path = "/proc_testing_set"
 
-    read_type = set_distinguisher(data_path, read_mode)['read_mode']
+    # read_type = set_distinguisher(data_path, read_mode)['read_mode']
 
-    process_info = setwise_preprocessing(data_path, True)
-
-    input_shape = (process_info["height"], process_info["width"], 3)
-    input_single = (process_info["height"], process_info["width"])
-    num_classes = process_info["num_categories"]
+    input_shape = models['convolutional_NN']['shape']
+    input_single = (input_shape[0], input_shape[1])
+    num_classes = models['convolutional_NN']['num_classes']
     loss_func = ""
+    data_path = models['convolutional_NN']['data_path']
 
     if num_classes > 2:
         loss_func = "categorical_crossentropy"
@@ -233,15 +302,16 @@ def get_image_data(data_path, read_mode=None, training_ratio=0.8):
     X_train = train_data.flow_from_directory(data_path + training_path,
                                              target_size=input_single,
                                              color_mode='rgb',
-                                             batch_size=(32 if process_info["train_size"] >= 32 else 1),
-                                             class_mode=loss_func[:loss_func.find("_")])
+                                             batch_size=(32 if models['convolutional_NN']['data_sizes']['train_size'] >= 32 else 1),
+                                             class_mode=loss_func[:loss_func.find("_")]
+                                             )
     X_test = test_data.flow_from_directory(data_path + testing_path,
                                            target_size=input_single,
                                            color_mode='rgb',
-                                           batch_size=(32 if process_info["test_size"] >= 32 else 1),
+                                           batch_size=(32 if models['convolutional_NN']['data_sizes']['test_size'] >= 32 else 1),
                                            class_mode=loss_func[:loss_func.find("_")])
 
-    return X_train, X_test, process_info['height'], process_info['width'], num_classes
+    return X_train, X_test, input_shape[0], input_shape[1], num_classes
 
 
 def get_model_data(self, model):
@@ -253,7 +323,8 @@ def get_model_data(self, model):
         data = [key for key in self.models[model].keys()]
         print(data)
     else:
-        raise Exception("The requested model has not been applied to the client.")
+        raise Exception(
+            "The requested model has not been applied to the client.")
 
 
 def get_operators(self, model):
@@ -263,14 +334,17 @@ def get_operators(self, model):
     '''
     defined = ['plots', 'accuracy', 'losses']
     if model in self.models:
-        operations = [func + "()" for func in self.models[model].keys() if func in defined]
+        operations = [
+            func +
+            "()" for func in self.models[model].keys() if func in defined]
         if len(operations) > 0:
             print(operations)
         else:
             raise Exception(
                 "There are no built-in operators defined for this model. Please refer to the models dictionary.")
     else:
-        raise Exception("The requested model has not been applied to the client.")
+        raise Exception(
+            "The requested model has not been applied to the client.")
 
 
 def get_accuracy(self, model):
@@ -286,7 +360,8 @@ def get_accuracy(self, model):
         else:
             raise Exception("Accuracy is not defined for {}".format(model))
     else:
-        raise Exception("The requested model has not been applied to the client.")
+        raise Exception(
+            "The requested model has not been applied to the client.")
 
 
 def get_losses(self, model):
@@ -300,7 +375,8 @@ def get_losses(self, model):
         else:
             raise Exception("Losses are not defined for {}".format(model))
     else:
-        raise Exception("The requested model has not been applied to the client.")
+        raise Exception(
+            "The requested model has not been applied to the client.")
 
 
 def get_target(self, model):
@@ -314,7 +390,8 @@ def get_target(self, model):
         else:
             raise Exception("Target is not defined for {}".format(model))
     else:
-        raise Exception("The requested model has not been applied to the client.")
+        raise Exception(
+            "The requested model has not been applied to the client.")
 
 
 def get_vocab(self, model):
@@ -328,8 +405,8 @@ def get_vocab(self, model):
         else:
             raise Exception("Vocabulary is not defined for {}".format(model))
     else:
-        raise Exception("The requested model has not been applied to the client.")
-
+        raise Exception(
+            "The requested model has not been applied to the client.")
 
 
 def get_plots(self, model="", plot="", save=False):
@@ -388,22 +465,23 @@ def get_standard_training_output_keras(epochs, history):
     :param history: the keras history object
     '''
     global counter
-    col_name=[["Epochs","| Training Loss ","| Validation Loss "]]
+    col_name = [["Epochs", "| Training Loss ", "| Validation Loss "]]
     col_width = max(len(word) for row in col_name for word in row) + 2
     for row in col_name:
         print((" " * 2 * counter) + "| " + ("".join(word.ljust(col_width)
                                                     for word in row)) + " |")
-    
-    for i, j, k in zip(range(epochs), history.history["loss"], history.history["val_loss"]):
+
+    for i, j, k in zip(
+            range(epochs), history.history["loss"], history.history["val_loss"]):
         values = []
         values.append(str(i))
         values.append("| " + str(j))
-        values.append( "| " + str(k))
+        values.append("| " + str(k))
         datax = []
         datax.append(values)
         for row in datax:
             print((" " * 2 * counter) + "| " + ("".join(word.ljust(col_width)
-                                                    for word in row)) + " |")
+                                                        for word in row)) + " |")
 
 
 def get_standard_training_output_generic(epochs, loss, val_loss):
@@ -414,20 +492,19 @@ def get_standard_training_output_generic(epochs, loss, val_loss):
     :param val_loss: just validation loss
     '''
     global counter
-    col_name=[["Epochs ","| Training Loss ","| Validation Loss "]]
+    col_name = [["Epochs ", "| Training Loss ", "| Validation Loss "]]
     col_width = max(len(word) for row in col_name for word in row) + 2
     for row in col_name:
         print((" " * 2 * counter) + "| " + ("".join(word.ljust(col_width)
-                                                for word in row)) + " |")
+                                                    for word in row)) + " |")
 
     for i, j, k in zip(range(epochs), loss, val_loss):
         values = []
         values.append(str(i))
         values.append("| " + str(j))
-        values.append( "| " + str(k))
+        values.append("| " + str(k))
         datax = []
         datax.append(values)
         for row in datax:
             print((" " * 2 * counter) + "| " + ("".join(word.ljust(col_width)
-                                                    for word in row)) + " |")
-
+                                                        for word in row)) + " |")

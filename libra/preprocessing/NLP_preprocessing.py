@@ -13,7 +13,7 @@ def get_target_values(data, instruction, yLabel):
     target = get_similar_column(get_value_instruction(instruction), data)
     X = data[target]
     del data[target]
-    #labels
+    # labels
     Y = data[get_similar_column(get_value_instruction(yLabel), data)]
     return X, Y, get_similar_column(get_value_instruction(yLabel), data)
 
@@ -60,7 +60,7 @@ def text_clean_up(dataset):
         clean_text = ' '.join(clean_text.split())
         clean_text = clean_text.split()
         stops = set(stopwords.words("english"))
-        clean_text = [w for w in clean_text if not w in stops]
+        clean_text = [w for w in clean_text if w not in stops]
         clean_text = " ".join(clean_text)
         newDataset.append(fix_slang(clean_text))
 

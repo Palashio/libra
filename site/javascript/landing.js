@@ -1,3 +1,15 @@
+$(function(){
+    $(".box").click(function(){
+        if($(this).find("p").hasClass("selected")){
+            $(this).find("p").removeClass("selected");
+        }
+        else{
+            $(document.body).find("p").removeClass("selected"); //remove selected from all others
+            $(this).find("p").addClass("selected"); //add selected to this one
+        }
+    });    
+});
+
 function load(){
     var w = window.innerWidth; //window width includes area used for scroll bars so subtract some width later on
     if(w < 1300){

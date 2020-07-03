@@ -9,6 +9,7 @@ import os
 
 # Creates a regression neural network
 
+
 def get_keras_model_reg(dataset, i):
     size_max_network = 10
     # base model
@@ -81,7 +82,7 @@ def get_keras_model_class(dataset, i, num_classes):
 
 
 # Sentiment analysis model
-def get_keras_text_class(max_features, num_classes,lr):
+def get_keras_text_class(max_features, num_classes, lr):
     model = tf.keras.models.Sequential()
     model.add(Embedding(max_features, 128))
     model.add(LSTM(128, dropout=0.2, recurrent_dropout=0.2))

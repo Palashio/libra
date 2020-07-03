@@ -1,6 +1,6 @@
 import os
-
 import numpy as np
+from colorama import Fore, Style
 import pandas as pd
 import torch
 from keras_preprocessing import sequence
@@ -19,11 +19,35 @@ from libra.preprocessing.NLP_preprocessing import get_target_values, text_clean_
 from libra.preprocessing.huggingface_model_finetune_helper import CustomDataset, train, inference
 from libra.preprocessing.image_caption_helpers import load_image, map_func, CNN_Encoder, RNN_Decoder, get_path_column, \
     generate_caption_helper
-from libra.query.dimensionality_red_queries import logger
 
 # Sentiment analysis predict wrapper
 from libra.query.supplementaries import save, get_standard_training_output_keras, get_standard_training_output_generic
 from libra.plotting.generate_plots import plot_loss
+
+
+def logger(instruction, found=""):
+    '''
+    logging function that creates hierarchial display of the processes of
+    different functions. Copied into different python files to maintain
+    global variables.
+
+    :param instruction: what you want to be displayed
+    :param found: if you want to display something found like target column
+
+    '''
+    global counter
+    if counter == 0:
+        print((" " * 2 * counter) + str(instruction) + str(found))
+    elif instruction == "->":
+        counter = counter - 1
+        print(Fore.BLUE + (" " * 2 * counter) +
+              str(instruction) + str(found) + (Style.RESET_ALL))
+    else:
+        print((" " * 2 * counter) + "|- " + str(instruction) + str(found))
+        if instruction == "done...":
+            print("\n" + "\n")
+
+    counter += 1
 
 
 def classify_text(self, text):
@@ -65,8 +89,9 @@ def text_classification_query(self, instruction, drop=None,
 
     logger("->", "Target Column Found: {}".format(target))
 
+    vocab = {}
     if preprocess:
-        logger("Preprocessing data...")
+        logger("Preprocessing data")
         X = lemmatize_text(text_clean_up(X.array))
         vocab = X
         X = encode_text(X, X)
@@ -74,13 +99,21 @@ def text_classification_query(self, instruction, drop=None,
     X = np.array(X)
 
     model = get_keras_text_class(maxTextLength, len(classes), learning_rate)
-
+    logger("Building Keras LSTM model dynamically")
     X_train, X_test, y_train, y_test = train_test_split(
         X, Y, test_size=test_size, random_state=random_state)
     X_train = sequence.pad_sequences(X_train, maxlen=maxTextLength)
     X_test = sequence.pad_sequences(X_test, maxlen=maxTextLength)
 
-    logger("Training Model...")
+    y_vals = np.unique(np.append(y_train, y_test))
+    label_mappings = {}
+    for i in range(len(y_vals)):
+        label_mappings[y_vals[i]] = i
+    map_func = np.vectorize(lambda x: label_mappings[x])
+    y_train = map_func(y_train)
+    y_test = map_func(y_test)
+
+    logger("Training initial model")
 
     # early stopping callback
     es = EarlyStopping(
@@ -94,27 +127,32 @@ def text_classification_query(self, instruction, drop=None,
                         epochs=epochs, callbacks=[es], verbose=0)
     # Print Epoch-History Table
     get_standard_training_output_keras(epochs, history)
-    logger("Final Training Loss:", history.history["loss"][len(history.history["loss"])-1])
-    logger("Final Validation Loss:", history.history["val_loss"][len(history.history["val_loss"]) - 1])
-    logger("Final Accuracy:", history.history["val_accuracy"][len(history.history["val_accuracy"]) - 1])
+    logger("->","Final training loss: {}".format(history.history["loss"][len(history.history["loss"]) - 1]))
+    logger("->", "Final validation loss: {}".format(history.history["val_loss"][len(history.history["val_loss"]) - 1]))
+    logger("->", "Final validation accuracy: {}".format(history.history["val_accuracy"][len(history.history["val_accuracy"]) - 1]))
 
+    plots = {}
     if generate_plots:
         # generates appropriate classification plots by feeding all
         # information
+        logger("Generating plots")
         plots = generate_classification_plots(
             history, X, Y, model, X_test, y_test)
 
     if save_model:
         save(model, save_model, save_path=save_path)
 
-    logger("Storing information in client object under key 'Text Classification' ...")
+    logger("Storing information in client object under key 'Text Classification'")
     # storing values the model dictionary
+
     self.models["Text Classification"] = {"model": model,
                                           "classes": classes,
                                           "plots": plots,
                                           "target": Y,
                                           "vocabulary": vocab,
+                                          "interpreter": label_mappings,
                                           "maxTextLength": maxTextLength,
+                                          'test_data': {'X': X_test, 'y': y_test},
                                           'losses': {
                                               'training_loss': history.history['loss'],
                                               'val_loss': history.history['val_loss']},
@@ -136,7 +174,13 @@ def get_summary(self, text):
         'shuffle': True,
         'num_workers': 0
     }
-    loader = DataLoader(CustomDataset(df, tokenizer, modelInfo["maxTextLength"], modelInfo["maxSumLength"]), **params)
+    loader = DataLoader(
+        CustomDataset(
+            df,
+            tokenizer,
+            modelInfo["maxTextLength"],
+            modelInfo["maxSumLength"]),
+        **params)
     predictions, truth = inference(tokenizer, model, "cpu", loader)
     return predictions
 
@@ -180,10 +224,14 @@ def summarization_query(self, instruction, preprocess=True,
         random_state=random_state).reset_index(
         drop=True)
     val_dataset = df.drop(train_dataset.index).reset_index(drop=True)
-
+    logger("Establishing dataset walkers")
     training_set = CustomDataset(
         train_dataset, tokenizer, max_text_length, max_summary_length)
-    val_set = CustomDataset(val_dataset, tokenizer, max_text_length, max_summary_length)
+    val_set = CustomDataset(
+        val_dataset,
+        tokenizer,
+        max_text_length,
+        max_summary_length)
     train_params = {
         'batch_size': batch_size,
         'shuffle': True,
@@ -209,11 +257,13 @@ def summarization_query(self, instruction, preprocess=True,
     total_loss_train = []
     total_loss_val = []
     for epoch in range(epochs):
-        loss_train, loss_val = train(epoch, tokenizer, model, device, training_loader, val_loader, optimizer)
+        loss_train, loss_val = train(
+            epoch, tokenizer, model, device, training_loader, val_loader, optimizer)
         total_loss_train.append(loss_train)
         total_loss_val.append(loss_val)
     # Print Epoch-Loss Table
-    get_standard_training_output_generic(epochs, total_loss_train, total_loss_val)
+    get_standard_training_output_generic(
+        epochs, total_loss_train, total_loss_val)
     logger("Final Training Loss: ", loss_train)
     logger("Final Validation Loss: ", loss_val)
 
@@ -222,12 +272,12 @@ def summarization_query(self, instruction, preprocess=True,
         plots.update({"loss": plot_loss(total_loss_train, total_loss_val)})
 
     if save_model:
-        logger("Saving model...")
+        logger("Saving model")
         path = save_path + "DocSummarization.pth"
         torch.save(model, path)
         logger("->", "Saved model to disk as DocSummarization.pth")
 
-    logger("Storing information in client object under key 'Document Summarization'...")
+    logger("Storing information in client object under key 'Document Summarization'")
 
     self.models["Document Summarization"] = {
         "model": model,
@@ -247,7 +297,12 @@ def generate_caption(self, image):
     encoder = modelInfo['encoder']
     tokenizer = modelInfo['tokenizer']
     image_features_extract_model = modelInfo['feature_extraction']
-    return generate_caption_helper(image, decoder, encoder, tokenizer, image_features_extract_model)
+    return generate_caption_helper(
+        image,
+        decoder,
+        encoder,
+        tokenizer,
+        image_features_extract_model)
 
 
 # Image Caption Generation query
@@ -275,7 +330,7 @@ def image_caption_query(self, instruction,
     if drop is not None:
         df = df.drop(drop)
 
-    logger("Preprocessing data...")
+    logger("Preprocessing data")
 
     train_captions = []
     img_name_vector = []
@@ -296,38 +351,37 @@ def image_caption_query(self, instruction,
                                                     weights='imagenet')
     new_input = image_model.input
     hidden_layer = image_model.layers[-1].output
-
+    logger("Extracting features from model")
     image_features_extract_model = tf.keras.Model(new_input, hidden_layer)
 
-    image_dataset = tf.data.Dataset.from_tensor_slices(sorted(set(img_name_vector)))
+    image_dataset = tf.data.Dataset.from_tensor_slices(
+        sorted(set(img_name_vector)))
     image_dataset = image_dataset.map(
         load_image, num_parallel_calls=tf.data.experimental.AUTOTUNE).batch(16)
 
     for img, path in image_dataset:
         batch_features = image_features_extract_model(img)
-        batch_features = tf.reshape(batch_features,
-                                    (batch_features.shape[0], -1, batch_features.shape[3]))
+        batch_features = tf.reshape(
+            batch_features, (batch_features.shape[0], -1, batch_features.shape[3]))
 
         for bf, p in zip(batch_features, path):
             path_of_feature = p.numpy().decode("utf-8")
             np.save(path_of_feature, bf.numpy())
-
-    tokenizer = tf.keras.preprocessing.text.Tokenizer(num_words=top_k,
-                                                      oov_token="<unk>",
-                                                      filters='!"#$%&()*+.,-/:;=?@[\]^_`{|}~ ')
+    logger("->", "Tokenizing top {} words".format(top_k))
+    tokenizer = tf.keras.preprocessing.text.Tokenizer(
+        num_words=top_k, oov_token="<unk>", filters='!"#$%&()*+.,-/:;=?@[\]^_`{|}~ ')
     tokenizer.fit_on_texts(train_captions)
     tokenizer.word_index['<pad>'] = 0
     tokenizer.index_word[0] = '<pad>'
     train_seqs = tokenizer.texts_to_sequences(train_captions)
-    cap_vector = tf.keras.preprocessing.sequence.pad_sequences(train_seqs, padding='post')
+    cap_vector = tf.keras.preprocessing.sequence.pad_sequences(
+        train_seqs, padding='post')
 
     vocab_size = top_k + 1
     num_steps = len(img_name_vector) // batch_size
 
-    img_name_train, img_name_val, cap_train, cap_val = train_test_split(img_name_vector,
-                                                                        cap_vector,
-                                                                        test_size=0.2,
-                                                                        random_state=0)
+    img_name_train, img_name_val, cap_train, cap_val = train_test_split(
+        img_name_vector, cap_vector, test_size=0.2, random_state=0)
 
     dataset = tf.data.Dataset.from_tensor_slices((img_name_train, cap_train))
 
@@ -336,6 +390,7 @@ def image_caption_query(self, instruction,
                           num_parallel_calls=tf.data.experimental.AUTOTUNE)
 
     # Shuffle and batch
+    logger("Shuffling dataset")
     dataset = dataset.shuffle(buffer_size).batch(batch_size)
     dataset = dataset.prefetch(buffer_size=tf.data.experimental.AUTOTUNE)
 
@@ -347,8 +402,10 @@ def image_caption_query(self, instruction,
 
     # Shuffle and batch
     dataset_val = dataset_val.shuffle(buffer_size).batch(batch_size)
-    dataset_val = dataset_val.prefetch(buffer_size=tf.data.experimental.AUTOTUNE)
+    dataset_val = dataset_val.prefetch(
+        buffer_size=tf.data.experimental.AUTOTUNE)
 
+    logger("Establishing encoder decoder framework")
     encoder = CNN_Encoder(embedding_dim)
     decoder = RNN_Decoder(embedding_dim, units, vocab_size)
 
@@ -373,7 +430,8 @@ def image_caption_query(self, instruction,
         # because the captions are not related from image to image
         hidden = decoder.reset_state(batch_size=target.shape[0])
 
-        dec_input = tf.expand_dims([tokenizer.word_index['<start>']] * target.shape[0], 1)
+        dec_input = tf.expand_dims(
+            [tokenizer.word_index['<start>']] * target.shape[0], 1)
 
         with tf.GradientTape() as tape:
             features = encoder(img_tensor)
@@ -405,7 +463,8 @@ def image_caption_query(self, instruction,
         # because the captions are not related from image to image
         hidden = decoder.reset_state(batch_size=target.shape[0])
 
-        dec_input = tf.expand_dims([tokenizer.word_index['<start>']] * target.shape[0], 1)
+        dec_input = tf.expand_dims(
+            [tokenizer.word_index['<start>']] * target.shape[0], 1)
 
         with tf.GradientTape() as tape:
             features = encoder(img_tensor)
@@ -442,7 +501,8 @@ def image_caption_query(self, instruction,
 
         loss_plot_val.append(total_loss_val.numpy() / num_steps)
     # Print Epoch-Loss Table
-    get_standard_training_output_generic(epochs, loss_plot_train, loss_plot_val)
+    get_standard_training_output_generic(
+        epochs, loss_plot_train, loss_plot_val)
 
     logger("Storing information in client object under key 'Image Caption' ...")
 
@@ -457,9 +517,8 @@ def image_caption_query(self, instruction,
     if generate_plots:
         plots.update({"loss": plot_loss(loss_plot_train, loss_plot_val)})
 
-    logger("Final Training Loss: ", str(total_loss.numpy()/ num_steps))
-    logger("Final Validation Loss: ", str(total_loss_val.numpy()/ num_steps))
-
+    logger("Final Training Loss: ", str(total_loss.numpy() / num_steps))
+    logger("Final Validation Loss: ", str(total_loss_val.numpy() / num_steps))
 
     if save_model_decoder:
         logger("Saving decoder...")
@@ -468,6 +527,8 @@ def image_caption_query(self, instruction,
     if save_model_encoder:
         logger("Saving encoder...")
         encoder.save_weights(save_path_encoder + "encoderImgCap.ckpt")
+
+    logger("Storing information in client object under key 'Image Caption'")
 
     self.models["Image Caption"] = {
         "decoder": decoder,
@@ -481,4 +542,3 @@ def image_caption_query(self, instruction,
         }
     }
     return self.models["Image Caption"]
-

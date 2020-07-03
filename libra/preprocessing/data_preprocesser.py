@@ -5,9 +5,9 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.impute import SimpleImputer
 from sklearn.model_selection import train_test_split
 from sklearn.pipeline import Pipeline
-from sklearn.preprocessing import ( OneHotEncoder, 
-                                    StandardScaler, 
-                                    FunctionTransformer)
+from sklearn.preprocessing import (OneHotEncoder,
+                                   StandardScaler,
+                                   FunctionTransformer)
 from libra.data_generation.dataset_labelmatcher import get_similar_column
 from libra.data_generation.grammartree import get_value_instruction
 from prince.ca import CA
@@ -18,16 +18,24 @@ from nltk.corpus import stopwords
 from autocorrect import Speller
 
 
-def initial_preprocesser(data, instruction, preprocess, ca_threshold, text, test_size=0.2, random_state=49):
+def initial_preprocesser(
+        data,
+        instruction,
+        preprocess,
+        ca_threshold,
+        text,
+        test_size=0.2,
+        random_state=49):
     # Scans for object columns just in case we have a datetime column that
     # isn't detected
 
     if test_size < 0 or test_size > 1:
-        raise Exception('Test size cannot be {}, it should be a proportion between 0 and 1'.format(test_size))
+        raise Exception(
+            'Test size cannot be {}, it should be a proportion between 0 and 1'.format(test_size))
 
     object_columns = [
         col for col,
-                col_type in data.dtypes.iteritems() if col_type == 'object']
+        col_type in data.dtypes.iteritems() if col_type == 'object']
 
     # Handles dates without timestamps
     for col in object_columns:
@@ -81,7 +89,8 @@ def structured_preprocesser(data, ca_threshold, text):
         lambda c: np.issubdtype(c, np.number))]
 
     # Removes text columns from categorical columns to use in separate pipeline
-    categorical_columns = [cat_cols for cat_cols in categorical_columns if cat_cols not in text]
+    categorical_columns = [
+        cat_cols for cat_cols in categorical_columns if cat_cols not in text]
 
     full_pipeline = ColumnTransformer([], remainder="passthrough")
 
@@ -92,34 +101,47 @@ def structured_preprocesser(data, ca_threshold, text):
             ('std_scaler', StandardScaler())
         ])
 
-        full_pipeline.transformers.append(("num", num_pipeline, numeric_columns))
+        full_pipeline.transformers.append(
+            ("num", num_pipeline, numeric_columns))
 
     if len(text) != 0:
         # Each text col needs a separate pipeline
         for x in range(len(text)):
-            full_pipeline.transformers.append((f"text_{x}",
-                                               Pipeline([
-                                                   ('test',
-                                                    FunctionTransformer(lambda x: np.reshape(x.to_numpy(), (-1,1)))),
-
-                                                   ('imputer', SimpleImputer(strategy="constant", fill_value="")),
-
-                                                   ('raveler',
-                                                    FunctionTransformer(lambda x: x.ravel(), accept_sparse=True)),
-
-                                                   ('vect', TfidfVectorizer()),
-
-                                                   ('densifier',
-                                                    FunctionTransformer(lambda x: x.todense(), accept_sparse=True)),
-
-                                                   ('embedder', FunctionTransformer(text_embedder, accept_sparse=True))
-                                               ]),
-                                               text[x]))
+            full_pipeline.transformers.append(
+                (f"text_{x}",
+                 Pipeline(
+                     [
+                         ('test',
+                          FunctionTransformer(
+                              lambda x: np.reshape(
+                                  x.to_numpy(),
+                                  (-1,
+                                   1)))),
+                         ('imputer',
+                          SimpleImputer(
+                              strategy="constant",
+                              fill_value="")),
+                         ('raveler',
+                          FunctionTransformer(
+                              lambda x: x.ravel(),
+                              accept_sparse=True)),
+                         ('vect',
+                          TfidfVectorizer()),
+                         ('densifier',
+                          FunctionTransformer(
+                              lambda x: x.todense(),
+                              accept_sparse=True)),
+                         ('embedder',
+                          FunctionTransformer(
+                              text_embedder,
+                              accept_sparse=True))]),
+                    text[x]))
 
     if len(categorical_columns) != 0:
         combined = pd.concat([data['train'], data['test']], axis=0)
 
-        ca_threshold = combined.shape[0] * .25 if ca_threshold is None else combined.shape[0] * ca_threshold
+        ca_threshold = combined.shape[0] * \
+            .25 if ca_threshold is None else combined.shape[0] * ca_threshold
 
         if too_many_values(combined[categorical_columns], ca_threshold):
             cat_pipeline = Pipeline([
@@ -134,7 +156,8 @@ def structured_preprocesser(data, ca_threshold, text):
                 ('one_hot_encoder', OneHotEncoder(handle_unknown='ignore'))
             ])
 
-        full_pipeline.transformers.append(('cat', cat_pipeline, categorical_columns))
+        full_pipeline.transformers.append(
+            ('cat', cat_pipeline, categorical_columns))
 
     train = full_pipeline.fit_transform(data['train'])
 
@@ -173,6 +196,8 @@ def process_dates(data):
             del df[col]
 
 # Preprocesses text for word embedding
+
+
 def text_preprocessing(data, text_cols):
 
     lemmatizer = WordNetLemmatizer()
@@ -180,7 +205,8 @@ def text_preprocessing(data, text_cols):
 
     spell = Speller(fast=True)
     for col in text_cols:
-        combined[col] = combined[col].apply(lambda x: x.lower() if isinstance(x, str) else x)
+        combined[col] = combined[col].apply(
+            lambda x: x.lower() if isinstance(x, str) else x)
 
     stop_words = set(stopwords.words('english'))
 
@@ -193,7 +219,7 @@ def text_preprocessing(data, text_cols):
                 words = [word for word in words if word not in stop_words]
                 words = [spell(word) for word in words]
                 words = [lemmatizer.lemmatize(word) for word in words]
-                
+
                 preprocessed_text.append(' '.join(words))
 
             else:
@@ -210,9 +236,11 @@ def text_embedder(text):
     for i in text:
         total.append(np.sum(i))
 
-    return np.reshape(total, (-1,1))
+    return np.reshape(total, (-1, 1))
 
 # Sees if one hot encoding occurred, if not just uses numeric cols
+
+
 def generate_column_labels(full_pipeline, numeric_cols, text_cols):
     # Check if one hot encoding was performed
     if 'cat' in full_pipeline.named_transformers_:
@@ -273,7 +301,8 @@ def clustering_preprocessor(data):
 
     data = full_pipeline.fit_transform(data)
 
-    new_columns = generate_column_labels(full_pipeline, numeric_columns, text_cols = [])
+    new_columns = generate_column_labels(
+        full_pipeline, numeric_columns, text_cols=[])
 
     return pd.DataFrame(data, columns=new_columns), full_pipeline
 
@@ -287,7 +316,8 @@ def too_many_values(data, ca_threshold):
     total_unique = 0
     for col in data:
 
-        if total_unique > ca_threshold: return True
+        if total_unique > ca_threshold:
+            return True
         # Use value_counts() due to same columns having strings and floats
         total_unique += len(data[col].value_counts())
 

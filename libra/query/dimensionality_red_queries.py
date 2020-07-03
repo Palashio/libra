@@ -16,7 +16,7 @@ from sklearn.metrics import accuracy_score
 from sklearn.decomposition import PCA, FastICA, KernelPCA
 import pandas as pd
 import numpy as np
-from colorama import Fore,Style
+from colorama import Fore, Style
 # function imports from other files
 
 counter = 0
@@ -31,20 +31,21 @@ def logger(instruction, found=""):
         print((" " * 2 * counter) + str(instruction) + str(found))
     elif instruction == "->":
         counter = counter - 1
-        print(Fore.BLUE + (" " * 2 * counter) + str(instruction) + str(found)+(Style.RESET_ALL)) 
+        print(Fore.BLUE + (" " * 2 * counter) +
+              str(instruction) + str(found) + (Style.RESET_ALL))
     else:
-        print((" " * 2 * counter) + "|- " + str(instruction) + str(found)) 
+        print((" " * 2 * counter) + "|- " + str(instruction) + str(found))
         if instruction == "done...":
             print("\n" + "\n")
 
     counter += 1
 
 
-def printtable(col_name,col_width):
+def printtable(col_name, col_width):
     global counter
     for row in col_name:
         print((" " * 2 * counter) + "| " + ("".join(word.ljust(col_width)
-                                                for word in row)) + " |")
+                                                    for word in row)) + " |")
 
 
 def dimensionality_reduc(
@@ -107,28 +108,31 @@ def dimensionality_reduc(
 
     logger("Fetching Best Accuracies...")
     accs = []
-    logger("->","Baseline Accuracy: " + str(finals[0][1]))
-    #print("----------------------------")
-    col_name=[["Permutation ","| Final Accuracy "]]
-    printtable(col_name,max(len(word) for row in col_name for word in row) + 5)
+    logger("->", "Baseline Accuracy: " + str(finals[0][1]))
+    # print("----------------------------")
+    col_name = [["Permutation ", "| Final Accuracy "]]
+    printtable(col_name, max(len(word)
+                             for row in col_name for word in row) + 5)
     for i, element in product(range(len(finals)), finals):
         values = []
         values.append(str(perms[i]))
         values.append("| " + str(element[2]))
         datax = []
         datax.append(values)
-        printtable(datax,max(len(word) for row in col_name for word in row) + 5)
-        del values,datax
+        printtable(datax, max(len(word)
+                              for row in col_name for word in row) + 5)
+        del values, datax
         if finals[0][1] < element[2]:
-            accs.append(list([str(perms[i]) ,
+            accs.append(list([str(perms[i]),
                               "| " + str(element[2])]))
     print("")
-    logger("->"," Best Accuracies")
-    #print("----------------------------")
-    col_name=[["Permutation ","| Final Accuracy "]]
-    printtable(col_name,max(len(word) for row in col_name for word in row) + 5)
-    printtable(accs,col_width)
-    
+    logger("->", " Best Accuracies")
+    # print("----------------------------")
+    col_name = [["Permutation ", "| Final Accuracy "]]
+    printtable(col_name, max(len(word)
+                             for row in col_name for word in row) + 5)
+    printtable(accs, col_width)
+
     if inplace:
         data.to_csv(dataset)
 
@@ -194,7 +198,8 @@ def dimensionality_PCA(instruction, dataset, ca_threshold=None):
 
     pca = PCA(0.92)
 
-    data, y, target, full_pipeline = initial_preprocesser(dataset, instruction, ca_threshold=ca_threshold, preprocess=True)
+    data, y, target, full_pipeline = initial_preprocesser(
+        dataset, instruction, ca_threshold=ca_threshold, preprocess=True)
 
     X_train = data['train']
     X_test = data['test']
@@ -220,7 +225,8 @@ def dimensionality_PCA(instruction, dataset, ca_threshold=None):
         acc.append(accuracy_score(model.predict(X_test_mod), y_test))
     del i, j
 
-    data_modified = pd.concat([pd.DataFrame(X_train_mod), pd.DataFrame(X_test_mod)], axis=0)
+    data_modified = pd.concat(
+        [pd.DataFrame(X_train_mod), pd.DataFrame(X_test_mod)], axis=0)
 
     y_combined = np.r_[y_train, y_test]
     data_modified[target] = y_combined
