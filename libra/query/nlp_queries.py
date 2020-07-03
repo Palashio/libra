@@ -22,7 +22,7 @@ from libra.preprocessing.image_caption_helpers import load_image, map_func, CNN_
     generate_caption_helper
 
 # Sentiment analysis predict wrapper
-from libra.query.supplementaries import save, get_standard_training_output_keras, get_standard_training_output_generic
+from libra.query.supplementaries import save
 from libra.plotting.generate_plots import plot_loss
 
 counter = 0
@@ -302,6 +302,7 @@ def summarization_query(self, instruction, preprocess=True,
 
     plots = {}
     if generate_plots:
+        logger("Generating plots")
         plots.update({"loss": libra.plotting.nonkeras_generate_plots.plot_loss(total_loss_train, total_loss_val)})
 
     if save_model:
@@ -344,6 +345,7 @@ def image_caption_query(self, instruction,
                         epochs=10,
                         preprocess=True,
                         random_state=49,
+                        test_size=0.2,
                         top_k=5000,
                         batch_size=1,
                         buffer_size=1000,
@@ -446,7 +448,7 @@ def image_caption_query(self, instruction,
     num_steps = len(img_name_vector) // batch_size
 
     img_name_train, img_name_val, cap_train, cap_val = train_test_split(
-        img_name_vector, cap_vector, test_size=0.2, random_state=0)
+        img_name_vector, cap_vector, test_size=test_size, random_state=0)
 
     dataset = tf.data.Dataset.from_tensor_slices((img_name_train, cap_train))
 
@@ -577,6 +579,7 @@ def image_caption_query(self, instruction,
 
     plots = {}
     if generate_plots:
+        logger("Generating plots")
         plots.update({"loss": plot_loss(loss_plot_train, loss_plot_val)})
 
     logger("->", "Final training loss: {}".format(str(total_loss.numpy() / num_steps)))

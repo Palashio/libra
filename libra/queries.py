@@ -656,6 +656,7 @@ class client:
                             epochs=10,
                             preprocess=True,
                             random_state=49,
+                            test_size=0.2,
                             top_k=5000,
                             batch_size=1,
                             buffer_size=1000,
@@ -679,6 +680,7 @@ class client:
             epochs=epochs,
             preprocess=preprocess,
             random_state=random_state,
+            test_size=test_size,
             top_k=top_k,
             batch_size=batch_size,
             buffer_size=buffer_size,
@@ -791,4 +793,4 @@ class client:
 
 
 x = client("/Users/anasawadalla/PycharmProjects/libra/tools/data/nlp_data/miniDocumentSummarization.csv")
-client.summarization_query(self=x, instruction="summarize text", save_model=True, batch_size=7, drop="Text")
+client.text_classification_query(self=x, instruction="Summary", save_model=True, batch_size=7, drop="Text")
