@@ -430,9 +430,13 @@ def image_caption_query(self, instruction,
         testing = True
 
     if gpu:
-        device = '/GPU:0'
+        if tf.test.gpu_device_name():
+            print('Default GPU Device: {}'.format(tf.test.gpu_device_name()))
+        else:
+            raise Exception("Please install GPU version of TF")
+        device = '/device:GPU:0'
     else:
-        device = '/CPU:0'
+        device = '/device:CPU:0'
 
     np.random.seed(random_state)
     tf.random.set_seed(random_state)
