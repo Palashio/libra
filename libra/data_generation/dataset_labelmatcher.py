@@ -2,6 +2,8 @@ import string
 import Levenshtein
 
 # generates mask for sequence to sequence processinng
+
+
 def produceMask(instruction_label):
     # creates a mask for a string with representation [1, 0, 2] based on
     # character frequencies

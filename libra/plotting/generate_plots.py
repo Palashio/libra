@@ -60,7 +60,13 @@ def logger(instruction, found=""):
 # generates all of the plots in clustering
 
 
-def generate_clustering_plots(kmeans, dataPandas, dataset, scatters, inertia_sor, base_clusters):
+def generate_clustering_plots(
+        kmeans,
+        dataPandas,
+        dataset,
+        scatters,
+        inertia_sor,
+        base_clusters):
     '''
     plotting function that generates all plots for the clustering algorithm
 
@@ -79,7 +85,8 @@ def generate_clustering_plots(kmeans, dataPandas, dataset, scatters, inertia_sor
     # columns with each other based on the cluster they're in
     for x in range(len(dataPandas.columns) - 1):
         for y in range(len(dataPandas.columns) - 1):
-            if dataPandas.columns[x].replace(" ", "_") + "_vs_" + dataPandas.columns[y].replace(" ", "_") in scatters:
+            if dataPandas.columns[x].replace(
+                    " ", "_") + "_vs_" + dataPandas.columns[y].replace(" ", "_") in scatters:
                 img = plt.figure()
                 plt.scatter(dataset[:, x], dataset[:, y],
                             c=kmeans.labels_, cmap='rainbow')
@@ -372,7 +379,10 @@ def analyze(client, model=None):
         centers = modeldict['model'].cluster_centers_
         logger(" ", ("Total Clusters: {}".format(str(len(centers)))))
         logger("->", ("KMeans centroids: {}".format(str(centers))))
-        logger("->", ("KMeans Sum Squared Dist of points to center (inertia): {}".format(str(inertia))))
+        logger(
+            "->",
+            ("KMeans Sum Squared Dist of points to center (inertia): {}".format(
+                str(inertia))))
         modeldict['n_centers'] = len(centers)
         modeldict['centroids'] = centers
         modeldict['inertia'] = inertia
