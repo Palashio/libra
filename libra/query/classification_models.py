@@ -51,6 +51,14 @@ def logger(instruction, found=""):
     counter += 1
 
 def printtable(col_name, col_width):
+    '''
+    function that prints a table consisting of a summary of the columns found
+    in the dataset (uses global counter variable found in other python files)
+
+    :param col_name: name of the column in dataset one wishes to see displayed
+    :param col_width: width of the column in dataset one wishes to see displayed
+
+    '''
     global counter
     for row in col_name:
         print((" " * 2 * counter) + "| " + ("".join(word.ljust(col_width)
@@ -192,7 +200,7 @@ def train_svm(instruction,
               coef0=0.0,
               max_iter=-1,
               random_state=49):
-    '''
+        '''
         function to train a support vector machine clustering algorithm
         :param many params: used to hyperparametrize the function.
         :return a dictionary object with all of the information for the algorithm.
