@@ -79,6 +79,9 @@ def text_classification_query(self, instruction, drop=None,
                               generate_plots=True,
                               save_model=False,
                               save_path=os.getcwd()):
+    if test_size < 0:
+        raise Exception("Test size must be a float between 0 and 1")
+
     if epochs < 1:
         raise Exception("Epoch number is less than 1 (model will not be trained)")
 
@@ -213,6 +216,9 @@ def summarization_query(self, instruction, preprocess=True,
                         generate_plots=True,
                         save_model=False,
                         save_path=os.getcwd()):
+    if test_size < 0:
+        raise Exception("Test size must be a float between 0 and 1")
+
     if epochs < 1:
         raise Exception("Epoch number is less than 1 (model will not be trained)")
 
@@ -357,6 +363,9 @@ def image_caption_query(self, instruction,
                         save_path_decoder=os.getcwd(),
                         save_model_encoder=False,
                         save_path_encoder=os.getcwd()):
+    if test_size < 0:
+        raise Exception("Test size must be a float between 0 and 1")
+    Image
     if top_k < 1:
         raise Exception("Top_k value must be equal to or greater than 1")
 
@@ -580,7 +589,7 @@ def image_caption_query(self, instruction,
     plots = {}
     if generate_plots:
         logger("Generating plots")
-        plots.update({"loss": plot_loss(loss_plot_train, loss_plot_val)})
+        plots.update({"loss": libra.plotting.nonkeras_generate_plots.plot_loss(loss_plot_train, loss_plot_val)})
 
     logger("->", "Final training loss: {}".format(str(total_loss.numpy() / num_steps)))
     logger("->", "Final validation loss: {}".format(str(total_loss_val.numpy() / num_steps)))
