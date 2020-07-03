@@ -50,10 +50,14 @@ def logger(instruction, found=""):
 
     counter += 1
 
+# function that prints a table consisting of a summary of the columns founnd
+# in the dataset (is copied into different python files to maintain global variable
+# parallels
 def printtable(col_name, col_width):
     '''
     function that prints a table consisting of a summary of the columns found
-    in the dataset (uses global counter variable found in other python files)
+    in the dataset (is copied into different python files to maintain global variable
+    parallels)
 
     :param col_name: name of the column in dataset one wishes to see displayed
     :param col_width: width of the column in dataset one wishes to see displayed
