@@ -503,16 +503,18 @@ def image_caption_query(self, instruction,
     dataset = dataset.shuffle(buffer_size).batch(batch_size)
     dataset = dataset.prefetch(buffer_size=tf.data.experimental.AUTOTUNE)
 
-    dataset_val = tf.data.Dataset.from_tensor_slices((img_name_val, cap_val))
+    if testing:
 
-    dataset_val = dataset_val.map(lambda item1, item2: tf.numpy_function(
-        map_func, [item1, item2], [tf.float32, tf.int32]),
-                                  num_parallel_calls=tf.data.experimental.AUTOTUNE)
+        dataset_val = tf.data.Dataset.from_tensor_slices((img_name_val, cap_val))
 
-    # Shuffle and batch
-    dataset_val = dataset_val.shuffle(buffer_size).batch(batch_size)
-    dataset_val = dataset_val.prefetch(
-        buffer_size=tf.data.experimental.AUTOTUNE)
+        dataset_val = dataset_val.map(lambda item1, item2: tf.numpy_function(
+            map_func, [item1, item2], [tf.float32, tf.int32]),
+                                      num_parallel_calls=tf.data.experimental.AUTOTUNE)
+
+        # Shuffle and batch
+        dataset_val = dataset_val.shuffle(buffer_size).batch(batch_size)
+        dataset_val = dataset_val.prefetch(
+            buffer_size=tf.data.experimental.AUTOTUNE)
 
     logger("Establishing encoder decoder framework")
     encoder = CNN_Encoder(embedding_dim)
@@ -624,7 +626,12 @@ def image_caption_query(self, instruction,
         plots.update({"loss": libra.plotting.nonkeras_generate_plots.plot_loss(loss_plot_train, loss_plot_val)})
 
     logger("->", "Final training loss: {}".format(str(total_loss.numpy() / num_steps)))
-    logger("->", "Final validation loss: {}".format(str(total_loss_val.numpy() / num_steps)))
+    total_loss = total_loss.numpy() / num_steps
+    if testing:
+        logger("->", "Final validation loss: {}".format(str(total_loss_val.numpy() / num_steps)))
+        total_loss_val = total_loss_val.numpy() / num_steps
+    else:
+        total_loss_val = 0
 
     if save_model_decoder:
         logger("Saving decoder checkpoint...")
@@ -643,8 +650,8 @@ def image_caption_query(self, instruction,
         "feature_extraction": image_features_extract_model,
         "plots": plots,
         'losses': {
-            'training_loss': total_loss.numpy(),
-            'validation_loss': total_loss_val.numpy()
+            'training_loss': total_loss,
+            'validation_loss': total_loss_val
         }
     }
     return self.models["Image Caption"]

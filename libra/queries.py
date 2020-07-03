@@ -793,4 +793,4 @@ class client:
 
 
 x = client("/Users/anasawadalla/PycharmProjects/libra/tools/data/nlp_data/image-caption.csv")
-client.image_caption_query(self=x, instruction="Image captions", test_size=0.01)
+client.image_caption_query(self=x, instruction="Image captions", test_size=0.0)
