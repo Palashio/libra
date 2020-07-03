@@ -50,6 +50,11 @@ def logger(instruction, found=""):
 
     counter += 1
 
+def printtable(col_name, col_width):
+    global counter
+    for row in col_name:
+        print((" " * 2 * counter) + "| " + ("".join(word.ljust(col_width)
+                                                    for word in row)) + " |")
 
 def k_means_clustering(dataset=None,
                        scatters=[],
@@ -97,12 +102,26 @@ def k_means_clustering(dataset=None,
         n_init=n_init,
         max_iter=max_iter).fit(data)
     modelStorage.append(kmeans)
-
     # stores SSE values in an array for later comparison
     inertiaStor.append(kmeans.inertia_)
-    i += 1
 
     logger("Identifying best centroid count and optimizing accuracy")
+
+    col_name=[["Number of clusters   ",
+                     "| Inertia  "]] 
+    col_width=max(len(word) for row in col_name for word in row) + 2
+    printtable(col_name,col_width)
+    values = []
+    values.append(str(i))
+    values.append(
+        "| " + str(inertiaStor[i-base_clusters]))
+    datax = []
+    datax.append(values)
+    printtable(datax,
+               col_width)
+    
+    i += 1
+
     # continues to increase cluster size until SSE values don't decrease by
     # 1000 - this value was decided based on precedence
     while (all(earlier >= later for earlier,
@@ -115,6 +134,16 @@ def k_means_clustering(dataset=None,
             max_iter=max_iter).fit(data)
         modelStorage.append(kmeans)
         inertiaStor.append(kmeans.inertia_)
+        
+        values = []
+        values.append(str(i))
+        values.append(
+            "| " + str(inertiaStor[i-base_clusters]))
+        datax = []
+        datax.append(values)
+        printtable(datax,
+                   col_width)
+
         # minimize inertia up to 10000
         i += 1
 
@@ -122,7 +151,9 @@ def k_means_clustering(dataset=None,
         # algorithm
         if i > 3 and inertiaStor[len(
                 inertiaStor) - 2] - 1000 <= inertiaStor[len(inertiaStor) - 1]:
+            print()
             break
+    
     # generates the clustering plots approiately
     logger("->", "Optimal number of clusters found: {}".format(i))
     logger(

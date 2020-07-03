@@ -149,8 +149,13 @@ def tuneReg(
         model.add(Dense(1, kernel_initializer='normal'))
         model.compile(
             optimizer=keras.optimizers.Adam(
-                hp.Choice('learning_rate', [1e-2, 1e-3, 1e-4])),
-            loss='mean_squared_error')
+                                       hp.Float('learning_rate',
+                                                min_value=1e-5,
+                                                max_value=1e-2,
+                                                sampling='LOG',
+                                                default=1e-3)),
+            loss='mean_squared_error',
+            metrics=[metrics])
         return model
 
     # random search for the model
@@ -162,12 +167,12 @@ def tuneReg(
         directory=directory)
     # tuner.search_space_summary()
     # del data[target]
-
     X_train, X_test, y_train, y_test = train_test_split(
         data, target, test_size=0.2, random_state=49)
 
     # searches the tuner space defined by hyperparameters (hp) and returns the
     # best model
+
     tuner.search(X_train, y_train,
                  epochs=epochs,
                  validation_data=(X_test, y_test),
@@ -226,11 +231,15 @@ def tuneClass(
         model.add(Dense(num_classes, activation='softmax'))
         model.compile(
             optimizer=keras.optimizers.Adam(
-                hp.Choice('learning_rate', [1e-2, 1e-3, 1e-4])),
+                                       hp.Float('learning_rate',
+                                                min_value=1e-5,
+                                                max_value=1e-2,
+                                                sampling='LOG',
+                                                default=1e-3)),
             loss=loss,
             metrics=[metrics])
         return model
-
+    
     # tuners, establish the object to look through the tuner search space
     tuner = RandomSearch(
         build_model,
@@ -241,7 +250,6 @@ def tuneClass(
         project_name='class_tuned')
 
     # tuner.search_space_summary()
-
     X_train, X_test, y_train, y_test = train_test_split(
         X, y, test_size=0.2, random_state=49)
 
@@ -262,6 +270,7 @@ def tuneClass(
         epochs=epochs,
         verbose=verbose,
         test_size=test_size)
+
     """
     Return:
         models[0] : best model obtained after tuning

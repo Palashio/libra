@@ -785,4 +785,3 @@ class client:
         get_plots(self, model, plot, save)
 
 
-
