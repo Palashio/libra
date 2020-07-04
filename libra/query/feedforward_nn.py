@@ -404,8 +404,8 @@ def classification_ann(instruction,
     # print((" " * 2 * counter)+ tabulate(datax, headers=col_name, tablefmt='orgtbl'))
     # del values, datax
 
-    final_model = model_data[losses.index(max(accuracies))]
-    final_hist = models[losses.index(max(accuracies))]
+    final_model = model_data[accuracies.index(max(accuracies))]
+    final_hist = models[accuracies.index(max(accuracies))]
 
     print("")
     logger('->', "Best number of layers found: " +
