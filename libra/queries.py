@@ -567,6 +567,7 @@ class client:
                                   monitor="val_loss",
                                   batch_size=32,
                                   max_text_length=200,
+                                  max_features=20000,
                                   generate_plots=True,
                                   save_model=False,
                                   save_path=os.getcwd()):
@@ -587,6 +588,7 @@ class client:
             epochs=epochs,
             batch_size=batch_size,
             max_text_length=max_text_length,
+            max_features=max_features,
             generate_plots=generate_plots,
             save_model=save_model,
             save_path=save_path)

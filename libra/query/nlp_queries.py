@@ -60,7 +60,7 @@ def classify_text(self, text):
     text = lemmatize_text(text_clean_up([text]))
     # Encode text
     text = encode_text(vocab, text)
-    text = sequence.pad_sequences(text, sentimentInfo["maxTextLength"])
+    text = sequence.pad_sequences(text, sentimentInfo["max_text_length"])
     model = sentimentInfo["model"]
     prediction = tf.keras.backend.argmax(model.predict(text))
     return sentimentInfo["classes"][tf.keras.backend.get_value(prediction)[0]]
@@ -76,6 +76,7 @@ def text_classification_query(self, instruction, drop=None,
                               monitor="val_loss",
                               batch_size=32,
                               max_text_length=200,
+                              max_features=20000,
                               generate_plots=True,
                               save_model=False,
                               save_path=os.getcwd()):
@@ -122,10 +123,12 @@ def text_classification_query(self, instruction, drop=None,
 
     X = np.array(X)
 
-    model = get_keras_text_class(max_text_length, len(classes), learning_rate)
+    model = get_keras_text_class(max_features, len(classes), learning_rate)
     logger("Building Keras LSTM model dynamically")
+
     X_train, X_test, y_train, y_test = train_test_split(
         X, Y, test_size=test_size, random_state=random_state)
+
     X_train = sequence.pad_sequences(X_train, maxlen=max_text_length)
     X_test = sequence.pad_sequences(X_test, maxlen=max_text_length)
 
@@ -517,7 +520,6 @@ def image_caption_query(self, instruction,
     dataset = dataset.prefetch(buffer_size=tf.data.experimental.AUTOTUNE)
 
     if testing:
-
         dataset_val = tf.data.Dataset.from_tensor_slices((img_name_val, cap_val))
 
         dataset_val = dataset_val.map(lambda item1, item2: tf.numpy_function(
