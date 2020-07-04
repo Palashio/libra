@@ -13,9 +13,10 @@ import uuid
 from PIL import Image
 from colorama import Fore, Style
 
+number = 0
 
 counter = 0
-number = 0
+currLog = ""
 
 
 # # allows for all columns to be displayed when printing()
@@ -27,7 +28,9 @@ number = 0
 
 def clearLog():
     global counter
+    global currLog
 
+    currLog = ""
     counter = 0
 
 
@@ -241,7 +244,7 @@ def tune_helper(
                 'training_accuracy': history.history['accuracy'],
                 'validation_accuracy': history.history['val_accuracy']}
         }
-
+    clearLog()
     return models
 
 
@@ -261,11 +264,11 @@ def save(model, save_model, save_path=os.getcwd()):
         logger("->", "Saved model to disk as model" + str(number))
     number = number + 1
 
-
 def generate_id():
     '''
     function to generate a unique id.
     '''
+
     return str(uuid.uuid4())
 
 
@@ -326,7 +329,7 @@ def get_model_data(self, model):
         raise Exception(
             "The requested model has not been applied to the client.")
 
-
+    clearLog()
 def get_operators(self, model):
     '''
     gets the operators that were used to preprocess the dataset for prediction.
@@ -460,54 +463,3 @@ def save_and_plot(self, modelname, plotname, save):
         currpath = os.getcwd()
         os.remove(currpath + '/' + path)
 
-
-def get_standard_training_output_keras(epochs, history):
-    '''
-    helper output for logger
-    :param epochs: is the number of epochs model was running for
-    :param history: the keras history object
-    '''
-    global counter
-    col_name = [["Epochs", "| Training Loss ", "| Validation Loss "]]
-    col_width = max(len(word) for row in col_name for word in row) + 2
-    for row in col_name:
-        print((" " * 2 * counter) + "| " + ("".join(word.ljust(col_width)
-                                                    for word in row)) + " |")
-
-    for i, j, k in zip(
-            range(epochs), history.history["loss"], history.history["val_loss"]):
-        values = []
-        values.append(str(i))
-        values.append("| " + str(j))
-        values.append("| " + str(k))
-        datax = []
-        datax.append(values)
-        for row in datax:
-            print((" " * 2 * counter) + "| " + ("".join(word.ljust(col_width)
-                                                        for word in row)) + " |")
-
-
-def get_standard_training_output_generic(epochs, loss, val_loss):
-    '''
-    helper output for logger
-    :param epochs: is the number of epochs model was running for
-    :param loss: is the amount of loss in the training instance
-    :param val_loss: just validation loss
-    '''
-    global counter
-    col_name = [["Epochs ", "| Training Loss ", "| Validation Loss "]]
-    col_width = max(len(word) for row in col_name for word in row) + 2
-    for row in col_name:
-        print((" " * 2 * counter) + "| " + ("".join(word.ljust(col_width)
-                                                    for word in row)) + " |")
-
-    for i, j, k in zip(range(epochs), loss, val_loss):
-        values = []
-        values.append(str(i))
-        values.append("| " + str(j))
-        values.append("| " + str(k))
-        datax = []
-        datax.append(values)
-        for row in datax:
-            print((" " * 2 * counter) + "| " + ("".join(word.ljust(col_width)
-                                                        for word in row)) + " |")
