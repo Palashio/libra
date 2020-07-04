@@ -205,11 +205,11 @@ def get_summary(self, text):
         CustomDataset(
             df,
             tokenizer,
-            modelInfo["maxTextLength"],
-            modelInfo["maxSumLength"]),
+            modelInfo["max_text_length"],
+            modelInfo["max_sum_length"]),
         **params)
     predictions, truth = inference(tokenizer, model, "cpu", loader)
-    return predictions
+    return predictions[0]
 
 
 # Text summarization query
@@ -233,6 +233,9 @@ def summarization_query(self, instruction, preprocess=True,
         raise Exception(
             "Test size must be a float between 0 and 1 (a test size greater than or equal to 1 results in no training "
             "data)")
+
+    if max_text_length < 2 | max_summary_length < 2:
+        raise Exception("Text and summary must be at least of length 2")
 
     if epochs < 1:
         raise Exception("Epoch number is less than 1 (model will not be trained)")
@@ -351,8 +354,8 @@ def summarization_query(self, instruction, preprocess=True,
 
     self.models["Document Summarization"] = {
         "model": model,
-        "maxTextLength": max_text_length,
-        "maxSumLength": max_summary_length,
+        "max_text_length": max_text_length,
+        "max_sum_length": max_summary_length,
         "plots": plots,
         'losses': {'training_loss': loss_train,
                    'val_loss': loss_val}
