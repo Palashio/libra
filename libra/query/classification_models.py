@@ -34,8 +34,8 @@ def logger(instruction, found=""):
 
     :param instruction: what you want to be displayed
     :param found: if you want to display something found like target column
-
     '''
+    
     global counter
     if counter == 0:
         print((" " * 2 * counter) + str(instruction) + str(found))
@@ -61,8 +61,8 @@ def printtable(col_name, col_width):
 
     :param col_name: name of the column in dataset one wishes to see displayed
     :param col_width: width of the column in dataset one wishes to see displayed
-
     '''
+    
     global counter
     for row in col_name:
         print((" " * 2 * counter) + "| " + ("".join(word.ljust(col_width)
@@ -79,11 +79,12 @@ def k_means_clustering(dataset=None,
                        max_iter=300,
                        random_state=42,
                        text=[]):
-     '''
-     function to train a k means clustering algorithm
-     :param many params: used to hyperparametrize the function.
-     :return a dictionary object with all of the information for the algorithm.
-     '''
+    '''
+    function to train a k means clustering algorithm
+    :param many params: used to hyperparametrize the function.
+    :return a dictionary object with all of the information for the algorithm.
+    '''
+        
     logger("Reading in dataset")
 
     dataReader = DataReader(dataset)
@@ -204,11 +205,11 @@ def train_svm(instruction,
               coef0=0.0,
               max_iter=-1,
               random_state=49):
-        '''
-        function to train a support vector machine clustering algorithm
-        :param many params: used to hyperparametrize the function.
-        :return a dictionary object with all of the information for the algorithm.
-        '''
+    '''
+    function to train a support vector machine clustering algorithm
+    :param many params: used to hyperparametrize the function.
+    :return a dictionary object with all of the information for the algorithm.
+    '''
 
     logger("Reading in dataset")
 
@@ -291,10 +292,11 @@ def nearest_neighbors(instruction=None,
                       algorithm='auto',
                       text=[]):
     '''
-        function to train a nearest neighbor algorithm
-        :param many params: used to hyperparametrize the function.
-        :return a dictionary object with all of the information for the algorithm.
-        '''
+    function to train a nearest neighbor algorithm
+    :param many params: used to hyperparametrize the function.
+    :return a dictionary object with all of the information for the algorithm.
+    '''
+    
     logger("Reading in dataset")
     # Reads in dataset
     # data = pd.read_csv(self.dataset)
