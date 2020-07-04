@@ -405,10 +405,7 @@ def analyze(client, model=None):
                 modeldict['model'], data, real, display_labels=labels)
             cm
             plt.show()
-            if model == 'svm':
-                accuracy = modeldict['accuracy']['accuracy_score']
-            else:
-                accuracy = modeldict['accuracy_score']
+            accuracy = modeldict['accuracy']['accuracy_score']
         elif model == 'Text Classification':
             roc = plot_mc_roc(real, preds, modeldict['interpreter'])
             roc
@@ -422,7 +419,7 @@ def analyze(client, model=None):
             plt.show()
 
             accuracy = modeldict['accuracy']['validation_accuracy']
-        elif model == 'classification_ann':  # classification_ANN
+        elif model == 'classification_ANN':  # classification_ANN
             roc = plot_mc_roc(real, preds, enc)
             roc
             plt.show()

@@ -13,6 +13,7 @@ import uuid
 from PIL import Image
 from colorama import Fore, Style
 
+number = 0
 
 counter = 0
 currLog = ""
