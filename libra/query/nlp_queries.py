@@ -96,12 +96,13 @@ def text_classification_query(self, instruction, drop=None,
                               generate_plots=True,
                               save_model=False,
                               save_path=os.getcwd()):
+
     '''
     function to apply text classification algorithm for sentiment analysis
     :param many params: used to hyperparametrize the function.
     :return a dictionary object with all of the information for the algorithm.
     '''
-    
+
     if test_size < 0:
         raise Exception("Test size must be a float between 0 and 1")
 
@@ -249,12 +250,14 @@ def summarization_query(self, instruction, preprocess=True,
                         generate_plots=True,
                         save_model=False,
                         save_path=os.getcwd()):
+
     '''
     function to apply algorithm for text summarization 
     :param many params: used to hyperparametrize the function.
     :return a dictionary object with all of the information for the algorithm.
     '''
     
+
     if test_size < 0:
         raise Exception("Test size must be a float between 0 and 1")
 
@@ -430,6 +433,7 @@ def image_caption_query(self, instruction,
                         save_path_decoder=os.getcwd(),
                         save_model_encoder=False,
                         save_path_encoder=os.getcwd()):
+
     '''
     function to apply predictive algorithm for image caption generation
     :param many params: used to hyperparametrize the function.

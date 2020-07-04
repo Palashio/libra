@@ -5,7 +5,8 @@ from libra.query.nlp_queries import (image_caption_query,
 from libra.query.classification_models import (k_means_clustering,
                                                train_svm, nearest_neighbors,
                                                decision_tree)
-from libra.query.supplementaries import tune_helper, get_model_data, get_operators, get_accuracy, get_losses, get_target, get_plots
+from libra.query.supplementaries import tune_helper, get_model_data, get_operators, get_accuracy, get_losses, \
+    get_target, get_plots, get_vocab
 from libra.query.feedforward_nn import (regression_ann,
                                         classification_ann,
                                         convolutional)
@@ -13,6 +14,7 @@ from libra.query.dimensionality_red_queries import dimensionality_reduc
 from libra.data_generation.grammartree import get_value_instruction
 from libra.data_generation.dataset_labelmatcher import (get_similar_column,
                                                         get_similar_model)
+from libra.plotting.generate_plots import analyze
 from colorama import Fore, Style
 import pandas as pd
 from pandas.core.common import SettingWithCopyWarning
@@ -117,6 +119,7 @@ class client:
             if modeldict.get('preprocesser'):
                 data = modeldict['preprocesser'].transform(data)
             predictions = modeldict['model'].predict(data)
+        clearLog()
         return self.interpret(modelKey, predictions)
 
     def interpret(self, modelKey, predictions):
@@ -138,6 +141,7 @@ class client:
             else:
                 predictions = modeldict['interpreter'].inverse_transform(
                     predictions)
+        clearLog()
         return predictions
 
     # determines type of solution based of type of problem posed by query using a feed-forward neural network
@@ -206,6 +210,7 @@ class client:
                     drop=drop,
                     save_model=save_model,
                     save_path=save_path)
+        clearLog()
         return self
 
     # single regression query using a feed-forward neural network
@@ -250,8 +255,9 @@ class client:
             save_path=save_path)
 
         self.latest_model = 'regression_ANN'
+        clearLog()
         return self
-    
+
     # query for multilabel classification query, does not work for
     # binaryclassification, fits to feed-forward neural network
 
@@ -295,6 +301,7 @@ class client:
             save_path=save_path)
 
         self.latest_model = 'classification_ANN'
+        clearLog()
         return self
         
     # query to perform k-means clustering
@@ -332,6 +339,7 @@ class client:
         )
 
         self.latest_model = 'k_means_clustering'
+        clearLog()
         return self
         
     # query to create a support vector machine
@@ -372,6 +380,7 @@ class client:
                                        )
 
         self.latest_model = 'svm'
+        clearLog()
         return self
         
     # query to create a nearest neighbors model
@@ -411,6 +420,7 @@ class client:
         )
 
         self.latest_model = 'nearest_neighbor'
+        clearLog()
         return self
       
     # query to create a decision tree model
@@ -455,9 +465,11 @@ class client:
             ccp_alpha=ccp_alpha)
 
         self.latest_model = 'decision_tree'
+        clearLog()
         return self
 
     # tunes a specific neural network based on the input model_to_tune
+    
     def tune(self,
              model_to_tune=None,
              max_layers=10,
@@ -509,9 +521,9 @@ class client:
             verbose=verbose,
             test_size=test_size
         )
-
+        clearLog()
         return self
-    
+
     # query to build a convolutional neural network
 
     def convolutional_query(self,
@@ -548,6 +560,7 @@ class client:
             width=width)
 
         self.latest_model = 'convolutional_NN'
+        clearLog()
         return self
 
     # sentiment analysis prediction wrapper
@@ -559,20 +572,20 @@ class client:
         :param many params: all used as hyperparameters for the algorithm.
         :return: a classification of text that you've provided
         '''
-
+        clearLog()
         return classify_text(self=self, text=text)
 
     # sentiment analysis query
     def text_classification_query(self, instruction, drop=None,
                                   preprocess=True,
                                   test_size=0.2,
-                                  validation_size=0.1,
                                   random_state=49,
                                   learning_rate=1e-2,
                                   epochs=20,
-                                  maximizer="val_loss",
+                                  monitor="val_loss",
                                   batch_size=32,
-                                  maxTextLength=200,
+                                  max_text_length=200,
+                                  max_features=20000,
                                   generate_plots=True,
                                   save_model=False,
                                   save_path=os.getcwd()):
@@ -587,17 +600,18 @@ class client:
             self=self, instruction=instruction, drop=drop,
             preprocess=preprocess,
             test_size=test_size,
-            val_size=validation_size,
             random_state=random_state,
             learning_rate=learning_rate,
-            maximizer=maximizer,
+            monitor=monitor,
             epochs=epochs,
             batch_size=batch_size,
-            maxTextLength=maxTextLength,
+            max_text_length=max_text_length,
+            max_features=max_features,
             generate_plots=generate_plots,
             save_model=save_model,
             save_path=save_path)
         self.latest_model = 'Text Classification'
+        clearLog()
         return self
 
     # document summarization predict wrapper
@@ -608,18 +622,20 @@ class client:
         :param text: set of text that you want to summarize.
         :return: a summary of text inputted in the text field.
         '''
+        clearLog()
         return get_summary(self=self, text=text)
 
     # text summarization query
     def summarization_query(self, instruction, preprocess=True,
                             drop=None,
                             epochs=10,
-                            batch_size=64,
+                            batch_size=32,
                             learning_rate=1e-4,
                             max_text_length=512,
                             max_summary_length=150,
                             test_size=0.2,
                             random_state=49,
+                            gpu=False,
                             generate_plots=True,
                             save_model=False,
                             save_path=os.getcwd()):
@@ -639,11 +655,13 @@ class client:
             max_summary_length=max_summary_length,
             test_size=test_size,
             random_state=random_state,
+            gpu=gpu,
             generate_plots=generate_plots,
             save_model=save_model,
             save_path=save_path)
 
         self.latest_model = 'Document Summarization'
+        clearLog()
         return self
 
     # image caption generator wrapper
@@ -655,6 +673,7 @@ class client:
         :return: a caption for the image inputted in the image field.
         '''
         caption = generate_caption(self=self, image=image)
+        clearLog()
         return ' '.join(caption[:len(caption) - 1])
 
     # image caption prediction query
@@ -663,11 +682,13 @@ class client:
                             epochs=10,
                             preprocess=True,
                             random_state=49,
+                            test_size=0.2,
                             top_k=5000,
-                            batch_size=1,
+                            batch_size=32,
                             buffer_size=1000,
                             embedding_dim=256,
                             units=512,
+                            gpu=False,
                             generate_plots=True,
                             save_model_decoder=False,
                             save_path_decoder=os.getcwd(),
@@ -685,17 +706,20 @@ class client:
             epochs=epochs,
             preprocess=preprocess,
             random_state=random_state,
+            test_size=test_size,
             top_k=top_k,
             batch_size=batch_size,
             buffer_size=buffer_size,
             embedding_dim=embedding_dim,
             units=units,
+            gpu=gpu,
             generate_plots=generate_plots,
             save_model_decoder=save_model_decoder,
             save_path_decoder=save_path_decoder,
             save_model_encoder=save_model_encoder,
             save_path_encoder=save_path_encoder)
         self.latest_model = 'Image Caption'
+        clearLog()
         return self
 
     # performs dimensionality reduction on your dataset
@@ -718,17 +742,19 @@ class client:
         if model is None:
             model = self.latest_model
         print(self.models[model]['plots'].keys())
-
+    
     # shows names of models in model dictionary
 
+        clearLog() 
     def model_names(self):
         '''
         Function that shows names of models associated with the client
         '''
         models_avail = [key for key in self.models.keys()]
         print(models_avail)
-
+        clearLog()
     # shows the keys in the models dictionary
+    
     def model_data(self, model=None):
         '''
         Function that retrieves the model_data; all the information in self.models for that model
@@ -737,7 +763,7 @@ class client:
         if model is None:
             model = self.latest_model
         get_model_data(self, model)
-
+        clearLog()
     # returns all operators applicable to the client's models dictionary
     def operators(self, model=None):
         '''
@@ -747,7 +773,7 @@ class client:
         if model is None:
             model = self.latest_model
         get_operators(self, model)
-
+        clearLog()
     # show accuracy scores for client's model
     def accuracy(self, model=None):
         '''
@@ -756,6 +782,7 @@ class client:
         '''
         if model is None:
             model = self.latest_model
+        clearLog()
         return get_accuracy(self, model)
 
     # show losses for client's model
@@ -766,6 +793,7 @@ class client:
         '''
         if model is None:
             model = self.latest_model
+        clearLog()
         return get_losses(self, model)
 
     # return client model's target
@@ -773,9 +801,11 @@ class client:
         '''
         Function that retrieves all of the targets in the self.models dictionary for the key.
         :param model: default to the latest model, but essentially the model key
+        returns target variable of model used in client instance
         '''
         if model is None:
             model = self.latest_model
+        clearLog()
         return get_target(self, model)
 
     # return NLP model's vocabulary
@@ -786,6 +816,7 @@ class client:
         '''
         if model is None:
             model = self.latest_model
+        clearLog()
         return get_vocab(self, model)
 
     # plotting for client
@@ -795,7 +826,19 @@ class client:
         :param model: default to the latest model, but essentially the model key
         :param plot: plot specified during the client session to be procured
         :param save: option to save plots after client session is done (default is false, or
+
         '''
+        clearLog()
         get_plots(self, model, plot, save)
 
+    # shows analysis of the model
+    def analyze(self, model=None):
+        '''
+        Function that retrieves all of plots in the self.models dictionary for the key.
+        :param model: default to the latest model, but essentailly the model key
+        '''
+        if model is None:
+            model = self.latest_model
+        clearLog()
+        analyze(self, model)
 
