@@ -23,7 +23,7 @@ import os
 import tensorflow
 import numpy as np
 
-# supressing warnings for cleaner dialogue box
+# suppressing warnings for cleaner dialogue box
 warnings.simplefilter(action='error', category=FutureWarning)
 warnings.simplefilter(action="ignore", category=SettingWithCopyWarning)
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
@@ -86,8 +86,8 @@ class client:
         self.latest_model = None
         clearLog()
 
-    # returns models with a specific string - currently deprecated, should not
-    # be used.
+    # param model_requested: string representation of the name of the model user seeks to retrieve
+    # returns models with a specific string - currently deprecated, should not be used.
 
     def get_models(self, model_requested):
         '''
@@ -144,6 +144,8 @@ class client:
         clearLog()
         return predictions
 
+    # determines type of solution based of type of problem posed by query using a feed-forward neural network
+    # instruction should be the value of a column
     def neural_network_query(self,
                              instruction,
                              callback=False,
@@ -301,7 +303,8 @@ class client:
         self.latest_model = 'classification_ANN'
         clearLog()
         return self
-        # query to perform k-means clustering
+        
+    # query to perform k-means clustering
 
     def kmeans_clustering_query(self,
                                 preprocess=True,
@@ -338,7 +341,8 @@ class client:
         self.latest_model = 'k_means_clustering'
         clearLog()
         return self
-        # query to create a support vector machine
+        
+    # query to create a support vector machine
 
     def svm_query(self,
                   instruction,
@@ -378,7 +382,8 @@ class client:
         self.latest_model = 'svm'
         clearLog()
         return self
-        # query to create a nearest neighbors model
+        
+    # query to create a nearest neighbors model
 
     def nearest_neighbor_query(
             self,
@@ -417,7 +422,8 @@ class client:
         self.latest_model = 'nearest_neighbor'
         clearLog()
         return self
-        # query to create a decision tree model
+      
+    # query to create a decision tree model
 
     def decision_tree_query(
             self,
@@ -462,8 +468,8 @@ class client:
         clearLog()
         return self
 
-        # tunes a specific neural network based on the input model_to_tune
-
+    # tunes a specific neural network based on the input model_to_tune
+    
     def tune(self,
              model_to_tune=None,
              max_layers=10,
@@ -538,7 +544,7 @@ class client:
         :return: an updated model and history stored in the models dictionary
         '''
 
-        # storing values the model dictionary
+        # storing values in the model dictionary
         self.models["convolutional_NN"] = convolutional(
             instruction=instruction,
             read_mode=read_mode,
@@ -556,7 +562,8 @@ class client:
         self.latest_model = 'convolutional_NN'
         clearLog()
         return self
-        # Sentiment analysis predict wrapper
+
+    # sentiment analysis prediction wrapper
 
     def classify_text(self, text):
         '''
@@ -606,7 +613,8 @@ class client:
         self.latest_model = 'Text Classification'
         clearLog()
         return self
-        # Document summarization predict wrapper
+
+    # document summarization predict wrapper
 
     def get_summary(self, text):
         '''
@@ -655,7 +663,8 @@ class client:
         self.latest_model = 'Document Summarization'
         clearLog()
         return self
-        # Image caption prediction
+
+    # image caption generator wrapper
 
     def generate_caption(self, image):
         '''
@@ -667,7 +676,7 @@ class client:
         clearLog()
         return ' '.join(caption[:len(caption) - 1])
 
-    # Image Caption query
+    # image caption prediction query
     def image_caption_query(self, instruction,
                             drop=None,
                             epochs=10,
@@ -712,9 +721,9 @@ class client:
         self.latest_model = 'Image Caption'
         clearLog()
         return self
-        # performs dimensionality reduction on your dataset
 
-    # based on user instruction for target variable
+    # performs dimensionality reduction on your dataset
+    # based on user instruction for target variable 
 
     def dimensionality_reducer(self, instruction):
         '''
@@ -733,7 +742,10 @@ class client:
         if model is None:
             model = self.latest_model
         print(self.models[model]['plots'].keys())
-        clearLog()
+    
+    # shows names of models in model dictionary
+
+        clearLog() 
     def model_names(self):
         '''
         Function that shows names of models associated with the client
@@ -742,6 +754,7 @@ class client:
         print(models_avail)
         clearLog()
     # shows the keys in the models dictionary
+    
     def model_data(self, model=None):
         '''
         Function that retrieves the model_data; all the information in self.models for that model
@@ -788,6 +801,7 @@ class client:
         '''
         Function that retrieves all of the targets in the self.models dictionary for the key.
         :param model: default to the latest model, but essentially the model key
+        returns target variable of model used in client instance
         '''
         if model is None:
             model = self.latest_model
@@ -810,6 +824,9 @@ class client:
         '''
         Function that retrieves all of plots in the self.models dictionary for the key.
         :param model: default to the latest model, but essentially the model key
+        :param plot: plot specified during the client session to be procured
+        :param save: option to save plots after client session is done (default is false, or
+
         '''
         clearLog()
         get_plots(self, model, plot, save)

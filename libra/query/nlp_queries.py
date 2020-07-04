@@ -46,8 +46,8 @@ def logger(instruction, found=""):
 
     :param instruction: what you want to be displayed
     :param found: if you want to display something found like target column
-
     '''
+    
     global counter
     if counter == 0:
         print((" " * 2 * counter) + str(instruction) + str(found))
@@ -64,6 +64,12 @@ def logger(instruction, found=""):
 
 
 def classify_text(self, text):
+    '''
+    function to perform sentiment analysis text classification
+
+    :param text: text sent in/from written query to be analyzed
+    '''
+    
     sentimentInfo = self.models.get("Text Classification")
     vocab = sentimentInfo["vocabulary"]
     # Clean up text
@@ -90,6 +96,13 @@ def text_classification_query(self, instruction, drop=None,
                               generate_plots=True,
                               save_model=False,
                               save_path=os.getcwd()):
+
+    '''
+    function to apply text classification algorithm for sentiment analysis
+    :param many params: used to hyperparametrize the function.
+    :return a dictionary object with all of the information for the algorithm.
+    '''
+
     if test_size < 0:
         raise Exception("Test size must be a float between 0 and 1")
 
@@ -237,6 +250,14 @@ def summarization_query(self, instruction, preprocess=True,
                         generate_plots=True,
                         save_model=False,
                         save_path=os.getcwd()):
+
+    '''
+    function to apply algorithm for text summarization 
+    :param many params: used to hyperparametrize the function.
+    :return a dictionary object with all of the information for the algorithm.
+    '''
+    
+
     if test_size < 0:
         raise Exception("Test size must be a float between 0 and 1")
 
@@ -377,6 +398,10 @@ def summarization_query(self, instruction, preprocess=True,
 
 # Image Caption Generation Prediction
 def generate_caption(self, image):
+    '''
+    wrapper function of image_caption_query to predict caption for image
+    :param image: image to be analyzed
+    '''
     modelInfo = self.models.get("Image Caption")
     decoder = modelInfo['decoder']
     encoder = modelInfo['encoder']
@@ -408,6 +433,13 @@ def image_caption_query(self, instruction,
                         save_path_decoder=os.getcwd(),
                         save_model_encoder=False,
                         save_path_encoder=os.getcwd()):
+
+    '''
+    function to apply predictive algorithm for image caption generation
+    :param many params: used to hyperparametrize the function.
+    :return a dictionary object with all of the information for the algorithm.
+    '''    
+    
     if test_size < 0:
         raise Exception("Test size must be a float between 0 and 1")
 
