@@ -14,6 +14,7 @@ from libra.query.dimensionality_red_queries import dimensionality_reduc
 from libra.data_generation.grammartree import get_value_instruction
 from libra.data_generation.dataset_labelmatcher import (get_similar_column,
                                                         get_similar_model)
+from libra.plotting.generate_plots import analyze
 from colorama import Fore, Style
 import pandas as pd
 from pandas.core.common import SettingWithCopyWarning
@@ -803,4 +804,15 @@ class client:
         clearLog()
         get_plots(self, model, plot, save)
 
+
+    # shows analysis of the model
+    def analyze(self, model=None):
+        '''
+        Function that retrieves all of plots in the self.models dictionary for the key.
+        :param model: default to the latest model, but essentailly the model key
+        '''
+        if model is None:
+            model = self.latest_model
+        clearLog()
+        analyze(self, model)
 
