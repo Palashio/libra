@@ -15,7 +15,7 @@ from colorama import Fore, Style
 
 
 counter = 0
-number = 0
+currLog = ""
 
 
 # # allows for all columns to be displayed when printing()
@@ -27,7 +27,9 @@ number = 0
 
 def clearLog():
     global counter
+    global currLog
 
+    currLog = ""
     counter = 0
 
 
@@ -241,7 +243,7 @@ def tune_helper(
                 'training_accuracy': history.history['accuracy'],
                 'validation_accuracy': history.history['val_accuracy']}
         }
-
+    clearLog()
     return models
 
 
@@ -261,11 +263,11 @@ def save(model, save_model, save_path=os.getcwd()):
         logger("->", "Saved model to disk as model" + str(number))
     number = number + 1
 
-
 def generate_id():
     '''
     function to generate a unique id.
     '''
+
     return str(uuid.uuid4())
 
 
@@ -326,7 +328,7 @@ def get_model_data(self, model):
         raise Exception(
             "The requested model has not been applied to the client.")
 
-
+    clearLog()
 def get_operators(self, model):
     '''
     gets the operators that were used to preprocess the dataset for prediction.

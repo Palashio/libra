@@ -263,7 +263,7 @@ def generate_column_labels(full_pipeline, numeric_cols, text_cols):
 
         return cols
     else:
-        return numeric_cols
+        return [*list(numeric_cols), *text_cols]
 
 
 def clustering_preprocessor(data):
