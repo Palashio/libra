@@ -23,18 +23,21 @@ import numpy as np
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
 counter = 0
-number = 0
-# current_dir=os.getcw()
-
-# allows for all columns to be displayed when printing()
-pd.options.display.width = None
+currLog = ""
 
 
-# clears the log when new process is started up
+# # allows for all columns to be displayed when printing()
+# pd.options.display.width = None
+
+
+# # clears the log when new process is started up
 
 
 def clearLog():
     global counter
+    global currLog
+
+    currLog = ""
     counter = 0
 
 
@@ -112,7 +115,7 @@ def regression_ann(
     y_train = target_scaler.fit_transform(np.array(y['train']).reshape(-1, 1))
     y_test = target_scaler.transform(np.array(y['test']).reshape(-1, 1))
 
-    logger("Establishing callback function...")
+    logger("Establishing callback function")
 
     models = []
     losses = []
@@ -134,7 +137,7 @@ def regression_ann(
     # get the first 3 layer model
     model = get_keras_model_reg(data, i)
 
-    logger("Training initial model...")
+    logger("Training initial model")
     history = model.fit(
         X_train,
         y_train,
@@ -230,6 +233,7 @@ def regression_ann(
     # stores values in the client object models dictionary field
     print("")
     logger("Stored model under 'regression_ANN' key")
+    clearLog()
     return {
         'id': generate_id(),
         'model': final_model,
@@ -400,8 +404,8 @@ def classification_ann(instruction,
     # print((" " * 2 * counter)+ tabulate(datax, headers=col_name, tablefmt='orgtbl'))
     # del values, datax
 
-    final_model = model_data[losses.index(max(accuracies))]
-    final_hist = models[losses.index(max(accuracies))]
+    final_model = model_data[accuracies.index(max(accuracies))]
+    final_hist = models[accuracies.index(max(accuracies))]
 
     print("")
     logger('->', "Best number of layers found: " +
@@ -422,7 +426,7 @@ def classification_ann(instruction,
 
     print("")
     logger("Stored model under 'classification_ANN' key")
-
+    clearLog()
     # stores the values and plots into the object dictionary
     return {
         'id': generate_id(),
@@ -572,6 +576,7 @@ def convolutional(instruction=None,
     # storing values the model dictionary
 
     logger("Stored model under 'convolutional_NN' key")
+    clearLog()
     return {
         'id': generate_id(),
         'data_type': read_mode,

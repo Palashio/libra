@@ -15,11 +15,21 @@ import warnings
 warnings.filterwarnings("ignore", category=UserWarning)
 
 counter = 0
-number = 0
+currLog = ""
+
+
+# # allows for all columns to be displayed when printing()
+# pd.options.display.width = None
+
+
+# # clears the log when new process is started up
 
 
 def clearLog():
     global counter
+    global currLog
+
+    currLog = ""
     counter = 0
 
 
@@ -169,7 +179,7 @@ def k_means_clustering(dataset=None,
         plots['elbow'] = elbow
 
     logger("Stored model under 'k_means_clustering' key")
-
+    clearLog()
     # stores plots and information in the dictionary client model
     return {
         'id': generate_id(),
@@ -247,6 +257,7 @@ def train_svm(instruction,
     logger("->", "Accuracy found on testing set: {}".format(score))
 
     logger('->', "Stored model under 'svm' key")
+    clearLog()
     return {
         'id': generate_id(),
         "model": clf,
@@ -332,7 +343,7 @@ def nearest_neighbors(instruction=None,
         "->", "Accuracy found on testing set: {}".format(scores[scores.index(max(scores))]))
     logger("Stored model under 'nearest_neighbors' key")
     knn = models[scores.index(min(scores))]
-
+    clearLog()
     return {'id': generate_id(),
             "model": knn,
             "accuracy": {'accuracy_score': scores[scores.index(max(scores))],
