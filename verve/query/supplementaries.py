@@ -1,12 +1,12 @@
 import os
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
-from libra.modeling.tuner import (tuneReg,
+from verve.modeling.tuner import (tuneReg,
                                   tuneClass,
                                   tuneCNN)
 import matplotlib.pyplot as plt
-from libra.preprocessing.data_reader import DataReader
+from verve.preprocessing.data_reader import DataReader
 from keras.preprocessing.image import ImageDataGenerator
-from libra.plotting.generate_plots import (generate_regression_plots,
+from verve.plotting.generate_plots import (generate_regression_plots,
                                            generate_classification_plots)
 
 import uuid

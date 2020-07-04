@@ -1,14 +1,14 @@
 import pandas as pd
-from libra.preprocessing.data_reader import DataReader
+from verve.preprocessing.data_reader import DataReader
 from sklearn import svm, tree
 from sklearn.metrics import accuracy_score
-from libra.preprocessing.data_preprocesser import initial_preprocesser, clustering_preprocessor
+from verve.preprocessing.data_preprocesser import initial_preprocesser, clustering_preprocessor
 from sklearn.cluster import KMeans
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.model_selection import cross_val_score
 import numpy as np
-from libra.query.supplementaries import generate_id
-from libra.plotting.generate_plots import (generate_clustering_plots)
+from verve.query.supplementaries import generate_id
+from verve.plotting.generate_plots import (generate_clustering_plots)
 from colorama import Fore, Style
 import warnings
 

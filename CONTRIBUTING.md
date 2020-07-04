@@ -1,1 +1,1 @@
-Guidelines for contributing to Libra will come soon.
+Guidelines for contributing to verve will come soon.

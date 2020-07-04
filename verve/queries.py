@@ -1,21 +1,20 @@
-from libra.query.nlp_queries import (image_caption_query,
-                                     generate_caption, classify_text,
-                                     text_classification_query, get_summary,
-                                     summarization_query)
-from libra.query.classification_models import (k_means_clustering,
+# from verve.query.nlp_queries import (image_caption_query,
+#                                      generate_caption, classify_text,
+#                                      text_classification_query, get_summary,
+#                                      summarization_query)
+from verve.query.classification_models import (k_means_clustering,
                                                train_svm, nearest_neighbors,
                                                decision_tree)
 
-from libra.query.supplementaries import tune_helper, get_model_data, get_operators, get_accuracy, get_losses, get_target, get_plots, get_vocab
+from verve.query.supplementaries import tune_helper, get_model_data, get_operators, get_accuracy, get_losses, get_target, get_plots, get_vocab
 
-from libra.query.feedforward_nn import (regression_ann,
+from verve.query.feedforward_nn import (regression_ann,
                                         classification_ann,
                                         convolutional)
-from libra.query.dimensionality_red_queries import dimensionality_reduc
-from libra.data_generation.grammartree import get_value_instruction
-from libra.data_generation.dataset_labelmatcher import (get_similar_column,
+from verve.data_generation.grammartree import get_value_instruction
+from verve.data_generation.dataset_labelmatcher import (get_similar_column,
                                                         get_similar_model)
-from libra.plotting.generate_plots import analyze
+from verve.plotting.generate_plots import analyze
 from colorama import Fore, Style
 import pandas as pd
 from pandas.core.common import SettingWithCopyWarning
@@ -723,17 +722,6 @@ class client:
         clearLog()
         return self
 
-    # performs dimensionality reduction on your dataset
-    # based on user instruction for target variable 
-
-    def dimensionality_reducer(self, instruction):
-        '''
-        Unused function for dimensionality reduction
-        :param instruction: the objective that you want to reduce dimensions to maximize
-        :return: the most optimal dataset
-        '''
-        dimensionality_reduc(instruction, self.dataset)
-
     # shows the names of plots associated with a specific model
     def plot_names(self, model=None):
         '''
@@ -843,3 +831,4 @@ class client:
         clearLog()
         analyze(self, model)
 
+newClient = client('none')
