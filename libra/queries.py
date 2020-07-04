@@ -255,6 +255,7 @@ class client:
         self.latest_model = 'regression_ANN'
         clearLog()
         return self
+
     # query for multilabel classification query, does not work for
     # binaryclassification, fits to feed-forward neural network
 
@@ -462,6 +463,7 @@ class client:
         return self
 
         # tunes a specific neural network based on the input model_to_tune
+
     def tune(self,
              model_to_tune=None,
              max_layers=10,
@@ -515,6 +517,7 @@ class client:
         )
         clearLog()
         return self
+
     # query to build a convolutional neural network
 
     def convolutional_query(self,
@@ -569,13 +572,13 @@ class client:
     def text_classification_query(self, instruction, drop=None,
                                   preprocess=True,
                                   test_size=0.2,
-                                  validation_size=0.1,
                                   random_state=49,
                                   learning_rate=1e-2,
                                   epochs=20,
-                                  maximizer="val_loss",
+                                  monitor="val_loss",
                                   batch_size=32,
-                                  maxTextLength=200,
+                                  max_text_length=200,
+                                  max_features=20000,
                                   generate_plots=True,
                                   save_model=False,
                                   save_path=os.getcwd()):
@@ -590,13 +593,13 @@ class client:
             self=self, instruction=instruction, drop=drop,
             preprocess=preprocess,
             test_size=test_size,
-            val_size=validation_size,
             random_state=random_state,
             learning_rate=learning_rate,
-            maximizer=maximizer,
+            monitor=monitor,
             epochs=epochs,
             batch_size=batch_size,
-            maxTextLength=maxTextLength,
+            max_text_length=max_text_length,
+            max_features=max_features,
             generate_plots=generate_plots,
             save_model=save_model,
             save_path=save_path)
@@ -618,12 +621,13 @@ class client:
     def summarization_query(self, instruction, preprocess=True,
                             drop=None,
                             epochs=10,
-                            batch_size=64,
+                            batch_size=32,
                             learning_rate=1e-4,
                             max_text_length=512,
                             max_summary_length=150,
                             test_size=0.2,
                             random_state=49,
+                            gpu=False,
                             generate_plots=True,
                             save_model=False,
                             save_path=os.getcwd()):
@@ -643,6 +647,7 @@ class client:
             max_summary_length=max_summary_length,
             test_size=test_size,
             random_state=random_state,
+            gpu=gpu,
             generate_plots=generate_plots,
             save_model=save_model,
             save_path=save_path)
@@ -668,11 +673,13 @@ class client:
                             epochs=10,
                             preprocess=True,
                             random_state=49,
+                            test_size=0.2,
                             top_k=5000,
-                            batch_size=1,
+                            batch_size=32,
                             buffer_size=1000,
                             embedding_dim=256,
                             units=512,
+                            gpu=False,
                             generate_plots=True,
                             save_model_decoder=False,
                             save_path_decoder=os.getcwd(),
@@ -690,11 +697,13 @@ class client:
             epochs=epochs,
             preprocess=preprocess,
             random_state=random_state,
+            test_size=test_size,
             top_k=top_k,
             batch_size=batch_size,
             buffer_size=buffer_size,
             embedding_dim=embedding_dim,
             units=units,
+            gpu=gpu,
             generate_plots=generate_plots,
             save_model_decoder=save_model_decoder,
             save_path_decoder=save_path_decoder,
@@ -704,6 +713,7 @@ class client:
         clearLog()
         return self
         # performs dimensionality reduction on your dataset
+
     # based on user instruction for target variable
 
     def dimensionality_reducer(self, instruction):
@@ -735,7 +745,7 @@ class client:
     def model_data(self, model=None):
         '''
         Function that retrieves the model_data; all the information in self.models for that model
-        :param model: default to the latest model, but essentailly the model key
+        :param model: default to the latest model, but essentially the model key
         '''
         if model is None:
             model = self.latest_model
@@ -745,7 +755,7 @@ class client:
     def operators(self, model=None):
         '''
         Function that retrieves all of the operators; pipelines that were used to model the dataset
-        :param model: default to the latest model, but essentailly the model key
+        :param model: default to the latest model, but essentially the model key
         '''
         if model is None:
             model = self.latest_model
@@ -755,7 +765,7 @@ class client:
     def accuracy(self, model=None):
         '''
         Function that retrieves all of the accuracies in the self.models dictionary for the key.
-        :param model: default to the latest model, but essentailly the model key
+        :param model: default to the latest model, but essentially the model key
         '''
         if model is None:
             model = self.latest_model
@@ -766,7 +776,7 @@ class client:
     def losses(self, model=None):
         '''
         Function that retrieves all of the losses in the self.models dictionary for the key.
-        :param model: default to the latest model, but essentailly the model key
+        :param model: default to the latest model, but essentially the model key
         '''
         if model is None:
             model = self.latest_model
@@ -788,7 +798,7 @@ class client:
     def vocab(self, model=None):
         '''
         Function that retrieves the NLP models vocabulary.
-        :param model: default to the latest model, but essentailly the model key
+        :param model: default to the latest model, but essentially the model key
         '''
         if model is None:
             model = self.latest_model
@@ -799,11 +809,10 @@ class client:
     def plots(self, model="", plot="", save=False):
         '''
         Function that retrieves all of plots in the self.models dictionary for the key.
-        :param model: default to the latest model, but essentailly the model key
+        :param model: default to the latest model, but essentially the model key
         '''
         clearLog()
         get_plots(self, model, plot, save)
-
 
     # shows analysis of the model
     def analyze(self, model=None):
