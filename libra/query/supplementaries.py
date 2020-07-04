@@ -418,9 +418,12 @@ def get_plots(self, model="", plot="", save=False):
     '''
     # no model or plot specified so plot all
     if model == "" and plot == "":
-        for each_model in self.models:
-            for each_plot in self.models[each_model]["plots"]:
-                save_and_plot(self, each_model, each_plot, save)
+        model = self.latest_model
+        if "plots" in self.models[model].keys():
+            for each_plot in self.models[model]['plots']:
+                save_and_plot(self, model, each_plot, save)
+        else:
+            raise Exception("{} does not have plots".format(model))
     # show plots for specified model
     elif model != "" and plot == "":
         if "plots" in self.models[model].keys():
