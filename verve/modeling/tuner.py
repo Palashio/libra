@@ -13,6 +13,7 @@ from sklearn import preprocessing
 from tensorflow import keras
 from sklearn.model_selection import train_test_split
 import tensorflow as tf
+from sklearn.preprocessing import StandardScaler
 
 
 tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)
@@ -167,8 +168,10 @@ def tuneReg(
         directory=directory)
     # tuner.search_space_summary()
     # del data[target]
+    data = StandardScaler().fit_transform(data)
+    target = StandardScaler().fit_transform(y.reshape(len(target),1))[:,0]
     X_train, X_test, y_train, y_test = train_test_split(
-        data, target, test_size=0.2, random_state=49)
+        X, y, test_size=0.2, random_state=49)
 
     # searches the tuner space defined by hyperparameters (hp) and returns the
     # best model
