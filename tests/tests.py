@@ -128,5 +128,5 @@ class TestQueries(unittest.TestCase):
         with self.assertRaises(NameError):
             self.newClient.analyze(model='I dont exist')
 
-
-unittest.main()
+if __name__ == '__main__':
+    unittest.main()
