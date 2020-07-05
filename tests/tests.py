@@ -1,4 +1,4 @@
-from libra.queries import client
+from verve.queries import client
 
 import unittest
 

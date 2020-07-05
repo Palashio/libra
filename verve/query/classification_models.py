@@ -1,14 +1,14 @@
 import pandas as pd
-from libra.preprocessing.data_reader import DataReader
+from verve.preprocessing.data_reader import DataReader
 from sklearn import svm, tree
 from sklearn.metrics import accuracy_score
-from libra.preprocessing.data_preprocesser import initial_preprocesser, clustering_preprocessor
+from verve.preprocessing.data_preprocesser import initial_preprocesser, clustering_preprocessor
 from sklearn.cluster import KMeans
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.model_selection import cross_val_score
 import numpy as np
-from libra.query.supplementaries import generate_id
-from libra.plotting.generate_plots import (generate_clustering_plots)
+from verve.query.supplementaries import generate_id
+from verve.plotting.generate_plots import (generate_clustering_plots)
 from colorama import Fore, Style
 import warnings
 
@@ -44,8 +44,8 @@ def logger(instruction, found=""):
 
     :param instruction: what you want to be displayed
     :param found: if you want to display something found like target column
-
     '''
+    
     global counter
     if counter == 0:
         print((" " * 2 * counter) + str(instruction) + str(found))
@@ -60,7 +60,19 @@ def logger(instruction, found=""):
 
     counter += 1
 
+# function that prints a table consisting of a summary of the columns founnd
+# in the dataset (is copied into different python files to maintain global variable
+# parallels
 def printtable(col_name, col_width):
+    '''
+    function that prints a table consisting of a summary of the columns found
+    in the dataset (is copied into different python files to maintain global variable
+    parallels)
+
+    :param col_name: name of the column in dataset one wishes to see displayed
+    :param col_width: width of the column in dataset one wishes to see displayed
+    '''
+    
     global counter
     for row in col_name:
         print((" " * 2 * counter) + "| " + ("".join(word.ljust(col_width)
@@ -78,10 +90,11 @@ def k_means_clustering(dataset=None,
                        random_state=42,
                        text=[]):
     '''
-        function to train a k means clustering algorithm
-        :param many params: used to hyperparametrize the function.
-        :return a dictionary object with all of the information for the algorithm.
-        '''
+    function to train a k means clustering algorithm
+    :param many params: used to hyperparametrize the function.
+    :return a dictionary object with all of the information for the algorithm.
+    '''
+        
     logger("Reading in dataset")
 
     dataReader = DataReader(dataset)
@@ -203,10 +216,10 @@ def train_svm(instruction,
               max_iter=-1,
               random_state=49):
     '''
-        function to train a support vector machine clustering algorithm
-        :param many params: used to hyperparametrize the function.
-        :return a dictionary object with all of the information for the algorithm.
-        '''
+    function to train a support vector machine clustering algorithm
+    :param many params: used to hyperparametrize the function.
+    :return a dictionary object with all of the information for the algorithm.
+    '''
 
     logger("Reading in dataset")
 
@@ -290,10 +303,11 @@ def nearest_neighbors(instruction=None,
                       algorithm='auto',
                       text=[]):
     '''
-        function to train a nearest neighbor algorithm
-        :param many params: used to hyperparametrize the function.
-        :return a dictionary object with all of the information for the algorithm.
-        '''
+    function to train a nearest neighbor algorithm
+    :param many params: used to hyperparametrize the function.
+    :return a dictionary object with all of the information for the algorithm.
+    '''
+    
     logger("Reading in dataset")
     # Reads in dataset
     # data = pd.read_csv(self.dataset)

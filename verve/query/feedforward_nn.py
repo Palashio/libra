@@ -1,22 +1,22 @@
 from colorama import Fore, Style
 from tensorflow.keras.callbacks import EarlyStopping
 import os
-from libra.preprocessing.image_preprocesser import (setwise_preprocessing,
+from verve.preprocessing.image_preprocesser import (setwise_preprocessing,
                                                     csv_preprocessing,
                                                     classwise_preprocessing,
                                                     set_distinguisher,
                                                     already_processed)
-from libra.preprocessing.data_reader import DataReader
+from verve.preprocessing.data_reader import DataReader
 from keras.models import Sequential
 from keras.layers import (Dense, Conv2D, Flatten, MaxPooling2D, )
 import pandas as pd
-from libra.query.supplementaries import save, generate_id
+from verve.query.supplementaries import save, generate_id
 from keras.preprocessing.image import ImageDataGenerator
 from sklearn.preprocessing import OneHotEncoder
-from libra.plotting.generate_plots import (generate_regression_plots,
+from verve.plotting.generate_plots import (generate_regression_plots,
                                            generate_classification_plots)
-from libra.preprocessing.data_preprocesser import initial_preprocesser
-from libra.modeling.prediction_model_creation import get_keras_model_reg, get_keras_model_class
+from verve.preprocessing.data_preprocesser import initial_preprocesser
+from verve.modeling.prediction_model_creation import get_keras_model_reg, get_keras_model_class
 from sklearn.preprocessing import StandardScaler
 import numpy as np
 

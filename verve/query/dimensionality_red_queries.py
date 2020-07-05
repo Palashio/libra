@@ -1,12 +1,12 @@
 from sklearn.feature_selection import SelectFromModel
 from sklearn import preprocessing, tree
 from itertools import product, permutations
-from libra.preprocessing.data_reader import DataReader
+from verve.preprocessing.data_reader import DataReader
 import os
 from sklearn.ensemble import RandomForestRegressor
-from libra.preprocessing.data_preprocesser import structured_preprocesser, initial_preprocesser
-from libra.data_generation.grammartree import get_value_instruction
-from libra.data_generation.dataset_labelmatcher import get_similar_column
+from verve.preprocessing.data_preprocesser import structured_preprocesser, initial_preprocesser
+from verve.data_generation.grammartree import get_value_instruction
+from verve.data_generation.dataset_labelmatcher import get_similar_column
 
 from xgboost import XGBClassifier
 
@@ -57,8 +57,19 @@ def dimensionality_reduc(
             "KPCA",
             "ICA"],
         inplace=False):
+    '''
+    function to perform dimensionality reduction on the dataset (retrieve only 
+    features with most relevance from multidimensional space of the dataset)
+    :param instruction: command sent to client instance in written query
+    :param dataset: data instantiated in client instance passed to the algorithm
+    :param arr: list of options of algorithm/dimension reducing techniques 
+    options to choose from
+    :param inplace: option to keep features that were deemed as not important
+    intact in the dataset
+    '''
+    
     global counter
-
+    
     dataReader = DataReader(dataset)
 
     logger("loading dataset...")
@@ -138,6 +149,15 @@ def dimensionality_reduc(
 
 
 def dimensionality_RF(instruction, dataset, target="", y="", n_features=10):
+    '''
+    function to reduce dimensionality in dataset via random forest method
+    :param instruction: command sent to client instance in written query.
+    :param dataset: data instantiated in client instance passed to the algorithm
+    :param target: column name of response variable/feature
+    :param y: dictionary of train/test data values associated with response variable/feature
+    :param n_features: maximum number of features to choose to analyze/select
+    '''
+    
     global counter
 
     dataReader = DataReader("./data/" + get_last_file()[0])
@@ -194,6 +214,13 @@ def dimensionality_RF(instruction, dataset, target="", y="", n_features=10):
 
 
 def dimensionality_PCA(instruction, dataset, ca_threshold=None):
+     '''
+     function to reduce dimensionality in dataset via principal component analysis method
+     :param instruction: command sent to client instance in written query.
+     :param dataset: data instantiated in client instance passed to the algorithm
+     :param ca_threshold: percentage of dataset to be preprocessed using morphological component analysis
+     '''
+        
     global counter
 
     pca = PCA(0.92)
@@ -238,6 +265,13 @@ def dimensionality_PCA(instruction, dataset, ca_threshold=None):
 
 
 def dimensionality_ICA(instruction, dataset, target="", y=""):
+    '''
+    function to reduce dimensionality in dataset via independent component analysis
+    :param instruction: command sent to client instance in written query.
+    :param dataset: data instantiated in client instance passed to the algorithm
+    :param target: column name of response variable/feature
+    :param y: dictionary of train/test data values associated with response variable/feature
+    '''
     global counter
 
     dataReader = DataReader("./data/" + get_last_file()[0])
@@ -283,6 +317,11 @@ def dimensionality_ICA(instruction, dataset, target="", y=""):
 
 
 def get_last_file():
+    '''
+    function to retrieve most recently created file generated from
+    reduced dimensionality technique
+    '''
+    
     max_mtime = 0
     for dirname, subdirs, files in os.walk("./data"):
         for fname in files:
@@ -298,6 +337,14 @@ def get_last_file():
 
 
 def dimensionality_KPCA(instruction, dataset, target="", y=""):
+    '''
+    function to reduce dimensionality in dataset via kernal principal component analysis
+    :param instruction: command sent to client instance in written query.
+    :param dataset: data instantiated in client instance passed to the algorithm
+    :param target: column name of response variable/feature
+    :param y: dictionary of train/test data values associated with response variable/feature
+    '''
+    
     global counter
 
     dataReader = DataReader("./data/" + get_last_file()[0])

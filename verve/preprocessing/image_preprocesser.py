@@ -3,8 +3,8 @@ import shutil
 import cv2
 import glob
 import pandas as pd
-from libra.data_generation.dataset_labelmatcher import get_similar_column
-from libra.data_generation.grammartree import get_value_instruction
+from verve.data_generation.dataset_labelmatcher import get_similar_column
+from verve.data_generation.grammartree import get_value_instruction
 
 # Preprocesses images from images to median of heighs/widths
 

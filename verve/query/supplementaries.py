@@ -1,12 +1,12 @@
 import os
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
-from libra.modeling.tuner import (tuneReg,
+from verve.modeling.tuner import (tuneReg,
                                   tuneClass,
                                   tuneCNN)
 import matplotlib.pyplot as plt
-from libra.preprocessing.data_reader import DataReader
+from verve.preprocessing.data_reader import DataReader
 from keras.preprocessing.image import ImageDataGenerator
-from libra.plotting.generate_plots import (generate_regression_plots,
+from verve.plotting.generate_plots import (generate_regression_plots,
                                            generate_classification_plots)
 
 import uuid
@@ -421,9 +421,12 @@ def get_plots(self, model="", plot="", save=False):
     '''
     # no model or plot specified so plot all
     if model == "" and plot == "":
-        for each_model in self.models:
-            for each_plot in self.models[each_model]["plots"]:
-                save_and_plot(self, each_model, each_plot, save)
+        model = self.latest_model
+        if "plots" in self.models[model].keys():
+            for each_plot in self.models[model]['plots']:
+                save_and_plot(self, model, each_plot, save)
+        else:
+            raise Exception("{} does not have plots".format(model))
     # show plots for specified model
     elif model != "" and plot == "":
         if "plots" in self.models[model].keys():
