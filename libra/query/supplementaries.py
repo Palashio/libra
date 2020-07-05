@@ -421,9 +421,12 @@ def get_plots(self, model="", plot="", save=False):
     '''
     # no model or plot specified so plot all
     if model == "" and plot == "":
-        for each_model in self.models:
-            for each_plot in self.models[each_model]["plots"]:
-                save_and_plot(self, each_model, each_plot, save)
+        model = self.latest_model
+        if "plots" in self.models[model].keys():
+            for each_plot in self.models[model]['plots']:
+                save_and_plot(self, model, each_plot, save)
+        else:
+            raise Exception("{} does not have plots".format(model))
     # show plots for specified model
     elif model != "" and plot == "":
         if "plots" in self.models[model].keys():
@@ -460,54 +463,3 @@ def save_and_plot(self, modelname, plotname, save):
         currpath = os.getcwd()
         os.remove(currpath + '/' + path)
 
-
-def get_standard_training_output_keras(epochs, history):
-    '''
-    helper output for logger
-    :param epochs: is the number of epochs model was running for
-    :param history: the keras history object
-    '''
-    global counter
-    col_name = [["Epochs", "| Training Loss ", "| Validation Loss "]]
-    col_width = max(len(word) for row in col_name for word in row) + 2
-    for row in col_name:
-        print((" " * 2 * counter) + "| " + ("".join(word.ljust(col_width)
-                                                    for word in row)) + " |")
-
-    for i, j, k in zip(
-            range(epochs), history.history["loss"], history.history["val_loss"]):
-        values = []
-        values.append(str(i))
-        values.append("| " + str(j))
-        values.append("| " + str(k))
-        datax = []
-        datax.append(values)
-        for row in datax:
-            print((" " * 2 * counter) + "| " + ("".join(word.ljust(col_width)
-                                                        for word in row)) + " |")
-
-
-def get_standard_training_output_generic(epochs, loss, val_loss):
-    '''
-    helper output for logger
-    :param epochs: is the number of epochs model was running for
-    :param loss: is the amount of loss in the training instance
-    :param val_loss: just validation loss
-    '''
-    global counter
-    col_name = [["Epochs ", "| Training Loss ", "| Validation Loss "]]
-    col_width = max(len(word) for row in col_name for word in row) + 2
-    for row in col_name:
-        print((" " * 2 * counter) + "| " + ("".join(word.ljust(col_width)
-                                                    for word in row)) + " |")
-
-    for i, j, k in zip(range(epochs), loss, val_loss):
-        values = []
-        values.append(str(i))
-        values.append("| " + str(j))
-        values.append("| " + str(k))
-        datax = []
-        datax.append(values)
-        for row in datax:
-            print((" " * 2 * counter) + "| " + ("".join(word.ljust(col_width)
-                                                        for word in row)) + " |")

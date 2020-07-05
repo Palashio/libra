@@ -16,13 +16,13 @@ build:
 	docker build -t libra --build-arg python_version=$(PYTHON_VERSION) --build-arg cuda_version=$(CUDA_VERSION) --build-arg cudnn_version=$(CUDNN_VERSION) -f $(DOCKER_FILE) .
 
 bash: build
-	$(DOCKER) run -it -v $(SRC):/src/workspace -v $(DATA):/data --env LIBRA_BACKEND=$(BACKEND) libra bash
+	$(DOCKER) run -it -v $(SRC):/src/workspace -v $(DATA):/data --env libra_BACKEND=$(BACKEND) libra bash
 
 ipython: build
-	$(DOCKER) run -it -v $(SRC):/src/workspace -v $(DATA):/data --env LIBRA_BACKEND=$(BACKEND) libra ipython
+	$(DOCKER) run -it -v $(SRC):/src/workspace -v $(DATA):/data --env libra_BACKEND=$(BACKEND) libra ipython
 
 notebook: build
-	$(DOCKER) run -it -v $(SRC):/src/workspace -v $(DATA):/data --net=host --env LIBRA_BACKEND=$(BACKEND) libra
+	$(DOCKER) run -it -v $(SRC):/src/workspace -v $(DATA):/data --net=host --env libra_BACKEND=$(BACKEND) libra
 
 test: build
-	$(DOCKER) run -it -v $(SRC):/src/workspace -v $(DATA):/data --env LIBRA_BACKEND=$(BACKEND) libra py.test $(TEST)
+	$(DOCKER) run -it -v $(SRC):/src/workspace -v $(DATA):/data --env libra_BACKEND=$(BACKEND) libra py.test $(TEST)

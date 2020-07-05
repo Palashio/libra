@@ -1,6 +1,6 @@
-# Libra Reference Manual  
+# libra Reference Manual  
 
-Libra is an open source deep learning API that provides a toolkit of intuitive and easily accessible machine learning methods, enabling users to streamline their data science workflows. The reference manual contains a detailed description of the Libra API. This reference delineates each of the methods avaiable for use, explaining how one can utilize them as well their respective parameters. The manual assumes that you have a baseline comprehension of some of the key concepts in machine learning. The reference is organized mainly in terms of location in the code where the method was defined as well as in accordance with OOP hierarchy, with a class introduced first and then its methods appearing underneath. Note that work on this manual is still in progress, and certain methods are due to recieve revised documentation in future updates.
+libra is an open source deep learning API that provides a toolkit of intuitive and easily accessible machine learning methods, enabling users to streamline their data science workflows. The reference manual contains a detailed description of the libra API. This reference delineates each of the methods avaiable for use, explaining how one can utilize them as well their respective parameters. The manual assumes that you have a baseline comprehension of some of the key concepts in machine learning. The reference is organized mainly in terms of location in the code where the method was defined as well as in accordance with OOP hierarchy, with a class introduced first and then its methods appearing underneath. Note that work on this manual is still in progress, and certain methods are due to recieve revised documentation in future updates.
 
 ***
 
@@ -197,7 +197,7 @@ Retrieves the column whose index shares closest similarity via comparision of th
 libra.get_similar_model(model_requested, model_keys)
 ```
 
-Identifies/saves the model requested in instruction whose title shares the most similarity with models available in Libra 
+Identifies/saves the model requested in instruction whose title shares the most similarity with models available in libra 
 
 
 *Parameters --* 
@@ -208,7 +208,7 @@ String representation of name of model parsed from instruction sent in written q
 
 model_keys: `[str, str,..., str]`
 
-List of string "key" representations of models inbuilt/supported in Libra for use 
+List of string "key" representations of models inbuilt/supported in libra for use 
 
 
 *Returns --*
@@ -227,7 +227,7 @@ Retrieves the model whose index shares closest similarity via comparision of the
 libra.get_value_instruction(sent)
 ```
 
-Acquires/grammatically parses/reformats (using Textblob) relevant parts of speech for analysis from instruction sent to/in written query into instruction interpretable by other Libra methods
+Acquires/grammatically parses/reformats (using Textblob) relevant parts of speech for analysis from instruction sent to/in written query into instruction interpretable by other libra methods
 
 (Note: If an issue ensues in the instruction where the method cannot comprehend the instruction, an error message will appear stating to 'Please try re-typing your sentence') 
 
@@ -1058,7 +1058,7 @@ libra.fix_slang(text)
 libra.initial_preprocesser(data, instruction, preprocess, ca_threshold)
 ```
 
-Checks data instantiated in Libra instance and applies initial data preprocessing techniques
+Checks data instantiated in libra instance and applies initial data preprocessing techniques
 
 
 *Parameters --*
@@ -1110,7 +1110,7 @@ Retrieves object containing all of the properties (imputer, one hot encoder, etc
 libra.structured_preprocesser(data, ca_threshold)
 ```
 
-Applies well known preprocessing techniques on structured data instantiated in Libra instance for non-clustering modelling/analysis methods
+Applies well known preprocessing techniques on structured data instantiated in libra instance for non-clustering modelling/analysis methods
 
 *Parameters --*
 
@@ -1142,7 +1142,7 @@ Retrieves object containing all of the properties (imputer, one hot encoder, etc
 libra.process_dates(data)
 ```
 
-Identifies/preprocesses existing timestamp columns within data instantiated in Libra instance
+Identifies/preprocesses existing timestamp columns within data instantiated in libra instance
 
 *Parameters --*
 
@@ -1164,7 +1164,7 @@ Executes deconstruction of timestamp column and parses/stores into 4 columns of 
 libra.generate_column_labels(pipeline, numeric_cols)
 ```
 
-Retains numeric column names in data instantiated in Libra instance to keep/reuse for subsequent dataframes after preprocessing
+Retains numeric column names in data instantiated in libra instance to keep/reuse for subsequent dataframes after preprocessing
 
 
 *Parameters --*
@@ -1175,18 +1175,18 @@ Object containing all of the properties (imputer, one hot encoder, etc.) from th
 
 numeric_cols: `[str, str,...,str]`
 
-List of string representations of all column names with numeric data in data instantiated in Libra instance
+List of string representations of all column names with numeric data in data instantiated in libra instance
 
 
 *Returns --*
 
 cols: `[str, str,..., str]`
 
-Retrieves list of string representations of all column names in data instantiated in Libra instance
+Retrieves list of string representations of all column names in data instantiated in libra instance
 
 numeric_cols: `[str, str,...,str]`
 
-Retrieves list of string representations of all column names in data instantiated in Libra instance composed of numeric data
+Retrieves list of string representations of all column names in data instantiated in libra instance composed of numeric data
 
 ### text_preprocessing ###
 
@@ -1194,7 +1194,7 @@ Retrieves list of string representations of all column names in data instantiate
 libra.text_preprocessing(data, text_cols)
 ```
 
-Identifies/preprocesses existing columns within data instantiated in Libra instance containing textual data for word embedding
+Identifies/preprocesses existing columns within data instantiated in libra instance containing textual data for word embedding
 
 *Parameters --*
 
@@ -1204,7 +1204,7 @@ Dictionary containing train and test data values associated with train and test 
 
 text_cols: `[str, str,...,str]`
 
-Retrieves list of string representations of all column names in data instantiated in Libra instance composed of textual data
+Retrieves list of string representations of all column names in data instantiated in libra instance composed of textual data
 
 
 *Returns --*
@@ -1241,7 +1241,7 @@ Retrieves shape of the array containing sum of each numerical row vector represe
 libra.clustering_preprocessor(data)
 ```
 
-Applies well known preprocessing techniques on structured data instantiated in Libra instance for clustering modelling/analysis methods
+Applies well known preprocessing techniques on structured data instantiated in libra instance for clustering modelling/analysis methods
 
 
 *Parameters --*
@@ -1271,7 +1271,7 @@ Object containing all of the properties (imputer, one hot encoder, etc.) from th
 libra.too_many_values(data, ca_threshold)
 ```
 
-Determines if correspondance analysis needs to be applied to data instantiated in Libra instance based on whether too many distinct values in data exist
+Determines if correspondance analysis needs to be applied to data instantiated in libra instance based on whether too many distinct values in data exist
 
 
 *Parameters --*
@@ -1568,7 +1568,7 @@ libra.get_last_file()
 libra.clearLog()
 ```
 
-Clears the logger hierarchial display of any past record of processes used in Libra session
+Clears the logger hierarchial display of any past record of processes used in libra session
 
 
 *Parameters --*
@@ -1590,7 +1590,7 @@ Instantiates/reassigns the global counter and logger state variable back to 0, r
 libra.logger(instruction, found="", slash='')
 ```
 
-Generates hierarchial display and tracks record of processes in operation upon utilizing a particular method in Libra
+Generates hierarchial display and tracks record of processes in operation upon utilizing a particular method in libra
 
 
 *Parameters --*
