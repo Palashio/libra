@@ -15,3 +15,6 @@ keras-tuner
 spacy
 torch
 autocorrect
+pillow
+prince
+cv
