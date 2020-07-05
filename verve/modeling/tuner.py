@@ -141,13 +141,25 @@ def tuneReg(
     # function build model using hyperparameter
     def build_model(hp):
         model = keras.Sequential()
+        model.add(Dense(units=hp.Int('units_00',
+                                     min_value=min_dense,
+                                     max_value=max_dense,
+                                     step=step),
+                                     input_dim=data.shape[1],
+                                     activation=activation))
         for i in range(hp.Int('num_layers', min_layers, max_layers)):
             model.add(Dense(units=hp.Int('units_' + str(i),
                                          min_value=min_dense,
                                          max_value=max_dense,
                                          step=step),
                             activation=activation))
-        model.add(Dense(1))
+            model.add(Dropout(rate=hp.Float(
+                              'dropout_3',
+                              min_value=0.0,
+                              max_value=0.5,
+                              default=0.20,
+                              step=0.05)))
+        model.add(Dense(1, activation='linear'))
         model.compile(
             optimizer=keras.optimizers.Adam(
                                        hp.Float('learning_rate',
