@@ -18,3 +18,4 @@ autocorrect
 pillow
 prince
 opencv-python
+nltk
