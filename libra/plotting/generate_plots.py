@@ -398,43 +398,33 @@ def analyze(client, model=None, save=True):
     elif model in ['svm', 'nearest_neighbor', 'decision_tree', 'classification_ANN', 'Text Classification']:
         logger("->", "Plotting ROC curves and creating confusion matrix...")
         if model in ['svm', 'nearest_neighbor',
-                     'decision_tree']:  # sklearn models ONLY
-            roc = plot_mc_roc(real, preds, modeldict['interpreter'])
-            roc
-            plt.show()
+                     'decision_tree', 'Text Classification']:
+            label_source = modeldict['interpreter']
             labels = list(modeldict['interpreter'].keys())
-            cm = plot_confusion_matrix(
-                modeldict['model'], data, real, display_labels=labels)
-            cm
-            plt.show()
-            accuracy = modeldict['accuracy']['accuracy_score']
-        elif model == 'Text Classification':
-            roc = plot_mc_roc(real, preds, modeldict['interpreter'])
-            roc
-            plt.show()
-            labels = list(modeldict['interpreter'].keys())
-            cm = confusion_matrix(real, preds)
-            cm = ConfusionMatrixDisplay(
-                confusion_matrix=cm,
-                display_labels=labels).plot()
-            cm
-            plt.show()
-
-            accuracy = modeldict['accuracy']['validation_accuracy']
-        elif model == 'classification_ANN':  # classification_ANN
-            roc = plot_mc_roc(real, preds, enc)
-            roc
-            plt.show()
-            cm = confusion_matrix(real, preds)
+        else:
+            label_source = enc
             labels = enc.classes_
-            cm = ConfusionMatrixDisplay(
-                confusion_matrix=cm,
-                display_labels=labels).plot()
-            cm
-            plt.show()
 
-            accuracy = modeldict['accuracy']['validation_accuracy']
+        # plot roc plots
+        roc = plot_mc_roc(real, preds, label_source)
+        roc
+        plt.show()
+
+        # plot confusion matrices
+        cm = confusion_matrix(real, preds)
+        cm = ConfusionMatrixDisplay(
+            confusion_matrix=cm,
+            display_labels=labels).plot()
+        cm
+        plt.show()
+
         logger("->", "Reporting metrics: ")
+        # get accuracy from modeldict
+        if model in ['svm', 'nearest_neighbor',
+                     'decision_tree']:
+            accuracy = modeldict['accuracy']['accuracy_score']
+        else:
+            accuracy = modeldict['accuracy']['validation_accuracy']
         recall = recall_score(real, preds, average='micro')
         precision = precision_score(real, preds, average='micro')
         f1 = f1_score(real, preds, average='micro')
