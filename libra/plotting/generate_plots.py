@@ -376,7 +376,6 @@ def analyze(client, model=None, save=True):
         inertia = modeldict['model'].inertia_
         centers = modeldict['model'].cluster_centers_
         logger(" ", ("Total Clusters: {}".format(str(len(centers)))))
-        logger("->", ("KMeans centroids: {}".format(str(centers))))
         logger(
             "->",
             ("KMeans Sum Squared Dist of points to center (inertia): {}".format(
