@@ -8,8 +8,8 @@ from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import (OneHotEncoder,
                                    StandardScaler,
                                    FunctionTransformer)
-from verve.data_generation.dataset_labelmatcher import get_similar_column
-from verve.data_generation.grammartree import get_value_instruction
+from libra.data_generation.dataset_labelmatcher import get_similar_column
+from libra.data_generation.grammartree import get_value_instruction
 from prince.ca import CA
 
 from nltk.stem import WordNetLemmatizer

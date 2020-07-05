@@ -1,6 +1,6 @@
-# verve Reference Manual  
+# libra Reference Manual  
 
-verve is an open source deep learning API that provides a toolkit of intuitive and easily accessible machine learning methods, enabling users to streamline their data science workflows. The reference manual contains a detailed description of the verve API. This reference delineates each of the methods avaiable for use, explaining how one can utilize them as well their respective parameters. The manual assumes that you have a baseline comprehension of some of the key concepts in machine learning. The reference is organized mainly in terms of location in the code where the method was defined as well as in accordance with OOP hierarchy, with a class introduced first and then its methods appearing underneath. Note that work on this manual is still in progress, and certain methods are due to recieve revised documentation in future updates.
+libra is an open source deep learning API that provides a toolkit of intuitive and easily accessible machine learning methods, enabling users to streamline their data science workflows. The reference manual contains a detailed description of the libra API. This reference delineates each of the methods avaiable for use, explaining how one can utilize them as well their respective parameters. The manual assumes that you have a baseline comprehension of some of the key concepts in machine learning. The reference is organized mainly in terms of location in the code where the method was defined as well as in accordance with OOP hierarchy, with a class introduced first and then its methods appearing underneath. Note that work on this manual is still in progress, and certain methods are due to recieve revised documentation in future updates.
 
 ***
 
@@ -146,7 +146,7 @@ Table of Contents
 ### produceMask ###
 
 ``` python
-verve.produceMask(instruction_label)
+libra.produceMask(instruction_label)
 ```
 
 Generates/stores with base object an encoding mask of form list ```[int/float, int/float, int/float]``` based on frequency of distinct characters used for sequence to sequence pre-training for natural language generation
@@ -168,7 +168,7 @@ Retrieves a list of encoded numerical representation of the instruction text rec
 ### get_similar_column ###
 
 ``` python
-verve.get_similar_column(instruction, dataset)
+libra.get_similar_column(instruction, dataset)
 ```
 
 Identifies/saves the column in dataset whose title shares the most similarity with keyword in instruction sent in written query 
@@ -194,10 +194,10 @@ Retrieves the column whose index shares closest similarity via comparision of th
 ### get_similar_model ###
 
 ``` python
-verve.get_similar_model(model_requested, model_keys)
+libra.get_similar_model(model_requested, model_keys)
 ```
 
-Identifies/saves the model requested in instruction whose title shares the most similarity with models available in verve 
+Identifies/saves the model requested in instruction whose title shares the most similarity with models available in libra 
 
 
 *Parameters --* 
@@ -208,7 +208,7 @@ String representation of name of model parsed from instruction sent in written q
 
 model_keys: `[str, str,..., str]`
 
-List of string "key" representations of models inbuilt/supported in verve for use 
+List of string "key" representations of models inbuilt/supported in libra for use 
 
 
 *Returns --*
@@ -224,10 +224,10 @@ Retrieves the model whose index shares closest similarity via comparision of the
 ### get_value_instruction ###
 
 ``` python
-verve.get_value_instruction(sent)
+libra.get_value_instruction(sent)
 ```
 
-Acquires/grammatically parses/reformats (using Textblob) relevant parts of speech for analysis from instruction sent to/in written query into instruction interpretable by other verve methods
+Acquires/grammatically parses/reformats (using Textblob) relevant parts of speech for analysis from instruction sent to/in written query into instruction interpretable by other libra methods
 
 (Note: If an issue ensues in the instruction where the method cannot comprehend the instruction, an error message will appear stating to 'Please try re-typing your sentence') 
 
@@ -252,7 +252,7 @@ Retrieves specific strings from written instruction to rearranged instruction us
 ### mypreprocessor ###
 
 ``` python
-verve.mypreprocessor(model_requested, model_keys)
+libra.mypreprocessor(model_requested, model_keys)
 ```
 
 (For dev use only) Allows for testing of customized feature of preprocessing of dataset 
@@ -283,7 +283,7 @@ Implements preprocessing algorithm on basis of defined parameters
 ### initializer ###
 
 ``` python
-verve.initializer(params)
+libra.initializer(params)
 ```
 
 Initializes the data pipeline with given set of data for backend regression based modelling tasks 
@@ -304,7 +304,7 @@ Retrieves dictionary of parameters revised after reading in data, removing data 
 ### preprocesser ###
    
 ``` python
-verve.preprocesser(params)
+libra.preprocesser(params)
 ```
 
 Implements preprocessing code defined in structured_preprocessor method to data earlier initialized in data pipeline parameters dictionary for regression based tasks
@@ -326,7 +326,7 @@ Executes structured_preprocesser method which preprocesses data by categorizing/
 ### instruction_identifier ###
 
 ``` python
-verve.instruction_identifier(params)
+libra.instruction_identifier(params)
 ```
 
 Employs usage of both get_similar_colummn and get_value_instruction methods to identify appropriate column and specific regression task type for analysis using initialized data pipeline parameters dictionary 
@@ -348,7 +348,7 @@ Executes both get_similar_column and get_value_instruction methods to determine 
 ### set_splitter ###
 
 ``` python
-verve.set_splitter(params)
+libra.set_splitter(params)
 ```
 
 Generates/stores training/testing segments of data for both class and target variable in initialized data pipeline parameters dictionary
@@ -370,7 +370,7 @@ Executes training testing splitting method based on scikit-learn functionality t
 ### modeler ###
 
 ``` python
-verve.modeler(params)
+libra.modeler(params)
 ```
 
 Develops/stores regression neural network model for analysis through application of get_keras_model_reg method as a parameter in regression data pipeline parameters dictionary 
@@ -392,7 +392,7 @@ Executes get_keras_model_reg method to develop regression neural network that is
 ### plotter ###
 
 ``` python
-verve.plotter(params)
+libra.plotter(params)
 ```
 
 Generates all plots affiliated with regression neural network model using generateRegressionPlots method and stores them in initialized data pipeline parameters dictionary
@@ -418,7 +418,7 @@ Executes generateRegressionPlots method to create all plots displaying the state
 ### get_keras_model_reg ###
 
 ``` python
-verve.get_keras_model_reg(dataset, i)
+libra.get_keras_model_reg(dataset, i)
 ```
 
 Constructs a regression neural network that uses rectified linear unit activation function and a normal distribution for its initial weight
@@ -444,7 +444,7 @@ Retrieves final regression neural network model with a rectified linear unit act
 ### get_keras_model_class ###
 
 ``` python
-verve.get_keras_model_class(dataset, i, num_classes)
+libra.get_keras_model_class(dataset, i, num_classes)
 ```
 
 Constructs a classification neural network that uses rectified linear unit activation function and a normal distribution for its initial weight
@@ -474,7 +474,7 @@ Retrieves final classification neural network model with a rectified linear unit
 ### get_keras_text_class ###
 
 ``` python
-verve.get_keras_text_class(max_features, num_classes)
+libra.get_keras_text_class(max_features, num_classes)
 ```
 
 Constructs a long term short memory recurrent binary text classification neural network that uses softmax activation function
@@ -500,7 +500,7 @@ Retrieves final text classification neural network model with a softmax activati
 ### getKerasConvolutional ###
 
 ``` python
-verve.instruction_getKerasConvolutional()
+libra.instruction_getKerasConvolutional()
 ```
 
 Updates user of successful entry of instruction to request convolutional neural network from written query
@@ -520,7 +520,7 @@ Executes method to send message to user that indicates convolutional neural netw
 ### load_model ###
 
 ``` python
-verve.load_model(self, load_path)
+libra.load_model(self, load_path)
 ```
 
 Loads a user defined model from user specified model file path if the user has provided the model dictionary
@@ -602,7 +602,7 @@ Retrieves neural network hypermodel with numerous inbuilt options per parameter 
 ### tuneReg ###
 
 ``` python
-verve.tuneReg(data, 
+libra.tuneReg(data, 
               target, 
               max_layers=10, 
               min_layers=2, 
@@ -659,7 +659,7 @@ Retrieves best model by searching in hyperparameter defined tuner space from gen
 ### build_model ###
 
 ``` python
-verve.build_model(hp)
+libra.build_model(hp)
 ```
 
 Constructs regression/convolution neural networks based off identified hyperparameters 
@@ -681,7 +681,7 @@ Retrieves baseline neural network model optimized using adaptive first/second mo
 ### tuneClass ###
 
 ``` python
-verve.tuneClass(X, 
+libra.tuneClass(X, 
                 y, 
                 num_classes,
                 max_layers=10,
@@ -762,7 +762,7 @@ Retrieves best model by searching in hyperparameter defined tuner space from gen
 ### tuneCNN ###  
 
 ``` python
-verve.tuneCNN(X, y, num_classes)
+libra.tuneCNN(X, y, num_classes)
 ```
 
 Performs automatic tuning of prior defined hyperparameters to find optimal convolutional neural network model
@@ -796,7 +796,7 @@ Retrieves best model by searching in hyperparameter defined tuner space from gen
 ### generate_clustering_plots ###
 
 ``` python
-verve.generate_clustering_plots(kmeans, dataPandas, dataset)
+libra.generate_clustering_plots(kmeans, dataPandas, dataset)
 ```
 
 Generates/stores all relevant plots for clustering models
@@ -830,7 +830,7 @@ Retrieves list of string representation or label names for plots generated
 ### generate_regression_plots ###
 
 ``` python
-verve.generate_regression_plots(history, data, label)
+libra.generate_regression_plots(history, data, label)
 ```
 
 Generates/stores all relevant plots for regression models
@@ -862,7 +862,7 @@ Retrieves list of string representation or label names for plots generated
 ### generate_classification_plots ###
 
 ``` python
-verve.generate_classification_plots(history, data, label, model, X_test, y_test)
+libra.generate_classification_plots(history, data, label, model, X_test, y_test)
 ```
 
 Generates/stores all relevant plots for classification models
@@ -904,7 +904,7 @@ Retrieves dictionary of dynamically fitting compilation of plots with key of plo
 ### generate_classification_together ###
 
 ``` python
-verve.generate_regression_plots(history, data, model, X_test, y_test)
+libra.generate_regression_plots(history, data, model, X_test, y_test)
 ```
 
 Generates/stores validation loss and accuracy score plots for classification models side-by-side in same pane
@@ -946,7 +946,7 @@ Executes code to output plot pane where graph depicting loss validation appears 
 ### plot_loss ###
 
 ``` python
-verve.plot_loss(history)
+libra.plot_loss(history)
 ```
 
 Generates/stores validation loss plot for any given machine learning technique model
@@ -969,7 +969,7 @@ Retrieves model loss figure which has x/y axes of validation loss/epoch measured
 
 
 ``` python
-verve.plot_corr(data, col=[])
+libra.plot_corr(data, col=[])
 ```
 
 Generates/stores correlation plot for any columns available in dataset for analysis
@@ -995,7 +995,7 @@ Retrieves square correlation heatmap figure shaded in accordance with strength o
 ### plot_acc ###
 
 ``` python
-verve.plot_acc(history)
+libra.plot_acc(history)
 ```
 
 Generates/stores accuracy plot for any given machine learning technique model
@@ -1021,31 +1021,31 @@ Retrieves model accuracy figure which has x/y axes of accuracy score/epoch measu
 ### get_target_values ###
 
 ``` python
-verve.get_target_values(data, instruction, yLabel)
+libra.get_target_values(data, instruction, yLabel)
 ```
 
 ### lemmatize_text ###
 
 ``` python
-verve.lemmatize_text(dataset)
+libra.lemmatize_text(dataset)
 ```
 
 ### tokenize_text ###
 
 ``` python
-verve.tokenize_text(dataset)
+libra.tokenize_text(dataset)
 ```
 
 ### text_clean_up ###
 
 ``` python
-verve.text_clean_up(dataset)
+libra.text_clean_up(dataset)
 ```
 
 ### fix_slang ###
 
 ``` python
-verve.fix_slang(text)
+libra.fix_slang(text)
 ```
 
 ***
@@ -1055,10 +1055,10 @@ verve.fix_slang(text)
 ### initial_preprocesser ###
 
 ``` python
-verve.initial_preprocesser(data, instruction, preprocess, ca_threshold)
+libra.initial_preprocesser(data, instruction, preprocess, ca_threshold)
 ```
 
-Checks data instantiated in verve instance and applies initial data preprocessing techniques
+Checks data instantiated in libra instance and applies initial data preprocessing techniques
 
 
 *Parameters --*
@@ -1107,10 +1107,10 @@ Retrieves object containing all of the properties (imputer, one hot encoder, etc
 ### structured_preprocesser ###
 
 ``` python
-verve.structured_preprocesser(data, ca_threshold)
+libra.structured_preprocesser(data, ca_threshold)
 ```
 
-Applies well known preprocessing techniques on structured data instantiated in verve instance for non-clustering modelling/analysis methods
+Applies well known preprocessing techniques on structured data instantiated in libra instance for non-clustering modelling/analysis methods
 
 *Parameters --*
 
@@ -1139,10 +1139,10 @@ Retrieves object containing all of the properties (imputer, one hot encoder, etc
 ### process_dates ###
 
 ``` python
-verve.process_dates(data)
+libra.process_dates(data)
 ```
 
-Identifies/preprocesses existing timestamp columns within data instantiated in verve instance
+Identifies/preprocesses existing timestamp columns within data instantiated in libra instance
 
 *Parameters --*
 
@@ -1161,10 +1161,10 @@ Executes deconstruction of timestamp column and parses/stores into 4 columns of 
 ### generate_column_labels ###
 
 ``` python
-verve.generate_column_labels(pipeline, numeric_cols)
+libra.generate_column_labels(pipeline, numeric_cols)
 ```
 
-Retains numeric column names in data instantiated in verve instance to keep/reuse for subsequent dataframes after preprocessing
+Retains numeric column names in data instantiated in libra instance to keep/reuse for subsequent dataframes after preprocessing
 
 
 *Parameters --*
@@ -1175,26 +1175,26 @@ Object containing all of the properties (imputer, one hot encoder, etc.) from th
 
 numeric_cols: `[str, str,...,str]`
 
-List of string representations of all column names with numeric data in data instantiated in verve instance
+List of string representations of all column names with numeric data in data instantiated in libra instance
 
 
 *Returns --*
 
 cols: `[str, str,..., str]`
 
-Retrieves list of string representations of all column names in data instantiated in verve instance
+Retrieves list of string representations of all column names in data instantiated in libra instance
 
 numeric_cols: `[str, str,...,str]`
 
-Retrieves list of string representations of all column names in data instantiated in verve instance composed of numeric data
+Retrieves list of string representations of all column names in data instantiated in libra instance composed of numeric data
 
 ### text_preprocessing ###
 
 ``` python
-verve.text_preprocessing(data, text_cols)
+libra.text_preprocessing(data, text_cols)
 ```
 
-Identifies/preprocesses existing columns within data instantiated in verve instance containing textual data for word embedding
+Identifies/preprocesses existing columns within data instantiated in libra instance containing textual data for word embedding
 
 *Parameters --*
 
@@ -1204,7 +1204,7 @@ Dictionary containing train and test data values associated with train and test 
 
 text_cols: `[str, str,...,str]`
 
-Retrieves list of string representations of all column names in data instantiated in verve instance composed of textual data
+Retrieves list of string representations of all column names in data instantiated in libra instance composed of textual data
 
 
 *Returns --*
@@ -1217,7 +1217,7 @@ Executes code to tokenize & normalize text, autocorrects spelling, and lemmatize
 ### text_embedder ###
 
 ``` python
-verve.text_embedder(text)
+libra.text_embedder(text)
 ```
 
 Embeds data in text column by summing all of the numerical vector representations of textual contents in column into suitable scalar format
@@ -1238,10 +1238,10 @@ Retrieves shape of the array containing sum of each numerical row vector represe
 ### clustering_preprocessor ###
 
 ``` python
-verve.clustering_preprocessor(data)
+libra.clustering_preprocessor(data)
 ```
 
-Applies well known preprocessing techniques on structured data instantiated in verve instance for clustering modelling/analysis methods
+Applies well known preprocessing techniques on structured data instantiated in libra instance for clustering modelling/analysis methods
 
 
 *Parameters --*
@@ -1268,10 +1268,10 @@ Object containing all of the properties (imputer, one hot encoder, etc.) from th
 ### too_many_values ###
 
 ```python
-verve.too_many_values(data, ca_threshold)
+libra.too_many_values(data, ca_threshold)
 ```
 
-Determines if correspondance analysis needs to be applied to data instantiated in verve instance based on whether too many distinct values in data exist
+Determines if correspondance analysis needs to be applied to data instantiated in libra instance based on whether too many distinct values in data exist
 
 
 *Parameters --*
@@ -1369,19 +1369,19 @@ DataReader.trim_gpu(self)
 ### get_path_column ###
 
 ```python
-verve.get_path_column(df)
+libra.get_path_column(df)
 ```
 
 ### load_image ###
 
 ```python
-verve.load_image(image_path)
+libra.load_image(image_path)
 ```
 
 ### map_func ###
 
 ```python
-verve.map_func(img_name, cap)
+libra.map_func(img_name, cap)
 ```
 
 ### class-BahdanauAttention ###
@@ -1447,7 +1447,7 @@ RNN_Decoder.reset_state(self, batch_size)
 ### generate_caption_helper ###
 
 ```python
-verve.generate_caption_helper(image, decoder, encoder, tokenizer, image_features_extract_model, max_length=500)
+libra.generate_caption_helper(image, decoder, encoder, tokenizer, image_features_extract_model, max_length=500)
 ```
 
 ***
@@ -1457,55 +1457,55 @@ verve.generate_caption_helper(image, decoder, encoder, tokenizer, image_features
 ### setwise_preprocessing ###
 
 ``` python
-verve.setwise_preprocessing(data_path, new_folder=True)
+libra.setwise_preprocessing(data_path, new_folder=True)
 ```
 
 ### setwise_preprocessing ###
 
 ``` python
-verve.pathwise_preprocessing(csv_file, dath_paths, label, image_column, training_ratio)
+libra.pathwise_preprocessing(csv_file, dath_paths, label, image_column, training_ratio)
 ```
 
 ### setwise_preprocessing ###
 
 ``` python
-verve.classwise_preprocessing(data_path, training_ratio)
+libra.classwise_preprocessing(data_path, training_ratio)
 ```
 
 ### process_class_folders ###
 
 ``` python
-verve.process_class_folder(data_path)
+libra.process_class_folder(data_path)
 ```
 
 ### replace_images ###
 
 ``` python
-verve.replace_images(data_path, loaded_shape)
+libra.replace_images(data_path, loaded_shape)
 ```
 
 ### create_folder ###
 
 ``` python
-verve.create_folder(path, folder_name)
+libra.create_folder(path, folder_name)
 ```
 
 ### save_image ###
 
 ``` python
-verve.save_image(path, img, img_name, classification)
+libra.save_image(path, img, img_name, classification)
 ```
 
 ### calculate_medians ###
 
 ``` python
-verve.calculate_medians(heights, widths)
+libra.calculate_medians(heights, widths)
 ```
 
 ### process_color_channel ###
 
 ``` python
-verve.process_color_channel(img, height, width)
+libra.process_color_channel(img, height, width)
 ```
 
 ***
@@ -1519,31 +1519,31 @@ verve.process_color_channel(img, height, width)
 ### dimensionality_reduc ###
 
 ``` python
-verve.dimensionality_reduc(instruction, dataset, arr = ["RF", "PCA", "ICA"], inplace = True)
+libra.dimensionality_reduc(instruction, dataset, arr = ["RF", "PCA", "ICA"], inplace = True)
 ```
 
 ### dimensionality_RF ###
 
 ``` python
-verve.dimensionality_RF(instruction, dataset, target="", y="", n_features=10)
+libra.dimensionality_RF(instruction, dataset, target="", y="", n_features=10)
 ```
 
 ### dimensionality_PCA ###
 
 ``` python
-verve.dimensionality_PCA(instruction, dataset, target="", y="", n_components=10)
+libra.dimensionality_PCA(instruction, dataset, target="", y="", n_components=10)
 ```
 
 ### dimensionality_ICA ###
 
 ``` python
-verve.dimensionality_ICA(instruction, dataset, target="", y="")
+libra.dimensionality_ICA(instruction, dataset, target="", y="")
 ```
 
 ### get_last_file ###
 
 ``` python
-verve.get_last_file()
+libra.get_last_file()
 ```
 
 ***
@@ -1565,10 +1565,10 @@ verve.get_last_file()
 ### clearLog ###
 
 ``` python
-verve.clearLog()
+libra.clearLog()
 ```
 
-Clears the logger hierarchial display of any past record of processes used in verve session
+Clears the logger hierarchial display of any past record of processes used in libra session
 
 
 *Parameters --*
@@ -1587,10 +1587,10 @@ Instantiates/reassigns the global counter and logger state variable back to 0, r
 ### logger-predictionQueries ###
 
 ``` python
-verve.logger(instruction, found="", slash='')
+libra.logger(instruction, found="", slash='')
 ```
 
-Generates hierarchial display and tracks record of processes in operation upon utilizing a particular method in verve
+Generates hierarchial display and tracks record of processes in operation upon utilizing a particular method in libra
 
 
 *Parameters --*

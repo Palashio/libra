@@ -11,19 +11,19 @@ from torch.utils.data import DataLoader
 from transformers import T5Tokenizer, T5ForConditionalGeneration
 import tensorflow as tf
 
-from verve.data_generation.dataset_labelmatcher import get_similar_column
-from verve.data_generation.grammartree import get_value_instruction
-from verve.modeling.prediction_model_creation import get_keras_text_class
-import verve.plotting.nonkeras_generate_plots
-from verve.plotting.generate_plots import generate_classification_plots
-from verve.preprocessing.NLP_preprocessing import get_target_values, text_clean_up, lemmatize_text, encode_text
-from verve.preprocessing.huggingface_model_finetune_helper import CustomDataset, train, inference
-from verve.preprocessing.image_caption_helpers import load_image, map_func, CNN_Encoder, RNN_Decoder, get_path_column, \
+from libra.data_generation.dataset_labelmatcher import get_similar_column
+from libra.data_generation.grammartree import get_value_instruction
+from libra.modeling.prediction_model_creation import get_keras_text_class
+import libra.plotting.nonkeras_generate_plots
+from libra.plotting.generate_plots import generate_classification_plots
+from libra.preprocessing.NLP_preprocessing import get_target_values, text_clean_up, lemmatize_text, encode_text
+from libra.preprocessing.huggingface_model_finetune_helper import CustomDataset, train, inference
+from libra.preprocessing.image_caption_helpers import load_image, map_func, CNN_Encoder, RNN_Decoder, get_path_column, \
     generate_caption_helper
 
 # Sentiment analysis predict wrapper
-from verve.query.supplementaries import save
-from verve.plotting.generate_plots import plot_loss
+from libra.query.supplementaries import save
+from libra.plotting.generate_plots import plot_loss
 
 counter = 0
 
@@ -374,7 +374,7 @@ def summarization_query(self, instruction, preprocess=True,
     plots = {}
     if generate_plots:
         logger("Generating plots")
-        plots.update({"loss": verve.plotting.nonkeras_generate_plots.plot_loss(total_loss_train, total_loss_val)})
+        plots.update({"loss": libra.plotting.nonkeras_generate_plots.plot_loss(total_loss_train, total_loss_val)})
 
     if save_model:
         logger("Saving model")
@@ -687,7 +687,7 @@ def image_caption_query(self, instruction,
     plots = {}
     if generate_plots:
         logger("Generating plots")
-        plots.update({"loss": verve.plotting.nonkeras_generate_plots.plot_loss(loss_plot_train, loss_plot_val)})
+        plots.update({"loss": libra.plotting.nonkeras_generate_plots.plot_loss(loss_plot_train, loss_plot_val)})
 
     logger("->", "Final training loss: {}".format(str(total_loss.numpy() / num_steps)))
     total_loss = total_loss.numpy() / num_steps

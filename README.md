@@ -1,15 +1,15 @@
 ## INITIAL BUILD RELEASE DATE: JULY 16TH.
 in progress....this README.md is out of date. Documentation site coming soon. 
 
-# Verve: Deep Learning fluent in one-liners
+# libra: Deep Learning fluent in one-liners
 
-Verve is a deep learning API that allows users to use machine learning in their workflows in fluent one-liners. It is written in Python and TensorFlow and makes training neural networks as simple as a one line function call. It was written to make deep learning as simple as possible to every user. 
+libra is a deep learning API that allows users to use machine learning in their workflows in fluent one-liners. It is written in Python and TensorFlow and makes training neural networks as simple as a one line function call. It was written to make deep learning as simple as possible to every user. 
 *** 
 
 ## Guiding Principles ## 
-  * **Beginner Friendly.** verve is an API designed to be used by developers with no deep learning experience whatsoever. It is built so that users with no knowledge in preprocessing, modeling, or tuning can build high-performance models with ease without worrying about the details of implementation.
+  * **Beginner Friendly.** libra is an API designed to be used by developers with no deep learning experience whatsoever. It is built so that users with no knowledge in preprocessing, modeling, or tuning can build high-performance models with ease without worrying about the details of implementation.
   
-  * **Quick Integration.** With the recent rise of machine learning on the cloud, the developer community has failed to make easy-to-use platforms that exist locally and integrate directly into workflows. verve allows users to develop models directly in programs with hundreds of API endpoints without having to worry about the transition to the cloud.
+  * **Quick Integration.** With the recent rise of machine learning on the cloud, the developer community has failed to make easy-to-use platforms that exist locally and integrate directly into workflows. libra allows users to develop models directly in programs with hundreds of API endpoints without having to worry about the transition to the cloud.
   
   * **Automation.** End-to-end pipelines containing hundreds of processes are automatically run for the user. The developer only has to consider what they want to accomplish from the task and the location of their initial dataset.
   
@@ -54,7 +54,7 @@ Generally, all queries have the same structure. You should always be passing an 
 Let's start with the most basic query. This will build a feed-forward network for a continuous label that you specify.
 
 ```python
-import verve
+import libra
 
 newClient = client('dataset')
 newClient.regression_query_ann('Model the median house value')
@@ -235,9 +235,9 @@ If you'd like to get the best pipeline for dimensionality reduction you can call
  dimensionality_reduc("I want to estimate number of crime", path_to_dataset) 
  
 ```
-Instructions like "I want to model x" are provided in the dimensionality reduction pipeline because it identifies which prediction objective you would like to maximize the accuracy for. Providing this instruction helps verve provide users with the best modification pipeline. 
+Instructions like "I want to model x" are provided in the dimensionality reduction pipeline because it identifies which prediction objective you would like to maximize the accuracy for. Providing this instruction helps libra provide users with the best modification pipeline. 
 
-verve current supports feature importance identification using random forest regressor, indepedent component analysis, and principle component analysis. The output of the dimensionalityReduc() function should look something like this: 
+libra current supports feature importance identification using random forest regressor, indepedent component analysis, and principle component analysis. The output of the dimensionalityReduc() function should look something like this: 
 
 ```
 Baseline Accuracy: 0.9752906976744186
@@ -299,7 +299,7 @@ If this does not converge a message will be displayed for users to warn them by 
 
 ## Process Logger ##
 
-verve will automatically output the current process running in a hierarchial format like this:
+libra will automatically output the current process running in a hierarchial format like this:
 
 ```
 loading dataset...
@@ -321,9 +321,9 @@ A quiet mode feature is currently being implemented.
 
 ## Pipelining for Contributors ##
 
-In order to help make verve extensible, a process pipeliner has been implemented to help contributors easily test their newly-developed modules. 
+In order to help make libra extensible, a process pipeliner has been implemented to help contributors easily test their newly-developed modules. 
 
-Let's say you've developed a different preprocesser for data that you want to test before integrating it into verve's primary workflow. This is the process to test it out:
+Let's say you've developed a different preprocesser for data that you want to test before integrating it into libra's primary workflow. This is the process to test it out:
 
 First, you want to initialize your base parameters, which are your instructions, the path to your dataset, and any other information your new function might require.
 
@@ -359,7 +359,7 @@ All model information should be stored in ```init_params```. If you'd like to mo
 ***
 ## Instructions ##
 
-verve uses intelligent natural language processing to analyze user instructions and match it with a column in user datasets. 
+libra uses intelligent natural language processing to analyze user instructions and match it with a column in user datasets. 
   1. [Textblob](https://textblob.readthedocs.io/en/dev/), a part of speech recognition algorithm, is used to identify parts of speech.
   2. A self-developed part-of-speech deciphering algorithm is used to extract relevant parts of a sentence. 
   3. Masks are generated to represent all words as tensors in order for easy comparison
@@ -368,4 +368,4 @@ verve uses intelligent natural language processing to analyze user instructions 
 
 ## Example Projects ##
 
-To get started, take a look at some of these examples of data science projects analyzing datasets using verve. 
+To get started, take a look at some of these examples of data science projects analyzing datasets using libra. 

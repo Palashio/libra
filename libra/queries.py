@@ -1,20 +1,20 @@
-from verve.query.nlp_queries import (image_caption_query,
+from libra.query.nlp_queries import (image_caption_query,
                                      generate_caption, classify_text,
                                      text_classification_query, get_summary,
                                      summarization_query)
-from verve.query.classification_models import (k_means_clustering,
+from libra.query.classification_models import (k_means_clustering,
                                                train_svm, nearest_neighbors,
                                                decision_tree)
 
-from verve.query.supplementaries import tune_helper, get_model_data, get_operators, get_accuracy, get_losses, get_target, get_plots, get_vocab
+from libra.query.supplementaries import tune_helper, get_model_data, get_operators, get_accuracy, get_losses, get_target, get_plots, get_vocab
 
-from verve.query.feedforward_nn import (regression_ann,
+from libra.query.feedforward_nn import (regression_ann,
                                         classification_ann,
                                         convolutional)
-from verve.data_generation.grammartree import get_value_instruction
-from verve.data_generation.dataset_labelmatcher import (get_similar_column,
+from libra.data_generation.grammartree import get_value_instruction
+from libra.data_generation.dataset_labelmatcher import (get_similar_column,
                                                         get_similar_model)
-from verve.plotting.generate_plots import analyze
+from libra.plotting.generate_plots import analyze
 from colorama import Fore, Style
 import pandas as pd
 from pandas.core.common import SettingWithCopyWarning
