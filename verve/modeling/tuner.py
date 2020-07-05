@@ -147,7 +147,7 @@ def tuneReg(
                                          max_value=max_dense,
                                          step=step),
                             activation=activation))
-        model.add(Dense(1, kernel_initializer='normal'))
+        model.add(Dense(1))
         model.compile(
             optimizer=keras.optimizers.Adam(
                                        hp.Float('learning_rate',
@@ -155,7 +155,7 @@ def tuneReg(
                                                 max_value=1e-2,
                                                 sampling='LOG',
                                                 default=1e-3)),
-            loss='mean_squared_error',
+            loss='mse',
             metrics=['accuracy'])
         return model
 
@@ -171,7 +171,7 @@ def tuneReg(
     data = StandardScaler().fit_transform(data)
     target = StandardScaler().fit_transform(y.reshape(len(target),1))[:,0]
     X_train, X_test, y_train, y_test = train_test_split(
-        X, y, test_size=0.2, random_state=49)
+        data, target, test_size=0.2, random_state=49)
 
     # searches the tuner space defined by hyperparameters (hp) and returns the
     # best model
