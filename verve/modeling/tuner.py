@@ -128,8 +128,8 @@ def tuneReg(
         min_layers=2,
         min_dense=32,
         max_dense=512,
-        executions_per_trial=3,
-        max_trials=3,
+        executions_per_trial=1,
+        max_trials=5,
         epochs=10,
         activation='relu',
         directory='my_dir',
@@ -155,7 +155,7 @@ def tuneReg(
                                                 sampling='LOG',
                                                 default=1e-3)),
             loss='mean_squared_error',
-            metrics=[metrics])
+            metrics=['accuracy'])
         return model
 
     # random search for the model
@@ -205,7 +205,7 @@ def tuneClass(
         min_layers=2,
         min_dense=32,
         max_dense=512,
-        executions_per_trial=3,
+        executions_per_trial=1,
         max_trials=3,
         activation='relu',
         directory='my_dir',
@@ -287,7 +287,7 @@ def tuneCNN(
         width,
         num_classes,
         patience=1,
-        executions_per_trial=3,
+        executions_per_trial=1,
         seed=42,
         max_trials=3,
         objective='val_accuracy',
