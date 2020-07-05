@@ -89,6 +89,9 @@ class client:
 
     def required_installations(self):
         nltk.download('punkt')
+        nltk.download('averaged_perceptron_tagger')
+
+
 
     # param model_requested: string representation of the name of the model user seeks to retrieve
     # returns models with a specific string - currently deprecated, should not be used.
