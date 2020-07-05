@@ -17,4 +17,4 @@ torch
 autocorrect
 pillow
 prince
-cv
+opencv-python
