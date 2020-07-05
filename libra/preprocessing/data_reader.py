@@ -1,6 +1,7 @@
 import os
 import pandas as pd
 import tensorflow as tf
+from sklearn.model_selection import train_test_split
 from tensorflow.python.client import device_lib
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
@@ -28,6 +29,7 @@ class DataReader():
         self.trim = trim
         self.trim_format = trim_format
         self.trim_ratio = trim_ratio
+        self.strat_col_index = strat_col_index
 
     def retrieve_file_size(self):
         '''
