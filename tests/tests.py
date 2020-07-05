@@ -20,7 +20,7 @@ unittest.defaultTestLoader.sortTestMethodsUsing = compare
 
 class TestQueries(unittest.TestCase):
 
-    newClient = client('../tools/data/structured_data/housing.csv')
+    newClient = client('tools/data/structured_data/housing.csv')
 
     """
     TEST QUERIES
