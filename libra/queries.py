@@ -806,7 +806,7 @@ class client:
 
 
     # shows analysis of the model
-    def analyze(self, model=None):
+    def analyze(self, model=None, save=True):
         '''
         Function that retrieves all of plots in the self.models dictionary for the key.
         :param model: default to the latest model, but essentailly the model key
@@ -814,5 +814,5 @@ class client:
         if model is None:
             model = self.latest_model
         clearLog()
-        analyze(self, model)
+        analyze(self, model, save)
 

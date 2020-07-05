@@ -332,7 +332,7 @@ def plot_mc_roc(y_test, y_score, interpreter=None):
 
 
 # Analysis of model
-def analyze(client, model=None):
+def analyze(client, model=None, save=True):
     '''
     the body of the analyze function in queries.py. Used to generate ROC, confusion matrix etc.
     :param model: is the actual model that you want to analyze for and against
@@ -381,17 +381,19 @@ def analyze(client, model=None):
             "->",
             ("KMeans Sum Squared Dist of points to center (inertia): {}".format(
                 str(inertia))))
-        modeldict['n_centers'] = len(centers)
-        modeldict['centroids'] = centers
-        modeldict['inertia'] = inertia
+        if save:
+            modeldict['n_centers'] = len(centers)
+            modeldict['centroids'] = centers
+            modeldict['inertia'] = inertia
     elif model == 'regression_ANN':
         logger("->", "Reporting metrics: ")
         MSE = sklearn.metrics.mean_squared_error(real, preds)
         MAE = sklearn.metrics.mean_absolute_error(real, preds)
         logger(" ", ("MSE on test set: {}".format(str(MSE))))
         logger("->", ("MAE on test set: {}".format(str(MAE))))
-        modeldict['MSE'] = MSE
-        modeldict['MAE'] = MAE
+        if save:
+            modeldict['MSE'] = MSE
+            modeldict['MAE'] = MAE
     # classification models
     elif model in ['svm', 'nearest_neighbor', 'decision_tree', 'classification_ANN', 'Text Classification']:
         logger("->", "Plotting ROC curves and creating confusion matrix...")
@@ -441,12 +443,13 @@ def analyze(client, model=None):
         logger("->", ("Recall on test set: {}".format(str(recall))))
         logger("->", ("Precision on test set: {}".format(str(precision))))
         logger("->", ("F1 Score on test set: {}".format(str(f1))))
-        if not 'plots' in modeldict:
-            modeldict['plots'] = {}
-        modeldict['plots']['roc_curve'] = roc
-        modeldict['confusion_matrix'] = cm
-        modeldict['recall_score'] = recall
-        modeldict['precision_score'] = precision
-        modeldict['f1_score'] = f1
+        if save:
+            if 'plots' not in modeldict:
+                modeldict['plots'] = {}
+            modeldict['plots']['roc_curve'] = roc
+            modeldict['confusion_matrix'] = cm
+            modeldict['recall_score'] = recall
+            modeldict['precision_score'] = precision
+            modeldict['f1_score'] = f1
     else:
         print("further analysis is not supported for {}".format(model))

@@ -14,6 +14,7 @@ def make_orderer():
 
     return ordered, compare
 
+
 ordered, compare = make_orderer()
 unittest.defaultTestLoader.sortTestMethodsUsing = compare
 
@@ -126,7 +127,6 @@ class TestQueries(unittest.TestCase):
     def test_invalid_model(self):
         with self.assertRaises(NameError):
             self.newClient.analyze(model='I dont exist')
-
 
 
 unittest.main()
