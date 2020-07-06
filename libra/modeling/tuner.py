@@ -141,12 +141,6 @@ def tuneReg(
     # function build model using hyperparameter
     def build_model(hp):
         model = keras.Sequential()
-        model.add(Dense(units=hp.Int('units_00',
-                                     min_value=min_dense,
-                                     max_value=max_dense,
-                                     step=step),
-                                     input_dim=data.shape[1],
-                                     activation=activation))
         for i in range(hp.Int('num_layers', min_layers, max_layers)):
             model.add(Dense(units=hp.Int('units_' + str(i),
                                          min_value=min_dense,
@@ -180,8 +174,7 @@ def tuneReg(
         directory=directory)
     # tuner.search_space_summary()
     # del data[target]
-    data = StandardScaler().fit_transform(data)
-    target = StandardScaler().fit_transform(y.reshape(len(target),1))[:,0]
+
     X_train, X_test, y_train, y_test = train_test_split(
         data, target, test_size=0.2, random_state=49)
 

@@ -481,7 +481,7 @@ def convolutional(instruction=None,
                 testing_path = "/testing_set"
 
         # if image dataset in form of csv
-        elif read_mode == "pathwise or namewise":
+        elif read_mode == "csvwise":
             if training_ratio <= 0 or training_ratio >= 1:
                 raise BaseException(f"Test ratio must be between 0 and 1.")
             processInfo = csv_preprocessing(read_mode_info["csv_path"],
