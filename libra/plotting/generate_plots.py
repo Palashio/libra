@@ -332,7 +332,7 @@ def plot_mc_roc(y_test, y_score, interpreter=None):
 
 
 # Analysis of model
-def analyze(client, model=None):
+def analyze(client, model=None, save=True):
     '''
     the body of the analyze function in queries.py. Used to generate ROC, confusion matrix etc.
     :param model: is the actual model that you want to analyze for and against
@@ -376,66 +376,54 @@ def analyze(client, model=None):
         inertia = modeldict['model'].inertia_
         centers = modeldict['model'].cluster_centers_
         logger(" ", ("Total Clusters: {}".format(str(len(centers)))))
-        logger("->", ("KMeans centroids: {}".format(str(centers))))
         logger(
             "->",
             ("KMeans Sum Squared Dist of points to center (inertia): {}".format(
                 str(inertia))))
-        modeldict['n_centers'] = len(centers)
-        modeldict['centroids'] = centers
-        modeldict['inertia'] = inertia
+        if save:
+            modeldict['n_centers'] = len(centers)
+            modeldict['centroids'] = centers
+            modeldict['inertia'] = inertia
     elif model == 'regression_ANN':
         logger("->", "Reporting metrics: ")
         MSE = sklearn.metrics.mean_squared_error(real, preds)
         MAE = sklearn.metrics.mean_absolute_error(real, preds)
         logger(" ", ("MSE on test set: {}".format(str(MSE))))
         logger("->", ("MAE on test set: {}".format(str(MAE))))
-        modeldict['MSE'] = MSE
-        modeldict['MAE'] = MAE
+        if save:
+            modeldict['MSE'] = MSE
+            modeldict['MAE'] = MAE
     # classification models
     elif model in ['svm', 'nearest_neighbor', 'decision_tree', 'classification_ANN', 'Text Classification']:
         logger("->", "Plotting ROC curves and creating confusion matrix...")
         if model in ['svm', 'nearest_neighbor',
-                     'decision_tree']:  # sklearn models ONLY
-            roc = plot_mc_roc(real, preds, modeldict['interpreter'])
-            roc
-            plt.show()
+                     'decision_tree', 'Text Classification']:
+            label_source = modeldict['interpreter']
             labels = list(modeldict['interpreter'].keys())
-            cm = plot_confusion_matrix(
-                modeldict['model'], data, real, display_labels=labels)
-            cm
-            plt.show()
-            if model == 'svm':
-                accuracy = modeldict['accuracy']['accuracy_score']
-            else:
-                accuracy = modeldict['accuracy_score']
-        elif model == 'Text Classification':
-            roc = plot_mc_roc(real, preds, modeldict['interpreter'])
-            roc
-            plt.show()
-            labels = list(modeldict['interpreter'].keys())
-            cm = confusion_matrix(real, preds)
-            cm = ConfusionMatrixDisplay(
-                confusion_matrix=cm,
-                display_labels=labels).plot()
-            cm
-            plt.show()
-
-            accuracy = modeldict['accuracy']['validation_accuracy']
-        elif model == 'classification_ann':  # classification_ANN
-            roc = plot_mc_roc(real, preds, enc)
-            roc
-            plt.show()
-            cm = confusion_matrix(real, preds)
+        else:
+            label_source = enc
             labels = enc.classes_
-            cm = ConfusionMatrixDisplay(
-                confusion_matrix=cm,
-                display_labels=labels).plot()
-            cm
-            plt.show()
 
-            accuracy = modeldict['accuracy']['validation_accuracy']
+        # plot roc plots
+        roc = plot_mc_roc(real, preds, label_source)
+        roc
+        plt.show()
+
+        # plot confusion matrices
+        cm = confusion_matrix(real, preds)
+        cm = ConfusionMatrixDisplay(
+            confusion_matrix=cm,
+            display_labels=labels).plot()
+        cm
+        plt.show()
+
         logger("->", "Reporting metrics: ")
+        # get accuracy from modeldict
+        if model in ['svm', 'nearest_neighbor',
+                     'decision_tree']:
+            accuracy = modeldict['accuracy']['accuracy_score']
+        else:
+            accuracy = modeldict['accuracy']['validation_accuracy']
         recall = recall_score(real, preds, average='micro')
         precision = precision_score(real, preds, average='micro')
         f1 = f1_score(real, preds, average='micro')
@@ -444,12 +432,13 @@ def analyze(client, model=None):
         logger("->", ("Recall on test set: {}".format(str(recall))))
         logger("->", ("Precision on test set: {}".format(str(precision))))
         logger("->", ("F1 Score on test set: {}".format(str(f1))))
-        if not 'plots' in modeldict:
-            modeldict['plots'] = {}
-        modeldict['plots']['roc_curve'] = roc
-        modeldict['confusion_matrix'] = cm
-        modeldict['recall_score'] = recall
-        modeldict['precision_score'] = precision
-        modeldict['f1_score'] = f1
+        if save:
+            if 'plots' not in modeldict:
+                modeldict['plots'] = {}
+            modeldict['plots']['roc_curve'] = roc
+            modeldict['confusion_matrix'] = cm
+            modeldict['recall_score'] = recall
+            modeldict['precision_score'] = precision
+            modeldict['f1_score'] = f1
     else:
         print("further analysis is not supported for {}".format(model))

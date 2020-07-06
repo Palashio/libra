@@ -1,4 +1,5 @@
-transformers
+colorama
+transformers==2.11.0
 tensorflow
 keras
 numpy
@@ -14,3 +15,7 @@ keras-tuner
 spacy
 torch
 autocorrect
+pillow
+prince
+opencv-python
+nltk

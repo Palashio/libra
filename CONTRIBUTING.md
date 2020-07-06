@@ -1,1 +1,1 @@
-Guidelines for contributing to Libra will come soon.
+Guidelines for contributing to libra will come soon.

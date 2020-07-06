@@ -13,6 +13,7 @@ from sklearn import preprocessing
 from tensorflow import keras
 from sklearn.model_selection import train_test_split
 import tensorflow as tf
+from sklearn.preprocessing import StandardScaler
 
 
 tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)
@@ -128,8 +129,8 @@ def tuneReg(
         min_layers=2,
         min_dense=32,
         max_dense=512,
-        executions_per_trial=3,
-        max_trials=3,
+        executions_per_trial=1,
+        max_trials=5,
         epochs=10,
         activation='relu',
         directory='my_dir',
@@ -146,7 +147,13 @@ def tuneReg(
                                          max_value=max_dense,
                                          step=step),
                             activation=activation))
-        model.add(Dense(1, kernel_initializer='normal'))
+            model.add(Dropout(rate=hp.Float(
+                              'dropout_3',
+                              min_value=0.0,
+                              max_value=0.5,
+                              default=0.20,
+                              step=0.05)))
+        model.add(Dense(1, activation='linear'))
         model.compile(
             optimizer=keras.optimizers.Adam(
                                        hp.Float('learning_rate',
@@ -154,8 +161,8 @@ def tuneReg(
                                                 max_value=1e-2,
                                                 sampling='LOG',
                                                 default=1e-3)),
-            loss='mean_squared_error',
-            metrics=[metrics])
+            loss='mse',
+            metrics=['accuracy'])
         return model
 
     # random search for the model
@@ -167,6 +174,7 @@ def tuneReg(
         directory=directory)
     # tuner.search_space_summary()
     # del data[target]
+
     X_train, X_test, y_train, y_test = train_test_split(
         data, target, test_size=0.2, random_state=49)
 
@@ -205,7 +213,7 @@ def tuneClass(
         min_layers=2,
         min_dense=32,
         max_dense=512,
-        executions_per_trial=3,
+        executions_per_trial=1,
         max_trials=3,
         activation='relu',
         directory='my_dir',
@@ -287,7 +295,7 @@ def tuneCNN(
         width,
         num_classes,
         patience=1,
-        executions_per_trial=3,
+        executions_per_trial=1,
         seed=42,
         max_trials=3,
         objective='val_accuracy',

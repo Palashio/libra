@@ -15,11 +15,21 @@ import warnings
 warnings.filterwarnings("ignore", category=UserWarning)
 
 counter = 0
-number = 0
+currLog = ""
+
+
+# # allows for all columns to be displayed when printing()
+# pd.options.display.width = None
+
+
+# # clears the log when new process is started up
 
 
 def clearLog():
     global counter
+    global currLog
+
+    currLog = ""
     counter = 0
 
 
@@ -34,8 +44,8 @@ def logger(instruction, found=""):
 
     :param instruction: what you want to be displayed
     :param found: if you want to display something found like target column
-
     '''
+    
     global counter
     if counter == 0:
         print((" " * 2 * counter) + str(instruction) + str(found))
@@ -50,7 +60,19 @@ def logger(instruction, found=""):
 
     counter += 1
 
+# function that prints a table consisting of a summary of the columns founnd
+# in the dataset (is copied into different python files to maintain global variable
+# parallels
 def printtable(col_name, col_width):
+    '''
+    function that prints a table consisting of a summary of the columns found
+    in the dataset (is copied into different python files to maintain global variable
+    parallels)
+
+    :param col_name: name of the column in dataset one wishes to see displayed
+    :param col_width: width of the column in dataset one wishes to see displayed
+    '''
+    
     global counter
     for row in col_name:
         print((" " * 2 * counter) + "| " + ("".join(word.ljust(col_width)
@@ -68,10 +90,11 @@ def k_means_clustering(dataset=None,
                        random_state=42,
                        text=[]):
     '''
-        function to train a k means clustering algorithm
-        :param many params: used to hyperparametrize the function.
-        :return a dictionary object with all of the information for the algorithm.
-        '''
+    function to train a k means clustering algorithm
+    :param many params: used to hyperparametrize the function.
+    :return a dictionary object with all of the information for the algorithm.
+    '''
+        
     logger("Reading in dataset")
 
     dataReader = DataReader(dataset)
@@ -169,7 +192,7 @@ def k_means_clustering(dataset=None,
         plots['elbow'] = elbow
 
     logger("Stored model under 'k_means_clustering' key")
-
+    clearLog()
     # stores plots and information in the dictionary client model
     return {
         'id': generate_id(),
@@ -193,10 +216,10 @@ def train_svm(instruction,
               max_iter=-1,
               random_state=49):
     '''
-        function to train a support vector machine clustering algorithm
-        :param many params: used to hyperparametrize the function.
-        :return a dictionary object with all of the information for the algorithm.
-        '''
+    function to train a support vector machine clustering algorithm
+    :param many params: used to hyperparametrize the function.
+    :return a dictionary object with all of the information for the algorithm.
+    '''
 
     logger("Reading in dataset")
 
@@ -247,6 +270,7 @@ def train_svm(instruction,
     logger("->", "Accuracy found on testing set: {}".format(score))
 
     logger('->', "Stored model under 'svm' key")
+    clearLog()
     return {
         'id': generate_id(),
         "model": clf,
@@ -279,10 +303,11 @@ def nearest_neighbors(instruction=None,
                       algorithm='auto',
                       text=[]):
     '''
-        function to train a nearest neighbor algorithm
-        :param many params: used to hyperparametrize the function.
-        :return a dictionary object with all of the information for the algorithm.
-        '''
+    function to train a nearest neighbor algorithm
+    :param many params: used to hyperparametrize the function.
+    :return a dictionary object with all of the information for the algorithm.
+    '''
+    
     logger("Reading in dataset")
     # Reads in dataset
     # data = pd.read_csv(self.dataset)
@@ -332,7 +357,7 @@ def nearest_neighbors(instruction=None,
         "->", "Accuracy found on testing set: {}".format(scores[scores.index(max(scores))]))
     logger("Stored model under 'nearest_neighbors' key")
     knn = models[scores.index(min(scores))]
-
+    clearLog()
     return {'id': generate_id(),
             "model": knn,
             "accuracy": {'accuracy_score': scores[scores.index(max(scores))],

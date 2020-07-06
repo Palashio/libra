@@ -1,6 +1,6 @@
 ---
 name: b) New feature
-about: Select this if you're adding a new feature to Libra.
+about: Select this if you're adding a new feature to libra.
 labels: feature
 ---
 
@@ -24,4 +24,4 @@ including tests for the new feature you added.
 
 - [ ] I updated the docs.
 
-This pull request adds a new feature to Libra. @Palashio, could you please take a look at it?
+This pull request adds a new feature to libra. @Palashio, could you please take a look at it?

@@ -1,5 +1,4 @@
 from libra.queries import client
-from libra.plotting.generate_plots import analyze
 
 import unittest
 
@@ -15,12 +14,13 @@ def make_orderer():
 
     return ordered, compare
 
+
 ordered, compare = make_orderer()
 unittest.defaultTestLoader.sortTestMethodsUsing = compare
 
 class TestQueries(unittest.TestCase):
 
-    newClient = client('../tools/data/structured_data/housing.csv')
+    newClient = client('tools/data/structured_data/housing.csv')
 
     """
     TEST QUERIES
@@ -85,7 +85,7 @@ class TestQueries(unittest.TestCase):
     # Tests analyze() function for k_means_clustering
     @ordered
     def test_analyze_kmeans(self):
-        analyze(self.newClient, model='k_means_clustering')
+        self.newClient.analyze(model='k_means_clustering')
         self.assertTrue('n_centers' in self.newClient.models['k_means_clustering'])
         self.assertTrue('centroids' in self.newClient.models['k_means_clustering'])
         self.assertTrue('inertia' in self.newClient.models['k_means_clustering'])
@@ -93,14 +93,14 @@ class TestQueries(unittest.TestCase):
     # Tests analyze() function on regression_ANN
     @ordered
     def test_analyze_regression(self):
-        analyze(self.newClient, model='regression_ANN')
+        self.newClient.analyze(model='regression_ANN')
         self.assertTrue('MSE' in self.newClient.models['regression_ANN'])
         self.assertTrue('MAE' in self.newClient.models['regression_ANN'])
 
     # Tests analyze() function on classification_ANN
     @ordered
     def test_analyze_classification(self):
-        analyze(self.newClient, model='classification_ANN')
+        self.newClient.analyze(model='classification_ANN')
         self.assertTrue('plots' in self.newClient.models['classification_ANN'])
         self.assertTrue('roc_curve' in self.newClient.models['classification_ANN']['plots'])
         self.assertTrue('confusion_matrix' in self.newClient.models['classification_ANN'])
@@ -112,7 +112,7 @@ class TestQueries(unittest.TestCase):
     @ordered
     def test_analyze_sklearn_classifiers(self):
         for mod in ['svm', 'nearest_neighbor', 'decision_tree']:
-            analyze(self.newClient, model=mod)
+            self.newClient.analyze(model=mod)
             modeldict = self.newClient.models[mod]
 
             self.assertTrue('plots' in modeldict)
@@ -126,8 +126,7 @@ class TestQueries(unittest.TestCase):
     @ordered
     def test_invalid_model(self):
         with self.assertRaises(NameError):
-            analyze(self.newClient, model='I dont exist')
+            self.newClient.analyze(model='I dont exist')
 
-
-
-unittest.main()
+if __name__ == '__main__':
+    unittest.main()
