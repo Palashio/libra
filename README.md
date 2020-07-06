@@ -8,3 +8,20 @@
 Libra is a deep learning API that allows users to use machine learning in their workflows in fluent one-liners. It is written in Python and TensorFlow and makes training neural networks as simple as a one line function call. It was written to make deep learning as simple as possible to every user. 
 *** 
 
+## Installation
+
+Install latest release version:
+
+`pip install libra`
+
+Install directory from github:
+
+```
+git clone https://github.com/Palashio/libra.git
+cd libra
+pip install .
+```
+
+## Usage: the basics
+
+coming soon.
