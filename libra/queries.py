@@ -844,4 +844,3 @@ class client:
             model = self.latest_model
         clearLog()
         analyze(self, model, save)
-
