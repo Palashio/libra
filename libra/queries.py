@@ -21,6 +21,7 @@ from pandas.core.common import SettingWithCopyWarning
 import warnings
 import os
 import nltk
+import ssl
 import numpy as np
 
 # suppressing warnings for cleaner dialogue box

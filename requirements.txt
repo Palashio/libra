@@ -19,3 +19,4 @@ pillow
 prince
 opencv-python
 nltk
+ssl
