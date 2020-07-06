@@ -20,7 +20,7 @@ import pandas as pd
 from pandas.core.common import SettingWithCopyWarning
 import warnings
 import os
-import tensorflow
+import nltk
 import numpy as np
 
 # suppressing warnings for cleaner dialogue box
@@ -78,6 +78,7 @@ class client:
         :param data: represents the dataset that you're trying to read
         :return: a completely initialized client class
         '''
+        self.required_installations()
         logger("Creating client object")
         self.dataset = data
         logger("Reading in dataset")
@@ -85,6 +86,12 @@ class client:
         self.models = {}
         self.latest_model = None
         clearLog()
+
+    def required_installations(self):
+        nltk.download('punkt')
+        nltk.download('averaged_perceptron_tagger')
+
+
 
     # param model_requested: string representation of the name of the model user seeks to retrieve
     # returns models with a specific string - currently deprecated, should not be used.
@@ -821,7 +828,7 @@ class client:
         get_plots(self, model, plot, save)
 
     # shows analysis of the model
-    def analyze(self, model=None):
+    def analyze(self, model=None, save=True):
         '''
         Function that retrieves all of plots in the self.models dictionary for the key.
         :param model: default to the latest model, but essentailly the model key
@@ -829,4 +836,5 @@ class client:
         if model is None:
             model = self.latest_model
         clearLog()
-        analyze(self, model)
+        analyze(self, model, save)
+

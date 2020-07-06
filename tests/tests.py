@@ -14,12 +14,13 @@ def make_orderer():
 
     return ordered, compare
 
+
 ordered, compare = make_orderer()
 unittest.defaultTestLoader.sortTestMethodsUsing = compare
 
 class TestQueries(unittest.TestCase):
 
-    newClient = client('../tools/data/structured_data/housing.csv')
+    newClient = client('tools/data/structured_data/housing.csv')
 
     """
     TEST QUERIES
@@ -127,6 +128,5 @@ class TestQueries(unittest.TestCase):
         with self.assertRaises(NameError):
             self.newClient.analyze(model='I dont exist')
 
-
-
-unittest.main()
+if __name__ == '__main__':
+    unittest.main()

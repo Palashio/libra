@@ -8,4 +8,4 @@ install:
   - pip install libra
 
 script:
-  - python -m unittest discover -t libra
+  - python -m unittest discover ./tests "tests.py"
