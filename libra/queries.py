@@ -226,7 +226,22 @@ class client:
             save_path=os.getcwd()):
         '''
         Calls the body of the regression_query__ code in the supplementaries.py file. Used for a regression feed forward neural network.
-        :param many params: all used as hyperparameters for the algorithm.
+        :param instruction: The objective that you want to model (str).
+        :param callback: Applying a set of functions/actions at various stages of training (bool).
+        :param ca_threshold: Threshold for multiple correspondence analysis (float).
+        :param dataset: The dataset being used in the regression feed forward neural network (str).
+        :param text: A list of columns to perform text embedding on.
+        :param drop: A list of the dataset's columns to drop.
+        :param preprocess: Preprocess the data (bool).
+        :param test_size: Size of the testing set (float).
+        :param random_state: Initialize a pseudo-random number generator (int).
+        :param epochs: Number of epochs (int).
+        :param generate_plots: Generate plots for the model (bool).
+        :param callback_mode: The type of callback (str).
+        :param maximizer: The accuracy/loss type to optimize (str).
+        :param save_model: Save the model (bool).
+        :param save_path: Filepath of where to save the model (str).
+
         :return: a model and information to along with it stored in the self.models dictionary.
         '''
 
@@ -270,7 +285,22 @@ class client:
             save_path=os.getcwd()):
         '''
         Calls the body of the classification code in the supplementaries.py file. Used for a classification feed forward neural network.
-        :param many params: all used as hyperparameters for the algorithm.
+        :param instruction: The objective that you want to model (str).
+        :param callback: Applying a set of functions/actions at various stages of training (bool).
+        :param dataset: The dataset being used in the classification feed forward neural network (str).
+        :param text: A list of columns to perform text embedding on.
+        :param ca_threshold: Threshold for multiple correspondence analysis (float).
+        :param drop: A list of the dataset's columns to drop.
+        :param preprocess: Preprocess the data (bool).
+        :param test_size: Size of the testing set (float).
+        :param random_state: Initialize a pseudo-random number generator (int).
+        :param epochs: Number of epochs (int).
+        :param generate_plots: Generate plots for the model (bool).
+        :param callback_mode: The type of callback (str).
+        :param maximizer: The accuracy/loss type to optimize (str).
+        :param save_model: Save the model (bool).
+        :param save_path: Filepath of where to save the model (str).        
+
         :return: a model and information to along with it stored in the self.models dictionary.
         '''
 
@@ -309,7 +339,19 @@ class client:
                                 ):
         '''
         Calls the body of the kmeans_clustering code in the supplementaries.py file. Can be used without any preprocessing and/or parameters.
-        :param many params: all used as hyperparameters for the algorithm.
+        
+        :param dataset: The dataset being used in the k-means clustering algorithm (str).
+        :param scatters: A list of various types of scatter plots.
+        :param preprocess: Preprocess the data (bool).
+        :param generate_plots: Generate plots for the model (bool).
+        :param drop: A list of the dataset's columns to drop.
+        :param base_clusters: Number of clusters to generate (int).
+        :param verbose: Printing the logging information (int).
+        :param n_init: Number of times the function will run with different seeds (int).
+        :param max_iter: Maximum number of iterations the function will run (int).
+        :param random_state: Initialize a pseudo-random number generator (int).
+        :param text: A list of columns to perform text embedding on.
+
         :return: a model and information to along with it stored in the self.models dictionary.
         '''
 
@@ -347,7 +389,20 @@ class client:
                   ):
         '''
         Calls the body of the svm query code in the supplementaries.py file. Used to create a classification support vector machine.
-        :param many params: all used as hyperparameters for the algorithm.
+        :param dataset: The dataset being used in the classification support vector machine (str).
+        :param text: A list of columns to perform text embedding on.
+        :param random_state: Initialize a pseudo-random number generator (int).
+        :param test_size: Size of the testing set (float).
+        :param kernel: The type of kernel to be used (str).
+        :param preprocess: Preprocess the data (bool).
+        :param drop: A list of the dataset's columns to drop.
+        :param cross_val_size: Cross-Validation score (float).
+        :param degree: Degree of the polynomial kernel function (int).
+        :param gamma: Kernel coefficient (int).
+        :param coef0: Significant term in 'poly' and 'sigmoid' kernel functions (float).
+        :param max_iter: Maximum number of iterations the function will run (int).
+        
+        
         :return: a model and information to go along with it stored in the self.models dictionary.
         '''
 
@@ -386,7 +441,20 @@ class client:
     ):
         '''
         Calls the body of the nearest neighbor code in the supplementaries.py file. Used to create a nearest neighbor algorithm.
-        :param many params: all used as hyperparameters for the algorithm.
+        :param instruction: The objective that you want to model (str).
+        :param text: A list of columns to perform text embedding on.
+        :param random_state: Initialize a pseudo-random number generator (int).
+        :param test_size: Size of the testing set (float).
+        :param dataset: The dataset being used in the nearest neighbor algorithm (str).
+        :param preprocess: Preprocess the data (bool).
+        :param drop: A list of the dataset's columns to drop.
+        :param min_neighbors: Minimum number of neighbors (int).
+        :param max_neighbors: Maximum number of neighbors (int).
+        :param leaf_size: Leaf size passed to BallTree or KDTree (int).
+        :param p: Power parameter for the Minkowski metric (int).
+        :param algorithm: Algorithm used to compute the nearest neighbors (str).
+        
+
         :return: a model and information to along with it stored in the self.models dictionary.
         '''
         self.models['nearest_neighbor'] = nearest_neighbors(
@@ -426,7 +494,24 @@ class client:
             ccp_alpha=0.0):
         '''
         Calls the body of the decision tree code in the classification_models.py file. Used to create a decision tree algorithm.
-        :param many params: all used as hyperparameters for the algorithm.
+        :param instruction: The objective that you want to model (str).
+        :param text: A list of columns to perform text embedding on.
+        :param dataset: The dataset being used in the decision tree algorithm (str).
+        :param preprocess: Preprocess the data (bool).
+        :param test_size: Size of the testing set (float).
+        :param drop: A list of the dataset's columns to drop.
+        :param criterion: The function to measure the quality of a split (str).
+        :param splitter: The technique used to choose each node's split (str).
+        :param max_depth: The maximum depth of the tree (int).
+        :param min_samples_split: The minimum number of samples a node must have to split (int).
+        :param min_samples_leaf: The minimum number of samples a leaf node must have (int).
+        :param min_weight_fraction_leaf: The fraction of the input samples required to be at a leaf node (float).
+        :param max_leaf_nodes: Maximum number of leaf nodes (int).
+        :param min_impurity_decrease: A node will be split if this split induces a decrease of the impurity greater than or equal
+         to this value (float).
+        :param ccp_alpha: Complexity parameter used for Minimal Cost-Complexity Pruning (float).
+        
+
         :return: a model and information to along with it stored in the self.models dictionary.
         '''
 
@@ -473,7 +558,28 @@ class client:
              ):
         '''
         Calls the body of the tune identifier which is located in the supplementaries.py which then calls the appropriate tuner depending on the model
-        :param many params: all used as hyperparameters for the algorithm.
+        :param model_to_tune: The model to tune.
+        :param patience: Number of epochs with no improvement after which training will be stopped (int).
+        :param dataset: The dataset being used in the tuner (str).
+        :param models: The model dictionary (dict).
+        :param generate_plots: Generate plots for the model (bool).
+        :param max_layers: Maximum number of layers (int).
+        :param min_layers: Minimum number of layers (int).
+        :param min_dense: Minimum kernel density (int).
+        :param max_dense: Maximum kernel density (int).
+        :param executions_per_trial: Number of executions per trial (int).
+        :param max_trials: Maximum number of trials
+        :param activation: Activation Function (str).
+        :param loss: Loss Function (str).
+        :param metrics: Type of metrics function (str).
+        :param epochs: Number of epochs (int).
+        :param objective: Name of model metric to maximize/minimize (str).
+        :param seed: Random seed (int).
+        :param directory: Path to the directory (str).
+        :param verbose: Printing the logging information (int).
+        :param test_size: Size of the testing set (float).
+        
+
         :return: an updated model and history stored in the models dictionary
         '''
 
@@ -520,7 +626,20 @@ class client:
                             width=None):
         '''
         Calls the body of the convolutional neural network query which is located in the feedforward.py file
-        :param many params: all used as hyperparameters for the algorithm.
+        :param instruction: The objective that you want to model (str).
+        :param read_mode: The type of dataset (str).
+        :param verbose: Printing the logging information (int).
+        :param preprocess: Preprocess the data (bool).
+        :param data_path: Path to the dataset (str).
+        :param new_folders: Create new folders for the image during preprocessing (bool).
+        :param image_column: The column in the csv file where the filepaths for the images exist (str).
+        :param training_ratio: Ratio of dataset allotted to the training data (float).
+        :param augmentation: Perform image data augmentation (bool).
+        :param epochs: Number of epochs (int).
+        :param height: Height of the input image (int).
+        :param width: Width of the input image (int).
+        
+
         :return: an updated model and history stored in the models dictionary
         '''
 
@@ -547,7 +666,22 @@ class client:
         '''
         Calls the body of the text classification neural network query which is located in the nlp_queries.py file. This can only be called
         if text_classification_query has been called previously.
-        :param many params: all used as hyperparameters for the algorithm.
+        :param instruction: The objective that you want to model (str).
+        :param drop: A list of the dataset's columns to drop.
+        :param preprocess: Preprocess the data (bool).
+        :param test_size: Size of the testing set (float).
+        :param validation_size: Size of the validation set (float).
+        :param random_state: Initialize a pseudo-random number generator (int).
+        :param learning_rate: The learning rate of the model (float).
+        :param epochs: Number of epochs (int).
+        :param maximizer: The accuracy/loss type to optimize (str).
+        :param batch_size: The batch size for the dataset (int).
+        :param maxTextLength: The maximum length of the string of text (int).
+        :param generate_plots: Generate plots for the model (bool).
+        :param save_model: Save the model (bool).
+        :param save_path: Filepath of where to save the model (str).
+        
+
         :return: a classification of text that you've provided
         '''
 
@@ -569,7 +703,22 @@ class client:
                                   save_path=os.getcwd()):
         '''
         Calls the body of the text classification query which is located in the nlp_queries.py file
-        :param many params: all used as hyperparameters for the algorithm.
+        :param instruction: The objective that you want to model (str).
+        :param drop: A list of the dataset's columns to drop.
+        :param preprocess: Preprocess the data (bool).
+        :param test_size: Size of the testing set (float).
+        :param val_size: Size of the validation set (float).
+        :param random_state: Initialize a pseudo-random number generator (int).
+        :param learning_rate: The learning rate of the model (float).
+        :param maximizer: The accuracy/loss type to optimize (str).
+        :param epochs: Number of epochs (int).
+        :param batch_size: The batch size for the dataset (int).
+        :param maxTextLength: The maximum length of the string of text (int).
+        :param generate_plots: Generate plots for the model (bool).
+        :param save_model: Save the model (bool).
+        :param save_path: Filepath of where to save the model (str).
+        
+
         :return: an updated model and history stored in the models dictionary
         '''
 
@@ -615,7 +764,21 @@ class client:
                             save_path=os.getcwd()):
         '''
         Calls the body of the summarization  query which is located in the nlp_queries.py file
-        :param many params: all used as hyperparameters for the algorithm.
+        :param instruction: The objective that you want to model (str).
+        :param preprocess: Preprocess the data (bool).
+        :param drop: A list of the dataset's columns to drop.
+        :param epochs: Number of epochs (int).
+        :param batch_size: The batch size for the dataset (int).
+        :param learning_rate: The learning rate of the model (float).
+        :param max_text_length: The maximum length of the string of text (int).
+        :param max_summary_length: The maximum length of the string of text (int).
+        :param test_size: Size of the testing set (float).
+        :param random_state: Initialize a pseudo-random number generator (int).
+        :param generate_plots: Generate plots for the model (bool).
+        :param save_model: Save the model (bool).
+        :param save_path: Filepath of where to save the model (str).
+        
+
         :return: an updated model and history stored in the models dictionary
         '''
 
@@ -664,7 +827,23 @@ class client:
                             save_path_encoder=os.getcwd()):
         '''
         Calls the body of the image caption query which is located in the nlp_queries.py file
-        :param many params: all used as hyperparameters for the algorithm.
+        :param instruction: The objective that you want to model (str).
+        :param drop: A list of the dataset's columns to drop.
+        :param epochs: Number of epochs (int).
+        :param preprocess: Preprocess the data (bool).
+        :param random_state: Initialize a pseudo-random number generator (int).
+        :param top_k:  Number of most frequent words in the vocab to be used in tokenization (int).
+        :param batch_size: The batch size for the dataset (int).
+        :param buffer_size: The maximum number of elements to buffer (int).
+        :param embedding_dim: The dimension of the word embedding mapping (int).
+        :param units: The recurrent units in the decoder (int).
+        :param generate_plots: Generate plots for the model (bool).
+        :param save_model_decoder: Save the decoder (bool).
+        :param save_path_decoder: Filepath of where to save the decoder (str).
+        :param save_model_encoder: Save the encoder (bool).
+        :param save_path_encoder: Filepath of where to save the encoder (str).
+        
+
         :return: an updated model and history stored in the models dictionary
         '''
 
