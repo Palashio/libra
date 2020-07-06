@@ -21,6 +21,7 @@ from pandas.core.common import SettingWithCopyWarning
 import warnings
 import os
 import nltk
+import ssl
 import numpy as np
 
 # suppressing warnings for cleaner dialogue box
@@ -88,6 +89,12 @@ class client:
         clearLog()
 
     def required_installations(self):
+        try:
+            _create_unverified_https_context = ssl._create_unverified_context
+        except AttributeError:
+            pass
+        else:
+            ssl._create_default_https_context = _create_unverified_https_context
         nltk.download('punkt')
         nltk.download('averaged_perceptron_tagger')
 
@@ -540,7 +547,7 @@ class client:
                             preprocess=True,
                             new_folders=True,
                             image_column=None,
-                            testing_ratio=0.2,
+                            test_size=0.2,
                             augmentation=True,
                             epochs=10,
                             height=None,
@@ -837,4 +844,3 @@ class client:
             model = self.latest_model
         clearLog()
         analyze(self, model, save)
-

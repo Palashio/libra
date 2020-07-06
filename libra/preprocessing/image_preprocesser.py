@@ -413,11 +413,11 @@ def set_distinguisher(data_path, read_mode):
                 f"training_set or testing_set folder not in f{data_path}")
         elif read_mode == "classwise":
             return {"read_mode": "classwise"}
-        elif read_mode == "pathwise" or read_mode == "namewise":
+        elif read_mode == "csvwise":
             csv_path = glob.glob(data_path + "/*.csv")
             if len(csv_path) == 1:
                 return {
-                    "read_mode": "pathwise or namewise",
+                    "read_mode": "csvwise",
                     "csv_path": csv_path[0]}
             elif len(csv_path) > 1:
                 raise BaseException(
@@ -436,7 +436,7 @@ def set_distinguisher(data_path, read_mode):
     # check if contains a csv file
     csv_path = glob.glob(data_path + "/*.csv")
     if len(csv_path) == 1:
-        return {"read_mode": "pathwise or namewise", "csv_path": csv_path[0]}
+        return {"read_mode": "csvwise", "csv_path": csv_path[0]}
     elif len(csv_path) > 1:
         raise BaseException(
             f"Too many csv files in directory: {[os.path.basename(path) for path in csv_path]}")
