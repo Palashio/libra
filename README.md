@@ -31,6 +31,8 @@ A new client object should be created for every dataset that you're working with
 You can then call different queries on that client object, and the dataset you passed to it will be used. 
 
 ```python
+from libra.queries import client
+
 newClient = client('path/to/dataset') 
 newClient.neural_network_query('please model the median number of households')
 ```
