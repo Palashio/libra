@@ -1,7 +1,7 @@
 <div align="center">
   
 
-![Test Image 1](/tools/data/gh_images/libra-logo.png)]
+![Test Image 1](/tools/data/gh_images/libra-logo.png)
 
 ## Fully Automated Machine Learning in One-Liners
 
