@@ -26,4 +26,11 @@ pip install .
 
 ## Usage: the basics
 
-coming soon.
+A new client object should be created for every dataset that you're working with. This is where the results of your models for the dataset will be stored.
+
+You can then call different queries on that client object, and the dataset you passed to it will be used. 
+
+```python
+newClient = client('path/to/dataset') 
+newClient.neural_network_query('please model the median number of households')
+```
