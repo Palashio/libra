@@ -1,3 +1,4 @@
+//modified
 $(function(){
     $(".box").click(function(){
         if($(this).find("p").hasClass("selected")){
