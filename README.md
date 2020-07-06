@@ -12,7 +12,9 @@ Libra is a deep learning API that allows users to use machine learning in their 
 
 Install latest release version:
 
-`pip install libra`
+```
+pip install -U libra
+```
 
 Install directory from github:
 
