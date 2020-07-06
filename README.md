@@ -31,6 +31,11 @@ git clone https://github.com/Palashio/libra.git
 cd libra
 pip install .
 ```
+From Conda:
+
+```python
+conda install libra -c conda-forge
+```
 
 ## Usage: the basics
 
