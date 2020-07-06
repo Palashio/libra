@@ -27,7 +27,7 @@ RUN wget --quiet --no-check-certificate https://repo.continuum.io/miniconda/Mini
     echo export PATH=$CONDA_DIR/bin:'$PATH' > /etc/profile.d/conda.sh
 
 # Install Python packages and keras
-ENV NB_USER verve
+ENV NB_USER libra
 ENV NB_UID 1000
 
 RUN useradd -m -s /bin/bash -N -u $NB_UID $NB_USER && \
@@ -75,7 +75,7 @@ RUN conda install -y python=${python_version} && \
       theano \
       mkdocs \
       && \
-      git clone git://github.com/Palashio/verve.git /src && pip install -e /src[tests] && pip install git+git://github.com/Palashio/verve.git && \
+      git clone git://github.com/Palashio/libra.git /src && pip install -e /src[tests] && pip install git+git://github.com/Palashio/libra.git && \
     conda clean -yt; exit 0
 
 ENV LC_ALL=C.UTF-8

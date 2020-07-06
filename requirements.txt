@@ -15,3 +15,7 @@ keras-tuner
 spacy
 torch
 autocorrect
+pillow
+prince
+opencv-python
+nltk

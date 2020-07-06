@@ -1,26 +1,26 @@
-from verve.query.nlp_queries import (image_caption_query,
+from libra.query.nlp_queries import (image_caption_query,
                                      generate_caption, classify_text,
                                      text_classification_query, get_summary,
                                      summarization_query)
-from verve.query.classification_models import (k_means_clustering,
+from libra.query.classification_models import (k_means_clustering,
                                                train_svm, nearest_neighbors,
                                                decision_tree)
 
-from verve.query.supplementaries import tune_helper, get_model_data, get_operators, get_accuracy, get_losses, get_target, get_plots, get_vocab
+from libra.query.supplementaries import tune_helper, get_model_data, get_operators, get_accuracy, get_losses, get_target, get_plots, get_vocab
 
-from verve.query.feedforward_nn import (regression_ann,
+from libra.query.feedforward_nn import (regression_ann,
                                         classification_ann,
                                         convolutional)
-from verve.data_generation.grammartree import get_value_instruction
-from verve.data_generation.dataset_labelmatcher import (get_similar_column,
+from libra.data_generation.grammartree import get_value_instruction
+from libra.data_generation.dataset_labelmatcher import (get_similar_column,
                                                         get_similar_model)
-from verve.plotting.generate_plots import analyze
+from libra.plotting.generate_plots import analyze
 from colorama import Fore, Style
 import pandas as pd
 from pandas.core.common import SettingWithCopyWarning
 import warnings
 import os
-import tensorflow
+import nltk
 import numpy as np
 
 # suppressing warnings for cleaner dialogue box
@@ -78,6 +78,7 @@ class client:
         :param data: represents the dataset that you're trying to read
         :return: a completely initialized client class
         '''
+        self.required_installations()
         logger("Creating client object")
         self.dataset = data
         logger("Reading in dataset")
@@ -85,6 +86,12 @@ class client:
         self.models = {}
         self.latest_model = None
         clearLog()
+
+    def required_installations(self):
+        nltk.download('punkt')
+        nltk.download('averaged_perceptron_tagger')
+
+
 
     # param model_requested: string representation of the name of the model user seeks to retrieve
     # returns models with a specific string - currently deprecated, should not be used.
@@ -821,7 +828,7 @@ class client:
         get_plots(self, model, plot, save)
 
     # shows analysis of the model
-    def analyze(self, model=None):
+    def analyze(self, model=None, save=True):
         '''
         Function that retrieves all of plots in the self.models dictionary for the key.
         :param model: default to the latest model, but essentailly the model key
@@ -829,4 +836,5 @@ class client:
         if model is None:
             model = self.latest_model
         clearLog()
-        analyze(self, model)
+        analyze(self, model, save)
+

@@ -18,23 +18,23 @@ from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import OneHotEncoder, StandardScaler
 from tensorflow import keras
 from tensorflow.python.keras.layers import Dense, Input
-from verve.data_generation.dataset_labelmatcher import get_similar_column, get_similar_model
+from libra.data_generation.dataset_labelmatcher import get_similar_column, get_similar_model
 from keras.callbacks import EarlyStopping
 from matplotlib import pyplot
-from verve.data_generation.grammartree import get_value_instruction
-from verve.preprocessing.data_preprocesser import structured_preprocesser
-from verve.modeling.prediction_model_creation import get_keras_model_reg
-from verve.modeling.prediction_model_creation import get_keras_model_class
+from libra.data_generation.grammartree import get_value_instruction
+from libra.preprocessing.data_preprocesser import structured_preprocesser
+from libra.modeling.prediction_model_creation import get_keras_model_reg
+from libra.modeling.prediction_model_creation import get_keras_model_class
 from keras.utils import to_categorical
 from keras.utils import np_utils
 from sklearn.cluster import KMeans
 import matplotlib.pyplot as plt
 
-from verve.data_generation import dataGen
+from libra.data_generation import dataGen
 from keras.models import Sequential
 from keras.layers import (Dense, Conv2D, Flatten)
 from os import listdir
-from verve.modeling.tuner import tuneReg, tuneClass, tuneCNN
+from libra.modeling.tuner import tuneReg, tuneClass, tuneCNN
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.feature_selection import SelectFromModel
