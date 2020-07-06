@@ -7,7 +7,7 @@
 
 [![Build Status](https://travis-ci.org/Palashio/libra.svg?branch=master)](https://travis-ci.org/Palashio/libra)
 [![Downloads](https://pepy.tech/badge/libra)](https://pepy.tech/project/libra)
-[![Slack](https://img.shields.io/badge/slack-chat-green.svg?logo=slack)](dummyslackchannel)
+[![Slack](https://img.shields.io/badge/slack-chat-green.svg?logo=slack)](https://join.slack.com/t/the-libra-team/shared_invite/zt-ek6bpd47-hdIxXlRAenKfy5JNWe8bgw)
 [![PyPi](https://img.shields.io/badge/pypi%20package-0.0.1-blue)](https://pypi.org/project/libra/)
 [![Release](https://img.shields.io/badge/Next%20Release-July%2012-green)](https://pypi.org/project/libra/)
 
