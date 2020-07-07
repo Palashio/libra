@@ -1,4 +1,4 @@
-from libra.queries import client
+from libra import client
 
 import unittest
 
