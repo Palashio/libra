@@ -117,7 +117,7 @@ class TestQueries(unittest.TestCase):
 
             self.assertTrue('plots' in modeldict)
             self.assertTrue('roc_curve' in modeldict['plots'])
-            self.assertTrue('confusion_matrix' in modeldict)
+            self.assertTrue('confusion_matrix' in modeldict['plots'])
             self.assertTrue('recall_score' in modeldict)
             self.assertTrue('precision_score' in modeldict)
             self.assertTrue('f1_score' in modeldict)
