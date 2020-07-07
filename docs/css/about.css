@@ -196,3 +196,58 @@
     from{margin-top:0px;}
     to{margin-top:-35px;}
 }
+
+#featureBox{
+    position: absolute;
+    width: 1920px;
+    top: 810px;
+    left: 0px;
+    background-color: white;
+    height: 2000px;
+    padding-top: 160px;
+}
+
+h2{
+    margin:auto;
+    text-align:center;
+    font-weight: 400;
+    font-size: 50px;
+    color: #4b4b4b;
+    border-bottom: 1px solid #b2b2b2;
+    width:400px
+}
+
+#pipeline{
+    width: 500px;
+    position: absolute;
+    left: 320px;
+    top: 300px;
+}
+
+#pipelineTxt{
+    position: absolute;
+    top: 320px;
+    left: 980px;
+    width: 700px;
+    font-size: 25px;
+    font-weight: 400;
+    color: #5f5f5f;
+}
+
+#nlpTxt{
+    position: absolute;
+    top: 650px;
+    left: 120px;
+    width: 700px;
+    font-size: 25px;
+    font-weight: 400;
+    color: #5f5f5f;
+    text-align: right;
+}
+
+#nlp{
+    width: 500px;
+    position: absolute;
+    left: 960px;
+    top: 600px;
+}

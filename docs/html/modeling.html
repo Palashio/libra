@@ -2,7 +2,7 @@
 <!DOCTYPE html>
 <head>
     <meta charset = "utf-8">
-    <title>About libra</title>
+    <title>About Libra</title>
     
     <!-- Latest compiled and minified CSS -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
@@ -18,20 +18,19 @@
     <div id="side-nav">
         <img src = "../resources/libra-logo.png" id="icon">
         <ul class="nav">
-            <li><a class="nav-tab" href="about.html">libra Home</a></li>
+            <li><a class="nav-tab" href="about.html">Libra Home</a></li> 
             
             <li><a class="nav-tab" href="started.html">Getting Started</a></li> 
             
             <li><a class="nav-tab" href="devGuides.html">Developer Guides</a></li>
 
-            <li class="nav-tab selected" href="modeling.html">Modeling Queries</li>
-                <div>
-                    <li class="dropdown-item selected" data="nnq">Neural Network</li>
-                    <li class="dropdown-item" data="cq">Convolutional</li>
-                    <li class="dropdown-item" data="tcq">Text Classification</li>
-                    <li class="dropdown-item" data="sq">Summarization</li>
-                    <li class="dropdown-item" data="kmcq">K Mean Clustering</li> 
-                </div>                 
+            <li class="nav-tab selected" href="modeling.html">Modeling Queries</li>    
+                <li class="dropdown-item selected" data="nnq">Neural Network</li>
+                <li class="dropdown-item" data="cq">Convolutional</li>
+                <li class="dropdown-item" data="tcq">Text Classification</li>
+                <li class="dropdown-item" data="sq">Summarization</li>
+                <li class="dropdown-item" data="kmcq">K Mean Clustering</li> 
+                                 
             
             <li><a class="nav-tab" href="nlp.html">NLP Queries</a></li>
 
@@ -46,7 +45,7 @@
                 <b>Only instruction is required. ALL other parameters are optional</b>
                 <br>
                 <br>
-                <table style="width:100%">
+                <table>
                     <tr>
                         <td colspan="2">Arguments</td>
                     </tr>
@@ -102,7 +101,7 @@ new_client.models['regression_ANN'].plots() #access plots</pre>
             <div class="box">
                 <h2 id="cq">convolutional_query()</h2>
                 <br>
-                <p>Automatically fits a Convolutional Neural Network to your dataset. Everything is handled by libra internally. Three types of dataset structures are detectable:
+                <p>Automatically fits a Convolutional Neural Network to your dataset. Everything is handled by libra internally. Three types of dataset structures are detectable: 
                     <br>
                     <br>
 1) classwise: where every folder represents a seperate class of images 
@@ -112,7 +111,7 @@ new_client.models['regression_ANN'].plots() #access plots</pre>
 3) pathwise: where a csv file stores relative paths to images
                 </p>
                 <br>
-                <table style="width:100%">
+                <table>
                     <tr>
                         <td colspan="2">Arguments</td>
                     </tr>
@@ -145,7 +144,7 @@ newClient.convolutional_query("Please classify my images")</pre>
                 <br>
                 <p>Lets you create a text classification model automatically; works for all sorts of situations like sentiment analysis.</p>
                 <br>
-                <table style="width:100%">
+                <table>
                     <tr>
                         <td colspan="2">Arguments</td>
                     </tr>
@@ -164,7 +163,7 @@ newClient.predict_text_sentiment('new_text_to_classify')</pre>
                 <br>
                 <p>Automatically fits a neural network to your dataset. Target detection, preprocessing, and scoring are done by default.</p>
                 <br>
-                <table style="width:100%">
+                <table>
                     <tr>
                         <td colspan="2">Arguments</td>
                     </tr>
@@ -181,7 +180,7 @@ newClient.predict_text_sentiment('new_text_to_classify')</pre>
                 <br>
                 <p>Automatically fits a clustering algorithm to your dataset. Target detection, preprocessing, and scoring are done by default.</p>
                 <br>
-                <table style="width:100%">
+                <table>
                     <tr>
                         <td colspan="2">Arguments</td>
                     </tr>
