@@ -41,6 +41,7 @@ def clearLog():
 
     currLog = ""
     counter = 0
+    print("")
 
 
 def logger(instruction, found=""):
@@ -95,8 +96,8 @@ class client:
             pass
         else:
             ssl._create_default_https_context = _create_unverified_https_context
-        nltk.download('punkt')
-        nltk.download('averaged_perceptron_tagger')
+        nltk.download('punkt', quiet=True)
+        nltk.download('averaged_perceptron_tagger', quiet=True)
 
 
 
@@ -225,7 +226,7 @@ class client:
                     save_model=save_model,
                     save_path=save_path)
         clearLog()
-        return self
+
 
     # single regression query using a feed-forward neural network
     # instruction should be the value of a column
@@ -285,7 +286,6 @@ class client:
 
         self.latest_model = 'regression_ANN'
         clearLog()
-        return self
 
     # query for multilabel classification query, does not work for
     # binaryclassification, fits to feed-forward neural network
@@ -346,7 +346,6 @@ class client:
 
         self.latest_model = 'classification_ANN'
         clearLog()
-        return self
         
     # query to perform k-means clustering
 
@@ -396,7 +395,6 @@ class client:
 
         self.latest_model = 'k_means_clustering'
         clearLog()
-        return self
         
     # query to create a support vector machine
 
@@ -450,7 +448,6 @@ class client:
 
         self.latest_model = 'svm'
         clearLog()
-        return self
         
     # query to create a nearest neighbors model
 
@@ -503,7 +500,6 @@ class client:
 
         self.latest_model = 'nearest_neighbor'
         clearLog()
-        return self
       
     # query to create a decision tree model
 
@@ -565,7 +561,6 @@ class client:
 
         self.latest_model = 'decision_tree'
         clearLog()
-        return self
 
     # tunes a specific neural network based on the input model_to_tune
     
@@ -642,7 +637,6 @@ class client:
             test_size=test_size
         )
         clearLog()
-        return self
 
     # query to build a convolutional neural network
 
@@ -694,7 +688,6 @@ class client:
 
         self.latest_model = 'convolutional_NN'
         clearLog()
-        return self
 
     # sentiment analysis prediction wrapper
 
@@ -775,7 +768,7 @@ class client:
             save_path=save_path)
         self.latest_model = 'Text Classification'
         clearLog()
-        return self
+
 
     # document summarization predict wrapper
 
@@ -839,7 +832,7 @@ class client:
 
         self.latest_model = 'Document Summarization'
         clearLog()
-        return self
+
 
     # image caption generator wrapper
 
@@ -913,7 +906,6 @@ class client:
             save_path_encoder=save_path_encoder)
         self.latest_model = 'Image Caption'
         clearLog()
-        return self
 
     # shows the names of plots associated with a specific model
     def plot_names(self, model=None):
