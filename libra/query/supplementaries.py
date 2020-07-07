@@ -323,13 +323,13 @@ def get_model_data(self, model):
     :param modeL: represents the specific model key that you're using to index dictionary
     '''
     if model in self.models:
-        data = [key for key in self.models[model].keys()]
-        print(data)
+        return self.models[model].keys()
     else:
         raise Exception(
             "The requested model has not been applied to the client.")
 
     clearLog()
+
 def get_operators(self, model):
     '''
     gets the operators that were used to preprocess the dataset for prediction.

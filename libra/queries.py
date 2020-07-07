@@ -920,23 +920,24 @@ class client:
     # shows names of models in model dictionary
 
         clearLog() 
-    def model_names(self):
+    def model(self, model=None):
         '''
         Function that shows names of models associated with the client
         '''
-        models_avail = [key for key in self.models.keys()]
-        print(models_avail)
+        if model is None:
+            model = self.latest_model
         clearLog()
+        return self.models[model]
     # shows the keys in the models dictionary
     
-    def model_data(self, model=None):
+    def data(self, model=None):
         '''
         Function that retrieves the model_data; all the information in self.models for that model
         :param model: default to the latest model, but essentially the model key
         '''
         if model is None:
             model = self.latest_model
-        get_model_data(self, model)
+        return get_model_data(self, model)
         clearLog()
     # returns all operators applicable to the client's models dictionary
     def operators(self, model=None):
@@ -1015,3 +1016,4 @@ class client:
             model = self.latest_model
         clearLog()
         analyze(self, model, save)
+
