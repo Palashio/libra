@@ -103,7 +103,7 @@ class TestQueries(unittest.TestCase):
         self.newClient.analyze(model='classification_ANN')
         self.assertTrue('plots' in self.newClient.models['classification_ANN'])
         self.assertTrue('roc_curve' in self.newClient.models['classification_ANN']['plots'])
-        self.assertTrue('confusion_matrix' in self.newClient.models['classification_ANN'])
+        self.assertTrue('confusion_matrix' in self.newClient.models['classification_ANN']['plots'])
         self.assertTrue('recall_score' in self.newClient.models['classification_ANN'])
         self.assertTrue('precision_score' in self.newClient.models['classification_ANN'])
         self.assertTrue('f1_score' in self.newClient.models['classification_ANN'])
