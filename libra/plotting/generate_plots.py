@@ -333,7 +333,7 @@ def plot_mc_roc(y_test, y_score, interpreter=None):
 
 
 # Analysis of model
-def analyze(client, model=None, save=True):
+def analyze(client, model=None, save=True, save_model=False):
     '''
     the body of the analyze function in queries.py. Used to generate ROC, confusion matrix etc.
     :param model: is the actual model that you want to analyze for and against
@@ -353,8 +353,11 @@ def analyze(client, model=None, save=True):
     if 'plots' in modeldict and model != 'k_means_clustering':
         logger("Collecting and displaying associated plots")
         for key in modeldict['plots']:
-            if key != 'roc_curve':
-                modeldict['plots'][key].show()
+            if key != 'confusion_matrix' and key != 'roc_curve':
+                img = modeldict['plots'][key]
+                if save_model:
+                    img.savefig("{}_{}.png".format(model, key))
+                img.show()
 
     if 'test_data' in modeldict:
         logger("Making predictions for test data")
@@ -410,6 +413,8 @@ def analyze(client, model=None, save=True):
         # plot roc plots
         roc = plot_mc_roc(real, preds, label_source)
         roc
+        if save_model:
+            plt.savefig("{}_{}.png".format(model, 'roc'))
         plt.show()
 
         # plot confusion matrices
@@ -418,7 +423,10 @@ def analyze(client, model=None, save=True):
             confusion_matrix=cm,
             display_labels=labels).plot()
         cm
+        if save_model:
+            plt.savefig("{}_{}.png".format(model, 'confusion_matrix'))
         plt.show()
+
         logger('Investigating potential issues with calculations')
         logger("Gathering metrics for display: ")
         # get accuracy from modeldict
