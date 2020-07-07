@@ -168,7 +168,7 @@ def tuneReg(
     # random search for the model
     tuner = RandomSearch(
         build_model,
-        objective='loss',
+        objective='val_accuracy',
         max_trials=max_trials,
         executions_per_trial=executions_per_trial,
         directory=directory)
