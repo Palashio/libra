@@ -692,27 +692,12 @@ class client:
     # sentiment analysis prediction wrapper
 
     def classify_text(self, text):
-        '''
+        """
         Calls the body of the text classification neural network query which is located in the nlp_queries.py file. This can only be called
         if text_classification_query has been called previously.
-        :param instruction: The objective that you want to model (str).
-        :param drop: A list of the dataset's columns to drop.
-        :param preprocess: Preprocess the data (bool).
-        :param test_size: Size of the testing set (float).
-        :param validation_size: Size of the validation set (float).
-        :param random_state: Initialize a pseudo-random number generator (int).
-        :param learning_rate: The learning rate of the model (float).
-        :param epochs: Number of epochs (int).
-        :param maximizer: The accuracy/loss type to optimize (str).
-        :param batch_size: The batch size for the dataset (int).
-        :param maxTextLength: The maximum length of the string of text (int).
-        :param generate_plots: Generate plots for the model (bool).
-        :param save_model: Save the model (bool).
-        :param save_path: Filepath of where to save the model (str).
-        
-
+        :param text: The new text that you want to classify (str).
         :return: a classification of text that you've provided
-        '''
+        """
         clearLog()
         return classify_text(self=self, text=text)
 
@@ -736,13 +721,10 @@ class client:
         :param drop: A list of the dataset's columns to drop.
         :param preprocess: Preprocess the data (bool).
         :param test_size: Size of the testing set (float).
-        :param val_size: Size of the validation set (float).
         :param random_state: Initialize a pseudo-random number generator (int).
         :param learning_rate: The learning rate of the model (float).
-        :param maximizer: The accuracy/loss type to optimize (str).
         :param epochs: Number of epochs (int).
         :param batch_size: The batch size for the dataset (int).
-        :param maxTextLength: The maximum length of the string of text (int).
         :param generate_plots: Generate plots for the model (bool).
         :param save_model: Save the model (bool).
         :param save_path: Filepath of where to save the model (str).
@@ -771,7 +753,6 @@ class client:
 
 
     # document summarization predict wrapper
-
     def get_summary(self, text):
         '''
         Calls the body of the summarizer which is located in the nlp_queries.py file
