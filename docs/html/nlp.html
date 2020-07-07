@@ -1,8 +1,7 @@
-
 <!DOCTYPE html>
 <head>
     <meta charset = "utf-8">
-    <title>About libra</title>
+    <title>About Libra</title>
     
     <!-- Latest compiled and minified CSS -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
@@ -18,35 +17,32 @@
     <div id="side-nav">
         <img src = "../resources/libra-logo.png" id="icon">
         <ul class="nav">
-            <li><a class="nav-tab" href="about.html">libra Home</a></li>
+            <li><a class="nav-tab" href="about.html">Libra Home</a></li> 
             
             <li><a class="nav-tab" href="started.html">Getting Started</a></li> 
             
             <li><a class="nav-tab" href="devGuides.html">Developer Guides</a></li>
-
-            <li class="nav-tab selected" href="modeling.html">Modeling Queries</li>
-                <div>
-                    <li class="dropdown-item selected" data="nnq">Neural Network</li>
-                    <li class="dropdown-item" data="cq">Convolutional</li>
-                    <li class="dropdown-item" data="tcq">Text Classification</li>
-                    <li class="dropdown-item" data="sq">Summarization</li>
-                    <li class="dropdown-item" data="kmcq">K Mean Clustering</li> 
-                </div>                 
             
-            <li><a class="nav-tab" href="nlp.html">NLP Queries</a></li>
+            <li><a class="nav-tab" href="modeling.html">Modeling Queries</a></li>
 
+            <li class="nav-tab selected" href="nlp.html">NLP Queries</li>
+                <li class="dropdown-item selected" data="drp">Dimensionality Reduction Pipeline</li>
+                <li class="dropdown-item" data="rff">Random Forest Feature</li>
+                <li class="dropdown-item" data="pca">Principal Component Analysis</li>
+                <li class="dropdown-item" data="ica">Independent Component Analysis</li>
+                
         </ul>
     </div>
-    <div id="nav-bar">Modeling Queries</div>
-        <div id="content">
-            <div class="box">
-                <h2 id="nnq">neural_network_query()</h2>
+    <div id="nav-bar">Natural Language Processing Queries</div>
+    <div id="content">
+        <div class="box">
+            <h2 id="drp">dimensionality_reduction_pipeline()</h2>
                 <br>
                 <p>Automatically fits a neural network to your dataset. Target detection, preprocessing, and scoring are done by default.</p>
                 <b>Only instruction is required. ALL other parameters are optional</b>
                 <br>
                 <br>
-                <table style="width:100%">
+                <table>
                     <tr>
                         <td colspan="2">Arguments</td>
                     </tr>
@@ -98,11 +94,11 @@
                 <pre>new_client = client('path_to_dataset')
 new_client.neural_network_query('Please estimate the number of households.')
 new_client.models['regression_ANN'].plots() #access plots</pre>
-            </div>
-            <div class="box">
-                <h2 id="cq">convolutional_query()</h2>
+        </div>
+        <div class="box">
+                <h2 id="rff">random_forest_feature()</h2>
                 <br>
-                <p>Automatically fits a Convolutional Neural Network to your dataset. Everything is handled by libra internally. Three types of dataset structures are detectable:
+                <p>Automatically fits a Convolutional Neural Network to your dataset. Everything is handled by libra internally. Three types of dataset structures are detectable: 
                     <br>
                     <br>
 1) classwise: where every folder represents a seperate class of images 
@@ -112,7 +108,7 @@ new_client.models['regression_ANN'].plots() #access plots</pre>
 3) pathwise: where a csv file stores relative paths to images
                 </p>
                 <br>
-                <table style="width:100%">
+                <table>
                     <tr>
                         <td colspan="2">Arguments</td>
                     </tr>
@@ -139,13 +135,13 @@ new_client.models['regression_ANN'].plots() #access plots</pre>
                 </table>
                 <pre>newClient = client('path_to_directory_with_image_folders')
 newClient.convolutional_query("Please classify my images")</pre>
-            </div>
-            <div class="box">
-                <h2 id="tcq">text_classification_query()</h2>
+        </div>
+        <div class="box">
+                <h2 id="pca">principal_component_analysis()</h2>
                 <br>
                 <p>Lets you create a text classification model automatically; works for all sorts of situations like sentiment analysis.</p>
                 <br>
-                <table style="width:100%">
+                <table>
                     <tr>
                         <td colspan="2">Arguments</td>
                     </tr>
@@ -158,30 +154,13 @@ newClient.convolutional_query("Please classify my images")</pre>
 newClient.text_classification_query('Model credit card transaction type')
 newClient.predict_text_sentiment('new_text_to_classify')</pre>
 
-            </div>
-            <div class="box">
-                <h2 id="sq">summarization_query()</h2>
-                <br>
-                <p>Automatically fits a neural network to your dataset. Target detection, preprocessing, and scoring are done by default.</p>
-                <br>
-                <table style="width:100%">
-                    <tr>
-                        <td colspan="2">Arguments</td>
-                    </tr>
-                    <tr>
-                        <td>Instruction</td>
-                        <td>An English language statement of what you’d like to do, eg: predict the median house value</td>
-                    </tr>
-                </table>
-                <pre>print("hello world")
-//random code stuff here, tabs are important though</pre>
-            </div>
-            <div class="box">
-                <h2 id="kmcq">kmeans_clustering_query()</h2>
+        </div>
+        <div class="box">
+                <h2 id="ica">independant_component_analysis()</h2>
                 <br>
                 <p>Automatically fits a clustering algorithm to your dataset. Target detection, preprocessing, and scoring are done by default.</p>
                 <br>
-                <table style="width:100%">
+                <table>
                     <tr>
                         <td colspan="2">Arguments</td>
                     </tr>
@@ -205,7 +184,7 @@ newClient.predict_text_sentiment('new_text_to_classify')</pre>
                 </table>
                 <pre>newClient = client('path_to_file')
 newClient.kmeans_clustering_query(preprocess=True, generate_plots=True, drop=[])</pre>
-            </div>
-            <div id="space"></div>
+        </div>
+        <div id="space"></div>
     </div>
 </body>
