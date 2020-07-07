@@ -6,7 +6,8 @@ from libra.query.classification_models import (k_means_clustering,
                                                train_svm, nearest_neighbors,
                                                decision_tree)
 
-from libra.query.supplementaries import tune_helper, get_model_data, get_operators, get_accuracy, get_losses, get_target, get_plots, get_vocab
+from libra.query.supplementaries import tune_helper, get_model_data, get_operators, get_accuracy, get_losses, \
+    get_target, get_plots, get_vocab
 
 from libra.query.feedforward_nn import (regression_ann,
                                         classification_ann,
@@ -98,8 +99,6 @@ class client:
             ssl._create_default_https_context = _create_unverified_https_context
         nltk.download('punkt', quiet=True)
         nltk.download('averaged_perceptron_tagger', quiet=True)
-
-
 
     # param model_requested: string representation of the name of the model user seeks to retrieve
     # returns models with a specific string - currently deprecated, should not be used.
@@ -227,7 +226,6 @@ class client:
                     save_path=save_path)
         clearLog()
 
-
     # single regression query using a feed-forward neural network
     # instruction should be the value of a column
     def regression_query_ann(
@@ -346,7 +344,7 @@ class client:
 
         self.latest_model = 'classification_ANN'
         clearLog()
-        
+
     # query to perform k-means clustering
 
     def kmeans_clustering_query(self,
@@ -395,7 +393,7 @@ class client:
 
         self.latest_model = 'k_means_clustering'
         clearLog()
-        
+
     # query to create a support vector machine
 
     def svm_query(self,
@@ -448,7 +446,7 @@ class client:
 
         self.latest_model = 'svm'
         clearLog()
-        
+
     # query to create a nearest neighbors model
 
     def nearest_neighbor_query(
@@ -500,7 +498,7 @@ class client:
 
         self.latest_model = 'nearest_neighbor'
         clearLog()
-      
+
     # query to create a decision tree model
 
     def decision_tree_query(
@@ -563,7 +561,7 @@ class client:
         clearLog()
 
     # tunes a specific neural network based on the input model_to_tune
-    
+
     def tune(self,
              model_to_tune=None,
              max_layers=10,
@@ -751,7 +749,6 @@ class client:
         self.latest_model = 'Text Classification'
         clearLog()
 
-
     # document summarization predict wrapper
     def get_summary(self, text):
         '''
@@ -813,7 +810,6 @@ class client:
 
         self.latest_model = 'Document Summarization'
         clearLog()
-
 
     # image caption generator wrapper
 
@@ -897,21 +893,24 @@ class client:
         if model is None:
             model = self.latest_model
         print(self.models[model]['plots'].keys())
-    
-    # shows names of models in model dictionary
 
-        clearLog() 
+        # shows names of models in model dictionary
+
+        clearLog()
+
     def model(self, model=None):
         '''
-        Function that shows names of models associated with the client
+        Function that either returns the latest model or one specified and its information as a dictionary.
+        :param model: is the model key that you want to use.
         '''
         if model is None:
             model = self.latest_model
         clearLog()
         return self.models[model]
+
     # shows the keys in the models dictionary
-    
-    def data(self, model=None):
+
+    def info(self, model=None):
         '''
         Function that retrieves the model_data; all the information in self.models for that model
         :param model: default to the latest model, but essentially the model key
@@ -920,6 +919,7 @@ class client:
             model = self.latest_model
         return get_model_data(self, model)
         clearLog()
+
     # returns all operators applicable to the client's models dictionary
     def operators(self, model=None):
         '''
@@ -930,6 +930,7 @@ class client:
             model = self.latest_model
         get_operators(self, model)
         clearLog()
+
     # show accuracy scores for client's model
     def accuracy(self, model=None):
         '''
@@ -982,7 +983,6 @@ class client:
         :param model: default to the latest model, but essentially the model key
         :param plot: plot specified during the client session to be procured
         :param save: option to save plots after client session is done (default is false, or
-
         '''
         clearLog()
         get_plots(self, model, plot, save)
@@ -997,4 +997,3 @@ class client:
             model = self.latest_model
         clearLog()
         analyze(self, model, save)
-
