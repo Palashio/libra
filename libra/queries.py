@@ -41,6 +41,7 @@ def clearLog():
 
     currLog = ""
     counter = 0
+    print("")
 
 
 def logger(instruction, found=""):

@@ -6,7 +6,8 @@ from numpy import interp
 import pandas as pd
 import sklearn
 import matplotlib.pyplot as plt
-from sklearn.metrics import confusion_matrix, plot_confusion_matrix, recall_score, precision_score, f1_score, ConfusionMatrixDisplay
+from sklearn.metrics import confusion_matrix, plot_confusion_matrix, recall_score, precision_score, f1_score, \
+    ConfusionMatrixDisplay
 import numpy as np
 
 warnings.filterwarnings("ignore", category=RuntimeWarning)
@@ -262,7 +263,7 @@ def plot_mc_roc(y_test, y_score, interpreter=None):
         y_test = label_binarize(y_test, classes=classes)
         y_score = label_binarize(y_score, classes=classes)
     else:
-        n_classes=1
+        n_classes = 1
         y_test = y_test.reshape(-1, 1)
         y_score = y_score.reshape(-1, 1)
 
@@ -338,6 +339,7 @@ def analyze(client, model=None, save=True):
     :param model: is the actual model that you want to analyze for and against
     :param client: is the whole client object :)
     '''
+
     if model is None:
         model = client.latest_model
 
@@ -345,22 +347,22 @@ def analyze(client, model=None, save=True):
         raise NameError('Model name is not valid or has not been created yet.')
 
     plt.clf()
-    logger(" ", ("Analyzing {}".format(model)))
-
+    logger("Analyzing {} for further understanding".format(model))
 
     modeldict = client.models[model]
     if 'plots' in modeldict and model != 'k_means_clustering':
-        logger(" ", "Displaying associated plots")
+        logger("Collecting and displaying associated plots")
         for key in modeldict['plots']:
             if key != 'roc_curve':
                 modeldict['plots'][key].show()
 
     if 'test_data' in modeldict:
-        logger("->", "Making predictions for test data...")
+        logger("Making predictions for test data")
         data = modeldict['test_data']['X']
         real = modeldict['test_data']['y']
         preds = modeldict['model'].predict(data)
         if model == 'Text Classification':
+            logger("Identifying textual relationships and numerical correspondence")
             preds = np.argmax(preds, axis=-1)
         if model == 'classification_ANN':  # formats labels column
             enc = sklearn.preprocessing.LabelEncoder()
@@ -370,22 +372,23 @@ def analyze(client, model=None, save=True):
                 preds).reshape(1, -1)[0]
             real = enc.fit_transform(real)
             preds = enc.transform(preds)
+            logger("Transforming dataset for plotting module")
 
     if model == 'k_means_clustering':
-        logger("->", "Reporting metrics: ")
+        logger("Gathering metrics for display: ")
         inertia = modeldict['model'].inertia_
         centers = modeldict['model'].cluster_centers_
-        logger(" ", ("Total Clusters: {}".format(str(len(centers)))))
+        logger(" ", ("Optimal number of clusters: {}".format(str(len(centers)))))
         logger(
             "->",
-            ("KMeans Sum Squared Dist of points to center (inertia): {}".format(
+            ("Sum of squared distance or inertia: {}".format(
                 str(inertia))))
         if save:
             modeldict['n_centers'] = len(centers)
             modeldict['centroids'] = centers
             modeldict['inertia'] = inertia
     elif model == 'regression_ANN':
-        logger("->", "Reporting metrics: ")
+        logger("Gathering metrics for display: ")
         MSE = sklearn.metrics.mean_squared_error(real, preds)
         MAE = sklearn.metrics.mean_absolute_error(real, preds)
         logger(" ", ("MSE on test set: {}".format(str(MSE))))
@@ -416,8 +419,8 @@ def analyze(client, model=None, save=True):
             display_labels=labels).plot()
         cm
         plt.show()
-
-        logger("->", "Reporting metrics: ")
+        logger('Investigating potential issues with calculations')
+        logger("Gathering metrics for display: ")
         # get accuracy from modeldict
         if model in ['svm', 'nearest_neighbor',
                      'decision_tree']:
@@ -428,7 +431,8 @@ def analyze(client, model=None, save=True):
         precision = precision_score(real, preds, average='micro')
         f1 = f1_score(real, preds, average='micro')
 
-        logger(" ", ("Accuracy on test set: {}".format(str(accuracy))))
+        logger("->",
+               ("Accuracy on test set: {}".format(str((accuracy[-1] if isinstance(accuracy, list) else accuracy)))))
         logger("->", ("Recall on test set: {}".format(str(recall))))
         logger("->", ("Precision on test set: {}".format(str(precision))))
         logger("->", ("F1 Score on test set: {}".format(str(f1))))
@@ -436,9 +440,10 @@ def analyze(client, model=None, save=True):
             if 'plots' not in modeldict:
                 modeldict['plots'] = {}
             modeldict['plots']['roc_curve'] = roc
-            modeldict['confusion_matrix'] = cm
+            modeldict['plots']['confusion_matrix'] = cm
             modeldict['recall_score'] = recall
             modeldict['precision_score'] = precision
             modeldict['f1_score'] = f1
     else:
         print("further analysis is not supported for {}".format(model))
+    clearLog()
