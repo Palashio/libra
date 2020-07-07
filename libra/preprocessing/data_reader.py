@@ -29,7 +29,6 @@ class DataReader():
         self.trim = trim
         self.trim_format = trim_format
         self.trim_ratio = trim_ratio
-        self.strat_col_index = strat_col_index
 
     def retrieve_file_size(self):
         '''
