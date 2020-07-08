@@ -52,7 +52,7 @@ newClient.neural_network_query('please model the median number of households')
 ```
 Now, calling 
 ```python
-newClient.data()
+newClient.info()
 ```
 will return a dictionary of all the information that was generated: 
 
