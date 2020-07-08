@@ -60,3 +60,12 @@ will return a dictionary of all the information that was generated:
 dict_keys(['id', 'model', 'num_classes', 'plots', 'target', 'preprocesser', 
           'interpreter', 'test_data', 'losses', 'accuracy'])
 ```
+
+Other queries can also be called on the same object, and will be appended to the `models` dictionary.
+
+```python
+newClient.svm_query('predict the proximity to the ocean')
+newClient.models().keys()
+
+dict_keys(['regression_ANN', svm'])
+```
