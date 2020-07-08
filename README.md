@@ -40,7 +40,7 @@ conda install libra -c conda-forge
 
 ## Usage: the basics
 
-A new client object should be created for every dataset that you're working with. This is where the results of your models for the dataset will be stored.
+The core functionality of libra works through the `client` object. A new client object should be created for every dataset that you want to produce results for. All information about the models that're built, the plots that are generated, and the metrics are created will be stored in the object.
 
 You can then call different queries on that client object, and the dataset you passed to it will be used. 
 
