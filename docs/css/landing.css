@@ -9,8 +9,6 @@
 }
 
 body{
-    height: 5000px; /*code was originally written on a 1920 by 969 monitor*/
-    /*    window may be 1920 but that included the scroll bar area so 100% width is actually a bit less*/
     width: 1905px;
     padding:0px;
     background-color: aliceblue;
