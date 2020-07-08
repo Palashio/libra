@@ -50,3 +50,12 @@ from libra import client
 newClient = client('path/to/dataset') 
 newClient.neural_network_query('please model the median number of households')
 ```
+Now, calling 
+```python
+newClient.data()
+```
+will return a dictionary of all the information that was generated: 
+
+```python
+dict_keys(['id', 'model', 'num_classes', 'plots', 'target', 'preprocesser', 'interpreter', 'test_data', 'losses', 'accuracy'])
+```
