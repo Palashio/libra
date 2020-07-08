@@ -1,0 +1,70 @@
+#header{
+    width: 1920px;
+    height: 300px;
+    background-color: white;
+    top: 30px;
+    left:0px;
+    position: absolute;
+}
+
+#overview{
+    left: 130px;
+    top: 100px;
+    color: rgb(39, 130, 255);
+    z-index: 11;
+    position: absolute;
+    text-align: left;
+    font-size: 45px;
+    font-weight: 600;
+}
+
+#description{
+    position: absolute;
+    top: 150px;
+    left: 130px;
+    color: #404040;
+}
+
+#installImg{
+    position: absolute;
+    left: 1200px;
+    top: 50px;
+    height: 200px;
+}
+
+#content{
+    margin: auto;
+    margin-top: 430px;
+    margin-bottom: 200px;
+    width: 1200px;
+    height: auto;
+    background-color: white;
+    box-shadow: 0px 0px 20px #a8d7ff;
+    border-radius: 20px;
+    padding: 80px;
+    padding-top: 20px;
+    box-sizing: border-box;
+}
+
+pre{
+    font-family: inherit;
+    font-weight: 500;
+    display: block;
+    width: 700px;
+    padding: 9.5px;
+    margin: 0 0 10px;
+    font-size: 15px;
+    line-height: 1.4;
+    color: #000000;
+    background-color: #f5f5f5;
+    border: 1px solid #cccccc;
+    border-radius: 4px;
+}
+
+h2{
+    font-weight: 500;
+    font-size: 27px;
+    color: #3b3b3b;
+    margin-top: 50px;
+}
+
