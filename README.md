@@ -40,7 +40,7 @@ conda install libra -c conda-forge
 
 ## Usage: the basics
 
-A new client object should be created for every dataset that you're working with. This is where the results of your models for the dataset will be stored.
+The core functionality of libra works through the `client` object. A new client object should be created for every dataset that you want to produce results for. All information about the models that're built, the plots that are generated, and the metrics are created will be stored in the object.
 
 You can then call different queries on that client object, and the dataset you passed to it will be used. 
 
@@ -49,4 +49,23 @@ from libra import client
 
 newClient = client('path/to/dataset') 
 newClient.neural_network_query('please model the median number of households')
+```
+Now, calling 
+```python
+newClient.info()
+```
+will return a dictionary of all the information that was generated: 
+
+```python
+dict_keys(['id', 'model', 'num_classes', 'plots', 'target', 'preprocesser', 
+          'interpreter', 'test_data', 'losses', 'accuracy'])
+```
+
+Other queries can also be called on the same object, and will be appended to the `models` dictionary.
+
+```python
+newClient.svm_query('predict the proximity to the ocean')
+newClient.models().keys()
+
+dict_keys(['regression_ANN', svm'])
 ```
