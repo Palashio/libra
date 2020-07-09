@@ -338,6 +338,8 @@ def analyze(client, model=None, save=True, save_model=False):
     the body of the analyze function in queries.py. Used to generate ROC, confusion matrix etc.
     :param model: is the actual model that you want to analyze for and against
     :param client: is the whole client object :)
+    :param save: whether to save into client dictionary
+    :param save_model: whether to save as .png
     '''
 
     if model is None:
@@ -442,11 +444,6 @@ def analyze(client, model=None, save=True, save_model=False):
         print("further analysis is not supported for {}".format(model))
 
     if 'plots' in modeldict and model != 'k_means_clustering':
-        logger("Collecting and displaying associated plots")
-        for key in modeldict['plots']:
-            img = modeldict['plots'][key]
-            if save_model:
-                img.savefig("{}_{}.png".format(model, key))
-            img.show()
+        client.plots(model=model, save=save_model)
 
     clearLog()
