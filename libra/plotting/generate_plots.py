@@ -350,14 +350,6 @@ def analyze(client, model=None, save=True, save_model=False):
     logger("Analyzing {} for further understanding".format(model))
 
     modeldict = client.models[model]
-    if 'plots' in modeldict and model != 'k_means_clustering':
-        logger("Collecting and displaying associated plots")
-        for key in modeldict['plots']:
-            if key != 'confusion_matrix' and key != 'roc_curve':
-                img = modeldict['plots'][key]
-                if save_model:
-                    img.savefig("{}_{}.png".format(model, key))
-                img.show()
 
     if 'test_data' in modeldict:
         logger("Making predictions for test data")
@@ -410,22 +402,15 @@ def analyze(client, model=None, save=True, save_model=False):
             label_source = enc
             labels = enc.classes_
 
-        # plot roc plots
+        # create roc plots
         roc = plot_mc_roc(real, preds, label_source)
-        roc
-        if save_model:
-            plt.savefig("{}_{}.png".format(model, 'roc'))
-        plt.show()
 
-        # plot confusion matrices
+        # create confusion matrices
         cm = confusion_matrix(real, preds)
         cm = ConfusionMatrixDisplay(
             confusion_matrix=cm,
             display_labels=labels).plot()
-        cm
-        if save_model:
-            plt.savefig("{}_{}.png".format(model, 'confusion_matrix'))
-        plt.show()
+        cm = cm.figure_
 
         logger('Investigating potential issues with calculations')
         logger("Gathering metrics for display: ")
@@ -452,6 +437,16 @@ def analyze(client, model=None, save=True, save_model=False):
             modeldict['recall_score'] = recall
             modeldict['precision_score'] = precision
             modeldict['f1_score'] = f1
+
     else:
         print("further analysis is not supported for {}".format(model))
+
+    if 'plots' in modeldict and model != 'k_means_clustering':
+        logger("Collecting and displaying associated plots")
+        for key in modeldict['plots']:
+            img = modeldict['plots'][key]
+            if save_model:
+                img.savefig("{}_{}.png".format(model, key))
+            img.show()
+
     clearLog()
