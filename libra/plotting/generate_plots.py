@@ -9,7 +9,9 @@ import matplotlib.pyplot as plt
 from sklearn.metrics import confusion_matrix, plot_confusion_matrix, recall_score, precision_score, f1_score, \
     ConfusionMatrixDisplay
 import numpy as np
+from sklearn.exceptions import DataConversionWarning
 
+warnings.filterwarnings(action='ignore', category=DataConversionWarning)
 warnings.filterwarnings("ignore", category=RuntimeWarning)
 
 currLog = ""
