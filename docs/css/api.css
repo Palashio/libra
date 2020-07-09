@@ -102,6 +102,7 @@ body{
     width: 1000px;
     left:300px;
     top:70px;
+    padding-left: 25px;
 }
 
 h2{
@@ -115,6 +116,7 @@ h2{
 .box{
     border: 1px solid rgb(206, 206, 206);
     margin: 25px;
+    margin-left: 0px;
     padding: 30px;
     padding-top: 20px;
     border-radius: 15px;
