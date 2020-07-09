@@ -104,9 +104,11 @@ class TestQueries(unittest.TestCase):
         self.assertTrue('plots' in self.newClient.models['classification_ANN'])
         self.assertTrue('roc_curve' in self.newClient.models['classification_ANN']['plots'])
         self.assertTrue('confusion_matrix' in self.newClient.models['classification_ANN']['plots'])
-        self.assertTrue('recall_score' in self.newClient.models['classification_ANN'])
-        self.assertTrue('precision_score' in self.newClient.models['classification_ANN'])
-        self.assertTrue('f1_score' in self.newClient.models['classification_ANN'])
+
+        self.assertTrue('scores' in self.newClient.models['classification_ANN'])
+        self.assertTrue('recall_score' in self.newClient.models['classification_ANN']['scores'])
+        self.assertTrue('precision_score' in self.newClient.models['classification_ANN']['scores'])
+        self.assertTrue('f1_score' in self.newClient.models['classification_ANN']['scores'])
 
     # Tests analyze() function for sklearn models
     @ordered
@@ -118,9 +120,11 @@ class TestQueries(unittest.TestCase):
             self.assertTrue('plots' in modeldict)
             self.assertTrue('roc_curve' in modeldict['plots'])
             self.assertTrue('confusion_matrix' in modeldict['plots'])
-            self.assertTrue('recall_score' in modeldict)
-            self.assertTrue('precision_score' in modeldict)
-            self.assertTrue('f1_score' in modeldict)
+
+            self.assertTrue('scores' in modeldict)
+            self.assertTrue('recall_score' in modeldict['scores'])
+            self.assertTrue('precision_score' in modeldict['scores'])
+            self.assertTrue('f1_score' in modeldict['scores'])
 
     # Tests invalid model input
     @ordered

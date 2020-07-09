@@ -436,9 +436,12 @@ def analyze(client, model=None, save=True, save_model=False):
                 modeldict['plots'] = {}
             modeldict['plots']['roc_curve'] = roc
             modeldict['plots']['confusion_matrix'] = cm
-            modeldict['recall_score'] = recall
-            modeldict['precision_score'] = precision
-            modeldict['f1_score'] = f1
+
+            if 'scores' not in modeldict:
+                modeldict['scores'] = {}
+            modeldict['scores']['recall_score'] = recall
+            modeldict['scores']['precision_score'] = precision
+            modeldict['scores']['f1_score'] = f1
 
     else:
         print("further analysis is not supported for {}".format(model))
