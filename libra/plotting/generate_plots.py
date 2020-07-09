@@ -9,7 +9,9 @@ import matplotlib.pyplot as plt
 from sklearn.metrics import confusion_matrix, plot_confusion_matrix, recall_score, precision_score, f1_score, \
     ConfusionMatrixDisplay
 import numpy as np
+from sklearn.exceptions import DataConversionWarning
 
+warnings.filterwarnings(action='ignore', category=DataConversionWarning)
 warnings.filterwarnings("ignore", category=RuntimeWarning)
 
 currLog = ""
@@ -338,6 +340,8 @@ def analyze(client, model=None, save=True, save_model=False):
     the body of the analyze function in queries.py. Used to generate ROC, confusion matrix etc.
     :param model: is the actual model that you want to analyze for and against
     :param client: is the whole client object :)
+    :param save: whether to save into client dictionary
+    :param save_model: whether to save as .png
     '''
 
     if model is None:
@@ -350,14 +354,6 @@ def analyze(client, model=None, save=True, save_model=False):
     logger("Analyzing {} for further understanding".format(model))
 
     modeldict = client.models[model]
-    if 'plots' in modeldict and model != 'k_means_clustering':
-        logger("Collecting and displaying associated plots")
-        for key in modeldict['plots']:
-            if key != 'confusion_matrix' and key != 'roc_curve':
-                img = modeldict['plots'][key]
-                if save_model:
-                    img.savefig("{}_{}.png".format(model, key))
-                img.show()
 
     if 'test_data' in modeldict:
         logger("Making predictions for test data")
@@ -410,22 +406,15 @@ def analyze(client, model=None, save=True, save_model=False):
             label_source = enc
             labels = enc.classes_
 
-        # plot roc plots
+        # create roc plots
         roc = plot_mc_roc(real, preds, label_source)
-        roc
-        if save_model:
-            plt.savefig("{}_{}.png".format(model, 'roc'))
-        plt.show()
 
-        # plot confusion matrices
+        # create confusion matrices
         cm = confusion_matrix(real, preds)
         cm = ConfusionMatrixDisplay(
             confusion_matrix=cm,
             display_labels=labels).plot()
-        cm
-        if save_model:
-            plt.savefig("{}_{}.png".format(model, 'confusion_matrix'))
-        plt.show()
+        cm = cm.figure_
 
         logger('Investigating potential issues with calculations')
         logger("Gathering metrics for display: ")
@@ -449,9 +438,17 @@ def analyze(client, model=None, save=True, save_model=False):
                 modeldict['plots'] = {}
             modeldict['plots']['roc_curve'] = roc
             modeldict['plots']['confusion_matrix'] = cm
-            modeldict['recall_score'] = recall
-            modeldict['precision_score'] = precision
-            modeldict['f1_score'] = f1
+
+            if 'scores' not in modeldict:
+                modeldict['scores'] = {}
+            modeldict['scores']['recall_score'] = recall
+            modeldict['scores']['precision_score'] = precision
+            modeldict['scores']['f1_score'] = f1
+
     else:
         print("further analysis is not supported for {}".format(model))
+
+    if 'plots' in modeldict and model != 'k_means_clustering':
+        client.plots(model=model, save=save_model)
+
     clearLog()

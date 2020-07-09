@@ -18,7 +18,6 @@ number = 0
 counter = 0
 currLog = ""
 
-
 # # allows for all columns to be displayed when printing()
 # pd.options.display.width = None
 
@@ -453,13 +452,8 @@ def save_and_plot(self, modelname, plotname, save):
     :param plotname: specific plot to save
     :param save: whether to save it or not
     '''
-    plt.savefig('{}_{}.png'.format(modelname, plotname))
     img = self.models[modelname]['plots'][plotname]
-    path = "{}_{}.png".format(modelname, plotname)
-    img.savefig(path)
-    saved = Image.open(path)
-    saved.show()
-    if save is False:
-        currpath = os.getcwd()
-        os.remove(currpath + '/' + path)
+    if save:
+        img.savefig("{}_{}.png".format(modelname, plotname))
+    img.show()
 

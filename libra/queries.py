@@ -24,6 +24,7 @@ import os
 import nltk
 import ssl
 import numpy as np
+from sklearn.exceptions import DataConversionWarning
 
 # suppressing warnings for cleaner dialogue box
 warnings.simplefilter(action='error', category=FutureWarning)
