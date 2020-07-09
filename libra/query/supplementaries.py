@@ -18,7 +18,6 @@ number = 0
 counter = 0
 currLog = ""
 
-
 # # allows for all columns to be displayed when printing()
 # pd.options.display.width = None
 
