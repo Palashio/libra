@@ -18,7 +18,6 @@ number = 0
 counter = 0
 currLog = ""
 
-
 # # allows for all columns to be displayed when printing()
 # pd.options.display.width = None
 
@@ -323,13 +322,13 @@ def get_model_data(self, model):
     :param modeL: represents the specific model key that you're using to index dictionary
     '''
     if model in self.models:
-        data = [key for key in self.models[model].keys()]
-        print(data)
+        return self.models[model].keys()
     else:
         raise Exception(
             "The requested model has not been applied to the client.")
 
     clearLog()
+
 def get_operators(self, model):
     '''
     gets the operators that were used to preprocess the dataset for prediction.
@@ -453,13 +452,8 @@ def save_and_plot(self, modelname, plotname, save):
     :param plotname: specific plot to save
     :param save: whether to save it or not
     '''
-    plt.savefig('{}_{}.png'.format(modelname, plotname))
     img = self.models[modelname]['plots'][plotname]
-    path = "{}_{}.png".format(modelname, plotname)
-    img.savefig(path)
-    saved = Image.open(path)
-    saved.show()
-    if save is False:
-        currpath = os.getcwd()
-        os.remove(currpath + '/' + path)
+    if save:
+        img.savefig("{}_{}.png".format(modelname, plotname))
+    img.show()
 

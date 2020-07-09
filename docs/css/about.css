@@ -207,14 +207,14 @@
     padding-top: 160px;
 }
 
-h2{
+#featureBox h2{
     margin:auto;
     text-align:center;
     font-weight: 400;
     font-size: 50px;
     color: #4b4b4b;
     border-bottom: 1px solid #b2b2b2;
-    width:400px
+    width:400px;
 }
 
 #pipeline{
@@ -228,7 +228,7 @@ h2{
     position: absolute;
     top: 320px;
     left: 980px;
-    width: 700px;
+    width: 650px;
     font-size: 25px;
     font-weight: 400;
     color: #5f5f5f;
@@ -237,8 +237,8 @@ h2{
 #nlpTxt{
     position: absolute;
     top: 650px;
-    left: 120px;
-    width: 700px;
+    left: 150px;
+    width: 650px;
     font-size: 25px;
     font-weight: 400;
     color: #5f5f5f;
@@ -250,4 +250,50 @@ h2{
     position: absolute;
     left: 960px;
     top: 600px;
+}
+
+#teamBox{
+    position: absolute;
+    width: 1920px;
+    top: 2970px;
+    left: 0px;
+    background-color: #646464;
+    height: 500px;
+}
+
+#teamBox h2{
+    margin:auto;
+    margin-top: 30px;
+    text-align:center;
+    font-weight: 400;
+    font-size: 50px;
+    color: white;
+    border-bottom: 1px solid white;
+    width: 500px;
+}
+
+#teamBox p{
+    margin-top: 45px;
+    text-align: center;
+    font-size: 25px;
+    color:#c4dce5;
+}
+
+#plugs{
+    width: 900px;
+    font-size: 25px;
+    font-weight: 400;
+    line-height: 1.5;
+    margin: auto;
+    margin-top: 60px;
+    color: white;
+    text-align: center;
+}
+
+#plugs a{ 
+    color: white;
+}
+
+#plugs a:hover{
+    color: #7dcdff;
 }
