@@ -24,8 +24,10 @@ import os
 import nltk
 import ssl
 import numpy as np
+from sklearn.exceptions import DataConversionWarning
 
 # suppressing warnings for cleaner dialogue box
+warnings.filterwarnings(action='ignore', category=DataConversionWarning)
 warnings.simplefilter(action='error', category=FutureWarning)
 warnings.simplefilter(action="ignore", category=SettingWithCopyWarning)
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
