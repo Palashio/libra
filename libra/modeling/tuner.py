@@ -160,32 +160,17 @@ def tuneReg(
                               default=0.20,
                               step=0.05)))
         model.add(Dense(1, activation='linear'))
+        lrate=hp.Float('learning_rate',
+                       min_value=1e-5,
+                       max_value=1e-1,
+                       sampling='LOG',
+                       default=1e-3)
         model.compile(
             optimizer=hp.Choice('optimizer', values=[
-                               keras.optimizers.Adam(
-                                       hp.Float('learning_rate',
-                                                min_value=1e-5,
-                                                max_value=1e-1,
-                                                sampling='LOG',
-                                                default=1e-3)),
-                               keras.optimizers.SGD(
-                                       hp.Float('learning_rate',
-                                                min_value=1e-5,
-                                                max_value=1e-1,
-                                                sampling='LOG',
-                                                default=1e-2)),
-                               keras.optimizer.RMSprop(
-                                       hp.Float('learning_rate',
-                                                min_value=1e-5,
-                                                max_value=1e-1,
-                                                sampling='LOG',
-                                                default=1e-3)),
-                              keras.optimizers.Adamax(
-                                       hp.Float('learning_rate',
-                                                min_value=1e-5,
-                                                max_value=1e-1,
-                                                sampling='LOG',
-                                                default=1e-3))
+                               keras.optimizers.Adam(learning_rate = lrate),
+                               keras.optimizers.SGD(learning_rate = lrate),
+                               keras.optimizer.RMSprop(learning_rate = lrate),
+                              keras.optimizers.Adamax(learning_rate = lrate)
                                ]),
             loss=hp.Choice('loss', values=['mean_squared_logarithmic_error',
                                            'mean_squared_error',
