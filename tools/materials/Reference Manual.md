@@ -35,15 +35,20 @@ Table of Contents
    * [tuneReg](#tuneReg)
    * [build_model](#build_model)
    * [tuneClass](#tuneClass)
-   * [tuneCNN](#tuneCNN)  
+   * [tuneCNN](#tuneCNN)
+* [nonkeras_generate_plots](#nonkeras_generate_plots)
+   * [plot_loss_nonkeras](#plot_loss_nonkeras)
 * [generatePlots.py](#generatePlots)
   * [generate_clustering_plots](#generate_clustering_plots)
+  * [elbow_cluster_graph](#elbow_cluster_graph)
   * [generate_regression_plots](#generate_regression_plots)
   * [generate_classification_plots](#generate_classification_plots)
   * [generate_classification_together](#generate_classification_together)
   * [plot_loss](#plot_loss)
   * [plot_corr](#plot_corr)
   * [plot_acc](#plot_acc)
+  * [plot_mc_roc](#plot_mc_roc)
+  * [analyze](#analyze)
 * [NLP_preprocessing.py](#NLP_preprocessing)
   * [get_target_values](#get_target_values)
   * [lemmatize_text](#lemmatize_text)
@@ -851,6 +856,8 @@ label: `[str, str]`
 String representation of labels used for names for x/y axes of plots generated
 
 
+*Retrieves --*
+
 plots: `[]`
 
 Retrieves list containing all the saved generated plots
@@ -961,7 +968,7 @@ History of past model iterations/results from classification model being plotted
 
 *Returns -- *
 
-img: `Figure` 
+img: `matplotlib.pyplot.figure` 
 
 Retrieves model loss figure which has x/y axes of validation loss/epoch measured across both training and testing datasets
 
@@ -988,7 +995,7 @@ List of string representation of names of columns where correlation is being sou
 
 *Returns --*
 
-img: `Figure` 
+img: `matplotlib.pyplot.figure` 
 
 Retrieves square correlation heatmap figure shaded in accordance with strength of correlation coefficient relating two variables
 
@@ -1010,9 +1017,73 @@ History of past model iterations/results from classification model being plotted
 
 *Returns -- *
 
-img: `Figure` 
+img: `matplotlib.pyplot.figure` 
 
 Retrieves model accuracy figure which has x/y axes of accuracy score/epoch measured across both training and testing datasets
+
+### plot_mc_roc ###
+
+''' python
+libra.plot_mc_roc(y_test, y_score, interpreter=None):
+'''
+
+Generates/stores the ROC curves for multiclassification neural network model constructed in client class instance 
+
+*Parameters --*
+
+y_test: `numpy.array`
+
+Array of the true values of the classification model sent to/from the client class instance
+
+y_score: `numpy.array`
+
+Array of the predicted values of the classification model sent to/from the client class instance
+
+interpreter: `LabelEncoder/{}` 
+
+Dictionary or LabelEncoder representation (depending on model selected) of preprocessing techniques applied for the multiclassification model (is set by default to none)
+
+
+*Returns --*
+
+img: `matplotlib.pyplot.figure`
+
+Retrieves multiclassification model ROC curves figure which has x/y axes of false positive rate/true positive rate 
+
+### analyze ### 
+
+```python
+def analyze(client, model=None, save=True, save_model=False
+```
+
+
+Wrapper function for analyze method in queries.py used to generate/output relevant plots/metrics in client class instance
+
+
+*Parameters --*
+
+client: `object`
+
+Object representation of client instantiated in client class instance
+
+model: `str`
+
+String representation of the model selected in the client class instance for analysis (is set by default to none)
+
+save: `bool`
+
+Boolean option to choose whether to save the plots/metrics for analysis in client class instance (is set by default to true)
+
+save_model: `bool`
+
+Boolean option to choose whether to save model selected in client class instance (is set by default to false)
+
+
+*Returns --*
+
+None
+
+Generates/stores ROC/confusion matrix plots, metrics for k means clustering, mean squared or absolute error for regression artificial neural network, or accuracy/recall/precision/F1 scores for plots relevant for models represented via keys present in associated dictionary
 
 ***
 
