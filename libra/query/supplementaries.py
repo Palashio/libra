@@ -107,8 +107,8 @@ def tune_helper(
         data = models['regression_ANN']['preprocesser'].transform(
             data.drop(target, axis=1))
         returned_model, returned_pms, history, X_test, y_test = tuneReg(
-            data,
-            target_column,
+            data.values,
+            target_column.values,
             max_layers=max_layers,
             min_layers=min_layers,
             min_dense=min_dense,

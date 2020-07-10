@@ -141,14 +141,14 @@ def tuneReg(
     # function build model using hyperparameter
     def build_model(hp):
         model = keras.Sequential()
-        model.add(Dense(units=hp.Int('units_00',
+        model.add(Dense(units=hp.Int('units_0',
                                      min_value=min_dense,
                                      max_value=max_dense,
                                      step=step),
                                      input_dim=data.shape[1],
                                      activation=activation))
         for i in range(hp.Int('num_layers', min_layers, max_layers)):
-            model.add(Dense(units=hp.Int('units_' + str(i),
+            model.add(Dense(units=hp.Int('units_' + str(i+1),
                                          min_value=min_dense,
                                          max_value=max_dense,
                                          step=step),
