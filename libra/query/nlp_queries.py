@@ -20,6 +20,7 @@ from libra.preprocessing.NLP_preprocessing import get_target_values, text_clean_
 from libra.preprocessing.huggingface_model_finetune_helper import CustomDataset, train, inference
 from libra.preprocessing.image_caption_helpers import load_image, map_func, CNN_Encoder, RNN_Decoder, get_path_column, \
     generate_caption_helper
+from libra.preprocessing.data_reader import DataReader
 
 # Sentiment analysis predict wrapper
 from libra.query.supplementaries import save
@@ -124,7 +125,9 @@ def text_classification_query(self, instruction, drop=None,
         if not os.path.exists(save_path):
             raise Exception("Save path does not exists")
 
-    data = pd.read_csv(self.dataset)
+    data = DataReader(self.dataset)
+    data = data.data_generator()
+
     if preprocess:
         data.fillna(0, inplace=True)
 
@@ -295,7 +298,8 @@ def summarization_query(self, instruction, preprocess=True,
     else:
         device = "cpu"
 
-    data = pd.read_csv(self.dataset)
+    data = DataReader(self.dataset)
+    data = data.data_generator()
 
     if drop is not None:
         data.drop(drop, axis=1, inplace=True)
@@ -492,7 +496,9 @@ def image_caption_query(self, instruction,
     np.random.seed(random_state)
     tf.random.set_seed(random_state)
 
-    df = pd.read_csv(self.dataset)
+    data = DataReader(self.dataset)
+    df = data.data_generator()
+
     if preprocess:
         df.fillna(0, inplace=True)
     if drop is not None:
