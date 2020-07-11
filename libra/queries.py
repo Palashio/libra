@@ -116,35 +116,35 @@ class client:
 
     # param modelKey: string representation of the model to make prediction
     # param data: dataframe version of desired prediction set
-    def predict(self, data, modelKey=None):
+    def predict(self, data, model=None):
         '''
         Uses a model from the self.models dictionary to make a prediction. Also fits it based on the operator stored in the models dictionary.
         :param data: is the data that you want to predict for using model
-        :param modelKey: is the specific model you want to use to predict
+        :param model: is the specific model you want to use to predict
         :return: a prediction, most likely an array
         '''
-        if modelKey is None:
-            modelKey = self.latest_model
-        if modelKey == 'Text Classification':
+        if model is None:
+            model = self.latest_model
+        if model == 'Text Classification':
             map_func = np.vectorize(lambda x: self.classify_text(x))
             predictions = map_func(data)
             return predictions
         else:
-            modeldict = self.models[modelKey]
+            modeldict = self.models[model]
             if modeldict.get('preprocesser'):
                 data = modeldict['preprocesser'].transform(data)
             predictions = modeldict['model'].predict(data)
         clearLog()
-        return self.interpret(modelKey, predictions)
+        return self.interpret(model, predictions)
 
-    def interpret(self, modelKey, predictions):
+    def interpret(self, model, predictions):
         '''
         Function to interpret predictions from a neural network for the creation for graphs / user understanding.
-        :param modelKey: is the model in the self.models dictionary that you want to use to interpret
+        :param model: is the model in the self.models dictionary that you want to use to interpret
         :param predictions: the predictions that come out of the model
         :return: a prediction, most likely an array
         '''
-        modeldict = self.models[modelKey]
+        modeldict = self.models[model]
         if modeldict.get('interpreter'):
             if isinstance(modeldict['interpreter'], dict):
                 inverted_interpreter = dict(
@@ -998,3 +998,4 @@ class client:
             model = self.latest_model
         clearLog()
         analyze(self, model, save, save_model)
+        
