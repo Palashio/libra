@@ -9,13 +9,14 @@ from libra.data_generation.grammartree import get_value_instruction
 
 
 def get_target_values(data, instruction, yLabel):
+    # labels
+    label = get_similar_column(get_value_instruction(yLabel), data)
+    Y = data[label]
+    del data[label]
     # Get target columns
     target = get_similar_column(get_value_instruction(instruction), data)
     X = data[target]
-    del data[target]
-    # labels
-    Y = data[get_similar_column(get_value_instruction(yLabel), data)]
-    return X, Y, get_similar_column(get_value_instruction(yLabel), data)
+    return X, Y, label
 
 
 def lemmatize_text(dataset):

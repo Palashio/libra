@@ -48,7 +48,7 @@ def logger(instruction, found=""):
     :param instruction: what you want to be displayed
     :param found: if you want to display something found like target column
     '''
-    
+
     global counter
     if counter == 0:
         print((" " * 2 * counter) + str(instruction) + str(found))
@@ -70,7 +70,7 @@ def classify_text(self, text):
 
     :param text: text sent in/from written query to be analyzed
     '''
-    
+
     sentimentInfo = self.models.get("Text Classification")
     vocab = sentimentInfo["vocabulary"]
     # Clean up text
@@ -86,6 +86,7 @@ def classify_text(self, text):
 # Sentiment analysis query
 def text_classification_query(self, instruction, drop=None,
                               preprocess=True,
+                              label_column=None,
                               test_size=0.2,
                               random_state=49,
                               learning_rate=1e-2,
@@ -97,7 +98,6 @@ def text_classification_query(self, instruction, drop=None,
                               generate_plots=True,
                               save_model=False,
                               save_path=os.getcwd()):
-
     '''
     function to apply text classification algorithm for sentiment analysis
     :param many params: used to hyperparametrize the function.
@@ -134,7 +134,12 @@ def text_classification_query(self, instruction, drop=None,
     if drop is not None:
         data.drop(drop, axis=1, inplace=True)
 
-    X, Y, target = get_target_values(data, instruction, "label")
+    if label_column is None:
+        label = "label"
+    else:
+        label = label_column
+
+    X, Y, target = get_target_values(data, instruction, label)
     Y = np.array(Y)
     classes = np.unique(Y)
 
@@ -240,7 +245,7 @@ def get_summary(self, text):
 
 
 # Text summarization query
-def summarization_query(self, instruction, preprocess=True,
+def summarization_query(self, instruction, preprocess=True, label_column=None,
                         drop=None,
                         epochs=10,
                         batch_size=32,
@@ -253,13 +258,11 @@ def summarization_query(self, instruction, preprocess=True,
                         generate_plots=True,
                         save_model=False,
                         save_path=os.getcwd()):
-
     '''
     function to apply algorithm for text summarization 
     :param many params: used to hyperparametrize the function.
     :return a dictionary object with all of the information for the algorithm.
     '''
-    
 
     if test_size < 0:
         raise Exception("Test size must be a float between 0 and 1")
@@ -309,7 +312,12 @@ def summarization_query(self, instruction, preprocess=True,
 
     logger("Preprocessing data...")
 
-    X, Y, target = get_target_values(data, instruction, "summary")
+    if label_column is None:
+        label = "summary"
+    else:
+        label = label_column
+
+    X, Y, target = get_target_values(data, instruction, label)
     df = pd.DataFrame({'text': Y, 'ctext': X})
     logger("->", "Target Column Found: {}".format(target))
 
@@ -420,7 +428,7 @@ def generate_caption(self, image):
 
 
 # Image Caption Generation query
-def image_caption_query(self, instruction,
+def image_caption_query(self, instruction, label_column=None,
                         drop=None,
                         epochs=10,
                         preprocess=True,
@@ -437,13 +445,12 @@ def image_caption_query(self, instruction,
                         save_path_decoder=os.getcwd(),
                         save_model_encoder=False,
                         save_path_encoder=os.getcwd()):
-
     '''
     function to apply predictive algorithm for image caption generation
     :param many params: used to hyperparametrize the function.
     :return a dictionary object with all of the information for the algorithm.
-    '''    
-    
+    '''
+
     if test_size < 0:
         raise Exception("Test size must be a float between 0 and 1")
 
@@ -508,8 +515,14 @@ def image_caption_query(self, instruction,
 
     train_captions = []
     img_name_vector = []
+
+    if label_column is None:
+        label = instruction
+    else:
+        label = label_column
+
     x = get_path_column(df)
-    y = get_similar_column(get_value_instruction(instruction), df)
+    y = get_similar_column(get_value_instruction(label), df)
     logger("->", "Target Column Found: {}".format(y))
 
     for row in df.iterrows():
