@@ -169,8 +169,8 @@ def tuneReg(
             optimizer=hp.Choice('optimizer', values=[
                                keras.optimizers.Adam(learning_rate = lrate),
                                keras.optimizers.SGD(learning_rate = lrate),
-                               keras.optimizer.RMSprop(learning_rate = lrate),
-                              keras.optimizers.Adamax(learning_rate = lrate)
+                               keras.optimizers.RMSprop(learning_rate = lrate),
+                               keras.optimizers.Adamax(learning_rate = lrate)
                                ]),
             loss=hp.Choice('loss', values=['mean_squared_logarithmic_error',
                                            'mean_squared_error',
