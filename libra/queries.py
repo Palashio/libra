@@ -701,7 +701,7 @@ class client:
         return classify_text(self=self, text=text)
 
     # sentiment analysis query
-    def text_classification_query(self, instruction, drop=None,
+    def text_classification_query(self, instruction, label_column=None, drop=None,
                                   preprocess=True,
                                   test_size=0.2,
                                   random_state=49,
@@ -734,7 +734,7 @@ class client:
 
         # storing values the model dictionary
         self.models["Text Classification"] = text_classification_query(
-            self=self, instruction=instruction, drop=drop,
+            self=self, instruction=instruction, label_column=label_column, drop=drop,
             preprocess=preprocess,
             test_size=test_size,
             random_state=random_state,
@@ -761,7 +761,7 @@ class client:
         return get_summary(self=self, text=text)
 
     # text summarization query
-    def summarization_query(self, instruction, preprocess=True,
+    def summarization_query(self, instruction, label_column=None, preprocess=True,
                             drop=None,
                             epochs=10,
                             batch_size=32,
@@ -795,7 +795,7 @@ class client:
         '''
 
         self.models["Document Summarization"] = summarization_query(
-            self=self, instruction=instruction, preprocess=preprocess,
+            self=self, instruction=instruction, preprocess=preprocess, label_column=label_column,
             drop=drop,
             epochs=epochs,
             batch_size=batch_size,
@@ -825,7 +825,7 @@ class client:
         return ' '.join(caption[:len(caption) - 1])
 
     # image caption prediction query
-    def image_caption_query(self, instruction,
+    def image_caption_query(self, instruction,label_column=None,
                             drop=None,
                             epochs=10,
                             preprocess=True,
@@ -865,7 +865,7 @@ class client:
         '''
 
         self.models["Image Caption"] = image_caption_query(
-            self, instruction=instruction,
+            self, instruction=instruction, label_column=label_column,
             drop=drop,
             epochs=epochs,
             preprocess=preprocess,
