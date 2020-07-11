@@ -661,7 +661,7 @@ class client:
         :param data_path: Path to the dataset (str).
         :param new_folders: Create new folders for the image during preprocessing (bool).
         :param image_column: The column in the csv file where the filepaths for the images exist (str).
-        :param training_ratio: Ratio of dataset allotted to the training data (float).
+        :param test_size: Ratio of dataset allotted to the testing data (float).
         :param augmentation: Perform image data augmentation (bool).
         :param epochs: Number of epochs (int).
         :param height: Height of the input image (int).
@@ -680,7 +680,7 @@ class client:
             data_path=self.dataset,
             new_folders=new_folders,
             image_column=image_column,
-            training_ratio=1 - testing_ratio,
+            training_ratio=1 - test_size,
             augmentation=augmentation,
             epochs=epochs,
             height=height,
