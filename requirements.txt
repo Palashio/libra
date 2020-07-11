@@ -1,7 +1,7 @@
 colorama
 transformers==2.11.0
-tensorflow
-keras
+tensorflow==2.2.0
+keras==2.4.3
 numpy
 pandas
 sklearn
