@@ -446,7 +446,9 @@ def analyze(client, model=None, save=True, save_model=False):
     else:
         print("further analysis is not supported for {}".format(model))
 
-    if 'plots' in modeldict and model != 'k_means_clustering':
+    if model != 'k_means_clustering':
         client.plots(model=model, save=save_model)
+    else:
+        client.plots(model=model, plot="elbow", save=save_model)
 
     clearLog()

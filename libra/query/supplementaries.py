@@ -411,37 +411,29 @@ def get_vocab(self, model):
             "The requested model has not been applied to the client.")
 
 
-def get_plots(self, model="", plot="", save=False):
+def get_plots(self, model=None, plot=None, save=False):
     '''
     function to get plots and then save them if appropriate
     :param modeL; the key in the models dictionary.
     :param plot: specific plot to get if applicable
     :param save: whether to save the file as a .png
     '''
-    # no model or plot specified so plot all
-    if model == "" and plot == "":
+    if model is None:
         model = self.latest_model
-        if "plots" in self.models[model].keys():
-            for each_plot in self.models[model]['plots']:
+
+    modeldict = self.models[model]
+
+    try:
+        if plot is None:
+            for each_plot in modeldict['plots']:
                 save_and_plot(self, model, each_plot, save)
         else:
-            raise Exception("{} does not have plots".format(model))
-    # show plots for specified model
-    elif model != "" and plot == "":
-        if "plots" in self.models[model].keys():
-            for each_plot in self.models[model]['plots']:
-                save_and_plot(self, model, each_plot, save)
-        else:
-            raise Exception("{} does not have plots".format(model))
-    # show specified plot for specified model
-    elif model != "" and plot != "":
-        if plot in self.models[model]['plots'].keys():
-            theplot = self.models[model]['plots'][plot]
-            save_and_plot(self, model, theplot, save)
-        else:
-            raise Exception("{} is not available for {}".format(plot, model))
-    else:
-        raise Exception("Invalid plotting input")
+            try:
+                save_and_plot(self, model, plot, save)
+            except:
+                raise Exception("{} is not available for {}".format(plot, model))
+    except:
+        raise Exception("{} does not have plots".format(model))
 
 
 # function to save and plot

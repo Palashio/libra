@@ -979,13 +979,15 @@ class client:
         return get_vocab(self, model)
 
     # plotting for client
-    def plots(self, model="", plot="", save=False):
+    def plots(self, model=None, plot=None, save=False):
         '''
         Function that retrieves all of plots in the self.models dictionary for the key.
         :param model: default to the latest model, but essentially the model key
         :param plot: plot specified during the client session to be procured
         :param save: option to save plots after client session is done (default is false, or
         '''
+        if model is None:
+            model = self.latest_model
         clearLog()
         get_plots(self, model, plot, save)
 
