@@ -94,7 +94,7 @@ def regression_ann(
     :return dictionary that holds all the information for the finished model.
     '''
 
-    logger("Reading in dataset...")
+    logger("Reading in dataset")
 
     dataReader = DataReader(dataset)
     data = dataReader.data_generator()
@@ -173,7 +173,7 @@ def regression_ann(
 
     # keeps running model and fit functions until the validation loss stops
     # decreasing
-    logger("Testing number of layers...")
+    logger("Testing number of layers")
     col_name = [["Current number of layers", "| Training Loss", "| Test Loss"]]
     col_width = max(len(word) for row in col_name for word in row) + 2
     for row in col_name:
@@ -268,7 +268,7 @@ def classification_ann(instruction,
     :param many parameters: used to preprocess, tune, plot generation, and parameterizing the neural network trained.
     :return dictionary that holds all the information for the finished model.
     '''
-    logger("Reading in dataset...")
+    logger("Reading in dataset")
 
     dataReader = DataReader(dataset)
     data = dataReader.data_generator()
@@ -308,7 +308,7 @@ def classification_ann(instruction,
     accuracies = []
     model_data = []
 
-    logger("Establishing callback function...")
+    logger("Establishing callback function")
 
     # early stopping callback
     es = EarlyStopping(
@@ -323,7 +323,7 @@ def classification_ann(instruction,
 
     i = 0
     model = get_keras_model_class(data, i, num_classes)
-    logger("Training initial model...")
+    logger("Training initial model")
 
     history = model.fit(
         X_train,
@@ -360,7 +360,7 @@ def classification_ann(instruction,
     # keeps running model and fit functions until the validation loss stops
     # decreasing
 
-    logger("Testing number of layers...")
+    logger("Testing number of layers")
     col_name = [["Current number of layers",
                  "| Training Accuracy", "| Test Accuracy"]]
     col_width = max(len(word) for row in col_name for word in row) + 2
@@ -464,7 +464,7 @@ def convolutional(instruction=None,
     :return dictionary that holds all the information for the finished model.
     '''
 
-    logger("Generating datasets for classes...")
+    logger("Generating datasets for classes")
 
     if preprocess:
         read_mode_info = set_distinguisher(data_path, read_mode)
@@ -514,7 +514,7 @@ def convolutional(instruction=None,
     elif num_classes == 2:
         loss_func = "binary_crossentropy"
 
-    logger("Creating convolutional neural network dynamically...")
+    logger("Creating convolutional neural network dynamically")
     # Convolutional Neural Network
     model = Sequential()
     model.add(
