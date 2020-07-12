@@ -427,9 +427,11 @@ def get_plots(self, model=None, plot=None, save=False):
         if plot is None:
             for each_plot in modeldict['plots']:
                 save_and_plot(self, model, each_plot, save)
+            return self.models[model]['plots']
         else:
             try:
                 save_and_plot(self, model, plot, save)
+                return self.models[model]['plots'][plot]
             except:
                 raise Exception("{} is not available for {}".format(plot, model))
     except:
