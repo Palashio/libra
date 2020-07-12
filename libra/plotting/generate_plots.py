@@ -342,6 +342,7 @@ def analyze(client, model=None, save=True, save_model=False):
     :param client: is the whole client object :)
     :param save: whether to save into client dictionary
     :param save_model: whether to save as .png
+    :return model dictionary for the specified model
     '''
 
     if model is None:
@@ -449,3 +450,4 @@ def analyze(client, model=None, save=True, save_model=False):
     client.plots(model=model, save=save_model)
 
     clearLog()
+    return modeldict;
