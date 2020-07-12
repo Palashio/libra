@@ -434,13 +434,11 @@ def analyze(client, model=None, save=True, save_model=False):
         logger("->", ("Precision on test set: {}".format(str(precision))))
         logger("->", ("F1 Score on test set: {}".format(str(f1))))
         if save:
-            if 'plots' not in modeldict:
-                modeldict['plots'] = {}
+            modeldict['plots'] = {}
             modeldict['plots']['roc_curve'] = roc
             modeldict['plots']['confusion_matrix'] = cm
 
-            if 'scores' not in modeldict:
-                modeldict['scores'] = {}
+            modeldict['scores'] = {}
             modeldict['scores']['recall_score'] = recall
             modeldict['scores']['precision_score'] = precision
             modeldict['scores']['f1_score'] = f1
