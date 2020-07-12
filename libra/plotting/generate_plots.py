@@ -350,7 +350,6 @@ def analyze(client, model=None, save=True, save_model=False):
     if not model in client.models:
         raise NameError('Model name is not valid or has not been created yet.')
 
-    plt.clf()
     logger("Analyzing {} for further understanding".format(model))
 
     modeldict = client.models[model]
@@ -434,11 +433,12 @@ def analyze(client, model=None, save=True, save_model=False):
         logger("->", ("Precision on test set: {}".format(str(precision))))
         logger("->", ("F1 Score on test set: {}".format(str(f1))))
         if save:
-            modeldict['plots'] = {}
+            if 'plots' not in modeldict:
+                modeldict['plots'] = {}
             modeldict['plots']['roc_curve'] = roc
             modeldict['plots']['confusion_matrix'] = cm
-
-            modeldict['scores'] = {}
+            if 'scores' not in modeldict:
+                modeldict['scores'] = {}
             modeldict['scores']['recall_score'] = recall
             modeldict['scores']['precision_score'] = precision
             modeldict['scores']['f1_score'] = f1
@@ -446,9 +446,6 @@ def analyze(client, model=None, save=True, save_model=False):
     else:
         print("further analysis is not supported for {}".format(model))
 
-    if model != 'k_means_clustering':
-        client.plots(model=model, save=save_model)
-    else:
-        client.plots(model=model, plot="elbow", save=save_model)
+    client.plots(model=model, save=save_model)
 
     clearLog()
