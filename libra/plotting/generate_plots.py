@@ -342,6 +342,7 @@ def analyze(client, model=None, save=True, save_model=False):
     :param client: is the whole client object :)
     :param save: whether to save into client dictionary
     :param save_model: whether to save as .png
+    :return model dictionary for the specified model
     '''
 
     if model is None:
@@ -350,7 +351,6 @@ def analyze(client, model=None, save=True, save_model=False):
     if not model in client.models:
         raise NameError('Model name is not valid or has not been created yet.')
 
-    plt.clf()
     logger("Analyzing {} for further understanding".format(model))
 
     modeldict = client.models[model]
@@ -438,7 +438,6 @@ def analyze(client, model=None, save=True, save_model=False):
                 modeldict['plots'] = {}
             modeldict['plots']['roc_curve'] = roc
             modeldict['plots']['confusion_matrix'] = cm
-
             if 'scores' not in modeldict:
                 modeldict['scores'] = {}
             modeldict['scores']['recall_score'] = recall
@@ -448,7 +447,7 @@ def analyze(client, model=None, save=True, save_model=False):
     else:
         print("further analysis is not supported for {}".format(model))
 
-    if 'plots' in modeldict and model != 'k_means_clustering':
-        client.plots(model=model, save=save_model)
+    client.plots(model=model, save=save_model)
 
     clearLog()
+    return modeldict;
