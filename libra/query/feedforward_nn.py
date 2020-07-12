@@ -238,6 +238,7 @@ def regression_ann(
         'id': generate_id(),
         'model': final_model,
         "target": target,
+        "num_classes": 1,
         "plots": plots,
         "preprocesser": full_pipeline,
         "interpreter": target_scaler,
