@@ -1,0 +1,162 @@
+:root{
+    --zoom-scale: 1;
+}
+
+body{
+    height: auto;
+    font-family: "Montserrat", sans-serif;
+    font-size: 1.5em;
+    zoom: var(--zoom-scale);
+}
+
+#side-nav{
+    max-width: 300px;
+    position: fixed;
+    top: 0px;
+    border: 1px solid rgb(221, 221, 221);
+    border-top: none;
+    border-left: none;
+    z-index: 10;
+}
+
+#icon{
+    width: 100%;
+}
+
+.nav-tab{
+    margin-top: -1px;
+    padding: 10px;
+    padding-left: 15px;
+    
+    border-top: 1px solid rgb(221, 221, 221);
+    
+    color: rgb(0, 113, 196);
+    font-size: 120%;
+    background-color: rgb(248, 248, 248);
+}
+
+.nav-tab:hover{
+    background-color: rgb(229, 229, 229);
+    cursor: pointer;
+    
+    border-right-style: solid;
+    border-right-color: rgb(0, 125, 217);
+    border-right-width: 3px;
+}
+
+.nav-tab.selected{
+    background-color: rgb(56, 140, 224);
+    color: white;
+}
+
+.dropdown-item{
+    height: 0px;
+    padding-top: 0px;
+    padding-bottom: 0px;
+    padding-left: 40px;
+    color: rgb(90, 90, 90);
+    
+    visibility: visible;
+    animation-name: drop;
+    animation-fill-mode: forwards;
+    animation-duration: 300ms;
+    background-color: white;
+}
+
+.dropdown-item:hover{
+    background-color: #f8f8f8;
+    cursor: pointer;
+}
+
+.dropdown-item.selected{
+    background-color: rgb(229, 229, 229);
+}
+
+#nav-bar{
+    position: fixed;
+    z-index: 1;
+    font-size: 1.7em;
+    font-weight: 600;
+    background-color: white;
+    left:300px;
+    width: 1000px;
+    height: 70px;
+    line-height: 70px;
+    padding-left: 20px;
+    border-bottom: solid rgb(221, 221, 221) 1px;
+}
+
+@keyframes drop{
+    from{
+        height: 0px;
+        padding-top: 0px;
+        padding-bottom: 0px;
+    }
+    to{
+        height: 30px;
+        padding-top: 5px;
+        padding-bottom: 5px;
+    }
+}
+
+/*css for the content pages below*/
+
+#content{
+    position: absolute;
+    width: 1000px;
+    left:300px;
+    top:70px;
+    padding-left: 25px;
+}
+
+h2{
+    padding:0px;
+    margin:0px;
+    margin-bottom: 10px;
+    font-weight: 400;
+    font-size: 30px;
+    color: rgb(0, 125, 217);
+}
+
+#space{
+    height: 350px;
+}
+
+#miniBox{
+    width: 290px;
+    height: 290px;
+    border: 1px solid rgb(192, 228, 255);
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0px 0px 10px #a8d7ff;
+    margin: 30px;
+    margin-left: 0px;
+    box-sizing: content-box;
+    float: left;
+    text-decoration: none;
+}
+
+#miniBox h3{
+    margin:0px;
+    padding:13px;
+    width: inherit;
+    height: 65px;
+    background-color: white;
+    -webkit-transition : 0.2s;
+}
+
+#miniBox p{
+    padding: 10px;
+    position: absolute;
+    width:inherit;
+    height: 76px;
+    background-color: white;
+    border-bottom: 3px solid gray;
+}
+
+#miniBox:hover{
+    -webkit-transition : 0.2s;
+    transform: scale(1.05,1.05);  
+    cursor: pointer;
+    text-decoration: none;
+}

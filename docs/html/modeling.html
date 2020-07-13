@@ -13,73 +13,83 @@
     <script src="../javascript/api.js" type="text/javascript"></script>
     <link href="https://fonts.googleapis.com/css?family=Montserrat:400,500,600" rel="stylesheet" type="text/css">
     <link href="../css/api.css" rel="stylesheet" type="text/css">
+    <link href="../css/basic.css" rel=stylesheet type="text/css">
 </head>
 <body>
     <div id="side-nav">
-        <img src = "../resources/libra-logo.png" id="icon">
+        <img src = "../resources/libraLogo.jpg" id="icon">
         <ul class="nav">
             <li><a class="nav-tab" href="../index.html">About</a></li>
             
             <li><a class="nav-tab" href="started.html">Getting Started</a></li> 
-            
-            <li><a class="nav-tab" href="devGuides.html">Developer Guides</a></li>
 
             <li class="nav-tab selected" href="modeling.html">Modeling Queries</li>    
                 <li class="dropdown-item selected" data="nnq">Neural Network</li>
-                <li class="dropdown-item" data="cq">Convolutional</li>
-                <li class="dropdown-item" data="tcq">Text Classification</li>
-                <li class="dropdown-item" data="sq">Summarization</li>
-                <li class="dropdown-item" data="kmcq">K Mean Clustering</li> 
+                <li class="dropdown-item" data="cq">Convolutional Neural Network</li>
+                <li class="dropdown-item" data="tcq">Support Vector Machine</li>
+                <li class="dropdown-item" data="sq">Nearest Neighbors</li>
+                <li class="dropdown-item" data="dt">Decision Tree</li>
+                <li class="dropdown-item" data="kmcq">K-Means Clustering</li> 
                                  
             
             <li><a class="nav-tab" href="nlp.html">NLP Queries</a></li>
-
+            
+            <li><a class="nav-tab" href="utility.html">Utility Functions</a></li>
+            
+            <li><a class="nav-tab" href="contributing.html">Contributing to Libra</a></li>
         </ul>
     </div>
     <div id="nav-bar">Modeling Queries</div>
         <div id="content">
+            <h2 style="margin-top: 30px;">General Dataset Guidelines</h2>
+            <p>These instructions apply to all of the modeling queries <b>EXCEPT convolutional_query()</b></p>
+                <ul>
+                    <li>ONLY the instruction parameter is required for the queries.</li>
+                    <li><b>When providing your instruction make sure that you're describing a column. For example: if you want the dataset to use a column named median_house_value as the target, make your instruction "please estimate the median house value". If you want your target to be number_of_households, make your instruction "In Baltimore, model the number of households". </b> </li>
+                    <li>You can also just pass the column name in as the instruction</li>
+                    <li>ALL tabular datasets will work with this query. The more parameters you specify, the more optimized your model will be.</li>
+                </ul>
+            <hr>
             <div class="box">
-                <h2 id="nnq">neural_network_query()</h2>
+                <h1 id="nnq">neural_network_query()</h1>
                 <br>
                 <p>Automatically fits a neural network to your dataset. Target detection, preprocessing, and scoring are done by default.</p>
-                <b>Only instruction is required. ALL other parameters are optional</b>
-                <br>
                 <br>
                 <table>
                     <tr>
                         <td colspan="2">Arguments</td>
                     </tr>
                     <tr>
-                        <td>Instruction=None</td>
-                        <td>An English language statement that represents the task you would like to be completed. eg: 'predict the median house value' or 'please estimate the number of households'</td>
+                        <td>instruction=None</td>
+                        <td>An English language statement that represents the task you would like to be completed. eg: 'predict the median house value' or 'please estimate the number of households'. Should correspond to a column in the dataset.</td>
                     </tr>
                     <tr>
-                        <td>Mca_threshold=0.2</td>
-                        <td>Changes the proportion at which multiple correspondence analysis is applied. This deals with reducing the number of categorical features that are one-hot-encoded.</td>
+                        <td>ca_threshold=0.2</td>
+                        <td>Changes the proportion at which correspondence analysis is applied. This deals with reducing the number of categorical features that are one-hot-encoded.</td>
                     </tr>
                     <tr>
-                        <td>Drop=[]</td>
+                        <td>drop=[]</td>
                         <td>Columns to drop manually, drop columns with links, weirdly formatted numbers, and others.</td>
                     </tr>
                     <tr>
-                        <td>Preprocess=True</td>
+                        <td>text=[]</td>
+                        <td>Represents any columns that contain long pieces of text to be embedded into vectors.</td>
+                    </tr>
+                    <tr>
+                        <td>preprocess=True</td>
                         <td>Whether you want your dataset to be intelligently preprocessed</td>
                     </tr>
                     <tr>
-                        <td>Test_size=0.2</td>
-                        <td>The size of your testing dataset</td>
+                        <td>test_size=0.2</td>
+                        <td>The proportion of your entire dataset that is used for testing. </td>
                     </tr>
                     <tr>
-                        <td>Random_state=49</td>
-                        <td>The state ticker you want to be set at</td>
+                        <td>random_state=49</td>
+                        <td>The state ticker you want to be set at.</td>
                     </tr>
                     <tr>
                         <td>epochs=50</td>
-                        <td>Number of epochs for every model attempted</td>
-                    </tr>
-                    <tr>
-                        <td>generate_plots=True</td>
-                        <td>Whether you want libra to create accuracy and loss plots for you. </td>
+                        <td>Number of epochs. This is for every model that's created in the process.</td>
                     </tr>
                     <tr>
                         <td>generate_plots=True</td>
@@ -87,28 +97,22 @@
                     </tr>
                     <tr>
                         <td>save_model=False</td>
-                        <td> Do you want the model weights and architecture to be saved as a .json and .h5 file.</td>
+                        <td>Whether the model is saved in a .json and .h5 file.</td>
                     </tr>
                     <tr>
                         <td>save_path='current_directory'</td>
-                        <td>Where do you want the save_model information to be stored. </td>
+                        <td>Where do you want the save_model information to be stored. Default is current working directory.</td>
                     </tr>
                 </table>
                 <pre>new_client = client('path_to_dataset')
 new_client.neural_network_query('Please estimate the number of households.')
 new_client.models['regression_ANN'].plots() #access plots</pre>
             </div>
-            <div class="box">
-                <h2 id="cq">convolutional_query()</h2>
+             <div class="box">
+                <h1 id="cq">convolutional_query()</h1>
                 <br>
-                <p>Automatically fits a Convolutional Neural Network to your dataset. Everything is handled by libra internally. Three types of dataset structures are detectable: 
-                    <br>
-                    <br>
-1) classwise: where every folder represents a seperate class of images 
-<br>
-2) setwise: where a training_set and testing_set folder are created with individually folders of classes
-<br>
-3) pathwise: where a csv file stores relative paths to images
+                <p>Automatically fits a Convolutional Neural Network to your dataset. Images are automatically interpolated to the median height and wiedth. Three types of dataset structures are supported. Read below for more information. 
+                <br>
                 </p>
                 <br>
                 <table>
@@ -116,12 +120,16 @@ new_client.models['regression_ANN'].plots() #access plots</pre>
                         <td colspan="2">Arguments</td>
                     </tr>
                     <tr>
-                        <td>Instruction=None</td>
-                        <td>An English language statement that represents the task you would like to be completed. eg: 'predict the median house value' or 'please estimate the number of households'</td>
+                        <td>instruction=None</td>
+                        <td>An English language statement that represents the task you would like to be completed. eg: 'predict the median house value' or 'please estimate the number of households'. Should correspond to a column in the dataset. Only neccesary if read_mode is 'csvwise'.</td>
                     </tr>
                     <tr>
-                        <td>readmode=distinguisher()</td>
-                        <td>Identifies the format in which data the present in. If none is specified then the query will automatically identify the format of your data. Note that only three types of formats are supported currently. </td>
+                        <td>image_column=None</td>
+                        <td>Only used when read_mode is ‘csvwise’. The column title containing the images.</td>
+                    </tr>
+                    <tr>
+                        <td>read_mode=distinguisher()</td>
+                        <td>Identifies the format in which data the present in. If none is specified then the query will automatically identify the format of your data. Note that only three types of formats are currently supported (listed in the table below). </td>
                     </tr>
                     <tr>
                         <td>new_folders=True</td>
@@ -132,34 +140,125 @@ new_client.models['regression_ANN'].plots() #access plots</pre>
                         <td>If you're using pathwise from a csv, you can by default use a column in the set as the path location.</td>
                     </tr>
                     <tr>
-                        <td>training_ratio=0.8</td>
-                        <td>Represents the size of the training set.</td>
+                        <td>test_size=0.2</td>
+                        <td>Represents the size of the testing set.</td>
+                    </tr>
+                    <tr>
+                        <td>preprocess=True</td>
+                        <td>Whether you want your dataset to be intelligently preprocessed.</td>
+                    </tr>
+                    <tr>
+                        <td>augmentation=True</td>
+                        <td>Magnifies dataset to add small variation to images before training in the model.</td>
+                    </tr>
+                    <tr>
+                        <td>epochs=10</td>
+                        <td>Number of epochs for every model attempted.</td>
+                    </tr>
+                    <tr>
+                        <td>height=None</td>
+                        <td>Resizes all images to the given height. If left as None, will resize images’ to the median height.</td>
+                    </tr>
+                    <tr>
+                        <td>width=None</td>
+                        <td>Resizes all images to the given width. If left as None, will resize images’ to the median width.</td>
+                    </tr>
+                    <tr>
+                        <td>verbose=0</td>
+                        <td>Whether inner computation is displayed. This will spam the console box.</td>
                     </tr>
                 </table>
                 <pre>newClient = client('path_to_directory_with_image_folders')
 newClient.convolutional_query("Please classify my images")</pre>
+                <br>
+                <table>
+                    <tr>
+                        <td colspan="3">Read Modes</td>
+                    </tr>
+                    <tr>
+                        <td>'setwise'</td>
+                        <td>Directory consists of a ‘training_set’ and ‘testing_set’ folder both containing classification folders with images inside.
+                        </td>
+                        <td>
+                            <img src="../resources/setwise.png" style="width: 300px;">
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>'classwise'</td>
+                        <td>Directory consists of classification folders with images inside.</td>
+                        <td>
+                            <img src="../resources/classwise.png" style="width: 300px;">
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>'csvwise'</td>
+                        <td>Directory consists of image folders and a CSV file that has an image column.</td>
+                        <td>
+                            <img src="../resources/csvwise.png" style="width: 300px;">
+                        </td>
+                    </tr>
+                </table>
             </div>
             <div class="box">
-                <h2 id="tcq">text_classification_query()</h2>
+                <h1 id="tcq">svm_query()</h1>
                 <br>
-                <p>Lets you create a text classification model automatically; works for all sorts of situations like sentiment analysis.</p>
+                <p>Automatically fits a support vector machine to your dataset. Only classification is supported. SVRegressor will be coming soon. Target detection, preprocessing, and scoring are done by default.</p>
                 <br>
                 <table>
                     <tr>
                         <td colspan="2">Arguments</td>
                     </tr>
                     <tr>
-                        <td>Instruction</td>
-                        <td>An English language statement that represents the task you would like to be completed. eg: 'predict the median house value' or 'please estimate the number of households'</td>
+                        <td>instruction</td>
+                        <td>An English language statement that represents the task you would like to be completed. eg: 'predict the median house value' or 'please estimate the number of households'. Should correspond to a column in the dataset.</td>
+                    </tr>
+                    <tr>
+                        <td>test_size=0.2</td>
+                        <td>The proportion of your entire dataset that is used for testing.</td>
+                    </tr>
+                    <tr>
+                        <td>text=[]</td>
+                        <td>Represents any columns that contain long pieces of text to be embedded into vectors.</td>
+                    </tr>
+                    <tr>
+                        <td>random_state=49</td>
+                        <td>The state ticker you want to be set at</td>
+                    </tr>
+                    <tr>
+                        <td>kernel='linear'</td>
+                        <td>The type of kernel trick you want to be used. Options include 'rbf' and 'poly'. </td>
+                    </tr>
+                    <tr>
+                        <td>preprocess=True</td>
+                        <td>Whether you want your dataset to be intelligently preprocessed</td>
+                    </tr>
+                    <tr>
+                        <td>drop=[]</td>
+                        <td>Columns to drop manually, drop columns with links, weirdly formatted numbers, and others.</td>
+                    </tr>
+                    <tr>
+                        <td>degree=3</td>
+                        <td>Degree of the polynomial kernel function. Only used by 'poly' kernel.</td>
+                    </tr>
+                    <tr>
+                        <td>gamma='scale'</td>
+                        <td>Kernel coefficient for 'rbf', 'poly' and 'sigmoid'.</td>
+                    </tr>
+                    <tr>
+                        <td>coef0=0.0</td>
+                        <td>Independent term in kernel function. It is only significant in ‘poly’ and ‘sigmoid’.</td>
+                    </tr>
+                    <tr>
+                        <td>max_iter=1</td>
+                        <td>Hard limit on iterations within solver, or -1 for no limit.</td>
                     </tr>
                 </table>
                 <pre>newClient = client('path_to_file')
-newClient.text_classification_query('Model credit card transaction type')
-newClient.predict_text_sentiment('new_text_to_classify')</pre>
+newClient.svm_query('Model the type of credit card')</pre>
 
             </div>
             <div class="box">
-                <h2 id="sq">summarization_query()</h2>
+                <h1 id="sq">nearest_neighbor_query()</h1>
                 <br>
                 <p>Automatically fits a neural network to your dataset. Target detection, preprocessing, and scoring are done by default.</p>
                 <br>
@@ -168,15 +267,123 @@ newClient.predict_text_sentiment('new_text_to_classify')</pre>
                         <td colspan="2">Arguments</td>
                     </tr>
                     <tr>
-                        <td>Instruction</td>
-                        <td>An English language statement of what you’d like to do, eg: predict the median house value</td>
+                        <td>instruction</td>
+                        <td>An English language statement that represents the task you would like to be completed. eg: 'predict the median house value' or 'please estimate the number of households'. Should correspond to a column in the dataset.</td>
+                    </tr>
+                    <tr>
+                        <td>test_size=0.2</td>
+                        <td>The proportion of your entire dataset that is used for testing.</td>
+                    </tr>
+                    <tr>
+                        <td>text=[]</td>
+                        <td>Represents any columns that contain long pieces of text to be embedded into vectors.</td>
+                    </tr>
+                    <tr>
+                        <td>random_state=49</td>
+                        <td>The state ticker you want to be set at</td>
+                    </tr>
+                   <tr>
+                        <td>preprocess=True</td>
+                        <td>Whether you want your dataset to be intelligently preprocessed.</td>
+                    </tr>
+                    <tr>
+                        <td>drop=[]</td>
+                        <td>Columns to drop manually, drop columns with links, weirdly formatted numbers, and others.</td>
+                    </tr>
+                    <tr>
+                        <td>min_neighbors=3</td>
+                        <td>The minimum number of nearest neighbors to calculate the loss with. </td>
+                    </tr>
+                    <tr>
+                        <td>max_neighbors=3</td>
+                        <td>The maximum number of nearest neighbors to calculate the loss with. </td>
+                    </tr>
+                    <tr>
+                        <td>leaf_size=30</td>
+                        <td>Leaf size passed to BallTree or KDTree. This can affect the speed of the construction and query, as well as the memory required to store the tree.</td>
+                    </tr>
+                    <tr>
+                        <td>p=2</td>
+                        <td>Parameter for the Minkowski metric from sklearn.metrics.pairwise.pairwise_distances. When p = 1, this is equivalent to using manhattan_distance (l1), and euclidean_distance (l2) for p = 2.</td>
+                    </tr>
+                    <tr>
+                        <td>algorithm='auto'</td>
+                        <td>Algorithm used to compute the nearest neighbors: ‘ball_tree’ will use BallTree, ‘kd_tree’ will use KDTree, ‘brute’ will use a brute-force search, ‘auto’ will attempt to decide the most appropriate algorithm based on the values passed to fit method.</td>
                     </tr>
                 </table>
-                <pre>print("hello world")
-//random code stuff here, tabs are important though</pre>
+                <pre>newClient = client('path_to_file')
+newClient.nearest_neighbors_query('Model the type of credit card')</pre>
             </div>
             <div class="box">
-                <h2 id="kmcq">kmeans_clustering_query()</h2>
+                <h1 id="dt">decision_tree_query()</h1>
+                <br>
+                <p>Automatically fits a decision tree algorithm to your dataset. Target detection, preprocessing, and scoring are done by default.</p>
+                <br>
+                <table>
+                    <tr>
+                        <td colspan="2">Arguments</td>
+                    </tr>
+                    <tr>
+                        <td>instruction</td>
+                        <td>An English language statement that represents the task you would like to be completed. eg: 'predict the median house value' or 'please estimate the number of households'. Should correspond to a column in the dataset.</td>
+                    </tr>
+                    <tr>
+                    <tr>
+                        <td>preprocess=True</td>
+                        <td>Whether you want your dataset to be intelligently preprocessed.</td>
+                    </tr>
+                   <tr>
+                        <td>test_size=0.2</td>
+                        <td>The proportion of your entire dataset that is used for testing.</td>
+                    </tr>
+                    <tr>
+                        <td>text=[]</td>
+                        <td>Represents any columns that contain long pieces of text to be embedded into vectors.</td>
+                    </tr>
+                    <tr>
+                        <td>drop=[]</td>
+                        <td>Columns to drop manually, drop columns with links, weirdly formatted numbers, and others.</td>
+                    </tr>
+                    <tr>
+                        <td>criterion='gini'</td>
+                        <td>The function to measure the quality of a split. Supported criteria are “gini” for the Gini impurity and “entropy” for the information gain.</td>
+                    </tr>
+                    <tr>
+                        <td>splitter='best'</td>
+                        <td>The strategy used to choose the split at each node. Supported strategies are “best” to choose the best split and “random” to choose the best random split.</td>
+                    </tr>
+                    <tr>
+                        <td>max_depth=None</td>
+                        <td>The maximum depth of the tree. If None, then nodes are expanded until all leaves are pure or until all leaves contain less than min_samples_split samples.</td>
+                    </tr>
+                    <tr>
+                        <td>min_samples_split=2</td>
+                        <td>The minimum number of samples required to split an internal node.</td>
+                    </tr>
+                    <tr>
+                        <td>min_weight_fraction_leaf=0.0</td>
+                        <td>The minimum weighted fraction of the sum total of weights (of all the input samples) required to be at a leaf node.</td>
+                    </tr>
+                    <tr>
+                        <td>max_leaf_nodes=None</td>
+                        <td>Grow a tree with max_leaf_nodes in best-first fashion. Best nodes are defined as relative reduction in impurity.</td>
+                    </tr>
+                    <tr>
+                        <td>min_impurity_decrease=0.0</td>
+                        <td>A node will be split if this split induces a decrease of the impurity greater than or equal to this value.</td>
+                    </tr>
+                    <tr>
+                        <td>ccp_alpha=0.0</td>
+                        <td>Complexity parameter used for Minimal Cost-Complexity Pruning. The subtree with the largest cost complexity that is smaller than ccp_alpha will be chosen.</td>
+                    </tr>
+
+
+                </table>
+                <pre>newClient = client('path_to_file')
+newClient.decision_tree_query('please estimate ocean proximity')</pre>
+            </div>
+            <div class="box">
+                <h1 id="kmcq">kmeans_clustering_query()</h1>
                 <br>
                 <p>Automatically fits a clustering algorithm to your dataset. Target detection, preprocessing, and scoring are done by default.</p>
                 <br>
