@@ -360,7 +360,7 @@ def analyze(client, model=None, save=True, save_model=False):
         data = modeldict['test_data']['X']
         real = modeldict['test_data']['y']
         preds = modeldict['model'].predict(data)
-        if model == 'Text Classification':
+        if model == 'text_classification':
             logger("Identifying textual relationships and numerical correspondence")
             preds = np.argmax(preds, axis=-1)
         if model == 'classification_ANN':  # formats labels column
@@ -396,10 +396,10 @@ def analyze(client, model=None, save=True, save_model=False):
             modeldict['MSE'] = MSE
             modeldict['MAE'] = MAE
     # classification models
-    elif model in ['svm', 'nearest_neighbor', 'decision_tree', 'classification_ANN', 'Text Classification']:
+    elif model in ['svm', 'nearest_neighbor', 'decision_tree', 'classification_ANN', 'text_classification']:
         logger("->", "Plotting ROC curves and creating confusion matrix...")
         if model in ['svm', 'nearest_neighbor',
-                     'decision_tree', 'Text Classification']:
+                     'decision_tree', 'text_classification']:
             label_source = modeldict['interpreter']
             labels = list(modeldict['interpreter'].keys())
         else:

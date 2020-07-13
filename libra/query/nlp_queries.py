@@ -66,12 +66,12 @@ def logger(instruction, found=""):
 
 def classify_text(self, text):
     '''
-    function to perform sentiment analysis text classification
+    function to perform sentiment analysis text_classification
 
     :param text: text sent in/from written query to be analyzed
     '''
 
-    sentimentInfo = self.models.get("Text Classification")
+    sentimentInfo = self.models.get("text_classification")
     vocab = sentimentInfo["vocabulary"]
     # Clean up text
     text = lemmatize_text(text_clean_up([text]))
@@ -99,7 +99,7 @@ def text_classification_query(self, instruction, drop=None,
                               save_model=False,
                               save_path=os.getcwd()):
     '''
-    function to apply text classification algorithm for sentiment analysis
+    function to apply text_classification algorithm for sentiment analysis
     :param many params: used to hyperparametrize the function.
     :return a dictionary object with all of the information for the algorithm.
     '''
@@ -200,10 +200,10 @@ def text_classification_query(self, instruction, drop=None,
     if save_model:
         save(model, save_model, save_path=save_path)
 
-    logger("Storing information in client object under key 'Text Classification'")
+    logger("Storing information in client object under key 'text_classification'")
     # storing values the model dictionary
 
-    self.models["Text Classification"] = {"model": model,
+    self.models["text_classification"] = {"model": model,
                                           "classes": classes,
                                           "plots": plots,
                                           "target": Y,
@@ -218,12 +218,12 @@ def text_classification_query(self, instruction, drop=None,
                                               'training_accuracy': history.history['accuracy'],
                                               'validation_accuracy': history.history['val_accuracy']}}
     clearLog()
-    return self.models["Text Classification"]
+    return self.models["text_classification"]
 
 
-# Document summarization predict wrapper
+# doc_summarization predict wrapper
 def get_summary(self, text):
-    modelInfo = self.models.get("Document Summarization")
+    modelInfo = self.models.get("doc_summarization")
     model = modelInfo['model']
     model.eval()
     tokenizer = T5Tokenizer.from_pretrained("t5-small")
@@ -394,9 +394,9 @@ def summarization_query(self, instruction, preprocess=True, label_column=None,
         torch.save(model, path)
         logger("->", "Saved model to disk as DocSummarization.pth")
 
-    logger("Storing information in client object under key 'Document Summarization'")
+    logger("Storing information in client object under key 'doc_summarization'")
 
-    self.models["Document Summarization"] = {
+    self.models["doc_summarization"] = {
         "model": model,
         "max_text_length": max_text_length,
         "max_sum_length": max_summary_length,
@@ -405,16 +405,16 @@ def summarization_query(self, instruction, preprocess=True, label_column=None,
                    'val_loss': loss_val}
     }
     clearLog()
-    return self.models["Document Summarization"]
+    return self.models["doc_summarization"]
 
 
-# Image Caption Generation Prediction
+# image_caption Generation Prediction
 def generate_caption(self, image):
     '''
     wrapper function of image_caption_query to predict caption for image
     :param image: image to be analyzed
     '''
-    modelInfo = self.models.get("Image Caption")
+    modelInfo = self.models.get("image_caption")
     decoder = modelInfo['decoder']
     encoder = modelInfo['encoder']
     tokenizer = modelInfo['tokenizer']
@@ -427,7 +427,7 @@ def generate_caption(self, image):
         image_features_extract_model)
 
 
-# Image Caption Generation query
+# image_caption Generation query
 def image_caption_query(self, instruction, label_column=None,
                         drop=None,
                         epochs=10,
@@ -446,7 +446,7 @@ def image_caption_query(self, instruction, label_column=None,
                         save_model_encoder=False,
                         save_path_encoder=os.getcwd()):
     '''
-    function to apply predictive algorithm for image caption generation
+    function to apply predictive algorithm for image_caption generation
     :param many params: used to hyperparametrize the function.
     :return a dictionary object with all of the information for the algorithm.
     '''
@@ -727,9 +727,9 @@ def image_caption_query(self, instruction, label_column=None,
         logger("Saving encoder checkpoint...")
         encoder.save_weights(save_path_encoder + "encoderImgCap.ckpt")
 
-    logger("Storing information in client object under key 'Image Caption'")
+    logger("Storing information in client object under key 'image_caption'")
 
-    self.models["Image Caption"] = {
+    self.models["image_caption"] = {
         "decoder": decoder,
         "encoder": encoder,
         "tokenizer": tokenizer,
@@ -741,4 +741,4 @@ def image_caption_query(self, instruction, label_column=None,
         }
     }
     clearLog()
-    return self.models["Image Caption"]
+    return self.models["image_caption"]

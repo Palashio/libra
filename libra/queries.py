@@ -126,7 +126,7 @@ class client:
         '''
         if model is None:
             model = self.latest_model
-        if model == 'Text Classification':
+        if model == 'text_classification':
             map_func = np.vectorize(lambda x: self.classify_text(x))
             predictions = map_func(data)
             return predictions
@@ -693,7 +693,7 @@ class client:
 
     def classify_text(self, text):
         """
-        Calls the body of the text classification neural network query which is located in the nlp_queries.py file. This can only be called
+        Calls the body of the text_classification neural network query which is located in the nlp_queries.py file. This can only be called
         if text_classification_query has been called previously.
         :param text: The new text that you want to classify (str).
         :return: a classification of text that you've provided
@@ -716,7 +716,7 @@ class client:
                                   save_model=False,
                                   save_path=os.getcwd()):
         '''
-        Calls the body of the text classification query which is located in the nlp_queries.py file
+        Calls the body of the text_classification query which is located in the nlp_queries.py file
         :param instruction: The objective that you want to model (str).
         :param drop: A list of the dataset's columns to drop.
         :param preprocess: Preprocess the data (bool).
@@ -734,7 +734,7 @@ class client:
         '''
 
         # storing values the model dictionary
-        self.models["Text Classification"] = text_classification_query(
+        self.models["text_classification"] = text_classification_query(
             self=self, instruction=instruction, label_column=label_column, drop=drop,
             preprocess=preprocess,
             test_size=test_size,
@@ -748,10 +748,10 @@ class client:
             generate_plots=generate_plots,
             save_model=save_model,
             save_path=save_path)
-        self.latest_model = 'Text Classification'
+        self.latest_model = 'text_classification'
         clearLog()
 
-    # document summarization predict wrapper
+    # doc_summarization predict wrapper
     def get_summary(self, text):
         '''
         Calls the body of the summarizer which is located in the nlp_queries.py file
@@ -795,7 +795,7 @@ class client:
         :return: an updated model and history stored in the models dictionary
         '''
 
-        self.models["Document Summarization"] = summarization_query(
+        self.models["doc_summarization"] = summarization_query(
             self=self, instruction=instruction, preprocess=preprocess, label_column=label_column,
             drop=drop,
             epochs=epochs,
@@ -810,10 +810,10 @@ class client:
             save_model=save_model,
             save_path=save_path)
 
-        self.latest_model = 'Document Summarization'
+        self.latest_model = 'doc_summarization'
         clearLog()
 
-    # image caption generator wrapper
+    # image_caption generator wrapper
 
     def generate_caption(self, image):
         '''
@@ -825,7 +825,7 @@ class client:
         clearLog()
         return ' '.join(caption[:len(caption) - 1])
 
-    # image caption prediction query
+    # image_caption prediction query
     def image_caption_query(self, instruction,label_column=None,
                             drop=None,
                             epochs=10,
@@ -844,7 +844,7 @@ class client:
                             save_model_encoder=False,
                             save_path_encoder=os.getcwd()):
         '''
-        Calls the body of the image caption query which is located in the nlp_queries.py file
+        Calls the body of the image_caption query which is located in the nlp_queries.py file
         :param instruction: The objective that you want to model (str).
         :param drop: A list of the dataset's columns to drop.
         :param epochs: Number of epochs (int).
@@ -865,7 +865,7 @@ class client:
         :return: an updated model and history stored in the models dictionary
         '''
 
-        self.models["Image Caption"] = image_caption_query(
+        self.models["image_caption"] = image_caption_query(
             self, instruction=instruction, label_column=label_column,
             drop=drop,
             epochs=epochs,
@@ -883,7 +883,7 @@ class client:
             save_path_decoder=save_path_decoder,
             save_model_encoder=save_model_encoder,
             save_path_encoder=save_path_encoder)
-        self.latest_model = 'Image Caption'
+        self.latest_model = 'image_caption'
         clearLog()
 
     # shows the names of plots associated with a specific model

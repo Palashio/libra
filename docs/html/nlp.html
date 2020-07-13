@@ -25,9 +25,9 @@
             <li><a class="nav-tab" href="modeling.html">Modeling Queries</a></li>
 
             <li class="nav-tab selected" href="nlp.html">NLP Queries</li>
-                <li class="dropdown-item selected" data="drp">Text Classification</li>
-                <li class="dropdown-item" data="rff">Document Summarization</li>
-                <li class="dropdown-item" data="pca">Image Caption Generation</li>
+                <li class="dropdown-item selected" data="drp">text_classification</li>
+                <li class="dropdown-item" data="rff">doc_summarization</li>
+                <li class="dropdown-item" data="pca">image_caption Generation</li>
                                     
             <li><a class="nav-tab" href="utility.html">Utility Functions</a></li>
             
@@ -39,7 +39,7 @@
         <div class="box">
             <h1 id="drp">text_classification_query()</h1>
                 <br>
-                <p>Automatically fits a text classification model to your dataset. All standard text modification procedures are applied automatically if applicable..</p>
+                <p>Automatically fits a text_classification model to your dataset. All standard text modification procedures are applied automatically if applicable..</p>
                 <p> <b>Dataset Guidelines</b> </p>
                 <ul>
                     <li>One column in the file should contain the text to be classified</li>
@@ -124,7 +124,7 @@ new_client.classify_text('new text to classify')</pre>
         <div class="box">
                 <h1 id="rff">summarization_query()</h1>
                 <br>
-                <p>Automatically fits a transfer-learning Document Summarization model to your dataset. This model will have frozen layers with pretrained weights to help with small dataset sizes.
+                <p>Automatically fits a transfer-learning doc_summarization model to your dataset. This model will have frozen layers with pretrained weights to help with small dataset sizes.
                 </p>
                 <p> <b>Dataset Guidelines </b></p>
                 <ul>
@@ -239,7 +239,7 @@ newClient.get_summary('new text to summarize')</pre>
 
                 </table>
                 <pre>newClient = client('path_to_csv')
-newClient.image_caption_query('Generate image captions')
+newClient.image_caption_query('Generate image_captions')
 newClient.generate_caption('path to image')</pre>
 
         </div>

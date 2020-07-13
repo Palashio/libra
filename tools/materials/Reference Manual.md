@@ -482,25 +482,25 @@ Retrieves final classification neural network model with a rectified linear unit
 libra.get_keras_text_class(max_features, num_classes)
 ```
 
-Constructs a long term short memory recurrent binary text classification neural network that uses softmax activation function
+Constructs a long term short memory recurrent binary text_classification neural network that uses softmax activation function
 
 
 *Parameters --* 
 
 max_features: `int`
 
-Integer maximum number of feature variables (measurable properties found in other column segments of data) to take into account in text classification model
+Integer maximum number of feature variables (measurable properties found in other column segments of data) to take into account in text_classification model
 
 num_classes: `int`
 
-Integer number of classes associated with data for text classification model
+Integer number of classes associated with data for text_classification model
 
 
 *Returns --*
 
 model: `obj`
 
-Retrieves final text classification neural network model with a softmax activation function outer layer compiled using a binary cross-entropy loss function and adaptive first/second moment stochastic gradient descent optimizer as well as including relevant accuracy metrics
+Retrieves final text_classification neural network model with a softmax activation function outer layer compiled using a binary cross-entropy loss function and adaptive first/second moment stochastic gradient descent optimizer as well as including relevant accuracy metrics
    
 ### getKerasConvolutional ###
 
@@ -2311,7 +2311,7 @@ List of sequence of integers representing the individual identified text parts o
 client.predict_text_sentiment(self, dataset, text)
 ```
 
-Wrapper function used for repeated caching of standard backend processing/prediction tasks needed for sentiment analysis when sentiment analysis text classification query is called
+Wrapper function used for repeated caching of standard backend processing/prediction tasks needed for sentiment analysis when sentiment analysis text_classification query is called
 
 
 *Parameters --* 
@@ -2344,7 +2344,7 @@ client.text_classification_query(self,
                                  generate_plots=True)
 ```
 
-Generates LSTM model used to solve sentiment analysis text classification problem request from written query sent to/in client class instance
+Generates LSTM model used to solve sentiment analysis text_classification problem request from written query sent to/in client class instance
 
 
 *Parameters --* 
@@ -2382,7 +2382,7 @@ Option to generate all relevant plots for query (is set by default to true)
 
 None
 
-Executes document summarization training/testing and outputs/stores resulting summary/metrics/associated plots
+Executes doc_summarization training/testing and outputs/stores resulting summary/metrics/associated plots
 
 #### get_summary #### 
 
@@ -2452,7 +2452,7 @@ Option to generate all relevant plots for query (is set by default to true)
 
 None
 
-Executes document summarization model training/testing and outputs resulting summary/metrics/associated plots
+Executes doc_summarization model training/testing and outputs resulting summary/metrics/associated plots
 
 #### dimensionality_reducer ####
 
