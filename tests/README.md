@@ -1,1 +1,1 @@
-Tests for contributors coming soon. 
+`tests.py` hosts all of the tests for the queries. More will be coming soon. 
