@@ -450,4 +450,3 @@ def analyze(client, model=None, save=True, save_model=False):
     client.plots(model=model, save=save_model)
 
     clearLog()
-    return modeldict;
