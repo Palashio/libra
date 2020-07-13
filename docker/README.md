@@ -1,5 +1,6 @@
 # Using libra via Docker
 
+### currently non-functional.... ###
 This directory contains `Dockerfile` to make it easy to get up and running with
 libra via [Docker](http://www.docker.com/).
 
