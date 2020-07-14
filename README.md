@@ -16,6 +16,7 @@ Libra automates the end-to-end machine learning process in just one line of code
 
 </div>
 
+Full documentation can be found at libradocs.github.io.
 ## Installation
 
 Install latest release version:
