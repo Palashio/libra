@@ -64,7 +64,7 @@ Other queries can also be called on the same object, and will be appended to the
 
 ```python
 newClient.svm_query('predict the proximity to the ocean')
-newClient.models().keys()
+newClient.model().keys()
 
 dict_keys(['regression_ANN', svm'])
 ```
