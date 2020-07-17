@@ -1,7 +1,7 @@
 import seaborn as sns
 import warnings
 from sklearn.metrics import roc_curve, auc
-from sklearn.preprocessing import label_binarize
+from sklearn.preprocessing import LabelBinarizer
 from numpy import interp
 import pandas as pd
 import sklearn
@@ -261,9 +261,11 @@ def plot_mc_roc(y_test, y_score, interpreter=None):
     lw = 2
     n_classes = len(np.unique(y_test))
     classes = pd.unique(y_test)
+    label_binarizer = LabelBinarizer()
+    label_binarizer.fit(np.concatenate((y_test, y_score)))
     if n_classes != 2:
-        y_test = label_binarize(y_test, classes=classes)
-        y_score = label_binarize(y_score, classes=classes)
+        y_test = label_binarizer.transform(y_test)
+        y_score = label_binarizer.transform(y_score)
     else:
         n_classes = 1
         y_test = y_test.reshape(-1, 1)
@@ -308,21 +310,15 @@ def plot_mc_roc(y_test, y_score, interpreter=None):
              color='navy', linestyle=':', linewidth=4)
 
     for i in range(n_classes):
-        if isinstance(interpreter, dict):
-            inverted_interpreter = dict(map(reversed, interpreter.items()))
-            plt.plot(fpr[i], tpr[i], lw=lw,
-                     label='ROC curve of class {0} (area = {1:0.2f})'
-                           ''.format(inverted_interpreter[i], roc_auc[i]))
-        else:
-            plt.plot(
-                fpr[i],
-                tpr[i],
-                lw=lw,
-                label='ROC curve of class {0} (area = {1:0.2f})'
-                      ''.format(
-                    interpreter.inverse_transform(
-                        [[i]])[0],
-                    roc_auc[i]))
+        plt.plot(
+            fpr[i],
+            tpr[i],
+            lw=lw,
+            label='ROC curve of class {0} (area = {1:0.2f})'
+                ''.format(
+                interpreter.inverse_transform(
+                [[label_binarizer.classes_[i]]])[0],
+                roc_auc[i]))
 
     plt.plot([0, 1], [0, 1], 'k--', lw=lw)
     plt.xlim([0.0, 1.0])
@@ -401,7 +397,9 @@ def analyze(client, model=None, save=True, save_model=False):
         if model in ['svm', 'nearest_neighbor',
                      'decision_tree', 'text_classification']:
             label_source = modeldict['interpreter']
-            labels = list(modeldict['interpreter'].keys())
+            labels = []
+            for num in np.unique(np.concatenate((real, preds))):
+                labels.append(label_source.inverse_transform([[num]])[0])
         else:
             label_source = enc
             labels = enc.classes_
