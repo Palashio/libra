@@ -358,6 +358,8 @@ def classification_ann(instruction,
     # print((" " * 2 * counter)+ tabulate(datax, headers=col_name, tablefmt='orgtbl'))
     losses.append(history.history[maximizer]
                   [len(history.history[maximizer]) - 1])
+    accuracies.append(history.history['val_accuracy']
+                  [len(history.history['val_accuracy']) - 1])
     # keeps running model and fit functions until the validation loss stops
     # decreasing
 
@@ -388,7 +390,7 @@ def classification_ann(instruction,
         values.append(
             "| " + str(history.history['accuracy'][len(history.history['val_accuracy']) - 1]))
         values.append(
-            "| " + str(history.history['accuracy'][len(history.history['val_accuracy']) - 1]))
+            "| " + str(history.history['val_accuracy'][len(history.history['val_accuracy']) - 1]))
         datax.append(values)
         for row in datax:
             print((" " * 2 * counter) + "| " +
