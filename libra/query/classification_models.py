@@ -274,6 +274,7 @@ def train_svm(instruction,
     return {
         'id': generate_id(),
         "model": clf,
+        'num_classes': num_classes,
         "accuracy": {
             'cross_val_score': cross_val_score(
                 clf,
@@ -360,6 +361,7 @@ def nearest_neighbors(instruction=None,
     clearLog()
     return {'id': generate_id(),
             "model": knn,
+            'num_classes': num_classes,
             "accuracy": {'accuracy_score': scores[scores.index(max(scores))],
                          'cross_val_score': cross_val_score(knn,
                                                             X_train,
@@ -453,6 +455,7 @@ def decision_tree(instruction,
         'id': generate_id(),
         "model": clf,
         "target": remove,
+        'num_classes': num_classes,
         "accuracy": {'cross_val_score': cross_val_score(
             clf,
             X_train,

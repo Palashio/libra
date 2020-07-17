@@ -6,7 +6,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="libra",  # Replace with your own username
-    version="0.0.9",
+    version="1.0.0",
     author="Palash Shah",
     author_email="ps9cmk@virginia.edu",
     description="Fully automated machine learning in one-liners.",
@@ -15,8 +15,8 @@ setuptools.setup(
     url="https://github.com/Palashio/libra",
     install_requires=['colorama',
                       'transformers==2.11.0',
-                      'tensorflow',
-                      'keras',
+                      'tensorflow==2.2.0',
+                      'keras==2.4.3',
                       'numpy',
                       'pandas',
                       'sklearn',

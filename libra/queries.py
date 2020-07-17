@@ -100,6 +100,7 @@ class client:
             ssl._create_default_https_context = _create_unverified_https_context
         nltk.download('punkt', quiet=True)
         nltk.download('averaged_perceptron_tagger', quiet=True)
+        nltk.download('stopwords', quiet=True)
 
     # param model_requested: string representation of the name of the model user seeks to retrieve
     # returns models with a specific string - currently deprecated, should not be used.
@@ -125,7 +126,7 @@ class client:
         '''
         if model is None:
             model = self.latest_model
-        if model == 'Text Classification':
+        if model == 'text_classification':
             map_func = np.vectorize(lambda x: self.classify_text(x))
             predictions = map_func(data)
             return predictions
@@ -660,7 +661,7 @@ class client:
         :param data_path: Path to the dataset (str).
         :param new_folders: Create new folders for the image during preprocessing (bool).
         :param image_column: The column in the csv file where the filepaths for the images exist (str).
-        :param training_ratio: Ratio of dataset allotted to the training data (float).
+        :param test_size: Ratio of dataset allotted to the testing data (float).
         :param augmentation: Perform image data augmentation (bool).
         :param epochs: Number of epochs (int).
         :param height: Height of the input image (int).
@@ -679,7 +680,7 @@ class client:
             data_path=self.dataset,
             new_folders=new_folders,
             image_column=image_column,
-            training_ratio=1 - testing_ratio,
+            training_ratio=1 - test_size,
             augmentation=augmentation,
             epochs=epochs,
             height=height,
@@ -692,7 +693,7 @@ class client:
 
     def classify_text(self, text):
         """
-        Calls the body of the text classification neural network query which is located in the nlp_queries.py file. This can only be called
+        Calls the body of the text_classification neural network query which is located in the nlp_queries.py file. This can only be called
         if text_classification_query has been called previously.
         :param text: The new text that you want to classify (str).
         :return: a classification of text that you've provided
@@ -701,7 +702,7 @@ class client:
         return classify_text(self=self, text=text)
 
     # sentiment analysis query
-    def text_classification_query(self, instruction, drop=None,
+    def text_classification_query(self, instruction, label_column=None, drop=None,
                                   preprocess=True,
                                   test_size=0.2,
                                   random_state=49,
@@ -715,7 +716,7 @@ class client:
                                   save_model=False,
                                   save_path=os.getcwd()):
         '''
-        Calls the body of the text classification query which is located in the nlp_queries.py file
+        Calls the body of the text_classification query which is located in the nlp_queries.py file
         :param instruction: The objective that you want to model (str).
         :param drop: A list of the dataset's columns to drop.
         :param preprocess: Preprocess the data (bool).
@@ -733,8 +734,8 @@ class client:
         '''
 
         # storing values the model dictionary
-        self.models["Text Classification"] = text_classification_query(
-            self=self, instruction=instruction, drop=drop,
+        self.models["text_classification"] = text_classification_query(
+            self=self, instruction=instruction, label_column=label_column, drop=drop,
             preprocess=preprocess,
             test_size=test_size,
             random_state=random_state,
@@ -747,10 +748,10 @@ class client:
             generate_plots=generate_plots,
             save_model=save_model,
             save_path=save_path)
-        self.latest_model = 'Text Classification'
+        self.latest_model = 'text_classification'
         clearLog()
 
-    # document summarization predict wrapper
+    # doc_summarization predict wrapper
     def get_summary(self, text):
         '''
         Calls the body of the summarizer which is located in the nlp_queries.py file
@@ -761,7 +762,7 @@ class client:
         return get_summary(self=self, text=text)
 
     # text summarization query
-    def summarization_query(self, instruction, preprocess=True,
+    def summarization_query(self, instruction, label_column=None, preprocess=True,
                             drop=None,
                             epochs=10,
                             batch_size=32,
@@ -794,8 +795,8 @@ class client:
         :return: an updated model and history stored in the models dictionary
         '''
 
-        self.models["Document Summarization"] = summarization_query(
-            self=self, instruction=instruction, preprocess=preprocess,
+        self.models["doc_summarization"] = summarization_query(
+            self=self, instruction=instruction, preprocess=preprocess, label_column=label_column,
             drop=drop,
             epochs=epochs,
             batch_size=batch_size,
@@ -809,10 +810,10 @@ class client:
             save_model=save_model,
             save_path=save_path)
 
-        self.latest_model = 'Document Summarization'
+        self.latest_model = 'doc_summarization'
         clearLog()
 
-    # image caption generator wrapper
+    # image_caption generator wrapper
 
     def generate_caption(self, image):
         '''
@@ -824,8 +825,8 @@ class client:
         clearLog()
         return ' '.join(caption[:len(caption) - 1])
 
-    # image caption prediction query
-    def image_caption_query(self, instruction,
+    # image_caption prediction query
+    def image_caption_query(self, instruction,label_column=None,
                             drop=None,
                             epochs=10,
                             preprocess=True,
@@ -843,7 +844,7 @@ class client:
                             save_model_encoder=False,
                             save_path_encoder=os.getcwd()):
         '''
-        Calls the body of the image caption query which is located in the nlp_queries.py file
+        Calls the body of the image_caption query which is located in the nlp_queries.py file
         :param instruction: The objective that you want to model (str).
         :param drop: A list of the dataset's columns to drop.
         :param epochs: Number of epochs (int).
@@ -864,8 +865,8 @@ class client:
         :return: an updated model and history stored in the models dictionary
         '''
 
-        self.models["Image Caption"] = image_caption_query(
-            self, instruction=instruction,
+        self.models["image_caption"] = image_caption_query(
+            self, instruction=instruction, label_column=label_column,
             drop=drop,
             epochs=epochs,
             preprocess=preprocess,
@@ -882,7 +883,7 @@ class client:
             save_path_decoder=save_path_decoder,
             save_model_encoder=save_model_encoder,
             save_path_encoder=save_path_encoder)
-        self.latest_model = 'Image Caption'
+        self.latest_model = 'image_caption'
         clearLog()
 
     # shows the names of plots associated with a specific model
@@ -978,13 +979,15 @@ class client:
         return get_vocab(self, model)
 
     # plotting for client
-    def plots(self, model="", plot="", save=False):
+    def plots(self, model=None, plot=None, save=False):
         '''
         Function that retrieves all of plots in the self.models dictionary for the key.
         :param model: default to the latest model, but essentially the model key
         :param plot: plot specified during the client session to be procured
         :param save: option to save plots after client session is done (default is false, or
         '''
+        if model is None:
+            model = self.latest_model
         clearLog()
         get_plots(self, model, plot, save)
 
@@ -998,4 +1001,3 @@ class client:
             model = self.latest_model
         clearLog()
         analyze(self, model, save, save_model)
-        

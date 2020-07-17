@@ -11,25 +11,105 @@
     
     <script src="../javascript/api.js" type="text/javascript"></script>
     <link href="https://fonts.googleapis.com/css?family=Montserrat:400,500,600" rel="stylesheet" type="text/css">
-    <link href="../css/api.css" rel="stylesheet" type="text/css">
+    <link href="../css/basic.css" rel=stylesheet type="text/css">
 </head>
 <body>
     <div id="side-nav">
-        <img src = "../resources/libra-logo.png" id="icon">
+        <img src = "../resources/libraLogo.jpg" id="icon">
         <ul class="nav">
             <li><a class="nav-tab" href="../index.html">About</a></li> 
             
-            <li class="nav-tab selected" href="started.html">Getting Started</li> 
-            
-            <li><a class="nav-tab" href="devGuides.html">Developer Guides</a></li> 
+            <li class="nav-tab selected">Getting Started</li> 
+                <li class="dropdown-item selected" data="il">Installation</li>
+                <li class="dropdown-item" data="uta">Understanding the API</li>
+                <li class="dropdown-item" data="lr">Learning Resources</li>
+                <li class="dropdown-item" data="cu">Contact Us</li>
             
             <li><a class="nav-tab" href="modeling.html">Modeling Queries</a></li>    
             
             <li><a class="nav-tab" href="nlp.html">NLP Queries</a></li>
+                        
+            <li><a class="nav-tab" href="utility.html">Utility Functions</a></li>
+            
+            <li><a class="nav-tab" href="contributing.html">Contributing to Libra</a></li>
         </ul>
     </div>
     <div id="nav-bar">Getting Started</div>
-     <div id="content">
-<!--    insert page content here-->
+    <div id="content">
+        <div class="box" id="il">
+            <h2 style="margin-top: 30px;">Installing Libra</h2>
+            <p>There are several ways to begin working with the API. Below, a step-by-step guide to different options are highlighted. If you're already familiar with python and PyPi, feel free to skip ahead and just do</p><pre>pip install libra</pre>
+            <hr>
+
+            <h2>Setting up your local enviroment</h2>
+            <ul>
+                <li>Install <a href="https://www.python.org/downloads/" target="_blank">Python 3.6+</a> directly onto your local machine. Anything lower then 3.6 WILL not work.</li>
+                <li>For Libra, and other libraries, pip is the best option for installing libraries. Install the most <a href="https://pip.pypa.io/en/stable/installing/" target="_blank">recent version.</a></li>
+                <li>If you're looking for an IDE we reccomend installing <a href="https://www.jetbrains.com/pycharm/" target="_blank">PyCharm</a></li>
+                <li>You should now be able to do <b>pip install libra</b> in your terminal. If you want to setup a local enviroment, follow this <a href="https://www.python.org/downloads/" target="_blank">guide</a> and then run the command.</li>
+                <br />
+
+                Now you're ready to code! Open up a notebook/terminal import libra and start working!
+            </ul>
+            <hr>
+
+            <h2>Work in an online preconfigured enviroment</h2>
+            <p>We recommend using Google Collaboratory, as it supports intensive processing and configures an enviroment for you.</p>
+            <ul>
+                <li>Make sure you have a google account and open up a notebook in collab.</li>
+                <li>Use !pip install libra to get all the package information</li>
+
+                You're ready to go! Note that here you'll have to upload your files for storage manually.
+            </ul>
+            <hr>
+        </div>
+                
+        <div  class="box" id="uta">
+        <h2>Understanding the API's structure</h2>
+        <p>There's two structural principles that a user should understand about libra</p>
+        <ul>
+            <li><b>Everything</b> is built around the client object. You can call different queries on it and everything will be stored under the models field of the object.</li>
+            <li>You can access all the information as a dictionary. Doing client_object.models['svm'] gets you all the information generated for the svm query.</li>
+            <li>Your latest model called will automatically be the default. If you call client_object.plots() and don't specify a model, the model for the most recent query that you've called WILL be used. Currently only one model of each type is supported by libra.</li>
+            
+            Direct any other questions to the Github or libradevteam@gmail.com
+        </ul>
+        <hr>
+        </div>
+        
+        <div class="box" id="lr">
+            <h2>Learning Resources</h2>
+            <p>With a strong core team and mentorship opportunities, Libra offers many sockets to find success.</p>
+            <p>Join our slack group, where the founding developers are constantly asking questions about the library.</p>
+            <p>If you're an organization, fill out our form today and we'll hold either live or online instruction on how to use our tools.</p>
+            <div style="width: inherit; height: 300px;">
+                <a id="miniBox" href="https://colab.research.google.com/drive/1sLHUi5rKKJ4R86dZyPt_NvpzBAU6faoc?usp=sharing" target="_blank">
+                    <h3>Tutorial Notebook on Collaboratory</h3>
+                    <p>An example notebook for you to understand the process of working with libra</p>  
+                    <img src="../resources/google.png" style="margin-top: 5px; width: inherit">
+                </a>
+                <a id="miniBox" href="https://join.slack.com/t/the-libra-team/shared_invite/zt-ek6bpd47-hdIxXlRAenKfy5JNWe8bgw" target="_blank">
+                    <h3>Join our Slack Channel</h3>
+                    <p>Ask your questions to core developers and get access to more information.</p>  
+                    <img src="../resources/slack.png" style="margin-top: 75px; height: 170px">
+                </a>
+                <a id="miniBox" href="https://medium.com/" target="_blank">
+                    <h3>Get Started with a Step-by-Step Guide</h3>
+                    <p>Learn how to use libra with a descriptive guide for beginners.</p>  
+                    <img src="../resources/medium.png" style="margin-top: 55px; height: 170px">
+                </a>
+            </div>
+            <br>
+            <hr>
+        </div>
+        <h2 class="box" id="cu">Get in touch with us!</h2>
+        <ul>
+            <li>Shoot us an email at libradevteam@gmail.com.</li>
+            <li>Join our slack group and ask questions in the #general channel</li>
+            <li>Connect with the founder, Palash Shah, on linkedin and send him a DM!</li>
+        </ul>
+        <hr>
+        <div id="space"></div>
+        <div id="space"></div>
     </div>
 </body>

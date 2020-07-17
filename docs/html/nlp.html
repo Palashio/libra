@@ -12,178 +12,236 @@
     <script src="../javascript/api.js" type="text/javascript"></script>
     <link href="https://fonts.googleapis.com/css?family=Montserrat:400,500,600" rel="stylesheet" type="text/css">
     <link href="../css/api.css" rel="stylesheet" type="text/css">
+    <link href="../css/basic.css" rel=stylesheet type="text/css">
 </head>
 <body>
     <div id="side-nav">
-        <img src = "../resources/libra-logo.png" id="icon">
+        <img src = "../resources/libraLogo.jpg" id="icon">
         <ul class="nav">
             <li><a class="nav-tab" href="../index.html">About</a></li>
             
             <li><a class="nav-tab" href="started.html">Getting Started</a></li> 
             
-            <li><a class="nav-tab" href="devGuides.html">Developer Guides</a></li>
-            
             <li><a class="nav-tab" href="modeling.html">Modeling Queries</a></li>
 
             <li class="nav-tab selected" href="nlp.html">NLP Queries</li>
-                <li class="dropdown-item selected" data="drp">Dimensionality Reduction Pipeline</li>
-                <li class="dropdown-item" data="rff">Random Forest Feature</li>
-                <li class="dropdown-item" data="pca">Principal Component Analysis</li>
-                <li class="dropdown-item" data="ica">Independent Component Analysis</li>
-                
+                <li class="dropdown-item selected" data="drp">text_classification</li>
+                <li class="dropdown-item" data="rff">doc_summarization</li>
+                <li class="dropdown-item" data="pca">image_caption Generation</li>
+                                    
+            <li><a class="nav-tab" href="utility.html">Utility Functions</a></li>
+            
+            <li><a class="nav-tab" href="contributing.html">Contributing to Libra</a></li>       
         </ul>
     </div>
     <div id="nav-bar">Natural Language Processing Queries</div>
     <div id="content">
         <div class="box">
-            <h2 id="drp">dimensionality_reduction_pipeline()</h2>
+            <h1 id="drp">text_classification_query()</h1>
                 <br>
-                <p>Automatically fits a neural network to your dataset. Target detection, preprocessing, and scoring are done by default.</p>
-                <b>Only instruction is required. ALL other parameters are optional</b>
-                <br>
+                <p>Automatically fits a text_classification model to your dataset. All standard text modification procedures are applied automatically if applicable..</p>
+                <p> <b>Dataset Guidelines</b> </p>
+                <ul>
+                    <li>One column in the file should contain the text to be classified</li>
+                    <li>One column should contain the label of each text and SHOULD BE NAMED LABEL. If is named something else, please specify the name with the label_column parameter. </li>
+                    <li>Your instruction should be about the text you want to classify, for example in a problem where you have a tweet column (with the text) and a sentiment column (with 0-2 representing mood) your instruction should be about the tweet: 'please perform analysis on tweets'.</li>
+
+                </ul>
                 <br>
                 <table>
                     <tr>
                         <td colspan="2">Arguments</td>
                     </tr>
                     <tr>
-                        <td>Instruction=None</td>
-                        <td>An English language statement that represents the task you would like to be completed. eg: 'predict the median house value' or 'please estimate the number of households'</td>
+                        <td>instruction=None</td>
+                        <td>An English language statement that represents the task you would like to be completed. eg: 'predict the median house value' or 'please estimate the number of households'. Should correspond to the column of text that you want to classify.</td>
                     </tr>
                     <tr>
-                        <td>Mca_threshold=0.2</td>
-                        <td>Changes the proportion at which multiple correspondence analysis is applied. This deals with reducing the number of categorical features that are one-hot-encoded.</td>
+                        <td>label_column='label'</td>
+                        <td>Represents the column name in which your label exists. If the name is already similar to 'label' then this parameter is not required.</td>
                     </tr>
                     <tr>
-                        <td>Drop=[]</td>
-                        <td>Columns to drop manually, drop columns with links, weirdly formatted numbers, and others.</td>
+                        <td>preprocess=True</td>
+                        <td>Whether you want your dataset to be intelligently preprocessed.</td>
                     </tr>
                     <tr>
-                        <td>Preprocess=True</td>
-                        <td>Whether you want your dataset to be intelligently preprocessed</td>
+                        <td>test_size=0.2</td>
+                        <td>The proportion of your entire dataset that is used for testing. </td>
                     </tr>
                     <tr>
-                        <td>Test_size=0.2</td>
-                        <td>The size of your testing dataset</td>
+                        <td>random_state=49</td>
+                        <td>The randomization channel that you want to be set at.</td>
                     </tr>
                     <tr>
-                        <td>Random_state=49</td>
-                        <td>The state ticker you want to be set at</td>
+                        <td>learning_rate=1e-2</td>
+                        <td>The default rate at which your model learns based on gradient descent.</td>
+                    </tr>
+                    <tr>
+                        <td>epochs=20</td>
+                        <td>Number of epochs. This is for every model that's created in the process.</td>
                     </tr>
                     <tr>
                         <td>epochs=50</td>
                         <td>Number of epochs for every model attempted</td>
                     </tr>
                     <tr>
-                        <td>generate_plots=True</td>
-                        <td>Whether you want libra to create accuracy and loss plots for you. </td>
+                        <td>monitor='val_loss'</td>
+                        <td>The parameter that you want the query to minimize/maximize. For example, the default setting will try to minimize your validation loss.</td>
                     </tr>
                     <tr>
                         <td>generate_plots=True</td>
                         <td>Whether you want libra to create accuracy and loss plots for you. </td>
                     </tr>
                     <tr>
-                        <td>save_model=False</td>
-                        <td> Do you want the model weights and architecture to be saved as a .json and .h5 file.</td>
+                        <td>batch_size=32</td>
+                        <td>The number of dataset points that will be provided to your model in every pass.</td>
                     </tr>
                     <tr>
-                        <td>save_path='current_directory'</td>
-                        <td>Where do you want the save_model information to be stored. </td>
-                    </tr>
-                </table>
-                <pre>new_client = client('path_to_dataset')
-new_client.neural_network_query('Please estimate the number of households.')
-new_client.models['regression_ANN'].plots() #access plots</pre>
-        </div>
-        <div class="box">
-                <h2 id="rff">random_forest_feature()</h2>
-                <br>
-                <p>Automatically fits a Convolutional Neural Network to your dataset. Everything is handled by libra internally. Three types of dataset structures are detectable: 
-                    <br>
-                    <br>
-1) classwise: where every folder represents a seperate class of images 
-<br>
-2) setwise: where a training_set and testing_set folder are created with individually folders of classes
-<br>
-3) pathwise: where a csv file stores relative paths to images
-                </p>
-                <br>
-                <table>
-                    <tr>
-                        <td colspan="2">Arguments</td>
+                        <td>max_text_length=200</td>
+                        <td>The maximum amount of text that can be used to classify. If larger, it will cut off the rest.</td>
                     </tr>
                     <tr>
-                        <td>Instruction=None</td>
-                        <td>An English language statement that represents the task you would like to be completed. eg: 'predict the median house value' or 'please estimate the number of households'</td>
-                    </tr>
-                    <tr>
-                        <td>readmode=distinguisher()</td>
-                        <td>Identifies the format in which data the present in. If none is specified then the query will automatically identify the format of your data. Note that only three types of formats are supported currently. </td>
-                    </tr>
-                    <tr>
-                        <td>new_folders=True</td>
-                        <td>This query will automatically crop all images to an intelligent size and create new folders with these images. If you would like it to replace your original images then set this to false. </td>
-                    </tr>
-                    <tr>
-                        <td>image_column=None</td>
-                        <td>If you're using pathwise from a csv, you can by default use a column in the set as the path location.</td>
-                    </tr>
-                    <tr>
-                        <td>training_ratio=0.8</td>
-                        <td>Represents the size of the training set.</td>
-                    </tr>
-                </table>
-                <pre>newClient = client('path_to_directory_with_image_folders')
-newClient.convolutional_query("Please classify my images")</pre>
-        </div>
-        <div class="box">
-                <h2 id="pca">principal_component_analysis()</h2>
-                <br>
-                <p>Lets you create a text classification model automatically; works for all sorts of situations like sentiment analysis.</p>
-                <br>
-                <table>
-                    <tr>
-                        <td colspan="2">Arguments</td>
-                    </tr>
-                    <tr>
-                        <td>Instruction</td>
-                        <td>An English language statement that represents the task you would like to be completed. eg: 'predict the median house value' or 'please estimate the number of households'</td>
-                    </tr>
-                </table>
-                <pre>newClient = client('path_to_file')
-newClient.text_classification_query('Model credit card transaction type')
-newClient.predict_text_sentiment('new_text_to_classify')</pre>
-
-        </div>
-        <div class="box">
-                <h2 id="ica">independant_component_analysis()</h2>
-                <br>
-                <p>Automatically fits a clustering algorithm to your dataset. Target detection, preprocessing, and scoring are done by default.</p>
-                <br>
-                <table>
-                    <tr>
-                        <td colspan="2">Arguments</td>
-                    </tr>
-                    <tr>
-                        <td>preprocess=True</td>
-                        <td>Whether you want your dataset to be intelligently preprocessed</td>
+                        <td>max_features=20000</td>
+                        <td>The size of the input embedding layer in the model.</td>
                     </tr>
                     <tr>
                         <td>generate_plots=True</td>
                         <td>Whether you want libra to create accuracy and loss plots for you.</td>
                     </tr>
                     <tr>
-                        <td>drop=[]</td>
+                        <td>save_model=False</td>
+                        <td>Do you want the model weights and architecture to be saved as a .json and .h5 file.</td>
+                    </tr>
+                    <tr>
+                        <td>save_path=os.getcwd()</td>
+                        <td>Where do you want the save_model information to be stored. Default is current working directory.</td>
+                    </tr>
+                </table>
+                <pre>new_client = client('path_to_csv')
+new_client.text_classification_query('Please estimate the sentiment')
+new_client.classify_text('new text to classify')</pre>
+        </div>
+        <div class="box">
+                <h1 id="rff">summarization_query()</h1>
+                <br>
+                <p>Automatically fits a transfer-learning doc_summarization model to your dataset. This model will have frozen layers with pretrained weights to help with small dataset sizes.
+                </p>
+                <p> <b>Dataset Guidelines </b></p>
+                <ul>
+                    <li>The data that you want to summarized should be the target of the instruction. So if you want to summarize tweets, the instruction could be 'summarize long textual tweets'. </li>
+                    <li>The result, or the summary should be in a column called 'summary'. <b>THIS IS ESSENTIAL.</b></li>
+                    <li>Your instruction should be about the label column, not the text.</li>
+                </ul>
+                <br>
+                <table>
+                    <tr>
+                        <td colspan="2">Arguments</td>
+                    </tr>
+                    <tr>
+                        <td>drop=None</td>
                         <td>Columns to drop manually, drop columns with links, weirdly formatted numbers, and others.</td>
                     </tr>
                     <tr>
-                        <td>base_clusters=2</td>
-                        <td>Base number of clusters that will be tested. From this parameter provided, more and more clusters will be tested until an optimal number is found. </td>
+                        <td>epochs=10</td>
+                        <td>Number of epochs. This is for every model that's created in the process.</td>
+                    </tr>
+                    <tr>
+                        <td>batch_size=32</td>
+                        <td>The number of dataset points that will be provided to your model in every pass.</td>
+                    </tr>
+                    <tr>
+                        <td>learning_rate=1e-2</td>
+                        <td>The default rate at which your model learns based on gradient descent.</td>
+                    </tr>
+                    <tr>
+                        <td>max_text_length=512</td>
+                        <td>The maximum amount of text that can be summarized</td>
+                    </tr>
+                    <tr>
+                        <td>max_summary_length=150</td>
+                        <td>Maximum outputted summary length. The longer this is, the less accurate it will be.</td>
+                    </tr>
+                    <tr>
+                        <td>gpu=False</td>
+                        <td>Determines whether a built in cpu or gpu will be used.</td>
+                    </tr>
+                    <tr>
+                        <td>generate_plots=True</td>
+                        <td>Whether you want libra to create accuracy and loss plots for you.</td>
+                    </tr>
+                    <tr>
+                        <td>save_model=False</td>
+                        <td>Do you want the model weights and architecture to be saved as a .json and .h5 file.</td>
+                    </tr>
+                    <tr>
+                        <td>save_path=os.getcwd()</td>
+                        <td>Where do you want the save_model information to be stored. Default is current working directory.</td>
+                    </tr>
+                </table>
+                <pre>newClient = client('path_to_csv')
+newClient.summarization_query("Please summarize original text")
+newClient.get_summary('new text to summarize')</pre>
+        </div>
+        <div class="box">
+                <h1 id="pca">image_caption_query()</h1>
+                <br>
+                <p>Automatically fits an caption generation transfer learning model to your dataset. This model will have frozen layers with pretrained weights to help with small dataset sizes.</p>
+                <p> <b>Dataset Guidelines</b> </p>
+                <ul>
+                    <li>One column in the file should be that path to the images. This will be found automatically.</li>
+                    <li>The target of your instruction should be the caption column. So, maybe if your caption column is called short tweets, have your instruction be 'please shorten this text into short tweets'.</li>
+                </ul>
+                <br>
+                <table>
+                    <tr>
+                        <td colspan="2">Arguments</td>
+                    </tr>
+                    <tr>
+                        <td>instruction</td>
+                        <td>An English language statement that represents the task you would like to be completed. eg: 'predict the median house value' or 'please estimate the number of households'. Should correspond to the column of captions in the dataset.</td>
+                    </tr>
+                    <tr>
+                        <td>drop=None</td>
+                        <td>Columns to drop manually, drop columns with links, weirdly formatted numbers, and others.</td>
+                    </tr>
+                    <tr>
+                        <td>epochs=10</td>
+                        <td>Number of epochs. This is for every model that's created in the process.</td>
+                    </tr>
+                    <tr>
+                        <td>preprocess=True</td>
+                        <td>Whether you want your dataset to be intelligently preprocessed.</td>
+                    </tr>
+                    <tr>
+                        <td>random_state=49</td>
+                        <td>he randomization channel that you want to be set at.</td>
+                    </tr>
+                    <tr>
+                        <td>buffer_size=1000</td>
+                        <td>Maximum number of elements that will be buffered to be selected for the caption.</td>
+                    </tr>
+                    <tr>
+                        <td>embedding_dim=256</td>
+                        <td>Sets the size of the word embedding mapping.</td>
+                    </tr>
+                    <tr>
+                        <td>units=512</td>
+                        <td>The exact number of recurrent units present in the decoder.</td>
+                    </tr>
+                    <tr>
+                        <td>gpu=False</td>
+                        <td>Determines whether a built in cpu or gpu will be used.</td>
+                    </tr>
+                    <tr>
+                        <td>generate_plots=True</td>
+                        <td>Whether you want libra to create accuracy and loss plots for you.</td>
                     </tr>
 
                 </table>
-                <pre>newClient = client('path_to_file')
-newClient.kmeans_clustering_query(preprocess=True, generate_plots=True, drop=[])</pre>
+                <pre>newClient = client('path_to_csv')
+newClient.image_caption_query('Generate image_captions')
+newClient.generate_caption('path to image')</pre>
+
         </div>
         <div id="space"></div>
     </div>
