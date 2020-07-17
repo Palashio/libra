@@ -359,7 +359,7 @@ def classification_ann(instruction,
     losses.append(history.history[maximizer]
                   [len(history.history[maximizer]) - 1])
     accuracies.append(history.history['val_accuracy']
-                  [len(history.history['val_accuracy']) - 1]))
+                  [len(history.history['val_accuracy']) - 1])
     # keeps running model and fit functions until the validation loss stops
     # decreasing
 
