@@ -121,7 +121,5 @@ def modeler(params):
 def plotter(params):
     init_plots, plot_names = generateRegressionPlots(
         params['models'][len(params['models']) - 1], params['data'], params['y'])
-    plots = {}
-    for x in range(len(plot_names)):
-        plots[str(plot_names[x])] = init_plots[x]
+    plots = {str(plot_names[x]):init_plots[x] for x in range(len(plot_names))}
     params['plots'] = plots
