@@ -113,9 +113,7 @@ def elbow_cluster_graph(inertia_stor, base_clusters):
     :param inertia_stor: the array of inertia values
     :return the elbow graph
     '''
-    ranged = []
-    for i in range(base_clusters, len(inertia_stor) + base_clusters):
-        ranged.append(i + 1)
+    ranged = [i+1 for i in range(base_clusters, len(inertia_stor) + base_clusters)]
 
     img = plt.figure()
     plt.plot(ranged, inertia_stor, marker='o')
@@ -160,10 +158,8 @@ def generate_classification_plots(history, data, label, model, X_test, y_test):
     plot_names.append('lossvsval_los')
 
     # dynamic way to return all possible plots in case it expands together
-    return_plots = {}
-    for x in range(len(plots)):
-        return_plots[str(plot_names[x])] = plots[x]
-
+    return_plots = {str(plot_names[x]):plot[x] for x in range(len(plots))}
+    
     return return_plots
 
 
@@ -181,10 +177,8 @@ def generate_classification_together(history, data, model, X_test, y_test):
     plots = []
     plot_names = []
 
-    arrEpochs = []
     # stores all of the history information
-    for x in range(len(history.history['loss'])):
-        arrEpochs.append(x + 1)
+    arrEpochs = [x+1 for x in range(len(history.history['loss']))]  
 
     # the first loss plot on the top
     plt.subplot(2, 1, 1)
