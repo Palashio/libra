@@ -175,7 +175,7 @@ class client:
         :return: a model, plots, accuracy information all stored in the self.models dictionary
         '''
 
-        data = pd.read_csv(self.dataset)
+        data = pd.read_csv(self.dataset, names=None, usecols=None)
 
         if preprocess:
 
@@ -818,7 +818,7 @@ class client:
         return ' '.join(caption[:len(caption) - 1])
 
     # image_caption prediction query
-    def image_caption_query(self, instruction,label_column=None,
+    def image_caption_query(self, instruction, label_column=None,
                             drop=None,
                             epochs=10,
                             preprocess=True,
