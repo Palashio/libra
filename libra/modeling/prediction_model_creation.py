@@ -33,7 +33,7 @@ def get_keras_model_reg(dataset, i):
         else:
             model.add(
                 Dense(
-                    i * 64,
+                    64,
                     kernel_initializer="normal",
                     activation="relu"))
 
@@ -68,7 +68,7 @@ def get_keras_model_class(dataset, i, num_classes):
         else:
             model.add(
                 Dense(
-                    i * 64,
+                    64,
                     kernel_initializer="normal",
                     activation="relu"))
 
