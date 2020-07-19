@@ -141,34 +141,51 @@ def tuneReg(
     # function build model using hyperparameter
     def build_model(hp):
         model = keras.Sequential()
+        model.add(Dense(units=hp.Int('units_0',
+                                     min_value=min_dense,
+                                     max_value=max_dense,
+                                     step=step),
+                                     input_dim=data.shape[1],
+                                     activation=activation))
         for i in range(hp.Int('num_layers', min_layers, max_layers)):
-            model.add(Dense(units=hp.Int('units_' + str(i),
+            model.add(Dense(units=hp.Int('units_' + str(i+1),
                                          min_value=min_dense,
                                          max_value=max_dense,
                                          step=step),
                             activation=activation))
             model.add(Dropout(rate=hp.Float(
-                              'dropout_3',
+                              'dropout_'+ str(i),
                               min_value=0.0,
                               max_value=0.5,
                               default=0.20,
                               step=0.05)))
         model.add(Dense(1, activation='linear'))
+        lrate=hp.Float('learning_rate',
+                       min_value=1e-5,
+                       max_value=1e-1,
+                       sampling='LOG',
+                       default=1e-3)
         model.compile(
-            optimizer=keras.optimizers.Adam(
-                                       hp.Float('learning_rate',
-                                                min_value=1e-5,
-                                                max_value=1e-2,
-                                                sampling='LOG',
-                                                default=1e-3)),
-            loss='mse',
+            optimizer=hp.Choice('optimizer', values=[
+                               keras.optimizers.Adam(learning_rate = lrate),
+                               keras.optimizers.SGD(learning_rate = lrate),
+                               keras.optimizers.RMSprop(learning_rate = lrate),
+                               keras.optimizers.Adamax(learning_rate = lrate)
+                               ]),
+            loss=hp.Choice('loss', values=['mean_squared_logarithmic_error',
+                                           'mean_squared_error',
+                                           'huber_loss',
+                                           'mean_absolute_error',
+                                           'cosine_similarity',
+                                           'log_cosh'],
+                                     default='mean_squared_error'),
             metrics=['accuracy'])
         return model
 
     # random search for the model
     tuner = RandomSearch(
         build_model,
-        objective='loss',
+        objective='val_accuracy',
         max_trials=max_trials,
         executions_per_trial=executions_per_trial,
         directory=directory)

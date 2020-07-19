@@ -72,11 +72,18 @@ def get_keras_model_class(dataset, i, num_classes):
                     kernel_initializer="normal",
                     activation="relu"))
 
-    model.add(Dense(num_classes, activation="softmax"))
-    model.compile(
-        loss='categorical_crossentropy',
-        optimizer='adam',
-        metrics=['accuracy'])
+    if num_classes == 2:
+        model.add(Dense(1, activation="sigmoid"))
+        model.compile(
+            loss='binary_crossentropy',
+            optimizer='adam',
+            metrics=['accuracy'])
+    elif num_classes > 2:
+        model.add(Dense(num_classes, activation="softmax"))
+        model.compile(
+            loss='categorical_crossentropy',
+            optimizer='adam',
+            metrics=['accuracy'])
 
     return model
 
