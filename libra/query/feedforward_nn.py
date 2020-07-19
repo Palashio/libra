@@ -180,7 +180,7 @@ def regression_ann(
         print((" " * 2 * counter) + "| " + ("".join(word.ljust(col_width)
                                                     for word in row)) + " |")
     datax = []
-    while all(x > y for x, y in zip(losses, losses[1:])):
+    while all(x >= y for x, y in zip(losses, losses[1:])):
         model = get_keras_model_reg(data, i)
         history = model.fit(
             X_train,
@@ -372,7 +372,7 @@ def classification_ann(instruction,
         print((" " * 2 * counter) + "| " + ("".join(word.ljust(col_width)
                                                     for word in row)) + " |")
     datax = []
-    while all(x < y for x, y in zip(accuracies, accuracies[1:])):
+    while all(x <= y for x, y in zip(accuracies, accuracies[1:])):
         model = get_keras_model_class(data, i, num_classes)
         history = model.fit(
             X_train,
