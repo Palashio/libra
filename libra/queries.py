@@ -147,16 +147,8 @@ class client:
         '''
         modeldict = self.models[model]
         if modeldict.get('interpreter'):
-            if isinstance(modeldict['interpreter'], dict):
-                inverted_interpreter = dict(
-                    map(reversed, modeldict['interpreter'].items()))
-                toRet = []
-                for each in predictions:
-                    toRet.append(inverted_interpreter[each])
-                predictions = toRet
-            else:
-                predictions = modeldict['interpreter'].inverse_transform(
-                    predictions)
+            predictions = modeldict['interpreter'].inverse_transform(
+                predictions)
         clearLog()
         return predictions
 

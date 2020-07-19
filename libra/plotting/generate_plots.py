@@ -1,7 +1,7 @@
 import seaborn as sns
 import warnings
 from sklearn.metrics import roc_curve, auc
-from sklearn.preprocessing import label_binarize
+from sklearn.preprocessing import LabelBinarizer
 from numpy import interp
 import pandas as pd
 import sklearn
@@ -113,9 +113,7 @@ def elbow_cluster_graph(inertia_stor, base_clusters):
     :param inertia_stor: the array of inertia values
     :return the elbow graph
     '''
-    ranged = []
-    for i in range(base_clusters, len(inertia_stor) + base_clusters):
-        ranged.append(i + 1)
+    ranged = [i+1 for i in range(base_clusters, len(inertia_stor) + base_clusters)]
 
     img = plt.figure()
     plt.plot(ranged, inertia_stor, marker='o')
@@ -160,9 +158,7 @@ def generate_classification_plots(history, data, label, model, X_test, y_test):
     plot_names.append('lossvsval_los')
 
     # dynamic way to return all possible plots in case it expands together
-    return_plots = {}
-    for x in range(len(plots)):
-        return_plots[str(plot_names[x])] = plots[x]
+    return_plots = {str(plot_names[x]):plots[x] for x in range(len(plots))}
 
     return return_plots
 
@@ -181,10 +177,8 @@ def generate_classification_together(history, data, model, X_test, y_test):
     plots = []
     plot_names = []
 
-    arrEpochs = []
     # stores all of the history information
-    for x in range(len(history.history['loss'])):
-        arrEpochs.append(x + 1)
+    arrEpochs = [x+1 for x in range(len(history.history['loss']))]
 
     # the first loss plot on the top
     plt.subplot(2, 1, 1)
@@ -261,9 +255,11 @@ def plot_mc_roc(y_test, y_score, interpreter=None):
     lw = 2
     n_classes = len(np.unique(y_test))
     classes = pd.unique(y_test)
+    label_binarizer = LabelBinarizer()
+    label_binarizer.fit(np.concatenate((y_test, y_score)))
     if n_classes != 2:
-        y_test = label_binarize(y_test, classes=classes)
-        y_score = label_binarize(y_score, classes=classes)
+        y_test = label_binarizer.transform(y_test)
+        y_score = label_binarizer.transform(y_score)
     else:
         n_classes = 1
         y_test = y_test.reshape(-1, 1)
@@ -308,21 +304,15 @@ def plot_mc_roc(y_test, y_score, interpreter=None):
              color='navy', linestyle=':', linewidth=4)
 
     for i in range(n_classes):
-        if isinstance(interpreter, dict):
-            inverted_interpreter = dict(map(reversed, interpreter.items()))
-            plt.plot(fpr[i], tpr[i], lw=lw,
-                     label='ROC curve of class {0} (area = {1:0.2f})'
-                           ''.format(inverted_interpreter[i], roc_auc[i]))
-        else:
-            plt.plot(
-                fpr[i],
-                tpr[i],
-                lw=lw,
-                label='ROC curve of class {0} (area = {1:0.2f})'
-                      ''.format(
-                    interpreter.inverse_transform(
-                        [[i]])[0],
-                    roc_auc[i]))
+        plt.plot(
+            fpr[i],
+            tpr[i],
+            lw=lw,
+            label='ROC curve of class {0} (area = {1:0.2f})'
+                ''.format(
+                interpreter.inverse_transform(
+                [[label_binarizer.classes_[i]]])[0],
+                roc_auc[i]))
 
     plt.plot([0, 1], [0, 1], 'k--', lw=lw)
     plt.xlim([0.0, 1.0])
@@ -401,7 +391,9 @@ def analyze(client, model=None, save=True, save_model=False):
         if model in ['svm', 'nearest_neighbor',
                      'decision_tree', 'text_classification']:
             label_source = modeldict['interpreter']
-            labels = list(modeldict['interpreter'].keys())
+            labels = []
+            for num in np.unique(np.concatenate((real, preds))):
+                labels.append(label_source.inverse_transform([[num]])[0])
         else:
             label_source = enc
             labels = enc.classes_

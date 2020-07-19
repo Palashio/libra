@@ -388,7 +388,7 @@ def classification_ann(instruction,
         datax = []
         values.append(str(len(model.layers)))
         values.append(
-            "| " + str(history.history['accuracy'][len(history.history['val_accuracy']) - 1]))
+            "| " + str(history.history['accuracy'][len(history.history['accuracy']) - 1]))
         values.append(
             "| " + str(history.history['val_accuracy'][len(history.history['val_accuracy']) - 1]))
         datax.append(values)

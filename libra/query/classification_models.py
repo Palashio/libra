@@ -11,6 +11,7 @@ from libra.query.supplementaries import generate_id
 from libra.plotting.generate_plots import (generate_clustering_plots)
 from colorama import Fore, Style
 import warnings
+import sklearn
 
 warnings.filterwarnings("ignore", category=UserWarning)
 
@@ -245,13 +246,11 @@ def train_svm(instruction,
     # Needed to make a custom label encoder due to train test split changes
     # Can still be inverse transformed, just a bit of extra work
     y_vals = np.unique(pd.concat([y['train'], y['test']], axis=0))
-    label_mappings = {}
-    logger("Labels being mapped to appropriate classes")
-    for i in range(len(y_vals)):
-        label_mappings[y_vals[i]] = i
+    label_mappings = sklearn.preprocessing.LabelEncoder()
+    label_mappings.fit(y_vals)
 
-    y_train = y_train.apply(lambda x: label_mappings[x]).values
-    y_test = y_test.apply(lambda x: label_mappings[x]).values
+    y_train = label_mappings.transform(y_train)
+    y_test = label_mappings.transform(y_test)
 
     # Fitting to SVM and storing in the model dictionary
     logger("Fitting Support Vector Machine")
@@ -328,11 +327,11 @@ def nearest_neighbors(instruction=None,
     num_classes = len(np.unique(y))
     # encodes the label dataset into 0's and 1's
     y_vals = np.unique(pd.concat([y['train'], y['test']], axis=0))
-    label_mappings = {}
-    for i in range(len(y_vals)):
-        label_mappings[y_vals[i]] = i
-    y_train = y_train.apply(lambda x: label_mappings[x]).values
-    y_test = y_test.apply(lambda x: label_mappings[x]).values
+    label_mappings = sklearn.preprocessing.LabelEncoder()
+    label_mappings.fit(y_vals)
+
+    y_train = label_mappings.transform(y_train)
+    y_test = label_mappings.transform(y_test)
     logger("Labels being mapped to appropriate classes")
     models = []
     scores = []
@@ -418,13 +417,11 @@ def decision_tree(instruction,
     # Needed to make a custom label encoder due to train test split changes
     # Can still be inverse transformed, just a bit of extra work
     y_vals = np.unique(pd.concat([y['train'], y['test']], axis=0))
-    label_mappings = {}
-    for i in range(len(y_vals)):
-        label_mappings[y_vals[i]] = i
+    label_mappings = sklearn.preprocessing.LabelEncoder()
+    label_mappings.fit(y_vals)
 
-    # Custom label encoder due to train test split
-    y_train = y_train.apply(lambda x: label_mappings[x]).values
-    y_test = y_test.apply(lambda x: label_mappings[x]).values
+    y_train = label_mappings.transform(y_train)
+    y_test = label_mappings.transform(y_test)
 
     logger("Labels being mapped to appropriate classes")
     num_classes = len(np.unique(y))
