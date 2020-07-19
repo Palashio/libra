@@ -289,17 +289,17 @@ def classification_ann(instruction,
 
     X_train = data['train']
     X_test = data['test']
-
-    # ANN needs target one hot encoded for classification
-    one_hot_encoder = OneHotEncoder()
-
-    y = pd.DataFrame(
-        one_hot_encoder.fit_transform(
-            np.reshape(
-                y.values,
-                (-1,
-                 1))).toarray(),
-        columns=one_hot_encoder.get_feature_names())
+    
+    if num_classes > 2:
+        # ANN needs target one hot encoded for classification
+        one_hot_encoder = OneHotEncoder()
+        y = pd.DataFrame(
+            one_hot_encoder.fit_transform(
+                np.reshape(
+                    y.values,
+                    (-1,
+                    1))).toarray(),
+        columns = one_hot_encoder.get_feature_names())
 
     y_train = y.iloc[:len(X_train)]
     y_test = y.iloc[len(X_train):]
