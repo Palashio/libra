@@ -7,6 +7,10 @@ from nltk.corpus import stopwords
 from libra.data_generation.dataset_labelmatcher import get_similar_column
 from libra.data_generation.grammartree import get_value_instruction
 
+"""
+Returns the target X, Y, and label of Y column from the instruction
+"""
+
 
 def get_target_values(data, instruction, yLabel):
     # labels
@@ -17,6 +21,11 @@ def get_target_values(data, instruction, yLabel):
     target = get_similar_column(get_value_instruction(instruction), data)
     X = data[target]
     return X, Y, label
+
+
+"""
+Takes a list of text values and returns a lemmatized version of this text.
+"""
 
 
 def lemmatize_text(dataset):
@@ -34,8 +43,12 @@ def lemmatize_text(dataset):
     return result
 
 
-# Tokenize text
+"""
+Takes a list of text values and returns a tokenized version of this text, using spacy.
+"""
 
+
+# Tokenize text
 def tokenize_text(dataset):
     nlp = English()
     # Create a Tokenizer with the default settings for English
@@ -46,8 +59,11 @@ def tokenize_text(dataset):
     return dataset
 
 
-# Cleans up text data by removing unnecessary characters (links,
-# punctuation, uppercase letters, numbers, whitespace)
+"""
+Cleans up text data by removing unnecessary characters (links,
+punctuation, uppercase letters, numbers, whitespace)
+"""
+
 
 def text_clean_up(dataset):
     newDataset = []
@@ -66,6 +82,11 @@ def text_clean_up(dataset):
         newDataset.append(fix_slang(clean_text))
 
     return newDataset
+
+
+"""
+Cleans up text data by changing slang like concatenations into more meaningful words
+"""
 
 
 def fix_slang(text):
@@ -92,7 +113,11 @@ def fix_slang(text):
     return text
 
 
-# text encoder
+"""
+Takes a dataset and text and encodes the given text based on the vocabulary in the dataset
+"""
+
+
 def encode_text(dataset, text):
     tokenizer = tf.keras.preprocessing.text.Tokenizer(
         num_words=None, filters='!"#$%&()*+,-./:;<=>?@[\\]^_`{|}~\t\n', lower=True,
@@ -100,53 +125,3 @@ def encode_text(dataset, text):
     tokenizer.fit_on_texts(dataset)
     result = tokenizer.texts_to_sequences(text)
     return result
-
-# def decode_sequence(input_seq, encoder_model, target_word_index, decoder_model, reverse_target_word_index,
-#                     max_len_summary=50):
-#     e_out, e_h, e_c = encoder_model.predict(input_seq)
-#
-#     target_seq = np.zeros((1, 1))
-#
-#     target_seq[0, 0] = target_word_index.get('sostok')
-#
-#     stop_condition = False
-#     decoded_sentence = ''
-#     while not stop_condition:
-#         output_tokens, h, c = decoder_model.predict([target_seq] + [e_out, e_h, e_c])
-#
-#         # Sample a token
-#         sampled_token_index = np.argmax(output_tokens[0, -1, :]) + 1
-#         sampled_token = reverse_target_word_index.get(sampled_token_index)
-#
-#         if sampled_token != 'eostok':
-#             print(decoded_sentence)
-#             decoded_sentence += ' ' + sampled_token
-#
-#             # Exit condition: either hit max length or find stop word.
-#         if sampled_token == 'eostok' or len(decoded_sentence.split()) >= (max_len_summary - 1):
-#            stop_condition = True
-#
-#         # # Update the target sequence (of length 1).
-#         # target_seq = np.zeros((1, 1))
-#         # target_seq[0, 0] = sampled_token_index
-#
-#         # Update internal states
-#         e_h, e_c = h, c
-#
-#     return decoded_sentence
-#
-#
-# def seq2summary(input_seq, target_word_index, reverse_target_word_index):
-#     newString = ''
-#     for i in input_seq:
-#         if (i != 0 and i != target_word_index['sostok']) and i != target_word_index['eostok']:
-#             newString = newString + reverse_target_word_index[i] + ' '
-#     return newString
-#
-#
-# def seq2text(input_seq, reverse_source_word_index):
-#     newString = ''
-#     for i in input_seq:
-#         if i != 0:
-#             newString = newString + reverse_source_word_index[i] + ' '
-#     return newString
