@@ -125,6 +125,8 @@ def text_classification_query(self, instruction, drop=None,
         if not os.path.exists(save_path):
             raise Exception("Save path does not exists")
 
+    os.system("python - m spacy download en")
+
     data = DataReader(self.dataset)
     data = data.data_generator()
 
@@ -259,7 +261,7 @@ def summarization_query(self, instruction, preprocess=True, label_column=None,
                         save_model=False,
                         save_path=os.getcwd()):
     '''
-    function to apply algorithm for text summarization 
+    function to apply algorithm for text summarization
     :param many params: used to hyperparametrize the function.
     :return a dictionary object with all of the information for the algorithm.
     '''
