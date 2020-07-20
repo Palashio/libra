@@ -171,7 +171,7 @@ def dimensionality_RF(instruction, dataset, target="", y="", n_features=10):
     datas.append(dataset)
     columns.append([])
 
-    for x in range(4, len(X_train.columns)):
+    for i, x in product(range(3, 10), range(4, len(X_train.columns))):
         feature_model = RandomForestRegressor(random_state=1, max_depth=x)
         feature_model.fit(X_train, y_train)
 
@@ -203,8 +203,12 @@ def dimensionality_PCA(instruction, dataset, ca_threshold=None):
 
     pca = PCA(0.92)
 
+    dataReader = DataReader(dataset)
+    dataset = dataReader.data_generator()
+
     data, y, target, full_pipeline = initial_preprocesser(
-        dataset, instruction, ca_threshold=ca_threshold, preprocess=True)
+        dataset, instruction, True, 0.2, [], 0.2, random_state=49)
+
 
     X_train = data['train']
     X_test = data['test']
@@ -224,6 +228,7 @@ def dimensionality_PCA(instruction, dataset, ca_threshold=None):
     acc = []
     acc.append(accuracy_score(
         clf_mod.predict(X_test_mod), y_test))
+
     for i, j in product(range(3, 10), ["entropy", "gini"]):
         model = tree.DecisionTreeClassifier(criterion=j, max_depth=i)
         model = model.fit(X_train_mod, y_train)
@@ -380,4 +385,4 @@ def booster(dataset, obj):
     # plt.rcParams['figure.figsize'] = [5, 5]
     # plt.show()}
 
-dimensionality_RF("Model ocean proximity", "/Users/palashshah/Desktop/housing.csv"))
+print(dimensionality_RF("Model ocean proximity", "/Users/palashshah/Desktop/housing.csv"))
