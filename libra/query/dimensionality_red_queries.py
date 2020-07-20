@@ -47,7 +47,6 @@ def printtable(col_name, col_width):
         print((" " * 2 * counter) + "| " + ("".join(word.ljust(col_width)
                                                     for word in row)) + " |")
 
-
 def dimensionality_reduc(
         instruction,
         dataset,
@@ -57,16 +56,6 @@ def dimensionality_reduc(
             "KPCA",
             "ICA"],
         inplace=False):
-    '''
-    function to perform dimensionality reduction on the dataset (retrieve only 
-    features with most relevance from multidimensional space of the dataset)
-    :param instruction: command sent to client instance in written query
-    :param dataset: data instantiated in client instance passed to the algorithm
-    :param arr: list of options of algorithm/dimension reducing techniques 
-    options to choose from
-    :param inplace: option to keep features that were deemed as not important
-    intact in the dataset
-    '''
     
     global counter
     
@@ -149,18 +138,10 @@ def dimensionality_reduc(
 
 
 def dimensionality_RF(instruction, dataset, target="", y="", n_features=10):
-    '''
-    function to reduce dimensionality in dataset via random forest method
-    :param instruction: command sent to client instance in written query.
-    :param dataset: data instantiated in client instance passed to the algorithm
-    :param target: column name of response variable/feature
-    :param y: dictionary of train/test data values associated with response variable/feature
-    :param n_features: maximum number of features to choose to analyze/select
-    '''
-    
+
     global counter
 
-    dataReader = DataReader("./data/" + get_last_file()[0])
+    dataReader = DataReader(dataset)
 
     if target == "":
         data = dataReader.data_generator()
@@ -214,13 +195,7 @@ def dimensionality_RF(instruction, dataset, target="", y="", n_features=10):
 
 
 def dimensionality_PCA(instruction, dataset, ca_threshold=None):
-     '''
-     function to reduce dimensionality in dataset via principal component analysis method
-     :param instruction: command sent to client instance in written query.
-     :param dataset: data instantiated in client instance passed to the algorithm
-     :param ca_threshold: percentage of dataset to be preprocessed using morphological component analysis
-     '''
-        
+
     global counter
 
     pca = PCA(0.92)
@@ -265,13 +240,7 @@ def dimensionality_PCA(instruction, dataset, ca_threshold=None):
 
 
 def dimensionality_ICA(instruction, dataset, target="", y=""):
-    '''
-    function to reduce dimensionality in dataset via independent component analysis
-    :param instruction: command sent to client instance in written query.
-    :param dataset: data instantiated in client instance passed to the algorithm
-    :param target: column name of response variable/feature
-    :param y: dictionary of train/test data values associated with response variable/feature
-    '''
+
     global counter
 
     dataReader = DataReader("./data/" + get_last_file()[0])
@@ -323,6 +292,8 @@ def get_last_file():
     '''
     
     max_mtime = 0
+    max_file = ""
+    max_dir = ""
     for dirname, subdirs, files in os.walk("./data"):
         for fname in files:
             if fname == ".DS_Store":
@@ -333,6 +304,7 @@ def get_last_file():
                 max_mtime = mtime
                 max_dir = dirname
                 max_file = fname
+
     return max_file, max_dir, max_mtime
 
 
@@ -404,3 +376,5 @@ def booster(dataset, obj):
     # importance graph
     # plt.rcParams['figure.figsize'] = [5, 5]
     # plt.show()}
+
+dimensionality_RF("Model ocean proximity", "/Users/palashshah/Desktop/housing.csv")
