@@ -2,6 +2,10 @@ import numpy as np
 import tensorflow as tf
 import os
 
+"""
+Checks which column contains paths in the dataframe
+"""
+
 
 def get_path_column(df):
     for row, col in zip(df.iterrows(), df.columns):
@@ -10,12 +14,23 @@ def get_path_column(df):
                 return col
 
 
+"""
+Loads image from path and uses inception v3 for feature extraction from the image and returns the features
+and the image path
+"""
+
+
 def load_image(image_path):
     img = tf.io.read_file(image_path)
     img = tf.image.decode_jpeg(img, channels=3)
     img = tf.image.resize(img, (299, 299))
     img = tf.keras.applications.inception_v3.preprocess_input(img)
     return img, image_path
+
+
+"""
+Maps image name to tensor and returns tensor
+"""
 
 
 def map_func(img_name, cap):
