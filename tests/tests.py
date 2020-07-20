@@ -1,6 +1,6 @@
 from libra import client
-
 import unittest
+
 
 def make_orderer():
     order = {}
@@ -18,8 +18,8 @@ def make_orderer():
 ordered, compare = make_orderer()
 unittest.defaultTestLoader.sortTestMethodsUsing = compare
 
-class TestQueries(unittest.TestCase):
 
+class TestQueries(unittest.TestCase):
     newClient = client('tools/data/structured_data/housing.csv')
 
     """
@@ -27,6 +27,7 @@ class TestQueries(unittest.TestCase):
     
     Tests some queries in queries.py
     """
+
     # Tests whether regression_ann_query works without errors, and creates a key in models dictionary
     @ordered
     def test_regression_ann(self):
@@ -76,12 +77,12 @@ class TestQueries(unittest.TestCase):
         self.newClient.kmeans_clustering_query('predict ocean proximity')
         self.assertTrue('k_means_clustering' in self.newClient.models)
 
-
     """
     TEST ANALYZE() FUNCTION
     
     Tests all branches of .analyze() function in generate_plots
     """
+
     # Tests analyze() function for k_means_clustering
     @ordered
     def test_analyze_kmeans(self):
@@ -131,6 +132,34 @@ class TestQueries(unittest.TestCase):
     def test_invalid_model(self):
         with self.assertRaises(NameError):
             self.newClient.analyze(model='I dont exist')
+
+    newClient = client('tools/data/nlp_data/smallSentimentAnalysis.csv')
+
+    # Tests whether regression_ann_query works without errors, and creates a key in models dictionary
+    @ordered
+    def test_text_classification(self):
+        self.newClient.text_classification_query('classify tweets', epochs=1)
+        self.assertTrue('text_classification' in self.newClient.models)
+        del self.newClient.models['text_classification']
+
+    newClient = client('tools/data/nlp_data/miniDocumentSummarization.csv')
+
+    # Tests whether classification_ann_query works without errors, and creates a key in models dictionary
+    @ordered
+    def test_document_summarize(self):
+        self.newClient.classification_query_ann('summarize text', epochs=1)
+        self.assertTrue('doc_summarization' in self.newClient.models)
+        del self.newClient.models['doc_summarization']
+
+    newClient = client('tools/data/nlp_data/image-caption.csv')
+
+    # Tests whether classification_ann_query works without errors, and creates a key in models dictionary
+    @ordered
+    def test_image_captioning(self):
+        self.newClient.image_caption_query('caption images', epochs=1)
+        self.assertTrue('image_caption' in self.newClient.models)
+        del self.newClient.models['image_caption']
+
 
 if __name__ == '__main__':
     unittest.main()
