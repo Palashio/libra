@@ -388,22 +388,3 @@ def dimensionality_KPCA(instruction, dataset, target="", y=""):
     return data_modified, accuracy_score(
         clf.predict(X_test), y_test), max(acc), (len(
             dataset.columns) - len(data_modified.columns))
-
-
-def booster(dataset, obj):
-    # obj=["reg:linear","multi:softmax "]
-
-    X_train, X_test, y_train, y_test = train_test_split(
-        dataset, y, test_size=0.2, random_state=49)
-    clf = XGBClassifier(
-        objective=obj,
-        learning_rate=0.1,
-        silent=1,
-        alpha=10)
-    clf.fit(X_train, y_train)
-    return accuracy_score(clf.predict(X_test_mod), y_test_mod)
-    # importance graph
-    # plt.rcParams['figure.figsize'] = [5, 5]
-    # plt.show()}
-
-print(dimensionality_KPCA("Model ocean proximity", "/Users/palashshah/Desktop/housing.csv"))
