@@ -20,7 +20,7 @@ unittest.defaultTestLoader.sortTestMethodsUsing = compare
 
 
 class TestQueries(unittest.TestCase):
-    newClient = client('tools/data/structured_data/housing.csv')
+    newClient = client('/Users/anasawadalla/PycharmProjects/libra/tools/data/structured_data/housing.csv')
 
     """
     TEST QUERIES
@@ -133,7 +133,7 @@ class TestQueries(unittest.TestCase):
         with self.assertRaises(NameError):
             self.newClient.analyze(model='I dont exist')
 
-    newClient = client('tools/data/nlp_data/smallSentimentAnalysis.csv')
+    newClient = client('/Users/anasawadalla/PycharmProjects/libra/tools/data/nlp_data/smallSentimentAnalysis.csv')
 
     # Tests whether regression_ann_query works without errors, and creates a key in models dictionary
     @ordered
@@ -142,21 +142,21 @@ class TestQueries(unittest.TestCase):
         self.assertTrue('text_classification' in self.newClient.models)
         del self.newClient.models['text_classification']
 
-    newClient = client('tools/data/nlp_data/miniDocumentSummarization.csv')
+    newClient = client('/Users/anasawadalla/PycharmProjects/libra/tools/data/nlp_data/miniDocumentSummarization.csv')
 
     # Tests whether classification_ann_query works without errors, and creates a key in models dictionary
     @ordered
     def test_document_summarize(self):
-        self.newClient.classification_query_ann('summarize text', epochs=1)
+        self.newClient.summarization_query('summarize text', epochs=1)
         self.assertTrue('doc_summarization' in self.newClient.models)
         del self.newClient.models['doc_summarization']
 
-    newClient = client('tools/data/nlp_data/image-caption.csv')
+    newClient = client('/Users/anasawadalla/PycharmProjects/libra/tools/data/nlp_data/image-caption.csv')
 
     # Tests whether classification_ann_query works without errors, and creates a key in models dictionary
     @ordered
     def test_image_captioning(self):
-        self.newClient.image_caption_query('caption images', epochs=1)
+        self.newClient.image_caption_query('caption images', epochs=2)
         self.assertTrue('image_caption' in self.newClient.models)
         del self.newClient.models['image_caption']
 
