@@ -344,43 +344,45 @@ def dimensionality_KPCA(instruction, dataset, target="", y=""):
     :param y: dictionary of train/test data values associated with response variable/feature
     '''
     
-    global counter
+    pca = KernelPCA(kernel='rbf')
 
-    dataReader = DataReader("./data/" + get_last_file()[0])
+    dataReader = DataReader(dataset)
+    dataset = dataReader.data_generator()
 
-    if target == "":
-        data = dataReader.data_generator()
-        data.fillna(0, inplace=True)
-        remove = get_similar_column(get_value_instruction(instruction), data)
+    data, y, target, full_pipeline = initial_preprocesser(
+        dataset, instruction, True, 0.2, [], 0.2, random_state=49)
 
-        y = data[remove]
-        del data[remove]
-        le = preprocessing.LabelEncoder()
-        y = le.fit_transform(y)
 
-    kpca = KernelPCA(n_components=len(dataset.columns), kernel="rbf")
-    data_modified = kpca.fit_transform(dataset)
+    X_train = data['train']
+    X_test = data['test']
 
-    X_train, X_test, y_train, y_test = train_test_split(
-        dataset, y, test_size=0.2, random_state=49)
-    X_train_mod, X_test_mod, y_train_mod, y_test_mod = train_test_split(
-        data_modified, y, test_size=0.2, random_state=49)
+    y_train = y['train']
+    y_test = y['test']
+
+    X_train_mod = pca.fit_transform(X_train)
+    X_test_mod = pca.transform(X_test)
 
     clf = tree.DecisionTreeClassifier()
-    clf.fit(X_train, y_train)
-
     clf_mod = tree.DecisionTreeClassifier()
-    clf_mod.fit(X_train_mod, y_train_mod)
+
+    clf.fit(X_train, y_train)
+    clf_mod.fit(X_train_mod, y_train)
+
     acc = []
     acc.append(accuracy_score(
-        clf_mod.predict(X_test_mod), y_test_mod))
+        clf_mod.predict(X_test_mod), y_test))
+
     for i, j in product(range(3, 10), ["entropy", "gini"]):
         model = tree.DecisionTreeClassifier(criterion=j, max_depth=i)
-        model = model.fit(X_train_mod, y_train_mod)
+        model = model.fit(X_train_mod, y_train)
         acc.append(accuracy_score(model.predict(X_test_mod), y_test))
     del i, j
-    data_modified = pd.DataFrame(data_modified)
-    data_modified[target] = np.r_[y_train, y_test]
+
+    data_modified = pd.concat(
+        [pd.DataFrame(X_train_mod), pd.DataFrame(X_test_mod)], axis=0)
+
+    y_combined = np.r_[y_train, y_test]
+    data_modified[target] = y_combined
     # data_modified.to_csv("./data/housingPCA.csv")
 
     return data_modified, accuracy_score(
@@ -404,4 +406,4 @@ def booster(dataset, obj):
     # plt.rcParams['figure.figsize'] = [5, 5]
     # plt.show()}
 
-print(dimensionality_ICA("Model ocean proximity", "/Users/palashshah/Desktop/housing.csv"))
+print(dimensionality_KPCA("Model ocean proximity", "/Users/palashshah/Desktop/housing.csv"))
