@@ -504,3 +504,90 @@ history = model.fit_generator(
 #     # plt.show()}
 
 
+# def dimensionality_reduc(
+#         instruction,
+#         dataset,
+#         arr=[
+#             "RF",
+#             "PCA",
+#             "KPCA",
+#             "ICA"],
+#         inplace=False):
+#     global counter
+#
+#     dataReader = DataReader(dataset)
+#
+#     logger("loading dataset...")
+#     data = dataReader.data_generator()
+#     data.fillna(0, inplace=True)
+#
+#     logger("getting most similar column from instruction...")
+#     target = get_similar_column(get_value_instruction(instruction), data)
+#
+#     y = data[target]
+#     del data[target]
+#     le = preprocessing.LabelEncoder()
+#     y = le.fit_transform(y)
+#
+#     data = structured_preprocesser(data)
+#
+#     perms = []
+#     overall_storage = []
+#     finals = []
+#
+#     logger("generating dimensionality permutations...")
+#     for i in range(1, len(arr) + 1):
+#         for elem in list(permutations(arr, i)):
+#             perms.append(elem)
+#
+#     logger("running each possible permutation...")
+#     logger("realigning tensors...")
+#     for path in perms:
+#         currSet = data
+#         for element in path:
+#             if element == "RF":
+#                 data_mod, beg_acc, final_acc, col_removed = dimensionality_RF(
+#                     instruction, currSet, target, y)
+#             elif element == "PCA":
+#                 data_mod, beg_acc, final_acc, col_removed = dimensionality_PCA(
+#                     instruction, currSet, target, y)
+#             elif element == "KPCA":
+#                 data_mod, beg_acc, final_acc, col_removed = dimensionality_KPCA(
+#                     instruction, currSet, target, y)
+#             elif element == "ICA":
+#                 data_mod, beg_acc, final_acc, col_removed = dimensionality_ICA(
+#                     instruction, currSet, target, y)
+#             overall_storage.append(
+#                 list([data_mod, beg_acc, final_acc, col_removed]))
+#             currSet = data_mod
+#         finals.append(overall_storage[len(overall_storage) - 1])
+#
+#     logger("Fetching Best Accuracies...")
+#     accs = []
+#     logger("->", "Baseline Accuracy: " + str(finals[0][1]))
+#     # print("----------------------------")
+#     col_name = [["Permutation ", "| Final Accuracy "]]
+#     printtable(col_name, max(len(word)
+#                              for row in col_name for word in row) + 5)
+#     for i, element in product(range(len(finals)), finals):
+#         values = []
+#         values.append(str(perms[i]))
+#         values.append("| " + str(element[2]))
+#         datax = []
+#         datax.append(values)
+#         printtable(datax, max(len(word)
+#                               for row in col_name for word in row) + 5)
+#         del values, datax
+#         if finals[0][1] < element[2]:
+#             accs.append(list([str(perms[i]),
+#                               "| " + str(element[2])]))
+#     print("")
+#     logger("->", " Best Accuracies")
+#     # print("----------------------------")
+#     col_name = [["Permutation ", "| Final Accuracy "]]
+#     printtable(col_name, max(len(word)
+#                              for row in col_name for word in row) + 5)
+#     printtable(accs, col_width)
+#
+#     if inplace:
+#         data.to_csv(dataset)
