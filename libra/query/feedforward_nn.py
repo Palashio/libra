@@ -509,7 +509,13 @@ def convolutional(instruction=None,
         testing_path = "/testing_set"
         processInfo = already_processed(data_path)
 
-    input_shape = (processInfo["height"], processInfo["width"], 3)
+    num_channels = 3
+    color_mode = 'rgb'
+    if processInfo["gray_scale"]:
+        num_channels = 1
+        color_mode = 'grayscale'
+
+    input_shape = (processInfo["height"], processInfo["width"], num_channels)
     input_single = (processInfo["height"], processInfo["width"])
     num_classes = processInfo["num_categories"]
     loss_func = ""
@@ -553,12 +559,12 @@ def convolutional(instruction=None,
     logger("->", "Optimal image size identified: {}".format(input_shape))
     X_train = train_data.flow_from_directory(data_path + training_path,
                                              target_size=input_single,
-                                             color_mode='rgb',
+                                             color_mode=color_mode,
                                              batch_size=(32 if processInfo["train_size"] >= 32 else 1),
                                              class_mode=loss_func[:loss_func.find("_")])
     X_test = test_data.flow_from_directory(data_path + testing_path,
                                            target_size=input_single,
-                                           color_mode='rgb',
+                                           color_mode=color_mode,
                                            batch_size=(32 if processInfo["test_size"] >= 32 else 1),
                                            class_mode=loss_func[:loss_func.find("_")])
 
