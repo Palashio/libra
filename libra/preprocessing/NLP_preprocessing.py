@@ -21,7 +21,7 @@ def get_target_values(data, instruction, yLabel):
 
 def lemmatize_text(dataset):
     result = []
-    nlp = spacy.load('en')
+    nlp = spacy.load('en_core_web_md')
     for text in range(len(dataset)):
         word = ""
         doc = nlp(dataset[text])

@@ -125,8 +125,6 @@ def text_classification_query(self, instruction, drop=None,
         if not os.path.exists(save_path):
             raise Exception("Save path does not exists")
 
-    os.system("python - m spacy download en")
-
     data = DataReader(self.dataset)
     data = data.data_generator()
 
