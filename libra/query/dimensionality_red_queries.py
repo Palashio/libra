@@ -4,7 +4,7 @@ from itertools import product, permutations
 from libra.preprocessing.data_reader import DataReader
 import os
 from sklearn.ensemble import RandomForestRegressor
-from libra.preprocessing.data_preprocesser import structured_preprocesser, initial_preprocesser
+from libra.preprocessing.data_preprocesser import structured_preprocesser, initial_preprocesser, clustering_preprocessor
 from libra.data_generation.grammartree import get_value_instruction
 from libra.data_generation.dataset_labelmatcher import get_similar_column
 
@@ -147,15 +147,18 @@ def dimensionality_RF(instruction, dataset, target="", y="", n_features=10):
         data = dataReader.data_generator()
         data.fillna(0, inplace=True)
         remove = get_similar_column(get_value_instruction(instruction), data)
-        data = structured_preprocesser(data)
+        data, y, target, full_pipeline = initial_preprocesser(
+            data, instruction, True, 0.2, [], 0.2, random_state=49)
 
-        y = data[remove]
-        del data[remove]
         le = preprocessing.LabelEncoder()
-        y = le.fit_transform(y)
+        X_train = data['train']
+        y_train = y['train']
+        X_test = data['test']
+        y_test = y['test']
 
-    X_train, X_test, y_train, y_test = train_test_split(
-        dataset, y, test_size=0.2, random_state=49)
+        y_train= le.fit_transform(y_train)
+        y_test = le.fit_transform(y_test)
+
     first_classifier = tree.DecisionTreeClassifier()
     first_classifier.fit(X_train, y_train)
 
@@ -168,16 +171,16 @@ def dimensionality_RF(instruction, dataset, target="", y="", n_features=10):
     datas.append(dataset)
     columns.append([])
 
-    for i, x in product(range(3, 10), range(4, len(dataset.columns))):
-        feature_model = RandomForestRegressor(random_state=1, max_depth=i)
+    for x in range(4, len(X_train.columns)):
+        feature_model = RandomForestRegressor(random_state=1, max_depth=x)
         feature_model.fit(X_train, y_train)
 
         importances = feature_model.feature_importances_
         indices = np.argsort(importances)[-x:]
-        columns.append(dataset.columns[indices])
+        columns.append(X_train.columns[indices])
 
-        X_temp_train = X_train[dataset.columns[indices]]
-        X_temp_test = X_test[dataset.columns[indices]]
+        X_temp_train = X_train[X_train.columns[indices]]
+        X_temp_test = X_test[X_train.columns[indices]]
 
         val = pd.DataFrame(np.r_[X_temp_train, X_temp_test])
         val[target] = np.r_[y_train, y_test]
@@ -189,7 +192,7 @@ def dimensionality_RF(instruction, dataset, target="", y="", n_features=10):
         accuracy_scores.append(accuracy_score(vr.predict(X_temp_test), y_test))
 
     the_index = accuracy_scores.index(max(accuracy_scores))
-
+    print(accuracy_scores)
     return datas[the_index], accuracy_scores[0], max(
         accuracy_scores), list(columns[the_index])
 
@@ -377,4 +380,4 @@ def booster(dataset, obj):
     # plt.rcParams['figure.figsize'] = [5, 5]
     # plt.show()}
 
-dimensionality_RF("Model ocean proximity", "/Users/palashshah/Desktop/housing.csv")
+dimensionality_RF("Model ocean proximity", "/Users/palashshah/Desktop/housing.csv"))
