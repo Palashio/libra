@@ -133,32 +133,29 @@ class TestQueries(unittest.TestCase):
         with self.assertRaises(NameError):
             self.newClient.analyze(model='I dont exist')
 
-    newClient = client('tools/data/nlp_data/smallSentimentAnalysis.csv')
-
     # Tests whether regression_ann_query works without errors, and creates a key in models dictionary
     @ordered
     def test_text_classification(self):
-        self.newClient.text_classification_query('classify tweets', epochs=1)
-        self.assertTrue('text_classification' in self.newClient.models)
-        del self.newClient.models['text_classification']
-
-    newClient = client('tools/data/nlp_data/miniDocumentSummarization.csv')
+        newClient = client('tools/data/nlp_data/smallSentimentAnalysis.csv')
+        newClient.text_classification_query('classify tweets', epochs=1)
+        self.assertTrue('text_classification' in newClient.models)
+        del newClient.models['text_classification']
 
     # Tests whether classification_ann_query works without errors, and creates a key in models dictionary
     @ordered
     def test_document_summarize(self):
-        self.newClient.summarization_query('summarize text', epochs=1)
-        self.assertTrue('doc_summarization' in self.newClient.models)
-        del self.newClient.models['doc_summarization']
-
-    newClient = client('tools/data/nlp_data/image-caption.csv')
+        newClient = client('tools/data/nlp_data/miniDocumentSummarization.csv')
+        newClient.summarization_query('summarize text', epochs=1)
+        self.assertTrue('doc_summarization' in newClient.models)
+        del newClient.models['doc_summarization']
 
     # Tests whether classification_ann_query works without errors, and creates a key in models dictionary
     @ordered
     def test_image_captioning(self):
-        self.newClient.image_caption_query('caption images', epochs=2)
-        self.assertTrue('image_caption' in self.newClient.models)
-        del self.newClient.models['image_caption']
+        newClient = client('tools/data/nlp_data/image-caption.csv')
+        newClient.image_caption_query('caption images', epochs=2)
+        self.assertTrue('image_caption' in newClient.models)
+        del newClient.models['image_caption']
 
 
 if __name__ == '__main__':
