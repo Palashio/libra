@@ -113,6 +113,12 @@ Table of Contents
   * [get_last_file](#get_last_file)
 * [feedforward_nn.py](#feedforward_nn)
 * [nlp_queries.py](#nlp_queries)
+  * [classify_text](#classify_text)
+  * [text_classification_query](#text_classification_query)
+  * [get_summary](#get_summary)
+  * [summarization_query](#summarization_query)
+  * [generate_caption](#generate_caption)
+  * [image_caption_query](#image_caption_query)
 * [supplementaries.py](#supplementaries)
 * [predictionQueries.py](#predictionQueries)
   * [clearLog](#clearLog)
@@ -1624,6 +1630,251 @@ libra.get_last_file()
 ***
 
 ## nlp_queries ##
+
+### classify_text ###
+
+``` python
+libra.clarify_text(self, text)
+```
+
+
+
+*Parameters --*
+
+text:
+
+
+*Returns --*
+
+sentimentInfo["classes"][tf.keras.backend.get_value(prediction)[0]]: 
+
+
+### text_classification_query ###
+
+``` python
+libra.text_classification_query(self, 
+                                instruction,
+                                drop=None,
+                                preprocess=True,
+                                label_column=None,
+                                test_size=0.2,
+                                random_state=49,
+                                learning_rate=1e-2,
+                                epochs=20,
+                                monitor="val_loss",
+                                batch_size=32,
+                                max_text_length=200,
+                                max_features=20000,
+                                generate_plots=True,
+                                save_model=False,
+                                save_path=os.getcwd())
+```
+
+*Parameters --*
+
+instruction: 
+
+label_column:
+
+drop:
+
+epochs:
+
+preprocess:
+
+random_state:
+
+test_size:
+
+top_k:
+
+batch_size:
+
+buffer_size:
+
+embedding_dim:
+
+units:
+
+gpu:
+
+generate_plots:
+
+save_model_decoder:
+
+save_path_decoder:
+
+save_modeL_encoder:
+
+save_path_encoder:
+
+
+*Returns --*
+
+self.models["text_classification"]:
+
+### get_summary ###
+
+``` python
+libra.get_summary(self, text)
+```
+
+
+
+*Parameters --*
+
+text:
+
+
+*Returns --*
+
+predictions[0]:
+
+### summarization_query ###
+
+``` python
+libra.summarization_query(self,
+                          instruction,
+                          preprocess=True,
+                          label_column=None,
+                          drop=None,
+                          epochs=10,
+                          batch_size=32,
+                          learning_rate=1e-4,
+                          max_text_length=512,
+                          max_summary_length=150,
+                          test_size=0.2,
+                          random_state=49,
+                          gpu=False,
+                          generate_plots=True,
+                          save_model=False,
+                          save_path=os.getcwd())
+```
+
+
+
+*Parameters --*
+
+instruction:
+
+label_column:
+
+drop:
+
+epochs:
+
+preprocess:
+
+random_state:
+
+test_size:
+
+top_k:
+
+batch_size:
+
+buffer_size:
+
+embedding_dim:
+
+units:
+
+gpu:
+
+generate_plots:
+
+save_model_decoder:
+
+save_path_decoder:
+
+save_model_encoder:
+
+save_path_encoder:
+
+
+*Returns --*
+
+self.models["doc_summarization"]: 
+
+### generate_caption ###
+
+``` python
+libra.generate_caption(self, image)
+```
+
+
+*Parameters --*
+
+image:
+
+
+*Returns --*
+
+generate_caption_helper(image, decoder, encoder, tokenizer, image_features_extract_model):
+
+### image_caption_query ###
+
+``` python
+libra.image_caption_query(self,
+                          instruction,
+                          drop=None,
+                          epochs=10,
+                          preprocess=True,
+                          random_state=49,
+                          test_size=0.2,
+                          top_k=5000,
+                          batch_size=32,
+                          buffer_size=1000,
+                          embedding_dim=256,
+                          units=512,
+                          gpu=False,
+                          generate_plots=True,
+                          save_model_decoder=False,
+                          save_path_decoder=os.getcwd(),
+                          save_model_encoder=False,
+                          save_path_encoder=os.getcwd())
+```
+
+*Parameters --*
+
+instruction:
+
+drop:
+
+epochs:
+
+preprocess:
+
+random_state:
+
+test_size:
+
+top_k:
+
+batch_size:
+
+buffer_size:
+
+embedding_dim:
+
+units:
+
+gpu:
+
+generate_plots:
+
+save_model_decoder:
+
+save_path_decoder:
+
+save_model_encoder:
+
+save_path_encoder:
+
+
+*Returns --*
+
+self.models["image_caption"]: 
 
 ***
 
