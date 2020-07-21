@@ -9,6 +9,7 @@ from libra.preprocessing.image_preprocesser import (setwise_preprocessing,
 from libra.preprocessing.data_reader import DataReader
 from keras.models import Sequential
 from keras.layers import (Dense, Conv2D, Flatten, MaxPooling2D, )
+from keras.applications import vgg16, vgg19, resnet50, resnet101, resnet152
 import pandas as pd
 from libra.query.supplementaries import save, generate_id
 from keras.preprocessing.image import ImageDataGenerator
@@ -459,6 +460,7 @@ def convolutional(instruction=None,
                   image_column=None,
                   training_ratio=0.8,
                   augmentation=True,
+                  architecture=None,
                   epochs=10,
                   height=None,
                   width=None):
@@ -525,24 +527,42 @@ def convolutional(instruction=None,
     elif num_classes == 2:
         loss_func = "binary_crossentropy"
 
-    logger("Creating convolutional neural network dynamically")
+    logger("Creating convolutional neural netwwork dynamically")
+
     # Convolutional Neural Network
-    model = Sequential()
-    model.add(
-        Conv2D(
-            64,
-            kernel_size=3,
-            activation="relu",
-            input_shape=input_shape))
-    model.add(MaxPooling2D(pool_size=(2, 2)))
-    model.add(Conv2D(64, kernel_size=3, activation="relu"))
-    model.add(MaxPooling2D(pool_size=(2, 2)))
-    model.add(Flatten())
-    model.add(Dense(num_classes, activation="softmax"))
+    if architecture:
+        architecture_lower = architecture.lower()
+
+        #By default, weights are randomly initialized
+        if architecture_lower == "vgg16":
+            model = vgg16.VGG16(include_top=True, classes=num_classes)
+        elif architecture_lower == "vgg19":
+            model = vgg19.VGG19(include_top=True, classes=num_classes)
+        elif architecture_lower == "resnet50":
+            model = resnet50.ResNet50(include_top=True, classes=num_classes)
+        elif architecture_lower == "resnet101":
+            model = resnet101.ResNet101(include_top=True, classes=num_classes)
+        elif architecture_lower == "resnet152":
+            model = resnet152.ResNet152(include_top=True, classes=num_classes)
+    else:
+        model = Sequential()
+        model.add(
+            Conv2D(
+                64,
+                kernel_size=3,
+                activation="relu",
+                input_shape=input_shape))
+        model.add(MaxPooling2D(pool_size=(2, 2)))
+        model.add(Conv2D(64, kernel_size=3, activation="relu"))
+        model.add(MaxPooling2D(pool_size=(2, 2)))
+        model.add(Flatten())
+        model.add(Dense(num_classes, activation="softmax"))
+
     model.compile(
         optimizer="adam",
         loss=loss_func,
         metrics=['accuracy'])
+
     logger("Located image data")
     if augmentation:
         train_data = ImageDataGenerator(rescale=1. / 255,
