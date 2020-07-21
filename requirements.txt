@@ -15,11 +15,9 @@ keras-tuner
 spacy
 torch
 autocorrect
-<<<<<<< HEAD
 pillow
 prince
 opencv-python
 nltk
-=======
 download
->>>>>>> update requirements and gitignore
+
