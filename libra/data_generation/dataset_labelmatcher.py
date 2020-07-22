@@ -1,5 +1,4 @@
 import string
-import Levenshtein
 
 # generates mask for sequence to sequence processinng
 
