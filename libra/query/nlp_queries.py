@@ -299,6 +299,10 @@ def summarization_query(self, instruction, preprocess=True, label_column=None,
     X, Y, target = get_target_values(data, instruction, label)
     logger("->", "Target Column Found: {}".format(target))
     logger("Establishing dataset walkers")
+    if preprocess:
+        logger("Preprocessing data")
+        X = lemmatize_text(text_clean_up(X.array))
+        Y = lemmatize_text(text_clean_up(Y.array))
 
     X = tokenizer.encode(X, return_tensors="tf", max_length=max_text_length)
     Y = tokenizer.encode(Y, return_tensors="tf", max_length=max_text_length)
