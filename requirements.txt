@@ -9,9 +9,9 @@ pprint
 matplotlib
 tabulate
 textblob
-python-Levenshtein
 seaborn
 keras-tuner
+jellyfish
 spacy
 torch
 autocorrect
@@ -19,3 +19,5 @@ pillow
 prince
 opencv-python
 nltk
+download
+
