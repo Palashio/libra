@@ -16,6 +16,7 @@ from libra.data_generation.grammartree import get_value_instruction
 from libra.data_generation.dataset_labelmatcher import (get_similar_column,
                                                         get_similar_model)
 from libra.plotting.generate_plots import analyze
+from libra.dashboard.auto_eda import edaDashboard
 from colorama import Fore, Style
 import pandas as pd
 from pandas.core.common import SettingWithCopyWarning
@@ -993,3 +994,7 @@ class client:
             model = self.latest_model
         clearLog()
         analyze(self, model, save, save_model)
+
+    def dashboard(self):
+        dash = edaDashboard(self.dataset)
+        dash.dashboard()    
