@@ -228,14 +228,15 @@ def text_classification_query(self, instruction, drop=None,
 
 
 # doc_summarization predict wrapper
-def get_summary(self, text, max_summary_length=40):
-    modelInfo = self.models.get("doc_summarization")
+def get_summary(self, text, max_summary_length=40, num_beams=4, no_repeat_ngram_size=2, num_return_sequences=1, early_stopping=True):
+    modelInfo = self.models.get("summarization")
     model = modelInfo['model']
     model.eval()
     tokenizer = modelInfo['tokenizer']
     return tokenizer.decode(
         model.generate(tokenizer.encode(text, return_tensors="tf", max_length=modelInfo["max_text_length"])
-                       , max_length=max_summary_length, num_beams=4, early_stopping=True))
+                       , max_length=max_summary_length, num_beams=num_beams,
+                       no_repeat_ngram_size=no_repeat_ngram_size, num_return_sequences=1, early_stopping=early_stopping))
 
 
 # Text summarization query
@@ -243,6 +244,7 @@ def summarization_query(self, instruction, preprocess=True, label_column=None,
                         drop=None,
                         epochs=10,
                         batch_size=32,
+                        num_beams=4,
                         learning_rate=3e-5,
                         monitor="val_loss",
                         max_text_length=512,
@@ -362,9 +364,9 @@ def summarization_query(self, instruction, preprocess=True, label_column=None,
         logger("Saving model")
         save(model, save_model, save_path=save_path)
 
-    logger("Storing information in client object under key 'doc_summarization'")
+    logger("Storing information in client object under key 'summarization'")
 
-    self.models["doc_summarization"] = {
+    self.models["summarization"] = {
         "model": model,
         "max_text_length": max_text_length,
         "plots": plots,
