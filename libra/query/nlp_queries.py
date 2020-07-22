@@ -269,7 +269,7 @@ def summarization_query(self, instruction, preprocess=True, label_column=None,
 
     if save_model:
         if not os.path.exists(save_path):
-            raise Exception("Save path does not exists")
+            raise Exception("Save path does not exist")
 
     if test_size == 0:
         testing = False
