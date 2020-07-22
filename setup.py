@@ -24,7 +24,6 @@ setuptools.setup(
                       'matplotlib',
                       'tabulate',
                       'textblob',
-                      'python-Levenshtein',
                       'seaborn',
                       'keras-tuner',
                       'spacy',
