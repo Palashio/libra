@@ -1,14 +1,11 @@
 import os
 import numpy as np
-import pandas as pd
 import tensorflow as tf
 from colorama import Fore, Style
 from keras_preprocessing import sequence
 from sklearn.model_selection import train_test_split
 from tensorflow.python.keras.callbacks import EarlyStopping
-from torch.utils.data import DataLoader
-from transformers import T5Tokenizer, T5ForConditionalGeneration, TFAutoModelWithLMHead, AutoTokenizer
-import transformers
+from transformers import TFAutoModelWithLMHead, AutoTokenizer
 import libra.plotting.nonkeras_generate_plots
 from libra.data_generation.dataset_labelmatcher import get_similar_column
 from libra.data_generation.grammartree import get_value_instruction
@@ -16,7 +13,6 @@ from libra.modeling.prediction_model_creation import get_keras_text_class
 from libra.plotting.generate_plots import generate_classification_plots
 from libra.preprocessing.NLP_preprocessing import get_target_values, text_clean_up, lemmatize_text, encode_text
 from libra.preprocessing.data_reader import DataReader
-from libra.preprocessing.huggingface_model_finetune_helper import CustomDataset, train, inference
 from libra.preprocessing.image_caption_helpers import load_image, map_func, CNN_Encoder, RNN_Decoder, get_path_column, \
     generate_caption_helper
 from libra.query.supplementaries import save
@@ -228,7 +224,7 @@ def text_classification_query(self, instruction, drop=None,
 
 
 # doc_summarization predict wrapper
-def get_summary(self, text, max_summary_length=40, num_beams=4, no_repeat_ngram_size=2, num_return_sequences=1,
+def get_summary(self, text, num_beams=4, no_repeat_ngram_size=2, num_return_sequences=1,
                 early_stopping=True):
     modelInfo = self.models.get("summarization")
     model = modelInfo['model']
@@ -236,7 +232,7 @@ def get_summary(self, text, max_summary_length=40, num_beams=4, no_repeat_ngram_
     tokenizer = modelInfo['tokenizer']
     return tokenizer.decode(
         model.generate(tokenizer.encode(text, return_tensors="tf", max_length=modelInfo["max_text_length"])
-                       , max_length=max_summary_length, num_beams=num_beams,
+                       , max_length=modelInfo["max_summary_length"], num_beams=num_beams,
                        no_repeat_ngram_size=no_repeat_ngram_size, num_return_sequences=num_return_sequences,
                        early_stopping=early_stopping))
 
@@ -249,6 +245,7 @@ def summarization_query(self, instruction, preprocess=True, label_column=None,
                         learning_rate=3e-5,
                         monitor="val_loss",
                         max_text_length=512,
+                        max_summary_length=40,
                         test_size=0.2,
                         random_state=49,
                         generate_plots=True,
@@ -309,6 +306,7 @@ def summarization_query(self, instruction, preprocess=True, label_column=None,
         label = label_column
 
     tokenizer = AutoTokenizer.from_pretrained("t5-small")
+    # Find target columns
     X, Y, target = get_target_values(data, instruction, label)
     logger("->", "Target Column Found: {}".format(target))
     logger("Establishing dataset walkers")
@@ -319,14 +317,15 @@ def summarization_query(self, instruction, preprocess=True, label_column=None,
         X = lemmatize_text(text_clean_up(X.array))
         Y = lemmatize_text(text_clean_up(Y.array))
 
-    X = tokenizer.encode(X, return_tensors="tf", max_length=max_text_length)
-    Y = tokenizer.encode(Y, return_tensors="tf", max_length=max_text_length)
-
+    # tokenize text/summaries
+    X = [tokenizer.encode(x, return_tensors="tf", max_length=max_text_length, pad_to_max_length=True) for x in X]
+    Y = [tokenizer.encode(y, return_tensors="tf", max_length=max_summary_length) for y in Y]
+    print(X)
     X_train, X_test, y_train, y_test = train_test_split(
         X, Y, test_size=test_size, random_state=random_state)
 
     logger('Fine-Tuning the model on your dataset...')
-    model = TFAutoModelWithLMHead.from_pretrained("t5-small", pad_token_id=tokenizer.eos_token_id)
+    model = TFAutoModelWithLMHead.from_pretrained("t5-small")
 
     optimizer = tf.keras.optimizers.Adam(learning_rate=learning_rate)
     loss = tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True)
@@ -339,9 +338,8 @@ def summarization_query(self, instruction, preprocess=True, label_column=None,
         verbose=0,
         patience=5)
 
-    model.train()
     # Fine tune model
-    history = model.fit(X_train, y_train, validation_data=(X_test, y_test),
+    history = model.fit(tf.convert_to_tensor(X_train), tf.convert_to_tensor(y_train), validation_data=(X_test, y_test),
                         batch_size=batch_size,
                         epochs=epochs, callbacks=[es], verbose=0)
 

@@ -743,7 +743,7 @@ class client:
         clearLog()
 
     # summarization predict wrapper
-    def get_summary(self, text, max_summary_length=40, num_beams=4, no_repeat_ngram_size=2, num_return_sequences=1,
+    def get_summary(self, text, num_beams=4, no_repeat_ngram_size=2, num_return_sequences=1,
                     early_stopping=True):
         '''
         Calls the body of the summarizer which is located in the nlp_queries.py file
@@ -756,8 +756,7 @@ class client:
         :return: a summary of text inputted in the text field.
         '''
         clearLog()
-        return get_summary(self=self, text=text, max_summary_length=max_summary_length
-                           , num_beams=num_beams, no_repeat_ngram_size=no_repeat_ngram_size
+        return get_summary(self=self, text=text, num_beams=num_beams, no_repeat_ngram_size=no_repeat_ngram_size
                            , num_return_sequences=num_return_sequences, early_stopping=early_stopping)
 
     # summarization query
@@ -768,6 +767,7 @@ class client:
                             learning_rate=3e-5,
                             monitor="val_loss",
                             max_text_length=512,
+                            max_summary_length=40,
                             test_size=0.2,
                             random_state=49,
                             generate_plots=True,
@@ -783,6 +783,8 @@ class client:
         :param learning_rate: The learning rate of the model (float).
         :param max_text_length: The maximum length of the string of text (int).
         :param test_size: Size of the testing set (float).
+        :param max_summary_length: Max summary length (int).
+        :param monitor: type of early stop monitor (str).
         :param random_state: Initialize a pseudo-random number generator (int).
         :param generate_plots: Generate plots for the model (bool).
         :param save_model: Save the model (bool).
@@ -800,6 +802,7 @@ class client:
             monitor=monitor,
             learning_rate=learning_rate,
             max_text_length=max_text_length,
+            max_summary_length=max_summary_length,
             test_size=test_size,
             random_state=random_state,
             generate_plots=generate_plots,
@@ -851,6 +854,8 @@ class client:
         :param buffer_size: The maximum number of elements to buffer (int).
         :param embedding_dim: The dimension of the word embedding mapping (int).
         :param units: The recurrent units in the decoder (int).
+        :param test_size: test size (int) .
+        :param gpu: Choose to use gpu (bool).
         :param generate_plots: Generate plots for the model (bool).
         :param save_model_decoder: Save the decoder (bool).
         :param save_path_decoder: Filepath of where to save the decoder (str).
@@ -997,3 +1002,8 @@ class client:
             model = self.latest_model
         clearLog()
         analyze(self, model, save, save_model)
+
+
+x = client("/Users/anasawadalla/PycharmProjects/libra/tools/data/nlp_data/miniDocumentSummarization.csv")
+x.summarization_query("summarize text")
+

@@ -29,7 +29,7 @@ Takes a list of text values and returns a lemmatized version of this text.
 
 def lemmatize_text(dataset):
     result = []
-    nlp = spacy.load('en')
+    nlp = English()
     for text in range(len(dataset)):
         word = ""
         doc = nlp(dataset[text])
