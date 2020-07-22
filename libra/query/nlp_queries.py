@@ -1,16 +1,14 @@
 import os
-
 import numpy as np
 import pandas as pd
 import tensorflow as tf
-import torch
 from colorama import Fore, Style
 from keras_preprocessing import sequence
 from sklearn.model_selection import train_test_split
 from tensorflow.python.keras.callbacks import EarlyStopping
 from torch.utils.data import DataLoader
-from transformers import T5Tokenizer, T5ForConditionalGeneration
-
+from transformers import T5Tokenizer, T5ForConditionalGeneration, TFAutoModelWithLMHead, AutoTokenizer
+import transformers
 import libra.plotting.nonkeras_generate_plots
 from libra.data_generation.dataset_labelmatcher import get_similar_column
 from libra.data_generation.grammartree import get_value_instruction
@@ -247,12 +245,11 @@ def summarization_query(self, instruction, preprocess=True, label_column=None,
                         drop=None,
                         epochs=10,
                         batch_size=32,
-                        learning_rate=1e-4,
+                        learning_rate=3e-5,
+                        monitor="val_loss",
                         max_text_length=512,
-                        max_summary_length=150,
                         test_size=0.2,
                         random_state=49,
-                        gpu=False,
                         generate_plots=True,
                         save_model=False,
                         save_path=os.getcwd()):
@@ -270,7 +267,7 @@ def summarization_query(self, instruction, preprocess=True, label_column=None,
             "Test size must be a float between 0 and 1 (a test size greater than or equal to 1 results in no training "
             "data)")
 
-    if max_text_length < 2 | max_summary_length < 2:
+    if max_text_length < 2:
         raise Exception("Text and summary must be at least of length 2")
 
     if epochs < 1:
@@ -282,9 +279,6 @@ def summarization_query(self, instruction, preprocess=True, label_column=None,
     if max_text_length < 1:
         raise Exception("Max text length must be equal to or greater than 1")
 
-    if max_summary_length < 1:
-        raise Exception("Max summary length must be equal to or greater than 1")
-
     if save_model:
         if not os.path.exists(save_path):
             raise Exception("Save path does not exists")
@@ -294,10 +288,8 @@ def summarization_query(self, instruction, preprocess=True, label_column=None,
     else:
         testing = True
 
-    if gpu:
-        device = "cuda"
-    else:
-        device = "cpu"
+    tf.random.set_seed(random_state)
+    np.random.seed(random_state)
 
     data = DataReader(self.dataset)
     data = data.data_generator()
@@ -315,93 +307,63 @@ def summarization_query(self, instruction, preprocess=True, label_column=None,
     else:
         label = label_column
 
+    tokenizer = AutoTokenizer.from_pretrained("t5-small")
     X, Y, target = get_target_values(data, instruction, label)
-    df = pd.DataFrame({'text': Y, 'ctext': X})
     logger("->", "Target Column Found: {}".format(target))
-
-    torch.manual_seed(random_state)
-    np.random.seed(random_state)
-
-    tokenizer = T5Tokenizer.from_pretrained("t5-small")
-
-    train_size = 1 - test_size
-    train_dataset = df.sample(
-        frac=train_size,
-        random_state=random_state).reset_index(
-        drop=True)
-
     logger("Establishing dataset walkers")
-    training_set = CustomDataset(
-        train_dataset, tokenizer, max_text_length, max_summary_length)
 
-    if testing:
-        val_dataset = df.drop(train_dataset.index).reset_index(drop=True)
+    X = tokenizer.encode(X, return_tensors="tf", max_length=max_text_length)
+    Y = tokenizer.encode(Y, return_tensors="tf", max_length=max_text_length)
 
-        val_set = CustomDataset(
-            val_dataset,
-            tokenizer,
-            max_text_length,
-            max_summary_length)
-
-        val_params = {
-            'batch_size': batch_size,
-            'shuffle': False,
-            'num_workers': 0
-        }
-        val_loader = DataLoader(val_set, **val_params)
-    else:
-        val_loader = None
-
-    train_params = {
-        'batch_size': batch_size,
-        'shuffle': True,
-        'num_workers': 0
-    }
-
-    training_loader = DataLoader(training_set, **train_params)
-    # used small model
-    model = T5ForConditionalGeneration.from_pretrained("t5-small")
-    model = model.to(device)
-
-    optimizer = torch.optim.Adam(
-        params=model.parameters(), lr=learning_rate)
+    X_train, X_test, y_train, y_test = train_test_split(
+        X, Y, test_size=test_size, random_state=random_state)
 
     logger('Fine-Tuning the model on your dataset...')
-    total_loss_train = []
-    total_loss_val = []
-    for epoch in range(epochs):
-        loss_train, loss_val = train(
-            epoch, tokenizer, model, device, training_loader, val_loader, optimizer, testing=testing)
-        total_loss_train.append(loss_train)
-        total_loss_val.append(loss_val)
+    model = TFAutoModelWithLMHead.from_pretrained("t5-small")
 
-    logger("->", "Final training loss: {}".format(loss_train))
+    optimizer = tf.keras.optimizers.Adam(learning_rate=learning_rate)
+    loss = tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True)
+    model.compile(optimizer=optimizer, loss=loss)
+
+    # early stopping callback
+    es = EarlyStopping(
+        monitor=monitor,
+        mode='auto',
+        verbose=0,
+        patience=5)
+
+    history = model.fit(X_train, y_train, validation_data=(X_test, y_test),
+                        batch_size=batch_size,
+                        epochs=epochs, callbacks=[es], verbose=0)
+
+    logger("->", "Final training loss: {}".format(history.history["loss"][len(history.history["loss"]) - 1]))
     if testing:
-        logger("->", "Final validation loss: {}".format(loss_val))
+        logger("->",
+               "Final validation loss: {}".format(history.history["val_loss"][len(history.history["val_loss"]) - 1]))
+        logger("->", "Final validation accuracy: {}".format(
+            history.history["val_accuracy"][len(history.history["val_accuracy"]) - 1]))
     else:
         logger("->", "Final validation loss: {}".format("0, No validation done"))
 
-    plots = {}
+    plots = None
     if generate_plots:
         logger("Generating plots")
-        plots.update({"loss": libra.plotting.nonkeras_generate_plots.plot_loss(total_loss_train, total_loss_val)})
+        plots = generate_classification_plots(
+            history, X, y_train, model, X_test, y_test)
 
     if save_model:
         logger("Saving model")
-        path = save_path + "DocSummarization.pth"
-        torch.save(model, path)
-        logger("->", "Saved model to disk as DocSummarization.pth")
+        save(model, save_model, save_path=save_path)
 
     logger("Storing information in client object under key 'doc_summarization'")
 
     self.models["doc_summarization"] = {
         "model": model,
         "max_text_length": max_text_length,
-        "max_sum_length": max_summary_length,
         "plots": plots,
-        'losses': {'training_loss': loss_train,
-                   'val_loss': loss_val}
-    }
+        'losses': {'training_loss': history.history['loss'], 'val_loss': history.history['val_loss']},
+        'accuracy': {'training_accuracy': history.history['accuracy'],
+                     'validation_accuracy': history.history['val_accuracy']}}
     clearLog()
     return self.models["doc_summarization"]
 
