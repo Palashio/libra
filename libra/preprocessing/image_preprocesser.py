@@ -47,12 +47,14 @@ def setwise_preprocessing(data_path, new_folder, height, width):
     if width is None:
         width = width1
 
+    is_rgb = []
     # resize images
     for index, p in enumerate(paths):
         for class_folder, images in dict[index].items():
             for image_name, image in images.items():
-                dict[index][class_folder][image_name] = process_color_channel(
-                    image, height, width)
+                resized_info = process_color_channel(image, height, width)
+                dict[index][class_folder][image_name] = resized_info[0]
+                is_rgb.append(resized_info[1])
         if new_folder:
             folder_names = ["proc_training_set", "proc_testing_set"]
             create_folder(data_path, folder_names[index])
@@ -69,7 +71,8 @@ def setwise_preprocessing(data_path, new_folder, height, width):
             "height": height,
             "width": width,
             "train_size": data_size[0],
-            "test_size": data_size[1]}
+            "test_size": data_size[1],
+            "gray_scale": not any(is_rgb)}
 
 
 # processes a csv_file containing image paths and creates a testing/training
@@ -196,12 +199,15 @@ def csv_preprocessing(csv_file,
         create_folder(data_path + "/proc_testing_set", classification)
 
     data_size = [0, 0]
-    class_count = dict.fromkeys(classifications.keys(), 0)
+    class_count = dict.fromkeys(classifications.keys(), 1)
+    is_rgb = []
 
     # save images into correct folder
     for index, row in df.iterrows():
         # resize images
-        img = process_color_channel(image_list[index], height, width)
+        resized_info = process_color_channel(image_list[index], height, width)
+        img = resized_info[0]
+        is_rgb.append(resized_info[1])
         p = "proc_" + (os.path.basename(row[image_column])
                        if path_included else row[image_column])
         if need_file_extension:
@@ -220,7 +226,8 @@ def csv_preprocessing(csv_file,
             "height": height,
             "width": width,
             "train_size": data_size[0],
-            "test_size": data_size[1]}
+            "test_size": data_size[1],
+            "gray_scale": not any(is_rgb)}
 
 
 # preprocesses images when given a folder containing class folders
@@ -251,10 +258,14 @@ def classwise_preprocessing(data_path, training_ratio, height, width):
         create_folder(data_path + "/proc_testing_set", classification)
 
     data_size = [0, 0]
+    is_rgb = []
+
     for class_folder, images in img_dict.items():
-        count = 0
+        count = 1
         for image_name, image in images.items():
-            resized_img = process_color_channel(image, height, width)
+            resized_info = process_color_channel(image, height, width)
+            resized_img = resized_info[0]
+            is_rgb.append(resized_info[1])
             if count / len(images) < training_ratio:
                 data_size[0] += 1
                 save_image(data_path + "/proc_training_set",
@@ -273,7 +284,8 @@ def classwise_preprocessing(data_path, training_ratio, height, width):
             "height": height,
             "width": width,
             "train_size": data_size[0],
-            "test_size": data_size[1]}
+            "test_size": data_size[1],
+            "gray_scale": not any(is_rgb)}
 
 
 # process a class folder by getting return a list of all the heights and widths
@@ -364,7 +376,11 @@ def calculate_medians(heights, widths):
 
 # resizes the image with the given height and width
 def process_color_channel(img, height, width):
-    chanels = [chanel for chanel in cv2.split(img)]
+    chanels = cv2.split(img)
+
+    is_rgb = True
+    if (chanels[0]==chanels[1]).all() and (chanels[1]==chanels[2]).all():
+        is_rgb = False
 
     for index, chanel in enumerate(chanels):
         if chanel.shape[0] > height:
@@ -397,7 +413,7 @@ def process_color_channel(img, height, width):
                 interpolation=cv2.INTER_AREA)
         chanels[index] = chanel
 
-    return cv2.merge(chanels)
+    return cv2.merge(chanels), is_rgb
 
 # distinguishes the preprocess mode to do
 
@@ -466,8 +482,13 @@ def already_processed(data_path):
                 if len(images) == 0:
                     raise BaseException(
                         f"Class: {directory} in {path} contains no images.")
-                height, width, _ = cv2.imread(
-                    class_path + "/" + images[0]).shape
+                img = cv2.imread(
+                    class_path + "/" + images[0])
+                height, width, _ = img.shape
+                channels = cv2.split(img)
+                is_rgb = True
+                if (channels[0] == channels[1]).all() and (channels[1] == channels[2]).all():
+                    is_rgb = False
                 sizes[index] += len(images)
         if num_categories[index] < 2:
             raise BaseException(
@@ -481,4 +502,5 @@ def already_processed(data_path):
             "height": height,
             "width": width,
             "train_size": sizes[0],
-            "test_size": sizes[1]}
+            "test_size": sizes[1],
+            "gray_scale": not is_rgb}

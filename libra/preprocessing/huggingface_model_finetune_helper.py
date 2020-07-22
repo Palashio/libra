@@ -1,6 +1,10 @@
 import torch
 from torch.utils.data import Dataset
 
+"""
+This file is to be removed in a coming fix. Don't use any of its methods.
+"""
+
 
 def train(epoch, tokenizer, model, device, loader, val_loader, optimizer, testing=True):
     model.train()
@@ -120,7 +124,7 @@ def inference(tokenizer, model, device, loader):
                 tokenizer.decode(
                     t,
                     skip_special_tokens=True,
-                    clean_up_tokenization_spaces=True)for t in y]
+                    clean_up_tokenization_spaces=True) for t in y]
 
             predictions.extend(preds)
             actuals.extend(target)

@@ -1,30 +1,27 @@
 import os
+
 import numpy as np
-from colorama import Fore, Style
 import pandas as pd
+import tensorflow as tf
 import torch
+from colorama import Fore, Style
 from keras_preprocessing import sequence
 from sklearn.model_selection import train_test_split
 from tensorflow.python.keras.callbacks import EarlyStopping
-from tensorflow.python.keras.saving.saved_model.json_utils import Encoder
 from torch.utils.data import DataLoader
 from transformers import T5Tokenizer, T5ForConditionalGeneration
-import tensorflow as tf
 
+import libra.plotting.nonkeras_generate_plots
 from libra.data_generation.dataset_labelmatcher import get_similar_column
 from libra.data_generation.grammartree import get_value_instruction
 from libra.modeling.prediction_model_creation import get_keras_text_class
-import libra.plotting.nonkeras_generate_plots
 from libra.plotting.generate_plots import generate_classification_plots
 from libra.preprocessing.NLP_preprocessing import get_target_values, text_clean_up, lemmatize_text, encode_text
+from libra.preprocessing.data_reader import DataReader
 from libra.preprocessing.huggingface_model_finetune_helper import CustomDataset, train, inference
 from libra.preprocessing.image_caption_helpers import load_image, map_func, CNN_Encoder, RNN_Decoder, get_path_column, \
     generate_caption_helper
-from libra.preprocessing.data_reader import DataReader
-
-# Sentiment analysis predict wrapper
 from libra.query.supplementaries import save
-from libra.plotting.generate_plots import plot_loss
 
 counter = 0
 
@@ -64,12 +61,13 @@ def logger(instruction, found=""):
     counter += 1
 
 
+# Sentiment analysis predict wrapper
 def classify_text(self, text):
-    '''
+    """
     function to perform sentiment analysis text_classification
 
     :param text: text sent in/from written query to be analyzed
-    '''
+    """
 
     sentimentInfo = self.models.get("text_classification")
     vocab = sentimentInfo["vocabulary"]
@@ -98,11 +96,11 @@ def text_classification_query(self, instruction, drop=None,
                               generate_plots=True,
                               save_model=False,
                               save_path=os.getcwd()):
-    '''
+    """
     function to apply text_classification algorithm for sentiment analysis
     :param many params: used to hyperparametrize the function.
     :return a dictionary object with all of the information for the algorithm.
-    '''
+    """
 
     if test_size < 0:
         raise Exception("Test size must be a float between 0 and 1")
@@ -259,7 +257,7 @@ def summarization_query(self, instruction, preprocess=True, label_column=None,
                         save_model=False,
                         save_path=os.getcwd()):
     '''
-    function to apply algorithm for text summarization 
+    function to apply algorithm for text summarization
     :param many params: used to hyperparametrize the function.
     :return a dictionary object with all of the information for the algorithm.
     '''

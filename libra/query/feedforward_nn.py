@@ -180,7 +180,8 @@ def regression_ann(
         print((" " * 2 * counter) + "| " + ("".join(word.ljust(col_width)
                                                     for word in row)) + " |")
     datax = []
-    while all(x > y for x, y in zip(losses, losses[1:])):
+    #while all(x > y for x, y in zip(losses, losses[1:])):
+    while (len(losses)<=2 or losses[len(losses)-1] < losses[len(losses)-2]):
         model = get_keras_model_reg(data, i)
         history = model.fit(
             X_train,
@@ -289,17 +290,17 @@ def classification_ann(instruction,
 
     X_train = data['train']
     X_test = data['test']
-
-    # ANN needs target one hot encoded for classification
-    one_hot_encoder = OneHotEncoder()
-
-    y = pd.DataFrame(
-        one_hot_encoder.fit_transform(
-            np.reshape(
-                y.values,
-                (-1,
-                 1))).toarray(),
-        columns=one_hot_encoder.get_feature_names())
+    
+    if num_classes > 2:
+        # ANN needs target one hot encoded for classification
+        one_hot_encoder = OneHotEncoder()
+        y = pd.DataFrame(
+            one_hot_encoder.fit_transform(
+                np.reshape(
+                    y.values,
+                    (-1,
+                    1))).toarray(),
+        columns = one_hot_encoder.get_feature_names())
 
     y_train = y.iloc[:len(X_train)]
     y_test = y.iloc[len(X_train):]
@@ -372,7 +373,8 @@ def classification_ann(instruction,
         print((" " * 2 * counter) + "| " + ("".join(word.ljust(col_width)
                                                     for word in row)) + " |")
     datax = []
-    while all(x < y for x, y in zip(accuracies, accuracies[1:])):
+    #while all(x < y for x, y in zip(accuracies, accuracies[1:])):
+    while (len(accuracies)<=2 or accuracies[len(accuracies)-1] > accuracies[len(accuracies)-2]):
         model = get_keras_model_class(data, i, num_classes)
         history = model.fit(
             X_train,
@@ -507,7 +509,13 @@ def convolutional(instruction=None,
         testing_path = "/testing_set"
         processInfo = already_processed(data_path)
 
-    input_shape = (processInfo["height"], processInfo["width"], 3)
+    num_channels = 3
+    color_mode = 'rgb'
+    if processInfo["gray_scale"]:
+        num_channels = 1
+        color_mode = 'grayscale'
+
+    input_shape = (processInfo["height"], processInfo["width"], num_channels)
     input_single = (processInfo["height"], processInfo["width"])
     num_classes = processInfo["num_categories"]
     loss_func = ""
@@ -551,12 +559,12 @@ def convolutional(instruction=None,
     logger("->", "Optimal image size identified: {}".format(input_shape))
     X_train = train_data.flow_from_directory(data_path + training_path,
                                              target_size=input_single,
-                                             color_mode='rgb',
+                                             color_mode=color_mode,
                                              batch_size=(32 if processInfo["train_size"] >= 32 else 1),
                                              class_mode=loss_func[:loss_func.find("_")])
     X_test = test_data.flow_from_directory(data_path + testing_path,
                                            target_size=input_single,
-                                           color_mode='rgb',
+                                           color_mode=color_mode,
                                            batch_size=(32 if processInfo["test_size"] >= 32 else 1),
                                            class_mode=loss_func[:loss_func.find("_")])
 
