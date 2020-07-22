@@ -334,8 +334,13 @@ def summarization_query(self, instruction, preprocess=True, label_column=None,
                "Final validation loss: {}".format(history.history["val_loss"][len(history.history["val_loss"]) - 1]))
         logger("->", "Final validation accuracy: {}".format(
             history.history["val_accuracy"][len(history.history["val_accuracy"]) - 1]))
+        losses = {'training_loss': history.history['loss'], 'val_loss': history.history['val_loss']}
+        accuracy = {'training_accuracy': history.history['accuracy'],
+                    'validation_accuracy': history.history['val_accuracy']}
     else:
         logger("->", "Final validation loss: {}".format("0, No validation done"))
+        losses = {'training_loss': history.history['loss']}
+        accuracy = {'training_accuracy': history.history['accuracy']}
 
     plots = None
     if generate_plots:
@@ -354,9 +359,8 @@ def summarization_query(self, instruction, preprocess=True, label_column=None,
         "max_text_length": max_text_length,
         "plots": plots,
         "tokenizer": tokenizer,
-        'losses': {'training_loss': history.history['loss'], 'val_loss': history.history['val_loss']},
-        'accuracy': {'training_accuracy': history.history['accuracy'],
-                     'validation_accuracy': history.history['val_accuracy']}}
+        'losses': losses,
+        'accuracy': accuracy}
     clearLog()
     return self.models["doc_summarization"]
 
