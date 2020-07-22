@@ -218,26 +218,14 @@ def text_classification_query(self, instruction, drop=None,
 
 
 # doc_summarization predict wrapper
-def get_summary(self, text):
+def get_summary(self, text, max_summary_length=40):
     modelInfo = self.models.get("doc_summarization")
     model = modelInfo['model']
     model.eval()
-    tokenizer = T5Tokenizer.from_pretrained("t5-small")
-    df = pd.DataFrame({'text': [""], 'ctext': [text]})
-    params = {
-        'batch_size': 1,
-        'shuffle': True,
-        'num_workers': 0
-    }
-    loader = DataLoader(
-        CustomDataset(
-            df,
-            tokenizer,
-            modelInfo["max_text_length"],
-            modelInfo["max_sum_length"]),
-        **params)
-    predictions, truth = inference(tokenizer, model, "cpu", loader)
-    return predictions[0]
+    tokenizer = modelInfo['tokenizer']
+    return tokenizer.decode(
+        model.generate(tokenizer.encode(text, return_tensors="tf", max_length=modelInfo["max_text_length"])
+                       , max_length=max_summary_length, num_beams=4, early_stopping=True))
 
 
 # Text summarization query
@@ -361,6 +349,7 @@ def summarization_query(self, instruction, preprocess=True, label_column=None,
         "model": model,
         "max_text_length": max_text_length,
         "plots": plots,
+        "tokenizer": tokenizer,
         'losses': {'training_loss': history.history['loss'], 'val_loss': history.history['val_loss']},
         'accuracy': {'training_accuracy': history.history['accuracy'],
                      'validation_accuracy': history.history['val_accuracy']}}
