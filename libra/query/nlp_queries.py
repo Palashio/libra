@@ -228,7 +228,8 @@ def text_classification_query(self, instruction, drop=None,
 
 
 # doc_summarization predict wrapper
-def get_summary(self, text, max_summary_length=40, num_beams=4, no_repeat_ngram_size=2, num_return_sequences=1, early_stopping=True):
+def get_summary(self, text, max_summary_length=40, num_beams=4, no_repeat_ngram_size=2, num_return_sequences=1,
+                early_stopping=True):
     modelInfo = self.models.get("summarization")
     model = modelInfo['model']
     model.eval()
@@ -236,7 +237,8 @@ def get_summary(self, text, max_summary_length=40, num_beams=4, no_repeat_ngram_
     return tokenizer.decode(
         model.generate(tokenizer.encode(text, return_tensors="tf", max_length=modelInfo["max_text_length"])
                        , max_length=max_summary_length, num_beams=num_beams,
-                       no_repeat_ngram_size=no_repeat_ngram_size, num_return_sequences=1, early_stopping=early_stopping))
+                       no_repeat_ngram_size=no_repeat_ngram_size, num_return_sequences=num_return_sequences,
+                       early_stopping=early_stopping))
 
 
 # Text summarization query
@@ -244,7 +246,6 @@ def summarization_query(self, instruction, preprocess=True, label_column=None,
                         drop=None,
                         epochs=10,
                         batch_size=32,
-                        num_beams=4,
                         learning_rate=3e-5,
                         monitor="val_loss",
                         max_text_length=512,
@@ -311,6 +312,8 @@ def summarization_query(self, instruction, preprocess=True, label_column=None,
     X, Y, target = get_target_values(data, instruction, label)
     logger("->", "Target Column Found: {}".format(target))
     logger("Establishing dataset walkers")
+
+    # Clean up text
     if preprocess:
         logger("Preprocessing data")
         X = lemmatize_text(text_clean_up(X.array))
@@ -323,7 +326,7 @@ def summarization_query(self, instruction, preprocess=True, label_column=None,
         X, Y, test_size=test_size, random_state=random_state)
 
     logger('Fine-Tuning the model on your dataset...')
-    model = TFAutoModelWithLMHead.from_pretrained("t5-small")
+    model = TFAutoModelWithLMHead.from_pretrained("t5-small", pad_token_id=tokenizer.eos_token_id)
 
     optimizer = tf.keras.optimizers.Adam(learning_rate=learning_rate)
     loss = tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True)
@@ -336,6 +339,8 @@ def summarization_query(self, instruction, preprocess=True, label_column=None,
         verbose=0,
         patience=5)
 
+    model.train()
+    # Fine tune model
     history = model.fit(X_train, y_train, validation_data=(X_test, y_test),
                         batch_size=batch_size,
                         epochs=epochs, callbacks=[es], verbose=0)
@@ -374,7 +379,7 @@ def summarization_query(self, instruction, preprocess=True, label_column=None,
         'losses': losses,
         'accuracy': accuracy}
     clearLog()
-    return self.models["doc_summarization"]
+    return self.models["summarization"]
 
 
 # image_caption Generation Prediction
