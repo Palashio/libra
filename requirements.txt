@@ -20,6 +20,5 @@ prince
 opencv-python
 nltk
 download
-
 altair==4.1.0
 streamlit==0.63.1
