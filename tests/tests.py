@@ -14,7 +14,6 @@ def make_orderer():
 
     return ordered, compare
 
-
 ordered, compare = make_orderer()
 unittest.defaultTestLoader.sortTestMethodsUsing = compare
 
