@@ -9,7 +9,7 @@ from libra.preprocessing.image_preprocesser import (setwise_preprocessing,
 from libra.preprocessing.data_reader import DataReader
 from keras.models import Sequential
 from keras.layers import (Dense, Conv2D, Flatten, MaxPooling2D, )
-from keras.applications import vgg16, vgg19, resnet50, resnet101, resnet152
+from keras.applications import VGG16, VGG19, ResNet50, ResNet101, ResNet152
 import pandas as pd
 from libra.query.supplementaries import save, generate_id
 from keras.preprocessing.image import ImageDataGenerator
@@ -460,7 +460,7 @@ def convolutional(instruction=None,
                   image_column=None,
                   training_ratio=0.8,
                   augmentation=True,
-                  architecture=None,
+                  custom_architecture=None,
                   epochs=10,
                   height=None,
                   width=None):
@@ -530,20 +530,20 @@ def convolutional(instruction=None,
     logger("Creating convolutional neural netwwork dynamically")
 
     # Convolutional Neural Network
-    if architecture:
-        architecture_lower = architecture.lower()
+    if custom_architecture:
+        custom_arch_lower = custom_architecture.lower()
 
         #By default, weights are randomly initialized
         if architecture_lower == "vgg16":
-            model = vgg16.VGG16(include_top=True, classes=num_classes)
+            model = VGG16(include_top=True, classes=num_classes)
         elif architecture_lower == "vgg19":
-            model = vgg19.VGG19(include_top=True, classes=num_classes)
+            model = VGG19(include_top=True, classes=num_classes)
         elif architecture_lower == "resnet50":
-            model = resnet50.ResNet50(include_top=True, classes=num_classes)
+            model = ResNet50(include_top=True, classes=num_classes)
         elif architecture_lower == "resnet101":
-            model = resnet101.ResNet101(include_top=True, classes=num_classes)
+            model = ResNet101(include_top=True, classes=num_classes)
         elif architecture_lower == "resnet152":
-            model = resnet152.ResNet152(include_top=True, classes=num_classes)
+            model = ResNet152(include_top=True, classes=num_classes)
     else:
         model = Sequential()
         model.add(
