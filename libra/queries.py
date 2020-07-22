@@ -747,12 +747,12 @@ class client:
                     early_stopping=True):
         '''
         Calls the body of the summarizer which is located in the nlp_queries.py file
-        :param text: set of text that you want to summarize.
-        :param max_summary_length: Max generated summary length.
-        :param early_stopping: Sets early stopping
-        :param num_return_sequences: Sets the number of likely possibilities to output
-        :param no_repeat_ngram_size: Sets the number of unrepeated consecutive n-grams
-        :param num_beams: Sets number of possibilities to explore in beam search
+        :param text: set of text that you want to summarize (str).
+        :param max_summary_length: Max generated summary length (int).
+        :param early_stopping: Sets early stopping (bool).
+        :param num_return_sequences: Sets the number of likely possibilities to output (int).
+        :param no_repeat_ngram_size: Sets the number of unrepeated consecutive n-grams (int).
+        :param num_beams: Sets number of possibilities to explore in beam search (int).
         :return: a summary of text inputted in the text field.
         '''
         clearLog()
