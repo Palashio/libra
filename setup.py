@@ -27,6 +27,7 @@ setuptools.setup(
                       'seaborn',
                       'keras-tuner',
                       'spacy',
+                      'jellyfish',
                       'torch',
                       'autocorrect',
                       'pillow',

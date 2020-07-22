@@ -11,6 +11,7 @@ tabulate
 textblob
 seaborn
 keras-tuner
+jellyfish
 spacy
 torch
 autocorrect
