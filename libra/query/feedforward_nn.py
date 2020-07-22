@@ -574,6 +574,8 @@ def convolutional(instruction=None,
                 x = Dropout(0.5)(x)
                 pred = Dense(num_classes, activation='softmax')(x)
                 model = Model(base_model.input, pred)
+            else:
+                raise ModuleNotFoundError("custom_arch \'" + custom_arch + "\' not found.")
         else:
             #Randomly initialized weights
             if custom_arch_lower == "vgg16":
@@ -587,7 +589,7 @@ def convolutional(instruction=None,
             elif custom_arch_lower == "resnet152":
                 model = ResNet152(include_top=True, classes=num_classes)
             else:
-                raise ValueError("custom_arch not found: " + custom_arch)
+                raise ModuleNotFoundError("custom_arch \'" + custom_arch + "\' not found.")
     else:
         model = Sequential()
         model.add(
