@@ -19,9 +19,25 @@ def produceMask(instruction_label):
     return mask
 
 
+def levenshtein(s, t):
+    if s == "":
+        return len(t)
+    if t == "":
+        return len(s)
+    if s[-1] == t[-1]:
+        cost = 0
+    else:
+        cost = 1
+
+    res = min([levenshtein(s[:-1], t) + 1,
+               levenshtein(s, t[:-1]) + 1,
+               levenshtein(s[:-1], t[:-1]) + cost])
+
+    return res
+
 def get_similar_column(instruction, dataset):
     # instruction = produceMask(instruction_label)
-    distances = [Levenshtein.distance(instruction, element) for element in dataset.columns]
+    distances = [levenshtein(instruction, element) for element in dataset.columns]
 
 
     val, idx = min((val, idx) for (idx, val) in enumerate(distances))
