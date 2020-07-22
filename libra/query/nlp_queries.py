@@ -121,6 +121,11 @@ def text_classification_query(self, instruction, drop=None,
         if not os.path.exists(save_path):
             raise Exception("Save path does not exists")
 
+    if test_size == 0:
+        testing = False
+    else:
+        testing = True
+
     data = DataReader(self.dataset)
     data = data.data_generator()
 
@@ -181,9 +186,18 @@ def text_classification_query(self, instruction, drop=None,
                         epochs=epochs, callbacks=[es], verbose=0)
 
     logger("->", "Final training loss: {}".format(history.history["loss"][len(history.history["loss"]) - 1]))
-    logger("->", "Final validation loss: {}".format(history.history["val_loss"][len(history.history["val_loss"]) - 1]))
-    logger("->", "Final validation accuracy: {}".format(
-        history.history["val_accuracy"][len(history.history["val_accuracy"]) - 1]))
+    if testing:
+        logger("->",
+               "Final validation loss: {}".format(history.history["val_loss"][len(history.history["val_loss"]) - 1]))
+        logger("->", "Final validation accuracy: {}".format(
+            history.history["val_accuracy"][len(history.history["val_accuracy"]) - 1]))
+        losses = {'training_loss': history.history['loss'], 'val_loss': history.history['val_loss']}
+        accuracy = {'training_accuracy': history.history['accuracy'],
+                    'validation_accuracy': history.history['val_accuracy']}
+    else:
+        logger("->", "Final validation loss: {}".format("0, No validation done"))
+        losses = {'training_loss': history.history['loss']}
+        accuracy = {'training_accuracy': history.history['accuracy']}
 
     plots = {}
     if generate_plots:
@@ -207,12 +221,8 @@ def text_classification_query(self, instruction, drop=None,
                                           "interpreter": label_mappings,
                                           "max_text_length": max_text_length,
                                           'test_data': {'X': X_test, 'y': y_test},
-                                          'losses': {
-                                              'training_loss': history.history['loss'],
-                                              'val_loss': history.history['val_loss']},
-                                          'accuracy': {
-                                              'training_accuracy': history.history['accuracy'],
-                                              'validation_accuracy': history.history['val_accuracy']}}
+                                          'losses': losses,
+                                          'accuracy': accuracy}
     clearLog()
     return self.models["text_classification"]
 
