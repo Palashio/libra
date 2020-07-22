@@ -4,10 +4,10 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 import streamlit as st
-from libra.query.dimensionality_red_queries import dimensionality_RF, dimensionality_PCA, dimensionality_ICA
-
 import sys
 sys.path.insert(1, '.')
+from libra.query.dimensionality_red_queries import dimensionality_RF, dimensionality_PCA, dimensionality_ICA
+from libra import client
 
 
 class edaDashboardback(object):
@@ -384,6 +384,11 @@ class edaDashboardback(object):
                     st.write(out[0])
                     st.write("")
                     st.markdown(self.get_csv_download_link(out[0]), unsafe_allow_html=True)
+                    st.write("")
+                    st.subheader("Note: Download The Above Dataset, If You Want To Modify The Original Data")
+                    st.write("")
+                    if st.button("Modify Original Data"):
+                        return -1
 
             elif display == 'PCA':
                 instruction = st.text_input("Enter Your Instruction")
@@ -402,7 +407,12 @@ class edaDashboardback(object):
                     st.write(out[0])
                     st.write("")
                     st.markdown(self.get_csv_download_link(out[0]), unsafe_allow_html=True)
-            
+                    st.write("")
+                    st.subheader("Note: Download The Above Dataset, If You Want To Modify The Original Data")
+                    st.write("")
+                    if st.button("Modify Original Data"):
+                        return -1
+
             elif display == 'ICA':
                 instruction = st.text_input("Enter Your Instruction")
                 target = st.text_input("Enter Your Target", "")
@@ -421,6 +431,11 @@ class edaDashboardback(object):
                     st.write(out[0])
                     st.write("")
                     st.markdown(self.get_csv_download_link(out[0]), unsafe_allow_html=True)
+                    st.write("")
+                    st.subheader("Note: Download The Above Dataset, If You Want To Modify The Original Data")
+                    st.write("")
+                    if st.button("Modify Original Data"):
+                        return -1
         '''
         elif page == 'Model Creation':
             st.title("Run ML Algorithm On Your Data")
