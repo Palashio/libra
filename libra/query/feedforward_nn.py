@@ -7,8 +7,9 @@ from libra.preprocessing.image_preprocesser import (setwise_preprocessing,
                                                     set_distinguisher,
                                                     already_processed)
 from libra.preprocessing.data_reader import DataReader
+from keras import Model
 from keras.models import Sequential
-from keras.layers import (Dense, Conv2D, Flatten, MaxPooling2D, )
+from keras.layers import (Dense, Conv2D, Flatten, MaxPooling2D, Dropout, GlobalAveragePooling2D)
 from keras.applications import VGG16, VGG19, ResNet50, ResNet101, ResNet152
 import pandas as pd
 from libra.query.supplementaries import save, generate_id
@@ -460,7 +461,8 @@ def convolutional(instruction=None,
                   image_column=None,
                   training_ratio=0.8,
                   augmentation=True,
-                  custom_architecture=None,
+                  custom_arch=None,
+                  pretrained=False,
                   epochs=10,
                   height=None,
                   width=None):
@@ -530,20 +532,62 @@ def convolutional(instruction=None,
     logger("Creating convolutional neural netwwork dynamically")
 
     # Convolutional Neural Network
-    if custom_architecture:
-        custom_arch_lower = custom_architecture.lower()
+    if custom_arch:
+        custom_arch_lower = custom_arch.lower()
 
-        #By default, weights are randomly initialized
-        if architecture_lower == "vgg16":
-            model = VGG16(include_top=True, classes=num_classes)
-        elif architecture_lower == "vgg19":
-            model = VGG19(include_top=True, classes=num_classes)
-        elif architecture_lower == "resnet50":
-            model = ResNet50(include_top=True, classes=num_classes)
-        elif architecture_lower == "resnet101":
-            model = ResNet101(include_top=True, classes=num_classes)
-        elif architecture_lower == "resnet152":
-            model = ResNet152(include_top=True, classes=num_classes)
+        if pretrained:
+            #Load ImageNet pretrained weights
+            if custom_arch_lower == "vgg16":
+                base_model = VGG16(include_top=False, weights='imagenet')
+                x = Flatten()(base_model.output)
+                x = Dense(4096)(x)
+                x = Dropout(0.5)(x)
+                x = Dense(4096)(x)
+                x = Dropout(0.5)(x)
+                pred = Dense(num_classes, activation='softmax')(x)
+                model = Model(base_model.input, pred)
+            elif custom_arch_lower == "vgg19":
+                base_model = VGG19(include_top=False, weights='imagenet')
+                x = Flatten()(base_model.output)
+                x = Dense(4096)(x)
+                x = Dropout(0.5)(x)
+                x = Dense(4096)(x)
+                x = Dropout(0.5)(x)
+                pred = Dense(num_classes, activation='softmax')(x)
+                model = Model(base_model.input, pred)
+            elif custom_arch_lower == "resnet50":
+                base_model = ResNet50(include_top=False, weights='imagenet')
+                x = Flatten()(base_model.output)
+                x = GlobalAveragePooling2D()(base_model.output)
+                x = Dropout(0.5)(x)
+                pred = Dense(num_classes, activation='softmax')(x)
+                model = Model(base_model.input, pred)
+            elif custom_arch_lower == "ResNet101":
+                base_model = ResNet101(include_top=False, weights='imagenet')d
+                x = GlobalAveragePooling2D()(base_model.output)
+                x = Dropout(0.5)(x)
+                pred = Dense(num_classes, activation='softmax')(x)
+                model = Model(base_model.input, pred)
+            elif custom_arch_lower == "ResNet152":
+                base_model = ResNet152(include_top=False, weights='imagenet')
+                x = GlobalAveragePooling2D()(base_model.output)
+                x = Dropout(0.5)(x)
+                pred = Dense(num_classes, activation='softmax')(x)
+                model = Model(base_model.input, pred)
+        else:
+            #Randomly initialized weights
+            if custom_arch_lower == "vgg16":
+                model = VGG16(include_top=True, classes=num_classes)
+            elif custom_arch_lower == "vgg19":
+                model = VGG19(include_top=True, classes=num_classes)
+            elif custom_arch_lower == "resnet50":
+                model = ResNet50(include_top=True, classes=num_classes)
+            elif custom_arch_lower == "resnet101":
+                model = ResNet101(include_top=True, classes=num_classes)
+            elif custom_arch_lower == "resnet152":
+                model = ResNet152(include_top=True, classes=num_classes)
+            else:
+                raise ValueError("custom_arch not found: " + custom_arch)
     else:
         model = Sequential()
         model.add(
