@@ -563,7 +563,7 @@ def convolutional(instruction=None,
                 pred = Dense(num_classes, activation='softmax')(x)
                 model = Model(base_model.input, pred)
             elif custom_arch_lower == "ResNet101":
-                base_model = ResNet101(include_top=False, weights='imagenet')d
+                base_model = ResNet101(include_top=False, weights='imagenet')
                 x = GlobalAveragePooling2D()(base_model.output)
                 x = Dropout(0.5)(x)
                 pred = Dense(num_classes, activation='softmax')(x)
