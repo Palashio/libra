@@ -1001,4 +1001,3 @@ class client:
         val = dash.dashboard()    
         if val == -1:
             self.dataset = '~/Downloads/Transformed_Data.csv'
-
