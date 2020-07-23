@@ -5,7 +5,7 @@ from colorama import Fore, Style
 from keras_preprocessing import sequence
 from sklearn.model_selection import train_test_split
 from tensorflow.python.keras.callbacks import EarlyStopping
-from transformers import TFAutoModelWithLMHead, AutoTokenizer
+from transformers import TFAutoModelWithLMHead, AutoTokenizer, TFT5ForConditionalGeneration
 import libra.plotting.nonkeras_generate_plots
 from libra.data_generation.dataset_labelmatcher import get_similar_column
 from libra.data_generation.grammartree import get_value_instruction
@@ -318,14 +318,20 @@ def summarization_query(self, instruction, preprocess=True, label_column=None,
         Y = lemmatize_text(text_clean_up(Y.array))
 
     # tokenize text/summaries
-    X = [tokenizer.encode(x, return_tensors="tf", max_length=max_text_length, pad_to_max_length=True) for x in X]
-    Y = [tokenizer.encode(y, return_tensors="tf", max_length=max_summary_length) for y in Y]
-    print(X)
-    X_train, X_test, y_train, y_test = train_test_split(
-        X, Y, test_size=test_size, random_state=random_state)
+    X = tokenizer.batch_encode_plus(X, return_tensors="tf", max_length=max_text_length, pad_to_max_length=True)
+    Y = tokenizer.batch_encode_plus(Y, return_tensors="tf", max_length=max_text_length, pad_to_max_length=True)
+
+
+
+
+
+
+
+    # X_train, X_test, y_train, y_test = train_test_split(
+    #     X, Y, test_size=test_size, random_state=random_state)
 
     logger('Fine-Tuning the model on your dataset...')
-    model = TFAutoModelWithLMHead.from_pretrained("t5-small")
+    model = TFT5ForConditionalGeneration.from_pretrained("t5-small")
 
     optimizer = tf.keras.optimizers.Adam(learning_rate=learning_rate)
     loss = tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True)
@@ -339,7 +345,7 @@ def summarization_query(self, instruction, preprocess=True, label_column=None,
         patience=5)
 
     # Fine tune model
-    history = model.fit(tf.convert_to_tensor(X_train), tf.convert_to_tensor(y_train), validation_data=(X_test, y_test),
+    history = model.fit({'inputs': X["input_ids"], 'decoder_input_ids': X["input_ids"]}, Y["input_ids"], validation_split=test_size,
                         batch_size=batch_size,
                         epochs=epochs, callbacks=[es], verbose=0)
 
