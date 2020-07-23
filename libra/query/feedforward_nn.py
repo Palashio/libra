@@ -545,7 +545,7 @@ def convolutional(instruction=None,
     elif pretrained:
 
         if input_shape[0] != 224 or input_shape[1] != 224:
-            raise ValueError("input shape must be (224, 224, 3) or (224, 224, 1)")
+            raise ValueError("For pretrained models, input shape must be (224, 224, 3) or (224, 224, 1).")
 
         arch_lower = pretrained.get('arch').lower()
 
