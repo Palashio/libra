@@ -346,6 +346,7 @@ class client:
                                 scatters=[],
                                 generate_plots=True,
                                 drop=None,
+                                clusters=None,
                                 base_clusters=2,
                                 verbose=0,
                                 n_init=10,
@@ -374,6 +375,7 @@ class client:
         self.models['k_means_clustering'] = k_means_clustering(
             dataset=self.dataset,
             scatters=scatters,
+            clusters=clusters,
             preprocess=preprocess,
             generate_plots=generate_plots,
             drop=drop,
