@@ -73,7 +73,7 @@ class TestQueries(unittest.TestCase):
     # Tests whether kmeans_clustering_query works without errors, and creates a key in models dictionary
     @ordered
     def test_kmeans(self):
-        self.newClient.kmeans_clustering_query()
+        self.newClient.kmeans_clustering_query(clusters=4)
         self.assertTrue('k_means_clustering' in self.newClient.models)
 
 
