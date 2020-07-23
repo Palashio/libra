@@ -5,25 +5,33 @@ from keras.layers import LSTM, Embedding, TimeDistributed, Concatenate
 from tensorflow.python.keras.layers import Dense, Input
 import numpy as np
 from keras.models import model_from_json
-import os
+import os 
 
 # Creates a regression neural network
 
 
-def get_keras_model_reg(dataset, i):
+def get_keras_model_reg(dataset, i, lstm_index):
     size_max_network = 10
     # base model
     model = tf.keras.Sequential()
-    model.add(
-        Dense(
-            dataset['train'].shape[1],
-            input_dim=dataset['train'].shape[1],
-            kernel_initializer='normal',
-            activation='relu'))
-    model.add(Dense(64, activation="relu"))
+    if(0 in lstm_index):
+        model.add(
+            LSTM(
+                dataset['train'].shape[1],
+                input_dim=dataset['train'].shape[1]))
+    else:
+        model.add(
+            Dense(
+                dataset['train'].shape[1],
+                input_dim=dataset['train'].shape[1],
+                kernel_initializer='normal',
+                activation='relu'))
+        model.add(Dense(64, activation="relu"))
 
     # Adds values depending on what the i value is
     for x in range(i):
+        if(x in lstm_index):
+            model.add(LSTM(128, dropout=0.2, recurrent_dropout=0.2))
         if (i < 5):
             model.add(
                 Dense(
@@ -45,20 +53,28 @@ def get_keras_model_reg(dataset, i):
 # Creates a classification neural network
 
 
-def get_keras_model_class(dataset, i, num_classes):
+def get_keras_model_class(dataset, i, num_classes, lstm_index):
     size_max_network = 10
     # base model
     model = tf.keras.Sequential()
-    model.add(
-        Dense(
-            dataset['train'].shape[1],
-            input_dim=dataset['train'].shape[1],
-            kernel_initializer='normal',
-            activation='relu'))
-    model.add(Dense(64, activation="relu"))
+    if(0 in lstm_index):
+        model.add(
+            LSTM(
+                dataset['train'].shape[1],
+                input_dim=dataset['train'].shape[1]))
+    else:
+        model.add(
+            Dense(
+                dataset['train'].shape[1],
+                input_dim=dataset['train'].shape[1],
+                kernel_initializer='normal',
+                activation='relu'))
+        model.add(Dense(64, activation="relu"))
 
     # Adds values depending on what the i value is
     for x in range(i):
+        if(x in lstm_index):
+            model.add(LSTM(128, dropout=0.2, recurrent_dropout=0.2))
         if (i < 5):
             model.add(
                 Dense(

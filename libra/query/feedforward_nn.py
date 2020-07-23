@@ -19,6 +19,7 @@ from libra.preprocessing.data_preprocesser import initial_preprocesser
 from libra.modeling.prediction_model_creation import get_keras_model_reg, get_keras_model_class
 from sklearn.preprocessing import StandardScaler
 import numpy as np
+import Tkinter, tkFileDialog
 
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
@@ -71,12 +72,22 @@ def logger(instruction, found=""):
     counter += 1
 
 
+def get_folder_dir(self):
+    dir_path= tkFileDialog.askdirectory()
+    return dir_path 
+
+def get_file():
+    filename = tkFileDialog.askopenfilename()
+    if os.path.isfile(filename):
+        return filename
+    else: print ('No file chosen')
+
+
 def regression_ann(
         instruction,
         callback=False,
         ca_threshold=None,
         text=[],
-        dataset=None,
         drop=None,
         preprocess=True,
         test_size=0.2,
@@ -86,7 +97,7 @@ def regression_ann(
         callback_mode='min',
         maximizer="val_loss",
         save_model=False,
-        save_path=os.getcwd()):
+        lstm_index=[]):
     '''
     Body of the regression function used that is called in the neural network query
     if the data is numerical.
@@ -96,7 +107,7 @@ def regression_ann(
 
     logger("Reading in dataset")
 
-    dataReader = DataReader(dataset)
+    dataReader = DataReader(get_file())
     data = dataReader.data_generator()
     # data = pd.read_csv(self.dataset)
 
@@ -135,7 +146,7 @@ def regression_ann(
     i = 0
 
     # get the first 3 layer model
-    model = get_keras_model_reg(data, i)
+    model = get_keras_model_reg(data, i, lstm_index)
 
     logger("Training initial model")
     history = model.fit(
@@ -230,7 +241,7 @@ def regression_ann(
             plots[str(plot_names[x])] = init_plots[x]
 
     if save_model:
-        save(final_model, save_model)
+        save(final_model, save_model, save_path = get_folder_dir())
     # stores values in the client object models dictionary field
     print("")
     logger("Stored model under 'regression_ANN' key")
@@ -251,7 +262,6 @@ def regression_ann(
 
 def classification_ann(instruction,
                        callback=False,
-                       dataset=None,
                        text=[],
                        ca_threshold=None,
                        preprocess=True,
@@ -263,7 +273,7 @@ def classification_ann(instruction,
                        generate_plots=True,
                        maximizer="val_accuracy",
                        save_model=False,
-                       save_path=os.getcwd()):
+                       lstm_index=[]):
     '''
     Body of the classification function used that is called in the neural network query
     if the data is categorical.
@@ -272,7 +282,7 @@ def classification_ann(instruction,
     '''
     logger("Reading in dataset")
 
-    dataReader = DataReader(dataset)
+    dataReader = DataReader(get_file())
     data = dataReader.data_generator()
 
     if drop is not None:
@@ -324,7 +334,7 @@ def classification_ann(instruction,
         callback_value = [es]
 
     i = 0
-    model = get_keras_model_class(data, i, num_classes)
+    model = get_keras_model_class(data, i, num_classes, lstm_index)
     logger("Training initial model")
 
     history = model.fit(
@@ -427,7 +437,7 @@ def classification_ann(instruction,
             models[len(models) - 1], data, y, model, X_test, y_test)
 
     if save_model:
-        save(final_model, save_model)
+        save(final_model, save_model, save_path = get_folder_dir())
 
     print("")
     logger("Stored model under 'classification_ANN' key")
@@ -454,7 +464,6 @@ def convolutional(instruction=None,
                   read_mode=None,
                   preprocess=True,
                   verbose=0,
-                  data_path=os.getcwd(),
                   new_folders=True,
                   image_column=None,
                   training_ratio=0.8,
@@ -468,7 +477,7 @@ def convolutional(instruction=None,
     :param many parameters: used to preprocess, tune, plot generation, and parameterizing the convolutional neural network trained.
     :return dictionary that holds all the information for the finished model.
     '''
-
+    data_path = get_folder_dir()
     logger("Generating datasets for classes")
 
     if preprocess:
