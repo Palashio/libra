@@ -543,13 +543,17 @@ def convolutional(instruction=None,
 
     #Build an existing state-of-the-art model
     elif pretrained:
+
+        if input_shape[0] != 224 or input_shape[1] != 224:
+            raise ValueError("input shape must be (224, 224, 3) or (224, 224, 1)")
+
         arch_lower = pretrained.get('arch').lower()
 
         #If user specifies value of pretrained['weights'] as 'imagenet', weights pretrained on ImageNet will be used
         if 'weights' in pretrained and pretrained.get('weights')=='imagenet':
             #Load ImageNet pretrained weights
             if arch_lower == "vgg16":
-                base_model = VGG16(include_top=False, weights='imagenet')
+                base_model = VGG16(include_top=False, weights='imagenet', input_shape=input_shape)
                 x = Flatten()(base_model.output)
                 x = Dense(4096)(x)
                 x = Dropout(0.5)(x)
@@ -558,7 +562,7 @@ def convolutional(instruction=None,
                 pred = Dense(num_classes, activation='softmax')(x)
                 model = Model(base_model.input, pred)
             elif arch_lower == "vgg19":
-                base_model = VGG19(include_top=False, weights='imagenet')
+                base_model = VGG19(include_top=False, weights='imagenet', input_shape=input_shape)
                 x = Flatten()(base_model.output)
                 x = Dense(4096)(x)
                 x = Dropout(0.5)(x)
@@ -567,20 +571,20 @@ def convolutional(instruction=None,
                 pred = Dense(num_classes, activation='softmax')(x)
                 model = Model(base_model.input, pred)
             elif arch_lower == "resnet50":
-                base_model = ResNet50(include_top=False, weights='imagenet')
+                base_model = ResNet50(include_top=False, weights='imagenet', input_shape=input_shape)
                 x = Flatten()(base_model.output)
                 x = GlobalAveragePooling2D()(base_model.output)
                 x = Dropout(0.5)(x)
                 pred = Dense(num_classes, activation='softmax')(x)
                 model = Model(base_model.input, pred)
             elif arch_lower == "resnet101":
-                base_model = ResNet101(include_top=False, weights='imagenet')
+                base_model = ResNet101(include_top=False, weights='imagenet', input_shape=input_shape)
                 x = GlobalAveragePooling2D()(base_model.output)
                 x = Dropout(0.5)(x)
                 pred = Dense(num_classes, activation='softmax')(x)
                 model = Model(base_model.input, pred)
             elif arch_lower == "resnet152":
-                base_model = ResNet152(include_top=False, weights='imagenet')
+                base_model = ResNet152(include_top=False, weights='imagenet', input_shape=input_shape)
                 x = GlobalAveragePooling2D()(base_model.output)
                 x = Dropout(0.5)(x)
                 pred = Dense(num_classes, activation='softmax')(x)
