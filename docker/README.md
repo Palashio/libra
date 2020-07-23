@@ -13,6 +13,19 @@ quick links here:
 * [ubuntu](https://docs.docker.com/installation/ubuntulinux/)
 * [OSX](https://docs.docker.com/installation/mac/): [docker toolbox](https://www.docker.com/toolbox)
 
+Build Docker Image
+
+    $ docker build -t libra -f Dockerfile .
+
+Run Docker Image
+
+    $ docker docker run -it libra
+    
+To remove all docker images
+    
+    $ docker rm $(docker ps -a -q)
+    $ docker rmi $(docker images -q)
+
 
 ## Running the container
 
