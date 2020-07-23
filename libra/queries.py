@@ -4,7 +4,7 @@ from libra.query.nlp_queries import (image_caption_query,
                                      summarization_query)
 from libra.query.classification_models import (k_means_clustering,
                                                train_svm, nearest_neighbors,
-                                               decision_tree)
+                                               decision_tree, train_xgboost)
 
 from libra.query.supplementaries import tune_helper, get_model_data, get_operators, get_accuracy, get_losses, \
     get_target, get_plots, get_vocab
@@ -553,6 +553,46 @@ class client:
 
         self.latest_model = 'decision_tree'
         clearLog()
+
+    # query to create a xgboost model
+
+    def xgboost_query(self,
+                  instruction,
+                  test_size=0.2,
+                  text=[],
+                  seed=49,
+                  preprocess=True,
+                  drop=None,                 
+                  learning_rate =0.1,
+                  n_estimators=1000,
+                  max_depth=6,
+                  min_child_weight=1,
+                  gamma=0,
+                  subsample=0.8,
+                  colsample_bytree=0.8,
+                  objective= 'binary:logistic',
+                  nthread=4,
+                  scale_pos_weight=1):
+        
+        self.models['xgboost'] = train_xgboost(instruction,
+                                       dataset=self.dataset,
+                                       text=[],
+                                        seed=seed,
+                                        preprocess=preprocess,
+                                        drop=drop,                 
+                                        learning_rate=learning_rate,
+                                        n_estimators=n_estimators,
+                                        max_depth=max_depth,
+                                        min_child_weight=min_child_weight,
+                                        gamma=gamma,
+                                        subsample=subsample,
+                                        colsample_bytree=colsample_bytree,
+                                        objective=objective,
+                                        nthread=nthread,
+                                        scale_pos_weight=scale_pos_weight)
+
+        self.latest_model = 'xgboost'
+        clearLog() 
 
     # tunes a specific neural network based on the input model_to_tune
 
