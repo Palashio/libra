@@ -543,10 +543,10 @@ def convolutional(instruction=None,
 
     #Build an existing state-of-the-art model
     elif pretrained:
-        arch_lower = pretrained['arch'].lower()
+        arch_lower = pretrained.get('arch').lower()
 
         #If user specifies value of pretrained['weights'] as 'imagenet', weights pretrained on ImageNet will be used
-        if 'weights' in pretrained and pretrained['weights']=='imagenet':
+        if 'weights' in pretrained and pretrained.get('weights')=='imagenet':
             #Load ImageNet pretrained weights
             if arch_lower == "vgg16":
                 base_model = VGG16(include_top=False, weights='imagenet')
