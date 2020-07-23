@@ -2,10 +2,19 @@
 # Base Image
 FROM python:3.6
 
-RUN apt-get update -y && \
-    apt-get install -y python3-pip python3-dev \
-    pip install -U libra
+# COPY requirements.txt docker/requirements.txt
+
+# RUN pip freeze > requirements.txt/ pip install -r requirements.txt/
+
+RUN pip install -U libra
+# ENV PYTHONPATH='/src/:$PYTHONPATH'
+
+# WORKDIR /data
 
 EXPOSE 8000
 
-CMD python -c "print('works')" 
+# CMD python ./libra/queries.py
+
+
+CMD python -c "print('docker image has been build')" 
+
