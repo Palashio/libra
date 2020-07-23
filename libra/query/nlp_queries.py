@@ -790,6 +790,3 @@ def generate_text(text,
 
     for i, sample_output in enumerate(output):
         logger("{}: {}".format(i, tokenizer.decode(sample_output, skip_special_tokens=True)))
-
-
-generate_text("I am willing to work")
