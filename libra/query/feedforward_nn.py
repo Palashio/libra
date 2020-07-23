@@ -545,9 +545,6 @@ def convolutional(instruction=None,
     elif pretrained:
         arch_lower = pretrained['arch'].lower()
 
-        #By default, weights are initialized randomly
-        weights = 'random'
-
         #If user specifies value of pretrained['weights'] as 'imagenet', weights pretrained on ImageNet will be used
         if 'weights' in pretrained and pretrained['weights']=='imagenet':
             #Load ImageNet pretrained weights
