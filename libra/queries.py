@@ -642,7 +642,7 @@ class client:
                             test_size=0.2,
                             augmentation=True,
                             custom_arch=None,
-                            pretrained=False,
+                            pretrained=None,
                             epochs=10,
                             height=None,
                             width=None):
