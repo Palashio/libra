@@ -75,6 +75,10 @@ class TestQueries(unittest.TestCase):
     def test_kmeans(self):
         self.newClient.kmeans_clustering_query('predict ocean proximity')
         self.assertTrue('k_means_clustering' in self.newClient.models)
+    @ordered
+    def test_kmeans(self):
+        self.newClient.kmeans_clustering_query('predict ocean proximity', clusters=4)
+        self.assertTrue('k_means_clustering' in self.newClient.models)
 
 
     """
