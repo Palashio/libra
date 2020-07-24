@@ -999,9 +999,3 @@ class client:
             model = self.latest_model
         clearLog()
         analyze(self, model, save, save_model)
-
-
-x = client("/Users/anasawadalla/PycharmProjects/libra/tools/data/nlp_data/miniDocumentSummarization.csv")
-x.summarization_query("summarize text", epochs=5)
-x.models["summarization"]["plots"]["loss"].show()
-print(x.get_summary("my name is cat", num_return_sequences=2))

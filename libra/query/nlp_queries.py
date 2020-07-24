@@ -234,11 +234,11 @@ def get_summary(self, text, max_summary_length=50, num_beams=4, no_repeat_ngram_
     modelInfo = self.models.get("summarization")
     model = modelInfo['model']
     tokenizer = modelInfo['tokenizer']
-    return tokenizer.decode(
-        model.generate(tf.convert_to_tensor(tokenize([text], tokenizer, max_length=modelInfo['max_text_length'])),
+    result = model.generate(tf.convert_to_tensor(tokenize([text], tokenizer, max_length=modelInfo['max_text_length'])),
                        max_length=max_summary_length, num_beams=num_beams,
                        no_repeat_ngram_size=no_repeat_ngram_size, num_return_sequences=num_return_sequences,
-                       early_stopping=early_stopping)[0])
+                       early_stopping=early_stopping)
+    return [tokenizer.decode(summary) for summary in result]
 
 
 # Text summarization query
@@ -321,6 +321,8 @@ def summarization_query(self, instruction, preprocess=True, label_column=None,
     tokenizer = T5Tokenizer.from_pretrained("t5-small")
     # Find target columns
     X, Y, target = get_target_values(data, instruction, label)
+    print(X)
+    print(Y)
     logger("->", "Target Column Found: {}".format(target))
     logger("Establishing dataset walkers")
 
