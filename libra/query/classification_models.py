@@ -476,9 +476,8 @@ def train_xgboost(instruction,
               subsample=0.8,
               colsample_bytree=0.8,
               objective= 'binary:logistic',
-              nthread=4,
               scale_pos_weight=1,
-              seed=27,
+              random_state=27,
               test_size=0.2,
               text=[],
               preprocess=True,
@@ -499,7 +498,7 @@ def train_xgboost(instruction,
 
     logger("Preprocessing data")
     data, y, target, full_pipeline = initial_preprocesser(
-        data, instruction, preprocess, ca_threshold, text, test_size=test_size, random_state=seed)
+        data, instruction, preprocess, ca_threshold, text, test_size=test_size, random_state=random_state)
     logger("->", "Target column found: {}".format(target))
 
     X_train = data['train']
@@ -509,6 +508,9 @@ def train_xgboost(instruction,
 
     # classification_column = get_similar_column(getLabelwithInstruction(instruction), data)
     num_classes = len(np.unique(y))
+
+    if num_classes > 2:
+        objective = 'multi:softmax'
 
     # Needed to make a custom label encoder due to train test split changes
     # Can still be inverse transformed, just a bit of extra work
@@ -529,9 +531,8 @@ def train_xgboost(instruction,
                         subsample=subsample,
                         colsample_bytree=colsample_bytree,
                         objective= objective,
-                        nthread=nthread,
                         scale_pos_weight=scale_pos_weight,
-                        seed=seed)
+                        random_state=random_state)
     clf.fit(X_train, y_train)
 
     score = accuracy_score(
