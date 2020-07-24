@@ -88,6 +88,7 @@ def regression_ann(
         callback=False,
         ca_threshold=None,
         text=[],
+        dataset=None,
         drop=None,
         preprocess=True,
         test_size=0.2,
@@ -105,9 +106,11 @@ def regression_ann(
     :return dictionary that holds all the information for the finished model.
     '''
 
+    if dataset is None:
+        dataReader = DataReader(get_file())
+    else:
+        dataReader = DataReader(dataset)
     logger("Reading in dataset")
-
-    dataReader = DataReader(get_file())
     data = dataReader.data_generator()
     # data = pd.read_csv(self.dataset)
 
@@ -262,6 +265,7 @@ def regression_ann(
 
 def classification_ann(instruction,
                        callback=False,
+                       dataset=None,
                        text=[],
                        ca_threshold=None,
                        preprocess=True,
@@ -280,9 +284,12 @@ def classification_ann(instruction,
     :param many parameters: used to preprocess, tune, plot generation, and parameterizing the neural network trained.
     :return dictionary that holds all the information for the finished model.
     '''
+    
+    if dataset is None:
+        dataReader = DataReader(get_file())
+    else:
+        dataReader = DataReader(dataset)
     logger("Reading in dataset")
-
-    dataReader = DataReader(get_file())
     data = dataReader.data_generator()
 
     if drop is not None:
