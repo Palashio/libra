@@ -16,6 +16,8 @@ from libra.data_generation.grammartree import get_value_instruction
 from libra.data_generation.dataset_labelmatcher import (get_similar_column,
                                                         get_similar_model)
 from libra.plotting.generate_plots import analyze
+from libra.query.recommender_systems import ContentRecommender
+
 from libra.dashboard.auto_eda import edaDashboard
 from colorama import Fore, Style
 import pandas as pd
@@ -115,6 +117,18 @@ class client:
         return get_similar_model(model_requested, self.models.keys())
         clearLog()
 
+    # recommend items based on search criteria
+    def recommend(self,search_term):
+        if self.latest_model == 'content_recommender':
+            model = self.models[self.latest_model]
+            print('Finished. Top Recommendations: \n')
+            print(model.recommend(search_term))
+            print('')
+            print('     |- Recommendations can be stored as a variable for later use.')
+            return model.recommend(search_term)
+        else:
+            pass
+        
     # param modelKey: string representation of the model to make prediction
     # param data: dataframe version of desired prediction set
     def predict(self, data, model=None):
@@ -132,6 +146,7 @@ class client:
             return predictions
         else:
             modeldict = self.models[model]
+
             if modeldict.get('preprocesser'):
                 data = modeldict['preprocesser'].transform(data)
             predictions = modeldict['model'].predict(data)
@@ -536,6 +551,7 @@ class client:
         :return: a model and information to along with it stored in the self.models dictionary.
         '''
 
+
         self.models['decision_tree'] = decision_tree(
             instruction=instruction,
             text=text,
@@ -555,6 +571,17 @@ class client:
 
         self.latest_model = 'decision_tree'
         clearLog()
+
+    def content_recommender_query(self,feature_names=[],search_name=None,n_recommendations=10,indexer='title'):
+        self.models['content_recommender'] = ContentRecommender(
+            data=self.dataset,
+            n_recommendations=10,
+            feature_names=feature_names,
+            indexer=indexer)
+        
+        self.latest_model = 'content_recommender'
+        clearLog()
+       
 
     # tunes a specific neural network based on the input model_to_tune
 
@@ -879,6 +906,7 @@ class client:
             save_path_encoder=save_path_encoder)
         self.latest_model = 'image_caption'
         clearLog()
+
 
     # shows the names of plots associated with a specific model
     def plot_names(self, model=None):
