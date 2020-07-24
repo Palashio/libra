@@ -14,7 +14,7 @@ from libra.data_generation.grammartree import get_value_instruction
 from libra.modeling.prediction_model_creation import get_keras_text_class
 from libra.plotting.generate_plots import generate_classification_plots
 from libra.preprocessing.NLP_preprocessing import get_target_values, text_clean_up, lemmatize_text, encode_text, \
-    tokenize, NoStdStreams, add_prefix
+    tokenize_for_input_ids, NoStdStreams, add_prefix
 from libra.preprocessing.data_reader import DataReader
 from libra.preprocessing.image_caption_helpers import load_image, map_func, CNN_Encoder, RNN_Decoder, get_path_column, \
     generate_caption_helper
@@ -234,7 +234,7 @@ def get_summary(self, text, max_summary_length=50, num_beams=4, no_repeat_ngram_
     tokenizer = modelInfo['tokenizer']
     text = [text]
     text = add_prefix(text, "summarize: ")
-    result = model.generate(tf.convert_to_tensor(tokenize(text, tokenizer, max_length=modelInfo['max_text_length'])),
+    result = model.generate(tf.convert_to_tensor(tokenize_for_input_ids(text, tokenizer, max_length=modelInfo['max_text_length'])),
                        max_length=max_summary_length, num_beams=num_beams,
                        no_repeat_ngram_size=no_repeat_ngram_size, num_return_sequences=num_return_sequences,
                        early_stopping=early_stopping)
@@ -331,8 +331,8 @@ def summarization_query(self, instruction, preprocess=True, label_column=None,
         Y = add_prefix(lemmatize_text(text_clean_up(Y.array)),"summarize: ")
 
     # tokenize text/summaries
-    X = tokenize(X, tokenizer, max_text_length)
-    Y = tokenize(Y, tokenizer, max_text_length)
+    X = tokenize_for_input_ids(X, tokenizer, max_text_length)
+    Y = tokenize_for_input_ids(Y, tokenizer, max_text_length)
 
     logger('Fine-Tuning the model on your dataset...')
 
@@ -574,7 +574,7 @@ def image_caption_query(self, instruction, label_column=None,
         train_seqs, padding='post')
 
     vocab_size = top_k + 1
-    num_steps = len(img_name_vector) // batch_size
+    # num_steps = len(img_name_vector) // batch_size
 
     if testing:
         img_name_train, img_name_val, cap_train, cap_val = train_test_split(
@@ -696,14 +696,14 @@ def image_caption_query(self, instruction, label_column=None,
                 batch_loss, t_loss = train_step(img_tensor, target)
                 total_loss += t_loss
 
-            loss_plot_train.append(total_loss.numpy() / num_steps)
+            loss_plot_train.append(total_loss.numpy())
 
             if testing:
                 for (batch, (img_tensor, target)) in enumerate(dataset_val):
                     batch_loss, t_loss = train_step(img_tensor, target)
                     total_loss_val += t_loss
 
-                loss_plot_val.append(total_loss_val.numpy() / num_steps)
+                loss_plot_val.append(total_loss_val.numpy())
 
     dir_name = os.path.dirname(img_name_vector[0])
     files = os.listdir(dir_name)
@@ -717,10 +717,10 @@ def image_caption_query(self, instruction, label_column=None,
         logger("Generating plots")
         plots.update({"loss": libra.plotting.nonkeras_generate_plots.plot_loss(loss_plot_train, loss_plot_val)})
 
-    logger("->", "Final training loss: {}".format(str(total_loss.numpy() / num_steps)))
-    total_loss = total_loss.numpy() / num_steps
+    logger("->", "Final training loss: {}".format(str(total_loss.numpy())))
+    total_loss = total_loss.numpy()
     if testing:
-        total_loss_val = total_loss_val.numpy() / num_steps
+        total_loss_val = total_loss_val.numpy()
         total_loss_val_str = str(total_loss_val)
     else:
         total_loss_val = 0

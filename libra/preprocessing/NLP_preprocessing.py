@@ -134,14 +134,12 @@ Tokenizes sentences and returns input ids
 """
 
 
-def tokenize(sentences, tokenizer, max_length):
+def tokenize_for_input_ids(sentences, tokenizer, max_length):
     input_ids, input_masks, input_segments = [], [], []
     for sentence in sentences:
         inputs = tokenizer.encode_plus(sentence, add_special_tokens=True, max_length=max_length, pad_to_max_length=True,
                                        return_attention_mask=True, return_token_type_ids=True, truncation=True)
         input_ids.append(inputs['input_ids'])
-        input_masks.append(inputs['attention_mask'])
-        input_segments.append(inputs['token_type_ids'])
 
     return input_ids
 
