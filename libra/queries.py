@@ -762,11 +762,11 @@ class client:
     # summarization query
     def summarization_query(self, instruction, label_column=None, preprocess=True,
                             drop=None,
-                            epochs=1,
+                            epochs=5,
                             batch_size=32,
                             learning_rate=3e-5,
                             max_text_length=512,
-                            test_size=0,
+                            test_size=0.2,
                             gpu=False,
                             random_state=49,
                             generate_plots=True,
@@ -1002,5 +1002,6 @@ class client:
 
 
 x = client("/Users/anasawadalla/PycharmProjects/libra/tools/data/nlp_data/miniDocumentSummarization.csv")
-x.summarization_query("summarize text")
-
+x.summarization_query("summarize text", epochs=5)
+x.models["summarization"]["plots"]["loss"].show()
+print(x.get_summary("my name is cat", num_return_sequences=2))

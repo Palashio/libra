@@ -229,23 +229,22 @@ def text_classification_query(self, instruction, drop=None,
 
 
 # Summarization predict wrapper
-def get_summary(self, text, num_beams=4, no_repeat_ngram_size=2, num_return_sequences=1,
+def get_summary(self, text, max_summary_length=50, num_beams=4, no_repeat_ngram_size=2, num_return_sequences=1,
                 early_stopping=True):
     modelInfo = self.models.get("summarization")
     model = modelInfo['model']
-    model.eval()
     tokenizer = modelInfo['tokenizer']
     return tokenizer.decode(
-        model.generate(tokenizer.encode(text, return_tensors="tf", max_length=modelInfo["max_text_length"])
-                       , max_length=modelInfo["max_summary_length"], num_beams=num_beams,
+        model.generate(tf.convert_to_tensor(tokenize([text], tokenizer, max_length=modelInfo['max_text_length'])),
+                       max_length=max_summary_length, num_beams=num_beams,
                        no_repeat_ngram_size=no_repeat_ngram_size, num_return_sequences=num_return_sequences,
-                       early_stopping=early_stopping))
+                       early_stopping=early_stopping)[0])
 
 
 # Text summarization query
 def summarization_query(self, instruction, preprocess=True, label_column=None,
                         drop=None,
-                        epochs=1,
+                        epochs=5,
                         batch_size=32,
                         learning_rate=3e-5,
                         max_text_length=512,
@@ -338,7 +337,8 @@ def summarization_query(self, instruction, preprocess=True, label_column=None,
     logger('Fine-Tuning the model on your dataset...')
 
     # Suppress unnecessary output
-    model = TFT5ForConditionalGeneration.from_pretrained("t5-small", output_loading_info=False)
+    with NoStdStreams():
+        model = TFT5ForConditionalGeneration.from_pretrained("t5-small", output_loading_info=False)
 
     if testing:
         X_train, X_test, y_train, y_test = train_test_split(
@@ -373,7 +373,7 @@ def summarization_query(self, instruction, preprocess=True, label_column=None,
             # Validation Loop
             if testing:
                 for data, truth in test_dataset:
-                    logits = model(inputs=data, decoder_input_ids=data)
+                    logits = model(inputs=data, decoder_input_ids=data, training=False)
                     val_loss = loss(truth, logits[0])
                     total_loss_val += val_loss
 
@@ -398,11 +398,11 @@ def summarization_query(self, instruction, preprocess=True, label_column=None,
     plots = None
     if generate_plots:
         logger("Generating plots")
-        plots = {"loss": libra.plotting.nonkeras_generate_plots.plot_loss(total_training_loss, total_loss_val)}
+        plots = {"loss": libra.plotting.nonkeras_generate_plots.plot_loss(total_training_loss, total_validation_loss)}
 
     if save_model:
         logger("Saving model")
-        save(model, save_model, save_path=save_path)
+        model.save_weights(save_path + "summarization_checkpoint.ckpt")
 
     logger("Storing information in client object under key 'summarization'")
 
