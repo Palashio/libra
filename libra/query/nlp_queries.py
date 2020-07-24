@@ -14,7 +14,7 @@ from libra.data_generation.grammartree import get_value_instruction
 from libra.modeling.prediction_model_creation import get_keras_text_class
 from libra.plotting.generate_plots import generate_classification_plots
 from libra.preprocessing.NLP_preprocessing import get_target_values, text_clean_up, lemmatize_text, encode_text, \
-    tokenize, NoStdStreams
+    tokenize, NoStdStreams, add_prefix
 from libra.preprocessing.data_reader import DataReader
 from libra.preprocessing.image_caption_helpers import load_image, map_func, CNN_Encoder, RNN_Decoder, get_path_column, \
     generate_caption_helper
@@ -232,7 +232,9 @@ def get_summary(self, text, max_summary_length=50, num_beams=4, no_repeat_ngram_
     modelInfo = self.models.get("summarization")
     model = modelInfo['model']
     tokenizer = modelInfo['tokenizer']
-    result = model.generate(tf.convert_to_tensor(tokenize([text], tokenizer, max_length=modelInfo['max_text_length'])),
+    text = [text]
+    text = add_prefix(text, "summarize: ")
+    result = model.generate(tf.convert_to_tensor(tokenize(text, tokenizer, max_length=modelInfo['max_text_length'])),
                        max_length=max_summary_length, num_beams=num_beams,
                        no_repeat_ngram_size=no_repeat_ngram_size, num_return_sequences=num_return_sequences,
                        early_stopping=early_stopping)
@@ -325,8 +327,8 @@ def summarization_query(self, instruction, preprocess=True, label_column=None,
     # Clean up text
     if preprocess:
         logger("Preprocessing data")
-        X = lemmatize_text(text_clean_up(X.array))
-        Y = lemmatize_text(text_clean_up(Y.array))
+        X = add_prefix(lemmatize_text(text_clean_up(X.array)),"summarize: ")
+        Y = add_prefix(lemmatize_text(text_clean_up(Y.array)),"summarize: ")
 
     # tokenize text/summaries
     X = tokenize(X, tokenizer, max_text_length)

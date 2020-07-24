@@ -147,8 +147,20 @@ def tokenize(sentences, tokenizer, max_length):
 
 
 """
+Add a specific prefix to all text data
+"""
+
+
+def add_prefix(dataset, prefix):
+    for i in range(len(dataset)):
+        dataset[i] = prefix + dataset[i]
+    return dataset
+
+
+"""
 Used to suppress HuggingFace model loading output
 """
+
 
 class NoStdStreams(object):
     def __init__(self, stdout=None, stderr=None):
