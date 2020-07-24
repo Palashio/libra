@@ -124,3 +124,20 @@ def encode_text(dataset, text):
     tokenizer.fit_on_texts(dataset)
     result = tokenizer.texts_to_sequences(text)
     return result
+
+
+"""
+Tokenizes sentences and returns input ids
+"""
+
+
+def tokenize(sentences, tokenizer):
+    input_ids, input_masks, input_segments = [], [], []
+    for sentence in tqdm(sentences):
+        inputs = tokenizer.encode_plus(sentence, add_special_tokens=True, max_length=128, pad_to_max_length=True,
+                                       return_attention_mask=True, return_token_type_ids=True)
+        input_ids.append(inputs['input_ids'])
+        input_masks.append(inputs['attention_mask'])
+        input_segments.append(inputs['token_type_ids'])
+
+    return input_ids

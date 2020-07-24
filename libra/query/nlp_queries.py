@@ -239,28 +239,14 @@ def get_summary(self, text, num_beams=4, no_repeat_ngram_size=2, num_return_sequ
                        no_repeat_ngram_size=no_repeat_ngram_size, num_return_sequences=num_return_sequences,
                        early_stopping=early_stopping))
 
-
-def tokenize(sentences, tokenizer):
-    input_ids, input_masks, input_segments = [], [], []
-    for sentence in tqdm(sentences):
-        inputs = tokenizer.encode_plus(sentence, add_special_tokens=True, max_length=128, pad_to_max_length=True,
-                                       return_attention_mask=True, return_token_type_ids=True)
-        input_ids.append(inputs['input_ids'])
-        input_masks.append(inputs['attention_mask'])
-        input_segments.append(inputs['token_type_ids'])
-
-    return input_ids
-
-
 # Text summarization query
 def summarization_query(self, instruction, preprocess=True, label_column=None,
                         drop=None,
                         epochs=1,
                         batch_size=32,
                         learning_rate=3e-5,
-                        monitor="val_loss",
                         max_text_length=512,
-                        max_summary_length=40,
+                        gpu=False,
                         test_size=0.2,
                         random_state=49,
                         generate_plots=True,
@@ -300,6 +286,16 @@ def summarization_query(self, instruction, preprocess=True, label_column=None,
         testing = False
     else:
         testing = True
+
+    if gpu:
+        if tf.test.gpu_device_name():
+            print('Default GPU Device: {}'.format(tf.test.gpu_device_name()))
+        else:
+            raise Exception("Please install GPU version of Tensorflow")
+
+        device = '/device:GPU:0'
+    else:
+        device = '/device:CPU:0'
 
     tf.random.set_seed(random_state)
     np.random.seed(random_state)
@@ -347,26 +343,38 @@ def summarization_query(self, instruction, preprocess=True, label_column=None,
     train_dataset = tf.data.Dataset.from_tensor_slices((X_train, y_train)).shuffle(10000).batch(batch_size)
     test_dataset = tf.data.Dataset.from_tensor_slices((X_test, y_test)).shuffle(10000).batch(batch_size)
 
+    num_steps = max_text_length // batch_size
+
+    total_training_loss = []
+    total_validation_loss = []
     # Training Loop
-    for epoch in range(epochs):
-        for data, truth in train_dataset:
-            with tf.GradientTape() as tape:
-                out = model(inputs=data, decoder_input_ids=data)
-                loss_value = loss(truth, out[0])
-                grads = tape.gradient(loss_value, model.trainable_weights)
-                optimizer.apply_gradients(zip(grads, model.trainable_weights))
+    with tf.device(device):
+        for epoch in range(epochs):
+            total_loss = 0
+            total_loss_val = 0
+            for data, truth in train_dataset:
+                with tf.GradientTape() as tape:
+                    out = model(inputs=data, decoder_input_ids=data)
+                    loss_value = loss(truth, out[0])
+                    total_loss += loss_value
+                    grads = tape.gradient(loss_value, model.trainable_weights)
+                    optimizer.apply_gradients(zip(grads, model.trainable_weights))
 
-        # Validation Loop
-        for data, truth in test_dataset:
-            logits = model(inputs=data, decoder_input_ids=data)
-            loss_value = loss(truth, logits[0])
+            total_training_loss.append(total_loss / num_steps)
 
-    total_training_loss = total_loss.numpy() / num_steps
-    logger("->", "Final training loss: {}".format(str(total_training_loss)))
+            # Validation Loop
+            if testing:
+                for data, truth in test_dataset:
+                    logits = model(inputs=data, decoder_input_ids=data)
+                    val_loss = loss(truth, logits[0])
+                    total_loss_val += val_loss
+
+                total_validation_loss.append(total_loss_val / num_steps)
+
+    logger("->", "Final training loss: {}".format(str(total_training_loss[len(total_training_loss) - 1])))
 
     if testing:
-        total_loss_val = total_loss_val.numpy() / num_steps
-        total_loss_val_str = str(total_loss_val)
+        total_loss_val_str = str(total_validation_loss[len(total_validation_loss) - 1])
     else:
         total_loss_val = [0]
         total_loss_val_str = str("0, No validation done")
@@ -389,8 +397,9 @@ def summarization_query(self, instruction, preprocess=True, label_column=None,
         "max_text_length": max_text_length,
         "plots": plots,
         "tokenizer": tokenizer,
-        'losses': losses,
-        'accuracy': accuracy}
+        'losses': {"Training loss": total_training_loss[len(total_training_loss) - 1],
+                   "Validation loss": total_validation_loss[len(total_validation_loss) - 1]}}
+
     clearLog()
     return self.models["summarization"]
 
@@ -723,8 +732,8 @@ def image_caption_query(self, instruction, label_column=None,
         "feature_extraction": image_features_extract_model,
         "plots": plots,
         'losses': {
-            'training_loss': total_loss,
-            'validation_loss': total_loss_val
+            'Training loss': total_loss,
+            'Validation loss': total_loss_val
         }
     }
     clearLog()
