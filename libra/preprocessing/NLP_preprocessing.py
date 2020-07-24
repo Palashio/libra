@@ -1,8 +1,11 @@
+import os
 import re
+import sys
+
 import tensorflow as tf
-import spacy
-from spacy.lang.en import English
 from nltk.corpus import stopwords
+from spacy.lang.en import English
+
 from libra.data_generation.dataset_labelmatcher import get_similar_column
 from libra.data_generation.grammartree import get_value_instruction
 
@@ -29,7 +32,7 @@ Takes a list of text values and returns a lemmatized version of this text.
 
 def lemmatize_text(dataset):
     result = []
-    nlp = spacy.load('en')
+    nlp = English()
     for text in range(len(dataset)):
         word = ""
         doc = nlp(dataset[text])
@@ -124,3 +127,54 @@ def encode_text(dataset, text):
     tokenizer.fit_on_texts(dataset)
     result = tokenizer.texts_to_sequences(text)
     return result
+
+
+"""
+Tokenizes sentences and returns input ids
+"""
+
+
+def tokenize_for_input_ids(sentences, tokenizer, max_length):
+    input_ids, input_masks, input_segments = [], [], []
+    for sentence in sentences:
+        inputs = tokenizer.encode_plus(sentence, add_special_tokens=True, max_length=max_length, pad_to_max_length=True,
+                                       return_attention_mask=True, return_token_type_ids=True, truncation=True)
+        input_ids.append(inputs['input_ids'])
+
+    return input_ids
+
+
+"""
+Add a specific prefix to all text data
+"""
+
+
+def add_prefix(dataset, prefix):
+    for i in range(len(dataset)):
+        dataset[i] = prefix + dataset[i]
+    return dataset
+
+
+"""
+Used to suppress HuggingFace model loading output
+"""
+
+
+class NoStdStreams(object):
+    def __init__(self, stdout=None, stderr=None):
+        self.devnull = open(os.devnull, 'w')
+        self._stdout = stdout or self.devnull or sys.stdout
+        self._stderr = stderr or self.devnull or sys.stderr
+
+    def __enter__(self):
+        self.old_stdout, self.old_stderr = sys.stdout, sys.stderr
+        self.old_stdout.flush();
+        self.old_stderr.flush()
+        sys.stdout, sys.stderr = self._stdout, self._stderr
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        self._stdout.flush();
+        self._stderr.flush()
+        sys.stdout = self.old_stdout
+        sys.stderr = self.old_stderr
+        self.devnull.close()

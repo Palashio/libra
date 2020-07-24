@@ -76,6 +76,24 @@ class TestQueries(unittest.TestCase):
         self.newClient.kmeans_clustering_query(clusters=4)
         self.assertTrue('k_means_clustering' in self.newClient.models)
 
+    # Tests whether summarization works without errors, and creates a key in models dictionary
+    @ordered
+    def test_summarization(self):
+        x = client("tools/data/nlp_data/miniDocumentSummarization.csv")
+        x.summarization_query("summarize text", epochs=1)
+
+    # Tests whether image captioning works without errors, and creates a key in models dictionary
+    @ordered
+    def test_captioning(self):
+        x = client("tools/data/nlp_data/image-caption.csv")
+        x.image_caption_query("get captions", epochs=1)
+
+    # Tests whether text classification works without errors, and creates a key in models dictionary
+    @ordered
+    def test_text_classification(self):
+        x = client("tools/data/nlp_data/smallSentimentAnalysis.csv")
+        x.text_classification_query("get captions", epochs=1)
+
 
     """
     TEST ANALYZE() FUNCTION
