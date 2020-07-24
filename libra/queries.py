@@ -762,7 +762,7 @@ class client:
     # summarization query
     def summarization_query(self, instruction, label_column=None, preprocess=True,
                             drop=None,
-                            epochs=10,
+                            epochs=1,
                             batch_size=32,
                             learning_rate=3e-5,
                             monitor="val_loss",

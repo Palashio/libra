@@ -1,11 +1,14 @@
 import os
 import numpy as np
 import tensorflow as tf
+import transformers
 from colorama import Fore, Style
 from keras_preprocessing import sequence
 from sklearn.model_selection import train_test_split
 from tensorflow.python.keras.callbacks import EarlyStopping
-from transformers import TFAutoModelWithLMHead, AutoTokenizer, TFT5ForConditionalGeneration
+from tqdm import tqdm
+from transformers import TFAutoModelWithLMHead, AutoTokenizer, TFT5ForConditionalGeneration, T5Tokenizer, shape_list, \
+    TFT5Model
 import libra.plotting.nonkeras_generate_plots
 from libra.data_generation.dataset_labelmatcher import get_similar_column
 from libra.data_generation.grammartree import get_value_instruction
@@ -223,7 +226,7 @@ def text_classification_query(self, instruction, drop=None,
     return self.models["text_classification"]
 
 
-# doc_summarization predict wrapper
+# Summarization predict wrapper
 def get_summary(self, text, num_beams=4, no_repeat_ngram_size=2, num_return_sequences=1,
                 early_stopping=True):
     modelInfo = self.models.get("summarization")
@@ -237,10 +240,22 @@ def get_summary(self, text, num_beams=4, no_repeat_ngram_size=2, num_return_sequ
                        early_stopping=early_stopping))
 
 
+def tokenize(sentences, tokenizer):
+    input_ids, input_masks, input_segments = [], [], []
+    for sentence in tqdm(sentences):
+        inputs = tokenizer.encode_plus(sentence, add_special_tokens=True, max_length=128, pad_to_max_length=True,
+                                       return_attention_mask=True, return_token_type_ids=True)
+        input_ids.append(inputs['input_ids'])
+        input_masks.append(inputs['attention_mask'])
+        input_segments.append(inputs['token_type_ids'])
+
+    return input_ids
+
+
 # Text summarization query
 def summarization_query(self, instruction, preprocess=True, label_column=None,
                         drop=None,
-                        epochs=10,
+                        epochs=1,
                         batch_size=32,
                         learning_rate=3e-5,
                         monitor="val_loss",
@@ -305,7 +320,7 @@ def summarization_query(self, instruction, preprocess=True, label_column=None,
     else:
         label = label_column
 
-    tokenizer = AutoTokenizer.from_pretrained("t5-small")
+    tokenizer = T5Tokenizer.from_pretrained("t5-small")
     # Find target columns
     X, Y, target = get_target_values(data, instruction, label)
     logger("->", "Target Column Found: {}".format(target))
@@ -318,56 +333,50 @@ def summarization_query(self, instruction, preprocess=True, label_column=None,
         Y = lemmatize_text(text_clean_up(Y.array))
 
     # tokenize text/summaries
-    X = tokenizer.batch_encode_plus(X, return_tensors="tf", max_length=max_text_length, pad_to_max_length=True)
-    Y = tokenizer.batch_encode_plus(Y, return_tensors="tf", max_length=max_text_length, pad_to_max_length=True)
-
-
-
-
-
-
-
-    # X_train, X_test, y_train, y_test = train_test_split(
-    #     X, Y, test_size=test_size, random_state=random_state)
+    X = tokenize(X, tokenizer)
+    Y = tokenize(Y, tokenizer)
 
     logger('Fine-Tuning the model on your dataset...')
     model = TFT5ForConditionalGeneration.from_pretrained("t5-small")
 
+    X_train, X_test, y_train, y_test = train_test_split(
+        X, Y, test_size=test_size, random_state=random_state)
+
     optimizer = tf.keras.optimizers.Adam(learning_rate=learning_rate)
     loss = tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True)
-    model.compile(optimizer=optimizer, loss=loss)
+    train_dataset = tf.data.Dataset.from_tensor_slices((X_train, y_train)).shuffle(10000).batch(batch_size)
+    test_dataset = tf.data.Dataset.from_tensor_slices((X_test, y_test)).shuffle(10000).batch(batch_size)
 
-    # early stopping callback
-    es = EarlyStopping(
-        monitor=monitor,
-        mode='auto',
-        verbose=0,
-        patience=5)
+    # Training Loop
+    for epoch in range(epochs):
+        for data, truth in train_dataset:
+            with tf.GradientTape() as tape:
+                out = model(inputs=data, decoder_input_ids=data)
+                loss_value = loss(truth, out[0])
+                grads = tape.gradient(loss_value, model.trainable_weights)
+                optimizer.apply_gradients(zip(grads, model.trainable_weights))
 
-    # Fine tune model
-    history = model.fit({'inputs': X["input_ids"], 'decoder_input_ids': X["input_ids"]}, Y["input_ids"], validation_split=test_size,
-                        batch_size=batch_size,
-                        epochs=epochs, callbacks=[es], verbose=0)
+        # Validation Loop
+        for data, truth in test_dataset:
+            logits = model(inputs=data, decoder_input_ids=data)
+            loss_value = loss(truth, logits[0])
 
-    logger("->", "Final training loss: {}".format(history.history["loss"][len(history.history["loss"]) - 1]))
+    total_training_loss = total_loss.numpy() / num_steps
+    logger("->", "Final training loss: {}".format(str(total_training_loss)))
+
     if testing:
-        logger("->",
-               "Final validation loss: {}".format(history.history["val_loss"][len(history.history["val_loss"]) - 1]))
-        logger("->", "Final validation accuracy: {}".format(
-            history.history["val_accuracy"][len(history.history["val_accuracy"]) - 1]))
-        losses = {'training_loss': history.history['loss'], 'val_loss': history.history['val_loss']}
-        accuracy = {'training_accuracy': history.history['accuracy'],
-                    'validation_accuracy': history.history['val_accuracy']}
+        total_loss_val = total_loss_val.numpy() / num_steps
+        total_loss_val_str = str(total_loss_val)
     else:
-        logger("->", "Final validation loss: {}".format("0, No validation done"))
-        losses = {'training_loss': history.history['loss']}
-        accuracy = {'training_accuracy': history.history['accuracy']}
+        total_loss_val = [0]
+        total_loss_val_str = str("0, No validation done")
+
+    logger("->", "Final validation loss: {}".format(total_loss_val_str))
 
     plots = None
     if generate_plots:
         logger("Generating plots")
-        plots = generate_classification_plots(
-            history, X, y_train, model, X_test, y_test)
+        plots = {"loss": libra.plotting.nonkeras_generate_plots.plot_loss(total_training_loss, total_loss_val)}
 
     if save_model:
         logger("Saving model")
