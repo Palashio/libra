@@ -3,9 +3,9 @@ import re
 import sys
 
 import tensorflow as tf
-import spacy
-from spacy.lang.en import English
 from nltk.corpus import stopwords
+from spacy.lang.en import English
+
 from libra.data_generation.dataset_labelmatcher import get_similar_column
 from libra.data_generation.grammartree import get_value_instruction
 
