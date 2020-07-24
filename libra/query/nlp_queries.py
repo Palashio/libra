@@ -321,8 +321,6 @@ def summarization_query(self, instruction, preprocess=True, label_column=None,
     tokenizer = T5Tokenizer.from_pretrained("t5-small")
     # Find target columns
     X, Y, target = get_target_values(data, instruction, label)
-    print(X)
-    print(Y)
     logger("->", "Target Column Found: {}".format(target))
     logger("Establishing dataset walkers")
 
