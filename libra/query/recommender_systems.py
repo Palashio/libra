@@ -35,6 +35,7 @@ result: a pandas DataFrame of the top n recommendations
         self.dataReader = DataReader(data)
         self.data_in = self.dataReader.data_generator()
         self.data = self.data_in.copy()
+
         self.feature_names = feature_names
         self.n_recommendations=n_recommendations
         self.indexer = indexer

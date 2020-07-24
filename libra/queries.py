@@ -117,7 +117,10 @@ class client:
         return get_similar_model(model_requested, self.models.keys())
         clearLog()
 
+<<<<<<< HEAD
     # recommend items based on search criteria
+=======
+>>>>>>> 95e151cbb4c24b735df2e7b78744dd2270e259d2
     def recommend(self,search_term):
         if self.latest_model == 'content_recommender':
             model = self.models[self.latest_model]
