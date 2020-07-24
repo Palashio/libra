@@ -1,4 +1,6 @@
+import io
 import os
+import sys
 
 import numpy as np
 import tensorflow as tf
@@ -14,7 +16,7 @@ from libra.data_generation.grammartree import get_value_instruction
 from libra.modeling.prediction_model_creation import get_keras_text_class
 from libra.plotting.generate_plots import generate_classification_plots
 from libra.preprocessing.NLP_preprocessing import get_target_values, text_clean_up, lemmatize_text, encode_text, \
-    tokenize
+    tokenize, NoStdStreams
 from libra.preprocessing.data_reader import DataReader
 from libra.preprocessing.image_caption_helpers import load_image, map_func, CNN_Encoder, RNN_Decoder, get_path_column, \
     generate_caption_helper
@@ -334,7 +336,9 @@ def summarization_query(self, instruction, preprocess=True, label_column=None,
     Y = tokenize(Y, tokenizer, max_text_length)
 
     logger('Fine-Tuning the model on your dataset...')
-    model = TFT5ForConditionalGeneration.from_pretrained("t5-small");
+
+    # Suppress unnecessary output
+    model = TFT5ForConditionalGeneration.from_pretrained("t5-small", output_loading_info=False)
 
     if testing:
         X_train, X_test, y_train, y_test = train_test_split(
@@ -350,6 +354,7 @@ def summarization_query(self, instruction, preprocess=True, label_column=None,
 
     total_training_loss = []
     total_validation_loss = []
+
     # Training Loop
     with tf.device(device):
         for epoch in range(epochs):
