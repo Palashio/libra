@@ -1,14 +1,13 @@
 import os
+
 import numpy as np
 import tensorflow as tf
-import transformers
 from colorama import Fore, Style
 from keras_preprocessing import sequence
 from sklearn.model_selection import train_test_split
 from tensorflow.python.keras.callbacks import EarlyStopping
-from tqdm import tqdm
-from transformers import TFAutoModelWithLMHead, AutoTokenizer, TFT5ForConditionalGeneration, T5Tokenizer, shape_list, \
-    TFT5Model
+from transformers import TFT5ForConditionalGeneration, T5Tokenizer
+
 import libra.plotting.nonkeras_generate_plots
 from libra.data_generation.dataset_labelmatcher import get_similar_column
 from libra.data_generation.grammartree import get_value_instruction
@@ -240,6 +239,7 @@ def get_summary(self, text, num_beams=4, no_repeat_ngram_size=2, num_return_sequ
                        no_repeat_ngram_size=no_repeat_ngram_size, num_return_sequences=num_return_sequences,
                        early_stopping=early_stopping))
 
+
 # Text summarization query
 def summarization_query(self, instruction, preprocess=True, label_column=None,
                         drop=None,
@@ -330,21 +330,23 @@ def summarization_query(self, instruction, preprocess=True, label_column=None,
         Y = lemmatize_text(text_clean_up(Y.array))
 
     # tokenize text/summaries
-    X = tokenize(X, tokenizer)
-    Y = tokenize(Y, tokenizer)
+    X = tokenize(X, tokenizer, max_text_length)
+    Y = tokenize(Y, tokenizer, max_text_length)
 
     logger('Fine-Tuning the model on your dataset...')
-    model = TFT5ForConditionalGeneration.from_pretrained("t5-small")
+    model = TFT5ForConditionalGeneration.from_pretrained("t5-small");
 
-    X_train, X_test, y_train, y_test = train_test_split(
-        X, Y, test_size=test_size, random_state=random_state)
+    if testing:
+        X_train, X_test, y_train, y_test = train_test_split(
+            X, Y, test_size=test_size, random_state=random_state)
+        test_dataset = tf.data.Dataset.from_tensor_slices((X_test, y_test)).shuffle(10000).batch(batch_size)
+    else:
+        X_train = X
+        y_train = Y
+    train_dataset = tf.data.Dataset.from_tensor_slices((X_train, y_train)).shuffle(10000).batch(batch_size)
 
     optimizer = tf.keras.optimizers.Adam(learning_rate=learning_rate)
     loss = tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True)
-    train_dataset = tf.data.Dataset.from_tensor_slices((X_train, y_train)).shuffle(10000).batch(batch_size)
-    test_dataset = tf.data.Dataset.from_tensor_slices((X_test, y_test)).shuffle(10000).batch(batch_size)
-
-    num_steps = max_text_length // batch_size
 
     total_training_loss = []
     total_validation_loss = []
@@ -361,7 +363,7 @@ def summarization_query(self, instruction, preprocess=True, label_column=None,
                     grads = tape.gradient(loss_value, model.trainable_weights)
                     optimizer.apply_gradients(zip(grads, model.trainable_weights))
 
-            total_training_loss.append(total_loss / num_steps)
+            total_training_loss.append(total_loss)
 
             # Validation Loop
             if testing:
@@ -370,17 +372,23 @@ def summarization_query(self, instruction, preprocess=True, label_column=None,
                     val_loss = loss(truth, logits[0])
                     total_loss_val += val_loss
 
-                total_validation_loss.append(total_loss_val / num_steps)
+                total_validation_loss.append(total_loss_val)
 
-    logger("->", "Final training loss: {}".format(str(total_training_loss[len(total_training_loss) - 1])))
+    logger("->", "Final training loss: {}".format(str(total_training_loss[len(total_training_loss) - 1].numpy())))
 
     if testing:
-        total_loss_val_str = str(total_validation_loss[len(total_validation_loss) - 1])
+        total_loss_val_str = str(total_validation_loss[len(total_validation_loss) - 1].numpy())
     else:
         total_loss_val = [0]
         total_loss_val_str = str("0, No validation done")
 
     logger("->", "Final validation loss: {}".format(total_loss_val_str))
+
+    if testing:
+        losses = {"Training loss": total_training_loss[len(total_training_loss) - 1].numpy(),
+                  "Validation loss": total_validation_loss[len(total_validation_loss) - 1].numpy()}
+    else:
+        losses = {"Training loss": total_training_loss[len(total_training_loss) - 1].numpy()}
 
     plots = None
     if generate_plots:
@@ -398,8 +406,7 @@ def summarization_query(self, instruction, preprocess=True, label_column=None,
         "max_text_length": max_text_length,
         "plots": plots,
         "tokenizer": tokenizer,
-        'losses': {"Training loss": total_training_loss[len(total_training_loss) - 1],
-                   "Validation loss": total_validation_loss[len(total_validation_loss) - 1]}}
+        'losses': losses}
 
     clearLog()
     return self.models["summarization"]

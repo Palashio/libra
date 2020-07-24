@@ -766,7 +766,7 @@ class client:
                             batch_size=32,
                             learning_rate=3e-5,
                             max_text_length=512,
-                            test_size=0.2,
+                            test_size=0,
                             gpu=False,
                             random_state=49,
                             generate_plots=True,
