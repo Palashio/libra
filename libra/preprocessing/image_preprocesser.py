@@ -1,697 +1,506 @@
-from colorama import Fore, Style
-from tensorflow.keras.callbacks import EarlyStopping
 import os
-from libra.preprocessing.image_preprocesser import (setwise_preprocessing,
-                                                    csv_preprocessing,
-                                                    classwise_preprocessing,
-                                                    set_distinguisher,
-                                                    already_processed)
-from libra.preprocessing.data_reader import DataReader
-from keras import Model
-from keras.models import Sequential, model_from_json
-from keras.layers import (Dense, Conv2D, Flatten, MaxPooling2D, Dropout, GlobalAveragePooling2D)
-from keras.applications import VGG16, VGG19, ResNet50, ResNet101, ResNet152
+import shutil
+import cv2
+import glob
 import pandas as pd
-import json
-from libra.query.supplementaries import save, generate_id
-from keras.preprocessing.image import ImageDataGenerator
-from sklearn.preprocessing import OneHotEncoder
-from libra.plotting.generate_plots import (generate_regression_plots,
-                                           generate_classification_plots)
-from libra.preprocessing.data_preprocesser import initial_preprocesser
-from libra.modeling.prediction_model_creation import get_keras_model_reg, get_keras_model_class
-from sklearn.preprocessing import StandardScaler
-import numpy as np
-
-os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
-
-counter = 0
-currLog = ""
-
-
-# # allows for all columns to be displayed when printing()
-# pd.options.display.width = None
-
-
-# # clears the log when new process is started up
-
-
-def clearLog():
-    global counter
-    global currLog
-
-    currLog = ""
-    counter = 0
-
-
-# logging function that creates hierarchial display of the processes of
-# different functions. Copied into different python files to maintain
-# global variable parallels
-
-
-def logger(instruction, found=""):
-    '''
-    logging function that creates hierarchial display of the processes of
-    different functions. Copied into different python files to maintain
-    global variables.
-
-    :param instruction: what you want to be displayed
-    :param found: if you want to display something found like target column
-
-    '''
-    global counter
-    if counter == 0:
-        print((" " * 2 * counter) + str(instruction) + str(found))
-    elif instruction == "->":
-        counter = counter - 1
-        print(Fore.BLUE + (" " * 2 * counter) +
-              str(instruction) + str(found) + (Style.RESET_ALL))
-    else:
-        print((" " * 2 * counter) + "|- " + str(instruction) + str(found))
-        if instruction == "done...":
-            print("\n" + "\n")
-
-    counter += 1
-
-
-def regression_ann(
-        instruction,
-        callback=False,
-        ca_threshold=None,
-        text=[],
-        dataset=None,
-        drop=None,
-        preprocess=True,
-        test_size=0.2,
-        random_state=49,
-        epochs=50,
-        generate_plots=True,
-        callback_mode='min',
-        maximizer="val_loss",
-        save_model=False,
-        save_path=os.getcwd()):
-    '''
-    Body of the regression function used that is called in the neural network query
-    if the data is numerical.
-    :param many parameters: used to preprocess, tune, plot generation, and parameterizing the neural network trained.
-    :return dictionary that holds all the information for the finished model.
-    '''
-
-    logger("Reading in dataset")
-
-    dataReader = DataReader(dataset)
-    data = dataReader.data_generator()
-    # data = pd.read_csv(self.dataset)
-
-    if drop is not None:
-        data.drop(drop, axis=1, inplace=True)
-    data, y, target, full_pipeline = initial_preprocesser(
-        data, instruction, preprocess, ca_threshold, text, test_size=test_size, random_state=random_state)
-    logger("->", "Target column found: {}".format(target))
-
-    X_train = data['train']
-    X_test = data['test']
-
-    # Target scaling
-    target_scaler = StandardScaler()
-
-    y_train = target_scaler.fit_transform(np.array(y['train']).reshape(-1, 1))
-    y_test = target_scaler.transform(np.array(y['test']).reshape(-1, 1))
-
-    logger("Establishing callback function")
-
-    models = []
-    losses = []
-    model_data = []
-
-    # callback function to store lowest loss value
-    es = EarlyStopping(
-        monitor=maximizer,
-        mode=callback_mode,
-        verbose=0,
-        patience=5)
-
-    callback_value = None
-    if callback is not False:
-        callback_value = [es]
-
-    i = 0
-
-    # get the first 3 layer model
-    model = get_keras_model_reg(data, i)
-
-    logger("Training initial model")
-    history = model.fit(
-        X_train,
-        y_train,
-        epochs=epochs,
-        validation_data=(
-            X_test,
-            y_test),
-        callbacks=callback_value,
-        verbose=0)
-    models.append(history)
-    model_data.append(model)
-
-    col_name = [["Initial number of layers ",
-                 "| Training Loss ", "| Test Loss "]]
-    col_width = max(len(word) for row in col_name for word in row) + 2
-    for row in col_name:
-        print((" " * 2 * counter) + "| " + ("".join(word.ljust(col_width)
-                                                    for word in row)) + " |")
-    values = []
-    values.append(str(len(model.layers)))
-    values.append(
-        "| " + str(history.history['loss'][len(history.history['val_loss']) - 1]))
-    values.append(
-        "| " + str(history.history['val_loss'][len(history.history['val_loss']) - 1]))
-    datax = []
-    datax.append(values)
-    for row in datax:
-        print((" " * 2 * counter) + "| " + ("".join(word.ljust(col_width)
-                                                    for word in row)) + " |")
-
-    losses.append(history.history[maximizer]
-                  [len(history.history[maximizer]) - 1])
-
-    # keeps running model and fit functions until the validation loss stops
-    # decreasing
-    logger("Testing number of layers")
-    col_name = [["Current number of layers", "| Training Loss", "| Test Loss"]]
-    col_width = max(len(word) for row in col_name for word in row) + 2
-    for row in col_name:
-        print((" " * 2 * counter) + "| " + ("".join(word.ljust(col_width)
-                                                    for word in row)) + " |")
-    datax = []
-    # while all(x > y for x, y in zip(losses, losses[1:])):
-    while (len(losses) <= 2 or losses[len(losses) - 1] < losses[len(losses) - 2]):
-        model = get_keras_model_reg(data, i)
-        history = model.fit(
-            X_train,
-            y_train,
-            callbacks=callback_value,
-            epochs=epochs,
-            validation_data=(
-                X_test,
-                y_test), verbose=0)
-        model_data.append(model)
-        models.append(history)
-
-        values = []
-        datax = []
-        values.append(str(len(model.layers)))
-        values.append(
-            "| " + str(history.history['loss'][len(history.history['val_loss']) - 1]))
-        values.append(
-            "| " + str(history.history['val_loss'][len(history.history['val_loss']) - 1]))
-        datax.append(values)
-        for row in datax:
-            print((" " * 2 * counter) + "| " +
-                  ("".join(word.ljust(col_width) for word in row)) + " |")
-        del values, datax
-        losses.append(history.history[maximizer]
-                      [len(history.history[maximizer]) - 1])
-        i += 1
-    # print((" " * 2 * counter)+ tabulate(datax, headers=col_name, tablefmt='orgtbl'))
-    final_model = model_data[losses.index(min(losses))]
-    final_hist = models[losses.index(min(losses))]
-    print("")
-    logger('->', "Best number of layers found: " +
-           str(len(final_model.layers)))
-
-    logger('->', "Training Loss: " + str(final_hist.history['loss']
-                                         [len(final_hist.history['val_loss']) - 1]))
-    logger('->', "Test Loss: " + str(final_hist.history['val_loss']
-                                     [len(final_hist.history['val_loss']) - 1]))
-
-    # calls function to generate plots in plot generation
-    plots = {}
-    if generate_plots:
-        init_plots, plot_names = generate_regression_plots(
-            models[len(models) - 1], data, y)
-        for x in range(len(plot_names)):
-            plots[str(plot_names[x])] = init_plots[x]
-
-    if save_model:
-        save(final_model, save_model)
-    # stores values in the client object models dictionary field
-    print("")
-    logger("Stored model under 'regression_ANN' key")
-    clearLog()
-    return {
-        'id': generate_id(),
-        'model': final_model,
-        "target": target,
-        "num_classes": 1,
-        "plots": plots,
-        "preprocesser": full_pipeline,
-        "interpreter": target_scaler,
-        'test_data': {'X': X_test, 'y': y_test},
-        'losses': {
-            'training_loss': final_hist.history['loss'],
-            'val_loss': final_hist.history['val_loss']}}
-
-
-def classification_ann(instruction,
-                       callback=False,
-                       dataset=None,
-                       text=[],
-                       ca_threshold=None,
-                       preprocess=True,
-                       callback_mode='min',
-                       drop=None,
-                       random_state=49,
-                       test_size=0.2,
-                       epochs=50,
-                       generate_plots=True,
-                       maximizer="val_accuracy",
-                       save_model=False,
-                       save_path=os.getcwd()):
-    '''
-    Body of the classification function used that is called in the neural network query
-    if the data is categorical.
-    :param many parameters: used to preprocess, tune, plot generation, and parameterizing the neural network trained.
-    :return dictionary that holds all the information for the finished model.
-    '''
-    logger("Reading in dataset")
-
-    dataReader = DataReader(dataset)
-    data = dataReader.data_generator()
-
-    if drop is not None:
-        data.drop(drop, axis=1, inplace=True)
-
-    data, y, remove, full_pipeline = initial_preprocesser(
-        data, instruction, preprocess, ca_threshold, text, test_size=test_size, random_state=random_state)
-    logger("->", "Target column found: {}".format(remove))
-
-    # Needed to make a custom label encoder due to train test split changes
-    # Can still be inverse transformed, just a bit of extra work
-    y = pd.concat([y['train'], y['test']], axis=0)
-
-    num_classes = len(np.unique(y))
-
-    X_train = data['train']
-    X_test = data['test']
-
-    if num_classes > 2:
-        # ANN needs target one hot encoded for classification
-        one_hot_encoder = OneHotEncoder()
-        y = pd.DataFrame(
-            one_hot_encoder.fit_transform(
-                np.reshape(
-                    y.values,
-                    (-1,
-                     1))).toarray(),
-            columns=one_hot_encoder.get_feature_names())
-
-    y_train = y.iloc[:len(X_train)]
-    y_test = y.iloc[len(X_train):]
-
-    models = []
-    losses = []
-    accuracies = []
-    model_data = []
-
-    logger("Establishing callback function")
-
-    # early stopping callback
-    es = EarlyStopping(
-        monitor=maximizer,
-        mode='max',
-        verbose=0,
-        patience=5)
-
-    callback_value = None
-    if callback is not False:
-        callback_value = [es]
-
-    i = 0
-    model = get_keras_model_class(data, i, num_classes)
-    logger("Training initial model")
-
-    history = model.fit(
-        X_train,
-        y_train,
-        callbacks=callback_value,
-        epochs=epochs,
-        validation_data=(
-            X_test,
-            y_test),
-        verbose=0)
-
-    model_data.append(model)
-    models.append(history)
-    col_name = [["Initial number of layers ",
-                 "| Training Accuracy ", "| Test Accuracy "]]
-    col_width = max(len(word) for row in col_name for word in row) + 2
-    for row in col_name:
-        print((" " * 2 * counter) + "| " + ("".join(word.ljust(col_width)
-                                                    for word in row)) + " |")
-    values = []
-    values.append(str(len(model.layers)))
-    values.append(
-        "| " + str(history.history['accuracy'][len(history.history['val_accuracy']) - 1]))
-    values.append(
-        "| " + str(history.history['val_accuracy'][len(history.history['val_accuracy']) - 1]))
-    datax = []
-    datax.append(values)
-    for row in datax:
-        print((" " * 2 * counter) + "| " + ("".join(word.ljust(col_width)
-                                                    for word in row)) + " |")
-    # print((" " * 2 * counter)+ tabulate(datax, headers=col_name, tablefmt='orgtbl'))
-    losses.append(history.history[maximizer]
-                  [len(history.history[maximizer]) - 1])
-    accuracies.append(history.history['val_accuracy']
-                      [len(history.history['val_accuracy']) - 1])
-    # keeps running model and fit functions until the validation loss stops
-    # decreasing
-
-    logger("Testing number of layers")
-    col_name = [["Current number of layers",
-                 "| Training Accuracy", "| Test Accuracy"]]
-    col_width = max(len(word) for row in col_name for word in row) + 2
-
-    for row in col_name:
-        print((" " * 2 * counter) + "| " + ("".join(word.ljust(col_width)
-                                                    for word in row)) + " |")
-    datax = []
-    # while all(x < y for x, y in zip(accuracies, accuracies[1:])):
-    while (len(accuracies) <= 2 or accuracies[len(accuracies) - 1] > accuracies[len(accuracies) - 2]):
-        model = get_keras_model_class(data, i, num_classes)
-        history = model.fit(
-            X_train,
-            y_train,
-            callbacks=callback_value,
-            epochs=epochs,
-            validation_data=(
-                X_test,
-                y_test),
-            verbose=0)
-
-        values = []
-        datax = []
-        values.append(str(len(model.layers)))
-        values.append(
-            "| " + str(history.history['accuracy'][len(history.history['accuracy']) - 1]))
-        values.append(
-            "| " + str(history.history['val_accuracy'][len(history.history['val_accuracy']) - 1]))
-        datax.append(values)
-        for row in datax:
-            print((" " * 2 * counter) + "| " +
-                  ("".join(word.ljust(col_width) for word in row)) + " |")
-        del values, datax
-        losses.append(history.history[maximizer]
-                      [len(history.history[maximizer]) - 1])
-        accuracies.append(history.history['val_accuracy']
-                          [len(history.history['val_accuracy']) - 1])
-        models.append(history)
-        model_data.append(model)
-
-        i += 1
-    # print((" " * 2 * counter)+ tabulate(datax, headers=col_name, tablefmt='orgtbl'))
-    # del values, datax
-
-    final_model = model_data[accuracies.index(max(accuracies))]
-    final_hist = models[accuracies.index(max(accuracies))]
-
-    print("")
-    logger('->', "Best number of layers found: " +
-           str(len(final_model.layers)))
-    logger('->', "Training Accuracy: " + str(final_hist.history['accuracy']
-                                             [len(final_hist.history['val_accuracy']) - 1]))
-    logger('->', "Test Accuracy: " + str(final_hist.history['val_accuracy'][
-                                             len(final_hist.history['val_accuracy']) - 1]))
-
-    # genreates appropriate classification plots by feeding all information
-    plots = {}
-    if generate_plots:
-        plots = generate_classification_plots(
-            models[len(models) - 1], data, y, model, X_test, y_test)
-
-    if save_model:
-        save(final_model, save_model)
-
-    print("")
-    logger("Stored model under 'classification_ANN' key")
-    clearLog()
-    # stores the values and plots into the object dictionary
-    return {
-        'id': generate_id(),
-        "model": final_model,
-        'num_classes': num_classes,
-        "plots": plots,
-        "target": remove,
-        "preprocesser": full_pipeline,
-        "interpreter": one_hot_encoder,
-        'test_data': {'X': X_test, 'y': y_test},
-        'losses': {
-            'training_loss': final_hist.history['loss'],
-            'val_loss': final_hist.history['val_loss']},
-        'accuracy': {
-            'training_accuracy': final_hist.history['accuracy'],
-            'validation_accuracy': final_hist.history['val_accuracy']}}
-
-
-def convolutional(instruction=None,
-                  read_mode=None,
-                  preprocess=True,
-                  verbose=0,
-                  data_path=os.getcwd(),
-                  new_folders=True,
-                  image_column=None,
-                  training_ratio=0.8,
-                  augmentation=True,
-                  custom_arch=None,
-                  pretrained=None,
-                  epochs=10,
-                  height=None,
-                  width=None):
-    '''
-    Body of the convolutional function used that is called in the neural network query
-    if the data is presented in images.
-    :param many parameters: used to preprocess, tune, plot generation, and parameterizing the convolutional neural network trained.
-    :return dictionary that holds all the information for the finished model.
-    '''
-
-    logger("Generating datasets for classes")
-
-    if pretrained:
-        if not height:
-            height = 224
-        if not width:
-            width = 224
-        if height != 224 or width != 224:
-            raise ValueError("For pretrained models, height must be 224 and width must be 224.")
-
-    if preprocess:
-        if custom_arch:
-            raise ValueError("If custom_arch is not None, preprocess must be set to false.")
-
-        read_mode_info = set_distinguisher(data_path, read_mode)
-        read_mode = read_mode_info["read_mode"]
-
-        training_path = "/proc_training_set"
-        testing_path = "/proc_testing_set"
-
-        if read_mode == "setwise":
-            processInfo = setwise_preprocessing(
-                data_path, new_folders, height, width)
-            if not new_folders:
-                training_path = "/training_set"
-                testing_path = "/testing_set"
-
-        # if image dataset in form of csv
-        elif read_mode == "csvwise":
-            if training_ratio <= 0 or training_ratio >= 1:
-                raise BaseException(f"Test ratio must be between 0 and 1.")
-            processInfo = csv_preprocessing(read_mode_info["csv_path"],
-                                            data_path,
-                                            instruction,
-                                            image_column,
-                                            training_ratio,
-                                            height,
-                                            width)
-
-        # if image dataset in form of one folder containing class folders
-        elif read_mode == "classwise":
-            if training_ratio <= 0 or training_ratio >= 1:
-                raise BaseException(f"Test ratio must be between 0 and 1.")
-            processInfo = classwise_preprocessing(
-                data_path, training_ratio, height, width)
-
-    else:
-        training_path = "/training_set"
-        testing_path = "/testing_set"
-        processInfo = already_processed(data_path)
-
-    num_channels = 3
-    color_mode = 'rgb'
-    if processInfo["gray_scale"]:
-        num_channels = 1
-        color_mode = 'grayscale'
-
-    input_shape = (processInfo["height"], processInfo["width"], num_channels)
-    input_single = (processInfo["height"], processInfo["width"])
-    num_classes = processInfo["num_categories"]
-    loss_func = ""
-
-    if num_classes > 2:
-        loss_func = "categorical_crossentropy"
-    elif num_classes == 2:
-        loss_func = "binary_crossentropy"
-
-    logger("Creating convolutional neural netwwork dynamically")
-
-    # Convolutional Neural Network
-
-    # Build model based on custom_arch configuration if given
-    if custom_arch:
-        with open(custom_arch, "r") as f:
-            custom_arch_dict = json.load(f)
-            custom_arch_json_string = json.dumps(custom_arch_dict)
-            model = model_from_json(custom_arch_json_string)
-
-    # Build an existing state-of-the-art model
-    elif pretrained:
-
-        arch_lower = pretrained.get('arch').lower()
-
-        # If user specifies value of pretrained['weights'] as 'imagenet', weights pretrained on ImageNet will be used
-        if 'weights' in pretrained and pretrained.get('weights') == 'imagenet':
-            # Load ImageNet pretrained weights
-            if arch_lower == "vggnet16":
-                base_model = VGG16(include_top=False, weights='imagenet', input_shape=input_shape)
-                x = Flatten()(base_model.output)
-                x = Dense(4096)(x)
-                x = Dropout(0.5)(x)
-                x = Dense(4096)(x)
-                x = Dropout(0.5)(x)
-                pred = Dense(num_classes, activation='softmax')(x)
-                model = Model(base_model.input, pred)
-            elif arch_lower == "vggnet19":
-                base_model = VGG19(include_top=False, weights='imagenet', input_shape=input_shape)
-                x = Flatten()(base_model.output)
-                x = Dense(4096)(x)
-                x = Dropout(0.5)(x)
-                x = Dense(4096)(x)
-                x = Dropout(0.5)(x)
-                pred = Dense(num_classes, activation='softmax')(x)
-                model = Model(base_model.input, pred)
-            elif arch_lower == "resnet50":
-                base_model = ResNet50(include_top=False, weights='imagenet', input_shape=input_shape)
-                x = Flatten()(base_model.output)
-                x = GlobalAveragePooling2D()(base_model.output)
-                x = Dropout(0.5)(x)
-                pred = Dense(num_classes, activation='softmax')(x)
-                model = Model(base_model.input, pred)
-            elif arch_lower == "resnet101":
-                base_model = ResNet101(include_top=False, weights='imagenet', input_shape=input_shape)
-                x = GlobalAveragePooling2D()(base_model.output)
-                x = Dropout(0.5)(x)
-                pred = Dense(num_classes, activation='softmax')(x)
-                model = Model(base_model.input, pred)
-            elif arch_lower == "resnet152":
-                base_model = ResNet152(include_top=False, weights='imagenet', input_shape=input_shape)
-                x = GlobalAveragePooling2D()(base_model.output)
-                x = Dropout(0.5)(x)
-                pred = Dense(num_classes, activation='softmax')(x)
-                model = Model(base_model.input, pred)
-            else:
-                raise ModuleNotFoundError("arch \'" + pretrained.get('arch') + "\' not supported.")
-
+from libra.data_generation.dataset_labelmatcher import get_similar_column
+from libra.data_generation.grammartree import get_value_instruction
+
+# Preprocesses images from images to median of heighs/widths
+
+
+def setwise_preprocessing(data_path, new_folder, height, width):
+    training_path = data_path + "/training_set"
+    testing_path = data_path + "/testing_set"
+
+    heights = []
+    widths = []
+
+    # first dictionary is training and second is testing set
+    paths = [training_path, testing_path]
+    dict = []
+    data_size = []
+    num_classes = [0, 0]
+    for index in range(2):
+        info = process_class_folders(paths[index])
+        data_size.append(len(info[0]))
+        heights += info[0]
+        widths += info[1]
+        if info[2] < 2:
+            raise BaseException(
+                f"Directory: {paths[index]} contains {info[2]} classes. Need at least two classification folders.")
+        num_classes[index] += info[2]
+        for key, value in info[3].items():
+            if len(value) == 0:
+                raise BaseException(
+                    f"Class: {key} contans {len(value)} images. Need at least one image in this class.")
+        dict.append(info[3])
+
+    if num_classes[0] != num_classes[1]:
+        raise BaseException(
+            f"Number of classes in testing_set and training_set are not equal. Training set has {num_classes[0]} and testing set has {num_classes[1]}")
+
+    classification = num_classes[0]
+    height1, width1 = calculate_medians(heights, widths)
+    if height is None:
+        height = height1
+    if width is None:
+        width = width1
+
+    is_rgb = []
+    # resize images
+    for index, p in enumerate(paths):
+        for class_folder, images in dict[index].items():
+            for image_name, image in images.items():
+                resized_info = process_color_channel(image, height, width)
+                dict[index][class_folder][image_name] = resized_info[0]
+                is_rgb.append(resized_info[1])
+        if new_folder:
+            folder_names = ["proc_training_set", "proc_testing_set"]
+            create_folder(data_path, folder_names[index])
+            for class_folder, images in dict[index].items():
+                add_resized_images(
+                    data_path + "/" + folder_names[index],
+                    class_folder,
+                    images)
         else:
-            # Randomly initialized weights
-            if arch_lower == "vggnet16":
-                model = VGG16(include_top=True, weights=None, classes=num_classes)
-            elif arch_lower == "vggnet19":
-                model = VGG19(include_top=True, weights=None, classes=num_classes)
-            elif arch_lower == "resnet50":
-                model = ResNet50(include_top=True, weights=None, classes=num_classes)
-            elif arch_lower == "resnet101":
-                model = ResNet101(include_top=True, weights=None, classes=num_classes)
-            elif arch_lower == "resnet152":
-                model = ResNet152(include_top=True, weights=None, classes=num_classes)
+            for class_folder, images in dict[index].items():
+                replace_images(p + "/" + class_folder, images)
+
+    return {"num_categories": classification,
+            "height": height,
+            "width": width,
+            "train_size": data_size[0],
+            "test_size": data_size[1],
+            "gray_scale": not any(is_rgb)}
+
+
+# processes a csv_file containing image paths and creates a testing/training
+# folders with resized images inside the same directory as the csv file
+def csv_preprocessing(csv_file,
+                      data_path,
+                      instruction,
+                      image_column,
+                      training_ratio,
+                      height,
+                      width):
+
+    df = pd.read_csv(csv_file)
+    if instruction is None:
+        raise BaseException(
+            "Instruction was not given for csv file to be processed.")
+
+    label = get_similar_column(get_value_instruction(instruction), df)
+    avoid_directories = ["proc_training_set", "proc_testing_set"]
+    data_paths = [
+        data_path +
+        "/" +
+        d for d in os.listdir(data_path) if os.path.isdir(
+            data_path +
+            "/" +
+            d) and d not in avoid_directories]
+
+    file_extensions = ["jpg", "jpeg", "png", "gif"]
+    need_file_extension = False
+    path_included = False
+
+    count = 0
+    while image_column is None:
+        if count > 20:
+            raise BaseException(
+                f"Could not locate column containing image information.")
+        count += 1
+        random_row = df.sample()
+        for column, value in random_row.iloc[0].items():
+            if isinstance(value, str):
+                if os.path.exists(data_path + "/" +
+                                  (value if value[0] != "/" else value[1:])):
+                    path_included = True
+                    image_column = column
+                    break
+                # add file extension if not included
+                if value.split(".")[-1] in file_extensions:
+                    file = [value]
+                else:
+                    file = []
+                    for extension in file_extensions:
+                        file.append(value + "." + extension)
+
+                # look through all data_paths for file
+                for path in data_paths:
+                    for file_option in file:
+                        if os.path.exists(path + "/" + file_option):
+                            if file_option.split(".")[-1] in file_extensions:
+                                need_file_extension = True
+                            image_column = column
+                            break
+            if image_column is not None:
+                break
+
+    else:
+        if os.path.exists(data_path + "/" + df.iloc[0][image_column]):
+            path_included = True
+        elif df.iloc[0][image_column].split(".")[-1]:
+            need_file_extension = True
+
+    df = df[[image_column, label]].dropna()
+
+    heights = []
+    widths = []
+    classifications = df[label].value_counts()
+    if len(classifications) < 2:
+        raise BaseException(
+            f"{csv_file} contains {len(classifications)} classes. Need at least two classification labels.")
+    for key, value in classifications.items():
+        if value < 2:
+            raise BaseException(
+                f"Class: {key} contans {value} images. Need at least two images in this class.")
+
+    image_list = []
+
+    # get the median heights and widths
+    for index, row in df.iterrows():
+        if path_included:
+            p = data_path + "/" + \
+                (row[image_column][1:] if row[image_column][0] == "/" else row[image_column])
+            img = cv2.imread(p)
+        else:
+            for path in data_paths:
+                if need_file_extension:
+                    for extension in file_extensions:
+                        p = path + "/" + row[image_column] + "." + extension
+                        img = cv2.imread(p)
+                        if img is not None:
+                            break
+                else:
+                    p = path + "/" + row[image_column]
+                    img = cv2.imread(p)
+                if img is not None:
+                    break
+        if img is None:
+            raise BaseException(
+                f"{row[image_column]} could not be found in any directories.")
+        image_list.append(img)
+        heights.append(img.shape[0])
+        widths.append(img.shape[1])
+
+    height1, width1 = calculate_medians(heights, widths)
+    if height is None:
+        height = height1
+    if width is None:
+        width = width1
+
+    # create training and testing folders
+    create_folder(data_path, "proc_training_set")
+    create_folder(data_path, "proc_testing_set")
+    # create classification folders
+    for classification in classifications.keys():
+        create_folder(data_path + "/proc_training_set", classification)
+        create_folder(data_path + "/proc_testing_set", classification)
+
+    data_size = [0, 0]
+    class_count = dict.fromkeys(classifications.keys(), 1)
+    is_rgb = []
+
+    # save images into correct folder
+    for index, row in df.iterrows():
+        # resize images
+        resized_info = process_color_channel(image_list[index], height, width)
+        img = resized_info[0]
+        is_rgb.append(resized_info[1])
+        p = "proc_" + (os.path.basename(row[image_column])
+                       if path_included else row[image_column])
+        if need_file_extension:
+            p += ".jpg"
+        if class_count[row[label]] / \
+                classifications[row[label]] < training_ratio:
+            data_size[0] += 1
+            class_count[row[label]] += 1
+            save_image(data_path + "/proc_training_set", img, p, row[label])
+        else:
+            data_size[1] += 1
+            class_count[row[label]] += 1
+            save_image(data_path + "/proc_testing_set", img, p, row[label])
+
+    return {"num_categories": len(classifications),
+            "height": height,
+            "width": width,
+            "train_size": data_size[0],
+            "test_size": data_size[1],
+            "gray_scale": not any(is_rgb)}
+
+
+# preprocesses images when given a folder containing class folders
+def classwise_preprocessing(data_path, training_ratio, height, width):
+    info = process_class_folders(data_path)
+    if info[2] < 2:
+        raise BaseException(
+            f"Directory: {data_path} contains {info[2]} classes. Need at least two classification folders.")
+    img_dict = info[3]
+    for key, value in img_dict.items():
+        if len(value) < 2:
+            raise BaseException(
+                f"Class: {key} contans {len(value)} images. Need at least two images in this class.")
+    height1, width1 = calculate_medians(info[0], info[1])
+    if height is None:
+        height = height1
+    if width is None:
+        width = width1
+    num_classifications = info[2]
+
+    # create training and testing folders
+    create_folder(data_path, "proc_training_set")
+    create_folder(data_path, "proc_testing_set")
+
+    # create classification folders
+    for classification in img_dict.keys():
+        create_folder(data_path + "/proc_training_set", classification)
+        create_folder(data_path + "/proc_testing_set", classification)
+
+    data_size = [0, 0]
+    is_rgb = []
+
+    for class_folder, images in img_dict.items():
+        count = 1
+        for image_name, image in images.items():
+            resized_info = process_color_channel(image, height, width)
+            resized_img = resized_info[0]
+            is_rgb.append(resized_info[1])
+            if count / len(images) < training_ratio:
+                data_size[0] += 1
+                save_image(data_path + "/proc_training_set",
+                           resized_img,
+                           "proc_" + image_name,
+                           class_folder)
             else:
-                raise ModuleNotFoundError("arch \'" + pretrained.get('arch') + "\' not supported.")
-    else:
-        model = Sequential()
-        model.add(
-            Conv2D(
-                64,
-                kernel_size=3,
-                activation="relu",
-                input_shape=input_shape))
-        model.add(MaxPooling2D(pool_size=(2, 2)))
-        model.add(Conv2D(64, kernel_size=3, activation="relu"))
-        model.add(MaxPooling2D(pool_size=(2, 2)))
-        model.add(Flatten())
-        model.add(Dense(num_classes, activation="softmax"))
+                data_size[1] += 1
+                save_image(data_path + "/proc_testing_set",
+                           resized_img,
+                           "proc_" + image_name,
+                           class_folder)
+            count += 1
 
-    model.compile(
-        optimizer="adam",
-        loss=loss_func,
-        metrics=['accuracy'])
+    return {"num_categories": num_classifications,
+            "height": height,
+            "width": width,
+            "train_size": data_size[0],
+            "test_size": data_size[1],
+            "gray_scale": not any(is_rgb)}
 
-    logger("Located image data")
-    if augmentation:
-        train_data = ImageDataGenerator(rescale=1. / 255,
-                                        shear_range=0.2,
-                                        zoom_range=0.2,
-                                        horizontal_flip=True)
-        test_data = ImageDataGenerator(rescale=1. / 255)
 
-        logger('Dataset augmented through zoom, shear, flip, and rescale')
-    else:
-        train_data = ImageDataGenerator()
-        test_data = ImageDataGenerator()
+# process a class folder by getting return a list of all the heights and widths
+def process_class_folders(data_path):
+    heights = []
+    widths = []
+    num_classifications = 0
+    img_dict = {}
+    avoid_directories = ["proc_training_set", "proc_testing_set"]
 
-    logger("->", "Optimal image size identified: {}".format(input_shape))
-    X_train = train_data.flow_from_directory(data_path + training_path,
-                                             target_size=input_single,
-                                             color_mode=color_mode,
-                                             batch_size=(32 if processInfo["train_size"] >= 32 else 1),
-                                             class_mode=loss_func[:loss_func.find("_")])
-    X_test = test_data.flow_from_directory(data_path + testing_path,
-                                           target_size=input_single,
-                                           color_mode=color_mode,
-                                           batch_size=(32 if processInfo["test_size"] >= 32 else 1),
-                                           class_mode=loss_func[:loss_func.find("_")])
+    for class_folder in os.listdir(data_path):
+        if not os.path.isdir(
+            data_path +
+            "/" +
+                class_folder) or class_folder in avoid_directories:
+            continue
 
-    if epochs < 0:
-        raise BaseException("Number of epochs has to be greater than 0.")
-    logger('Training image model')
-    history = model.fit(
-        X_train,
-        steps_per_epoch=X_train.n //
-                        X_train.batch_size,
-        validation_data=X_test,
-        validation_steps=X_test.n //
-                         X_test.batch_size,
-        epochs=epochs,
-        verbose=verbose)
+        folder_dict = {}
+        folder_height = []
+        folder_width = []
 
-    logger('->',
-           'Final training accuracy: {}'.format(history.history['accuracy'][len(history.history['accuracy']) - 1]))
-    logger('->', 'Final validation accuracy: {}'.format(
-        history.history['val_accuracy'][len(history.history['val_accuracy']) - 1]))
-    # storing values the model dictionary
+        for image in os.listdir(data_path + "/" + class_folder):
+            if image == ".DS_Store":
+                continue
+            try:
+                img = cv2.imread(data_path + "/" + class_folder + "/" + image)
+                folder_height.append(img.shape[0])
+                folder_width.append(img.shape[1])
+                folder_dict[image] = img
+            except BaseException:
+                break
+        else:
+            heights += folder_height
+            widths += folder_width
+            img_dict[class_folder] = folder_dict
+            num_classifications += 1
 
-    logger("Stored model under 'convolutional_NN' key")
-    clearLog()
-    return {
-        'id': generate_id(),
-        'data_type': read_mode,
-        'data_path': data_path,
-        'data': {'train': X_train, 'test': X_test},
-        'shape': input_shape,
-        "model": model,
-        'losses': {
-            'training_loss': history.history['loss'],
-            'val_loss': history.history['val_loss']},
-        'accuracy': {
-            'training_accuracy': history.history['accuracy'],
-            'validation_accuracy': history.history['val_accuracy']},
-        'num_classes': (2 if num_classes == 1 else num_classes),
-        'data_sizes': {'train_size': processInfo['train_size'], 'test_size': processInfo['test_size']}}
+    return [heights, widths, num_classifications, img_dict]
 
+
+# creates a folder with the given folder name and fills the folders
+# with the images given
+def add_resized_images(data_path, folder_name, images):
+    # create processed folder
+    os.mkdir(data_path + "/proc_" + folder_name)
+    # add images to processed folder
+    for img_name, img in images.items():
+        cv2.imwrite(
+            data_path +
+            "/proc_" +
+            folder_name +
+            "/proc_" +
+            img_name,
+            img)
+
+
+# writes an image into the given path
+def replace_images(data_path, loaded_shaped):
+    for img_name, img in loaded_shaped.items():
+        cv2.imwrite(data_path + "/" + img_name, img)
+
+
+# creates a folder in the given path with the given folder name
+def create_folder(path, folder_name):
+    folder_name = "/" + folder_name
+    if os.path.isdir(path + folder_name):
+        shutil.rmtree(path + folder_name)
+    os.mkdir(path + folder_name)
+
+
+# saves an image to the given path inside the classification folder
+# specified with the img_name
+def save_image(path, img, img_name, classification):
+    cv2.imwrite(
+        path + "/" + classification + "/" + img_name,
+        img)
+
+# calculates the medians of the given lists of height and widths
+
+
+def calculate_medians(heights, widths):
+    heights.sort()
+    widths.sort()
+    height = heights[int(len(heights) / 2)]
+    width = widths[int(len(widths) / 2)]
+    return height, width
+
+
+# resizes the image with the given height and width
+def process_color_channel(img, height, width):
+    chanels = cv2.split(img)
+
+    is_rgb = True
+    if (chanels[0]==chanels[1]).all() and (chanels[1]==chanels[2]).all():
+        is_rgb = False
+
+    for index, chanel in enumerate(chanels):
+        if chanel.shape[0] > height:
+            chanel = cv2.resize(
+                chanel,
+                dsize=(
+                    chanel.shape[1],
+                    height),
+                interpolation=cv2.INTER_CUBIC)
+        else:
+            chanel = cv2.resize(
+                chanel,
+                dsize=(
+                    chanel.shape[1],
+                    height),
+                interpolation=cv2.INTER_AREA)
+        if chanel.shape[1] > width:
+            chanel = cv2.resize(
+                chanel,
+                dsize=(
+                    width,
+                    height),
+                interpolation=cv2.INTER_CUBIC)
+        else:
+            chanel = cv2.resize(
+                chanel,
+                dsize=(
+                    width,
+                    height),
+                interpolation=cv2.INTER_AREA)
+        chanels[index] = chanel
+
+    return cv2.merge(chanels), is_rgb
+
+# distinguishes the preprocess mode to do
+
+
+def set_distinguisher(data_path, read_mode):
+    if read_mode is not None:
+        if read_mode == "setwise":
+            if os.path.isdir(data_path +
+                             "/training_set") and os.path.isdir(data_path +
+                                                                "/testing_set"):
+                return {"read_mode": "setwise"}
+            raise BaseException(
+                f"training_set or testing_set folder not in f{data_path}")
+        elif read_mode == "classwise":
+            return {"read_mode": "classwise"}
+        elif read_mode == "csvwise":
+            csv_path = glob.glob(data_path + "/*.csv")
+            if len(csv_path) == 1:
+                return {
+                    "read_mode": "csvwise",
+                    "csv_path": csv_path[0]}
+            elif len(csv_path) > 1:
+                raise BaseException(
+                    f"Too many csv files in {data_path}: {[os.path.basename(path) for path in csv_path]}")
+            else:
+                raise BaseException(f"No csv file in {data_path}")
+        else:
+            raise BaseException(f"{read_mode}, is an invalid read mode.")
+
+    # check if setwise
+    if os.path.isdir(data_path +
+                     "/training_set") and os.path.isdir(data_path +
+                                                        "/testing_set"):
+        return {"read_mode": "setwise"}
+
+    # check if contains a csv file
+    csv_path = glob.glob(data_path + "/*.csv")
+    if len(csv_path) == 1:
+        return {"read_mode": "csvwise", "csv_path": csv_path[0]}
+    elif len(csv_path) > 1:
+        raise BaseException(
+            f"Too many csv files in directory: {[os.path.basename(path) for path in csv_path]}")
+
+    return {"read_mode": "classwise"}
+
+
+# get the dataset info for the CNN model
+def already_processed(data_path):
+    training_path = data_path + "/training_set"
+    testing_path = data_path + "/testing_set"
+
+    if not os.path.isdir(training_path) or not os.path.isdir(testing_path):
+        raise BaseException(
+            f"Missing training_set or testing_set folder in directory: {data_path}")
+
+    paths = [training_path, testing_path]
+    num_categories = [0, 0]
+    sizes = [0, 0]
+    for index, path in enumerate(paths):
+        for directory in os.listdir(path):
+            class_path = path + "/" + directory
+            if os.path.isdir(class_path):
+                num_categories[index] += 1
+                images = [img for img in os.listdir(
+                    class_path) if img != ".DS_Store"]
+                if len(images) == 0:
+                    raise BaseException(
+                        f"Class: {directory} in {path} contains no images.")
+                img = cv2.imread(
+                    class_path + "/" + images[0])
+                height, width, _ = img.shape
+                channels = cv2.split(img)
+                is_rgb = True
+                if (channels[0] == channels[1]).all() and (channels[1] == channels[2]).all():
+                    is_rgb = False
+                sizes[index] += len(images)
+        if num_categories[index] < 2:
+            raise BaseException(
+                f"Directory: {path} contains {num_categories[index]} classes. Need at least two classification folders.")
+
+    if num_categories[0] != num_categories[1]:
+        raise BaseException(
+            f"Number of classes in testing_set and training_set are not equal. Training set has {num_categories[0]} and testing set has {num_categories[1]}")
+
+    return {"num_categories": num_categories[0],
+            "height": height,
+            "width": width,
+            "train_size": sizes[0],
+            "test_size": sizes[1],
+            "gray_scale": not is_rgb}
