@@ -14,7 +14,8 @@ from libra.data_generation.dataset_labelmatcher import get_similar_column
 from libra.data_generation.grammartree import get_value_instruction
 from libra.modeling.prediction_model_creation import get_keras_text_class
 from libra.plotting.generate_plots import generate_classification_plots
-from libra.preprocessing.NLP_preprocessing import get_target_values, text_clean_up, lemmatize_text, encode_text
+from libra.preprocessing.NLP_preprocessing import get_target_values, text_clean_up, lemmatize_text, encode_text, \
+    tokenize
 from libra.preprocessing.data_reader import DataReader
 from libra.preprocessing.image_caption_helpers import load_image, map_func, CNN_Encoder, RNN_Decoder, get_path_column, \
     generate_caption_helper

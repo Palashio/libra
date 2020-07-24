@@ -765,10 +765,9 @@ class client:
                             epochs=1,
                             batch_size=32,
                             learning_rate=3e-5,
-                            monitor="val_loss",
                             max_text_length=512,
-                            max_summary_length=40,
                             test_size=0.2,
+                            gpu=False,
                             random_state=49,
                             generate_plots=True,
                             save_model=False,
@@ -783,8 +782,7 @@ class client:
         :param learning_rate: The learning rate of the model (float).
         :param max_text_length: The maximum length of the string of text (int).
         :param test_size: Size of the testing set (float).
-        :param max_summary_length: Max summary length (int).
-        :param monitor: type of early stop monitor (str).
+        :param gpu: Use gpu for accelerated training (bool).
         :param random_state: Initialize a pseudo-random number generator (int).
         :param generate_plots: Generate plots for the model (bool).
         :param save_model: Save the model (bool).
@@ -799,11 +797,10 @@ class client:
             drop=drop,
             epochs=epochs,
             batch_size=batch_size,
-            monitor=monitor,
             learning_rate=learning_rate,
             max_text_length=max_text_length,
-            max_summary_length=max_summary_length,
             test_size=test_size,
+            gpu=gpu,
             random_state=random_state,
             generate_plots=generate_plots,
             save_model=save_model,
