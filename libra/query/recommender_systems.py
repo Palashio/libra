@@ -32,8 +32,9 @@ result: a pandas DataFrame of the top n recommendations
 
 
     def __init__(self,data=None,feature_names=[],n_recommendations=10,indexer='title'):
-        dataReader = DataReader(data)
-        self.data = dataReader.data_generator()
+        self.dataReader = DataReader(data)
+        self.data_in = self.dataReader.data_generator()
+        self.data = self.data_in.copy()
         self.feature_names = feature_names
         self.n_recommendations=n_recommendations
         self.indexer = indexer
