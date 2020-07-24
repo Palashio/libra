@@ -4,7 +4,7 @@ from libra.query.nlp_queries import (image_caption_query,
                                      summarization_query)
 from libra.query.classification_models import (k_means_clustering,
                                                train_svm, nearest_neighbors,
-                                               decision_tree)
+                                               decision_tree, train_xgboost)
 
 from libra.query.supplementaries import tune_helper, get_model_data, get_operators, get_accuracy, get_losses, \
     get_target, get_plots, get_vocab
@@ -555,6 +555,68 @@ class client:
 
         self.latest_model = 'decision_tree'
         clearLog()
+
+    # query to create a xgboost model
+
+    def xgboost_query(self,
+                  instruction,
+                  text=[],
+                  preprocess=True,
+                  test_size=0.2,
+                  drop=None,  
+                  random_state=49,     
+                  learning_rate=0.1,
+                  n_estimators=1000,
+                  max_depth=6,
+                  min_child_weight=1,
+                  gamma=0,
+                  subsample=0.8,
+                  colsample_bytree=0.8,
+                  objective= 'binary:logistic',
+                  scale_pos_weight=1):
+        
+        '''
+        Calls the body of the xgboost code in the classification_models.py file. Used to create a xgboost algorithm.
+        :param instruction: The objective that you want to model (str).
+        :param text: A list of columns to perform text embedding on.
+        :param dataset: The dataset being used in the xgboost algorithm (str).
+        :param preprocess: Preprocess the data (bool).
+        :param test_size: Size of the testing set (float).
+        :param drop: A list of the dataset's columns to drop.
+        :param random_seed: Initialize a pseudo-random number generator (int).
+        :param learning_rate:  Boosting learning rate(float).
+        :param n_estimators: Number of gradient boosted trees. Equivalent to number of boosting rounds(in   ).
+        :param max_depth: Maximum tree depth for base learners(int).
+        :param min_child_weight: Minimum sum of instance weight(hessian) needed in a child(int).
+        :param gamma: Minimum loss reduction required to make a further partition on a leaf node of the tree(int).
+        :param subsample: Subsample ratio of the training instance(float).
+        :param colsample_bytree: Subsample ratio of columns when constructing each tree(float).
+        :param objective: Specify the learning task and the corresponding learning objective or a custom 
+        objective function to be used (string or callable).
+        :param scale_pos_weight: Balancing of positive and negative weights(float).
+        
+
+        :return: a model and information to along with it stored in the self.models dictionary.
+        '''
+        
+        self.models['xgboost'] = train_xgboost(instruction,
+                                       dataset=self.dataset,
+                                       text=[],
+                                       random_state=random_state,
+                                       preprocess=preprocess,
+                                       drop=drop,                 
+                                       learning_rate=learning_rate,
+                                       n_estimators=n_estimators,
+                                       max_depth=max_depth,
+                                       min_child_weight=min_child_weight,
+                                       gamma=gamma,
+                                       subsample=subsample,
+                                       colsample_bytree=colsample_bytree,
+                                       objective=objective,
+                                       scale_pos_weight=scale_pos_weight)
+
+        self.latest_model = 'xgboost'
+        clearLog() 
 
     # tunes a specific neural network based on the input model_to_tune
 

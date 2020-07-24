@@ -12,6 +12,7 @@ from libra.plotting.generate_plots import (generate_clustering_plots)
 from colorama import Fore, Style
 import warnings
 import sklearn
+from xgboost.sklearn import XGBClassifier
 
 warnings.filterwarnings("ignore", category=UserWarning)
 
@@ -468,6 +469,102 @@ def decision_tree(instruction,
             X_train,
             y_train,
             cv=3), 'accuracy_score': score},
+        "accuracy_score": score,
+        "preprocesser": full_pipeline,
+        "interpreter": label_mappings,
+        'test_data': {'X': X_test, 'y': y_test}}
+
+
+def train_xgboost(instruction,
+              dataset=None,
+              learning_rate =0.1,
+              n_estimators=1000,
+              ca_threshold=None,
+              max_depth=6,
+              min_child_weight=1,
+              gamma=0,
+              subsample=0.8,
+              colsample_bytree=0.8,
+              objective= 'binary:logistic',
+              scale_pos_weight=1,
+              random_state=27,
+              test_size=0.2,
+              text=[],
+              preprocess=True,
+              drop=None):
+    '''
+    function to train a xgboost algorithm
+    :param many params: used to hyperparametrize the function.
+    :return a dictionary object with all of the information for the algorithm.
+    '''
+
+    logger("Reading in dataset")
+
+    dataReader = DataReader(dataset)
+    data = dataReader.data_generator()
+
+    if drop is not None:
+        data.drop(drop, axis=1, inplace=True)
+
+    logger("Preprocessing data")
+    data, y, target, full_pipeline = initial_preprocesser(
+        data, instruction, preprocess, ca_threshold, text, test_size=test_size, random_state=random_state)
+    logger("->", "Target column found: {}".format(target))
+
+    X_train = data['train']
+    y_train = y['train']
+    X_test = data['test']
+    y_test = y['test']
+
+    # classification_column = get_similar_column(getLabelwithInstruction(instruction), data)
+    num_classes = len(np.unique(y))
+
+    if num_classes > 2:
+        objective = 'multi:softmax'
+
+    # Needed to make a custom label encoder due to train test split changes
+    # Can still be inverse transformed, just a bit of extra work
+    y_vals = np.unique(pd.concat([y['train'], y['test']], axis=0))
+    label_mappings = sklearn.preprocessing.LabelEncoder()
+    label_mappings.fit(y_vals)
+
+    y_train = label_mappings.transform(y_train)
+    y_test = label_mappings.transform(y_test)
+
+    # Fitting to SVM and storing in the model dictionary
+    logger("Fitting XGBoost")
+    clf = XGBClassifier(learning_rate=learning_rate,
+                        n_estimators=n_estimators,
+                        max_depth=max_depth,
+                        min_child_weight=min_child_weight,
+                        gamma=gamma,
+                        subsample=subsample,
+                        colsample_bytree=colsample_bytree,
+                        objective= objective,
+                        scale_pos_weight=scale_pos_weight,
+                        random_state=random_state)
+    clf.fit(X_train, y_train)
+
+    score = accuracy_score(
+        clf.predict(X_test),
+        y_test)
+
+    logger("->", "Accuracy found on testing set: {}".format(score))
+
+    logger('->', "Stored model under 'xgboost' key")
+    clearLog()
+    clearLog()
+
+    return {
+        'id': generate_id(),
+        "model": clf,
+        "target": target,
+        'num_classes': num_classes,
+        "accuracy": {'cross_val_score': cross_val_score(
+            clf,
+            X_train,
+            y_train,), 
+            'accuracy_score': score},
         "accuracy_score": score,
         "preprocesser": full_pipeline,
         "interpreter": label_mappings,

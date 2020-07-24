@@ -33,7 +33,8 @@ setuptools.setup(
                       'pillow',
                       'prince',
                       'opencv-python',
-                      'nltk'],
+                      'nltk',
+                      'xgboost'],
     packages=find_packages(exclude=('tests',)),
     classifiers=[
         "Programming Language :: Python :: 3",

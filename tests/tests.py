@@ -76,6 +76,11 @@ class TestQueries(unittest.TestCase):
         self.newClient.kmeans_clustering_query(clusters=4)
         self.assertTrue('k_means_clustering' in self.newClient.models)
 
+    # Tests whether xgboost_query works without errors, and creates a key in models dictionary
+    @ordered
+    def test_xgboost(self):
+        self.newClient.xgboost_query('predict ocean proximity')
+        self.assertTrue('xgboost' in self.newClient.models)
 
     """
     TEST ANALYZE() FUNCTION
@@ -110,10 +115,10 @@ class TestQueries(unittest.TestCase):
         self.assertTrue('precision_score' in self.newClient.models['classification_ANN']['scores'])
         self.assertTrue('f1_score' in self.newClient.models['classification_ANN']['scores'])
 
-    # Tests analyze() function for sklearn models
+    # Tests analyze() function for classifier models
     @ordered
     def test_analyze_sklearn_classifiers(self):
-        for mod in ['svm', 'nearest_neighbor', 'decision_tree']:
+        for mod in ['svm', 'nearest_neighbor', 'decision_tree','xgboost']:
             self.newClient.analyze(model=mod)
             modeldict = self.newClient.models[mod]
 
