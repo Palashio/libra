@@ -8,7 +8,7 @@ from libra.preprocessing.image_preprocesser import (setwise_preprocessing,
                                                     already_processed)
 from libra.preprocessing.data_reader import DataReader
 from keras.models import Sequential
-from keras.layers import (Dense, Conv2D, Flatten, MaxPooling2D, )
+from keras.layers import (Dense, Conv2D, Flatten, MaxPooling2D, Dropout)
 import pandas as pd
 from libra.query.supplementaries import save, generate_id
 from keras.preprocessing.image import ImageDataGenerator
@@ -544,22 +544,53 @@ def convolutional(instruction=None,
     logger("Creating convolutional neural network dynamically")
     # Convolutional Neural Network
     model = Sequential()
-    model.add(
-        Conv2D(
-            64,
-            kernel_size=3,
-            activation="relu",
-            input_shape=input_shape))
-    model.add(MaxPooling2D(pool_size=(2, 2)))
-    model.add(Conv2D(64, kernel_size=3, activation="relu"))
-    model.add(MaxPooling2D(pool_size=(2, 2)))
+    # model.add(
+    #     Conv2D(
+    #         64,
+    #         kernel_size=3,
+    #         activation="relu",
+    #         input_shape=input_shape))
+    # model.add(MaxPooling2D(pool_size=(2, 2)))
+    # model.add(Conv2D(64, kernel_size=3, activation="relu"))
+    # model.add(MaxPooling2D(pool_size=(2, 2)))
+    # model.add(Flatten())
+    # model.add(Dense(num_classes, activation="softmax"))
+    # model.compile(
+    #     optimizer="adam",
+    #     loss=loss_func,
+    #     metrics=['accuracy'])
+    model.add(Conv2D(
+        filters=64,
+        kernel_size=5,
+        activation="relu",
+        input_shape=input_shape))
+    model.add(MaxPooling2D(pool_size=(2,2)))
+    model.add(Conv2D(
+        filters=64,
+        kernel_size=3,
+        activation="relu"))
+    model.add(MaxPooling2D(pool_size=(2,2)))
+    model.add(Dropout(0.25))
+    model.add(Conv2D(
+        filters=64,
+        kernel_size=3,
+        activation="relu"))
+    model.add(MaxPooling2D(pool_size=(2,2)))
     model.add(Flatten())
-    model.add(Dense(num_classes, activation="softmax"))
+    model.add(Dense(
+        units=256,
+        activation="relu"))
+    model.add(Dropout(0.25))
+    model.add(Dense(
+        units=num_classes,
+        activation="softmax"
+    ))
     model.compile(
         optimizer="adam",
         loss=loss_func,
         metrics=['accuracy'])
     logger("Located image data")
+
     if augmentation:
         train_data = ImageDataGenerator(rescale=1. / 255,
                                         shear_range=0.2,
@@ -588,7 +619,7 @@ def convolutional(instruction=None,
     if epochs < 0:
         raise BaseException("Number of epochs has to be greater than 0.")
     logger('Training image model')
-    history = model.fit(
+    history = model.fit_generator(
         X_train,
         steps_per_epoch=X_train.n //
         X_train.batch_size,

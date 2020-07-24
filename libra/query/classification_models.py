@@ -81,6 +81,7 @@ def printtable(col_name, col_width):
 
 def k_means_clustering(dataset=None,
                        scatters=[],
+                       clusters=None,
                        preprocess=True,
                        generate_plots=True,
                        drop=None,
@@ -117,39 +118,9 @@ def k_means_clustering(dataset=None,
 
     # processes dataset and runs KMeans algorithm on one cluster as
     # baseline
-    i = base_clusters
-    logger("Creating unsupervised clustering task")
-    kmeans = KMeans(
-        n_clusters=i,
-        random_state=random_state,
-        verbose=verbose,
-        n_init=n_init,
-        max_iter=max_iter).fit(data)
-    modelStorage.append(kmeans)
-    # stores SSE values in an array for later comparison
-    inertiaStor.append(kmeans.inertia_)
-
-    logger("Identifying best centroid count and optimizing accuracy")
-
-    col_name=[["Number of clusters   ",
-                     "| Inertia  "]] 
-    col_width=max(len(word) for row in col_name for word in row) + 2
-    printtable(col_name,col_width)
-    values = []
-    values.append(str(i))
-    values.append(
-        "| " + str(inertiaStor[i-base_clusters]))
-    datax = []
-    datax.append(values)
-    printtable(datax,
-               col_width)
-    
-    i += 1
-
-    # continues to increase cluster size until SSE values don't decrease by
-    # 1000 - this value was decided based on precedence
-    while (all(earlier >= later for earlier,
-               later in zip(inertiaStor, inertiaStor[1:]))):
+    if clusters is None:
+        i = base_clusters
+        logger("Creating unsupervised clustering task")
         kmeans = KMeans(
             n_clusters=i,
             random_state=random_state,
@@ -157,8 +128,15 @@ def k_means_clustering(dataset=None,
             n_init=n_init,
             max_iter=max_iter).fit(data)
         modelStorage.append(kmeans)
+        # stores SSE values in an array for later comparison
         inertiaStor.append(kmeans.inertia_)
-        
+
+        logger("Identifying best centroid count and optimizing accuracy")
+
+        col_name=[["Number of clusters   ",
+                         "| Inertia  "]]
+        col_width=max(len(word) for row in col_name for word in row) + 2
+        printtable(col_name,col_width)
         values = []
         values.append(str(i))
         values.append(
@@ -168,36 +146,68 @@ def k_means_clustering(dataset=None,
         printtable(datax,
                    col_width)
 
-        # minimize inertia up to 10000
         i += 1
 
-        # checks to see if it should continue to run; need to improve this
-        # algorithm
-        if i > 3 and inertiaStor[len(
-                inertiaStor) - 2] - 1000 <= inertiaStor[len(inertiaStor) - 1]:
-            print()
-            break
-    
-    # generates the clustering plots approiately
-    logger("->", "Optimal number of clusters found: {}".format(i))
-    logger(
-        "->", "Final inertia of {}".format(inertiaStor[len(inertiaStor) - 1]))
+        # continues to increase cluster size until SSE values don't decrease by
+        # 1000 - this value was decided based on precedence
+        while (all(earlier >= later for earlier,
+                   later in zip(inertiaStor, inertiaStor[1:]))):
+            kmeans = KMeans(
+                n_clusters=i,
+                random_state=random_state,
+                verbose=verbose,
+                n_init=n_init,
+                max_iter=max_iter).fit(data)
+            modelStorage.append(kmeans)
+            inertiaStor.append(kmeans.inertia_)
+
+            values = []
+            values.append(str(i))
+            values.append(
+                "| " + str(inertiaStor[i-base_clusters]))
+            datax = []
+            datax.append(values)
+            printtable(datax,
+                       col_width)
+
+            # minimize inertia up to 10000
+            i += 1
+
+            # checks to see if it should continue to run; need to improve this
+            # algorithm
+            if i > 3 and inertiaStor[len(
+                    inertiaStor) - 2] - 1000 <= inertiaStor[len(inertiaStor) - 1]:
+                print()
+                break
+
+        # generates the clustering plots approiately
+        logger("->", "Optimal number of clusters found: {}".format(i))
+        logger(
+            "->", "Final inertia of {}".format(inertiaStor[len(inertiaStor) - 1]))
+    else:
+        kmeans = KMeans(
+            n_clusters=clusters,
+            random_state=random_state,
+            verbose=verbose,
+            n_init=n_init,
+            max_iter=max_iter).fit(data)
 
     plots = {}
     if generate_plots:
-        logger("Generating plots and storing in model")
-        init_plots, plot_names, elbow = generate_clustering_plots(modelStorage[len(
-            modelStorage) - 1], dataPandas, data, scatters, inertiaStor, base_clusters)
-        for x in range(len(plot_names)):
-            plots[str(plot_names[x])] = init_plots[x]
-        plots['elbow'] = elbow
+        if clusters is None:
+            logger("Generating plots and storing in model")
+            init_plots, plot_names, elbow = generate_clustering_plots(modelStorage[len(
+                modelStorage) - 1], dataPandas, data, scatters, inertiaStor, base_clusters)
+            for x in range(len(plot_names)):
+                plots[str(plot_names[x])] = init_plots[x]
+            plots['elbow'] = elbow
 
     logger("Stored model under 'k_means_clustering' key")
     clearLog()
     # stores plots and information in the dictionary client model
     return {
         'id': generate_id(),
-        "model": modelStorage[len(modelStorage) - 1],
+        "model": (modelStorage[len(modelStorage) - 1] if clusters is None else kmeans),
         "preprocesser": full_pipeline,
         "plots": plots}
 
