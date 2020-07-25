@@ -572,8 +572,8 @@ class client:
                   gamma=0,
                   subsample=0.8,
                   colsample_bytree=0.8,
-                  objective= 'binary:logistic',
-                  scale_pos_weight=1):
+                  verbosity=0,
+                  objective= 'binary:logistic'):
         
         '''
         Calls the body of the xgboost code in the classification_models.py file. Used to create a xgboost algorithm.
@@ -594,7 +594,7 @@ class client:
         :param objective: Specify the learning task and the corresponding learning objective or a custom 
         objective function to be used (string or callable).
         :param scale_pos_weight: Balancing of positive and negative weights(float).
-        
+        :param verbose: Verbosity of printing messages. Valid values are 0 (silent), 1 (warning), 2 (info), 3 (debug).
 
         :return: a model and information to along with it stored in the self.models dictionary.
         '''
@@ -611,9 +611,9 @@ class client:
                                        min_child_weight=min_child_weight,
                                        gamma=gamma,
                                        subsample=subsample,
+                                       verbosity=verbosity,
                                        colsample_bytree=colsample_bytree,
-                                       objective=objective,
-                                       scale_pos_weight=scale_pos_weight)
+                                       objective=objective)
 
         self.latest_model = 'xgboost'
         clearLog() 

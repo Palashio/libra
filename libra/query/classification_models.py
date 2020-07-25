@@ -486,11 +486,11 @@ def train_xgboost(instruction,
               subsample=0.8,
               colsample_bytree=0.8,
               objective= 'binary:logistic',
-              scale_pos_weight=1,
               random_state=27,
               test_size=0.2,
               text=[],
               preprocess=True,
+              verbosity=0,
               drop=None):
     '''
     function to train a xgboost algorithm
@@ -541,7 +541,7 @@ def train_xgboost(instruction,
                         subsample=subsample,
                         colsample_bytree=colsample_bytree,
                         objective= objective,
-                        scale_pos_weight=scale_pos_weight,
+                        verbosity=verbosity,
                         random_state=random_state)
     clf.fit(X_train, y_train)
 
