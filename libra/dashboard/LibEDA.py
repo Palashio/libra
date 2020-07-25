@@ -47,10 +47,10 @@ class edaDashboardback(object):
 
 
     def visualize_circle(self, df, x_axis, y_axis, legend):
-            graph = alt.Chart(df).mark_circle(size = 60).encode(
-            x = x_axis,
-            y = y_axis,
-            color = legend
+        graph = alt.Chart(df).mark_circle(size = 60).encode(
+        x = x_axis,
+        y = y_axis,
+        color = legend
         ).interactive().properties(width = self.width, height = self.height)
         st.text("")
         st.text("")
