@@ -594,7 +594,7 @@ class client:
         :param objective: Specify the learning task and the corresponding learning objective or a custom 
         objective function to be used (string or callable).
         :param scale_pos_weight: Balancing of positive and negative weights(float).
-        :param verbose:
+        :param verbose: Verbosity of printing messages. Valid values are 0 (silent), 1 (warning), 2 (info), 3 (debug).
 
         :return: a model and information to along with it stored in the self.models dictionary.
         '''
