@@ -35,40 +35,8 @@ class edaDashboardback(object):
         href = f'<a href = "data:file/csv;base64,{b64}" download="Transformed_Data.csv">Download Transformed Data</a>'
         return href
 
-    def visualize_bar(self, df, x_axis, y_axis, legend):
-            graph = alt.Chart(df).mark_bar().encode(
-                x = x_axis,
-                y = y_axis,
-                color = legend
-            ).interactive().properties(width = self.width, height = self.height)
-            st.text("")
-            st.text("")
-            st.write(graph)
-
-
-    def visualize_circle(self, df, x_axis, y_axis, legend):
-        graph = alt.Chart(df).mark_circle(size = 60).encode(
-        x = x_axis,
-        y = y_axis,
-        color = legend
-        ).interactive().properties(width = self.width, height = self.height)
-        st.text("")
-        st.text("")
-        st.write(graph)
-
-    def visualize_line(self, df, x_axis, y_axis, legend, tooltips):
-        if tooltips != []:
-            graph = alt.Chart(df).mark_line().encode(
-                x = x_axis,
-                y = y_axis,
-                color = legend,
-                tooltip = tooltips
-            ).interactive().properties(width = self.width, height = self.height)
-            st.text("")
-            st.text("")
-            st.write(graph)
-        else:
-            graph = alt.Chart(df).mark_line().encode(
+    def visualize_bar(self, df, x_axis, y_axis, legend, tooltips):
+        graph = alt.Chart(df).mark_bar().encode(
             x = x_axis,
             y = y_axis,
             color = legend
@@ -77,54 +45,52 @@ class edaDashboardback(object):
         st.text("")
         st.write(graph)
 
-    def visualize_area(self, df, x_axis, y_axis, legend, tooltips):
-        if tooltips != []:
-            graph = alt.Chart(df).mark_area().encode(
-                x = x_axis,
-                y = y_axis,
-                color = legend,
-                tooltip = tooltips
-            ).interactive().properties(width = self.width, height = self.height)
-            st.text("")
-            st.text("")
-            st.write(graph)
-        else:
-            graph = alt.Chart(df).mark_area().encode(
-                x = x_axis,
-                y = y_axis,
-                color = legend
-            ).interactive().properties(width = self.width, height = self.height)
-            st.text("")
-            st.text("")
-            st.write(graph)
+
+    def visualize_circle(self, df, x_axis, y_axis, legend):
+        graph = alt.Chart(df).mark_circle(size = 60).encode(
+            x = x_axis,
+            y = y_axis,
+            color = legend
+        ).interactive().properties(width = self.width, height = self.height)
+        st.text("")
+        st.text("")
+        st.write(graph)
+
+    def visualize_line(self, df, x_axis, y_axis, legend):
+        graph = alt.Chart(df).mark_line().encode(
+            x = x_axis,
+            y = y_axis,
+            color = legend
+        ).interactive().properties(width = self.width, height = self.height)
+        st.text("")
+        st.text("")
+        st.write(graph)
+
+    def visualize_area(self, df, x_axis, y_axis, legend):
+        graph = alt.Chart(df).mark_area().encode(
+            x = x_axis,
+            y = y_axis,
+            color = legend
+        ).interactive().properties(width = self.width, height = self.height)
+        st.text("")
+        st.text("")
+        st.write(graph)
 
     def visualize_box(self, df, x_axis, y_axis, legend, tooltips):
-        if tooltips != []:
-            graph = alt.Chart(df).mark_boxplot().encode(
-                x = x_axis,
-                y = y_axis,
-                color = legend,
-                tooltip = tooltips
-            ).interactive().properties(width = self.width, height = self.height)
-            st.text("")
-            st.text("")
-            st.write(graph)
-        else:
-            graph = alt.Chart(df).mark_boxplot().encode(
-                x = x_axis,
-                y = y_axis,
-                color = legend
-            ).interactive().properties(width = self.width, height = self.height)
-            st.text("")
-            st.text("")
-            st.write(graph)
+        graph = alt.Chart(df).mark_boxplot().encode(
+            x = x_axis,
+            y = y_axis,
+            color = legend
+        ).interactive().properties(width = self.width, height = self.height)
+        st.text("")
+        st.text("")
+        st.write(graph)
 
     def visualize_count(self, df, x_axis):
         graph = alt.Chart(df).mark_bar().encode(
             x = x_axis,
             y = 'count('+x_axis+'):Q',
             color = x_axis+':N',
-            #tooltip = tooltips
         ).interactive().properties(width = self.width, height = self.height)
         st.text("")
         st.text("")
@@ -361,8 +327,14 @@ class edaDashboardback(object):
                     st.write(out[0])
                     st.write("")
                     st.markdown(self.get_csv_download_link(out[0]), unsafe_allow_html=True)
-                  
-
+                    st.write("")
+                '''
+                st.write("")    
+                st.subheader("Note: Download The Dataset After Transforming, If You Want To Modify The Original Data")
+                st.write("")
+                if st.button("Modify Original Data"):
+                    self.dataset = '~/Downloads/Transformed_Data.csv'
+                '''
             elif display == 'PCA':
                 instruction = st.text_input("Enter Your Instruction")
                 ca_thresh = st.text_input("Enter The CA Threshold", "")
@@ -380,7 +352,14 @@ class edaDashboardback(object):
                     st.write(out[0])
                     st.write("")
                     st.markdown(self.get_csv_download_link(out[0]), unsafe_allow_html=True)
-       
+                    st.write("")
+                '''
+                st.write("")    
+                st.subheader("Note: Download The Dataset After Transforming, If You Want To Modify The Original Data")
+                st.write("")
+                if st.button("Modify Original Data"):
+                    self.dataset = '~/Downloads/Transformed_Data.csv'
+                '''
             elif display == 'ICA':
                 instruction = st.text_input("Enter Your Instruction")
                 target = st.text_input("Enter Your Target", "")
@@ -399,7 +378,14 @@ class edaDashboardback(object):
                     st.write(out[0])
                     st.write("")
                     st.markdown(self.get_csv_download_link(out[0]), unsafe_allow_html=True)
- 
+                    st.write("")
+                '''
+                st.write("")    
+                st.subheader("Note: Download The Dataset After Transforming, If You Want To Modify The Original Data")
+                st.write("")
+                if st.button("Modify Original Data"):
+                    self.dataset = '~/Downloads/Transformed_Data.csv'
+                '''
         '''
         elif page == 'Model Creation':
             st.title("Run ML Algorithm On Your Data")
