@@ -35,18 +35,7 @@ class edaDashboardback(object):
         href = f'<a href = "data:file/csv;base64,{b64}" download="Transformed_Data.csv">Download Transformed Data</a>'
         return href
 
-    def visualize_bar(self, df, x_axis, y_axis, legend, tooltips):
-        if tooltips != []:  
-            graph = alt.Chart(df).mark_bar().encode(
-                x = x_axis,
-                y = y_axis,
-                color = legend,
-                tooltip = tooltips
-            ).interactive().properties(width = self.width, height = self.height)
-            st.text("")
-            st.text("")
-            st.write(graph)
-        else:
+    def visualize_bar(self, df, x_axis, y_axis, legend):
             graph = alt.Chart(df).mark_bar().encode(
                 x = x_axis,
                 y = y_axis,
