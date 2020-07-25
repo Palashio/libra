@@ -1,24 +1,21 @@
 import os
 
 import numpy as np
-import pandas as pd
 import tensorflow as tf
-import torch
 from colorama import Fore, Style
 from keras_preprocessing import sequence
 from sklearn.model_selection import train_test_split
 from tensorflow.python.keras.callbacks import EarlyStopping
-from torch.utils.data import DataLoader
-from transformers import T5Tokenizer, T5ForConditionalGeneration
+from transformers import TFT5ForConditionalGeneration, T5Tokenizer
 
 import libra.plotting.nonkeras_generate_plots
 from libra.data_generation.dataset_labelmatcher import get_similar_column
 from libra.data_generation.grammartree import get_value_instruction
 from libra.modeling.prediction_model_creation import get_keras_text_class
 from libra.plotting.generate_plots import generate_classification_plots
-from libra.preprocessing.NLP_preprocessing import get_target_values, text_clean_up, lemmatize_text, encode_text
+from libra.preprocessing.NLP_preprocessing import get_target_values, text_clean_up, lemmatize_text, encode_text, \
+    tokenize_for_input_ids, NoStdStreams, add_prefix
 from libra.preprocessing.data_reader import DataReader
-from libra.preprocessing.huggingface_model_finetune_helper import CustomDataset, train, inference
 from libra.preprocessing.image_caption_helpers import load_image, map_func, CNN_Encoder, RNN_Decoder, get_path_column, \
     generate_caption_helper
 from libra.query.supplementaries import save
@@ -123,6 +120,11 @@ def text_classification_query(self, instruction, drop=None,
         if not os.path.exists(save_path):
             raise Exception("Save path does not exists")
 
+    if test_size == 0:
+        testing = False
+    else:
+        testing = True
+
     data = DataReader(self.dataset)
     data = data.data_generator()
 
@@ -183,9 +185,18 @@ def text_classification_query(self, instruction, drop=None,
                         epochs=epochs, callbacks=[es], verbose=0)
 
     logger("->", "Final training loss: {}".format(history.history["loss"][len(history.history["loss"]) - 1]))
-    logger("->", "Final validation loss: {}".format(history.history["val_loss"][len(history.history["val_loss"]) - 1]))
-    logger("->", "Final validation accuracy: {}".format(
-        history.history["val_accuracy"][len(history.history["val_accuracy"]) - 1]))
+    if testing:
+        logger("->",
+               "Final validation loss: {}".format(history.history["val_loss"][len(history.history["val_loss"]) - 1]))
+        logger("->", "Final validation accuracy: {}".format(
+            history.history["val_accuracy"][len(history.history["val_accuracy"]) - 1]))
+        losses = {'training_loss': history.history['loss'], 'val_loss': history.history['val_loss']}
+        accuracy = {'training_accuracy': history.history['accuracy'],
+                    'validation_accuracy': history.history['val_accuracy']}
+    else:
+        logger("->", "Final validation loss: {}".format("0, No validation done"))
+        losses = {'training_loss': history.history['loss']}
+        accuracy = {'training_accuracy': history.history['accuracy']}
 
     plots = {}
     if generate_plots:
@@ -209,50 +220,37 @@ def text_classification_query(self, instruction, drop=None,
                                           "interpreter": label_mappings,
                                           "max_text_length": max_text_length,
                                           'test_data': {'X': X_test, 'y': y_test},
-                                          'losses': {
-                                              'training_loss': history.history['loss'],
-                                              'val_loss': history.history['val_loss']},
-                                          'accuracy': {
-                                              'training_accuracy': history.history['accuracy'],
-                                              'validation_accuracy': history.history['val_accuracy']}}
+                                          'losses': losses,
+                                          'accuracy': accuracy}
     clearLog()
     return self.models["text_classification"]
 
 
-# doc_summarization predict wrapper
-def get_summary(self, text):
-    modelInfo = self.models.get("doc_summarization")
+# Summarization predict wrapper
+def get_summary(self, text, max_summary_length=50, num_beams=4, no_repeat_ngram_size=2, num_return_sequences=1,
+                early_stopping=True):
+    modelInfo = self.models.get("summarization")
     model = modelInfo['model']
-    model.eval()
-    tokenizer = T5Tokenizer.from_pretrained("t5-small")
-    df = pd.DataFrame({'text': [""], 'ctext': [text]})
-    params = {
-        'batch_size': 1,
-        'shuffle': True,
-        'num_workers': 0
-    }
-    loader = DataLoader(
-        CustomDataset(
-            df,
-            tokenizer,
-            modelInfo["max_text_length"],
-            modelInfo["max_sum_length"]),
-        **params)
-    predictions, truth = inference(tokenizer, model, "cpu", loader)
-    return predictions[0]
+    tokenizer = modelInfo['tokenizer']
+    text = [text]
+    text = add_prefix(text, "summarize: ")
+    result = model.generate(tf.convert_to_tensor(tokenize_for_input_ids(text, tokenizer, max_length=modelInfo['max_text_length'])),
+                       max_length=max_summary_length, num_beams=num_beams,
+                       no_repeat_ngram_size=no_repeat_ngram_size, num_return_sequences=num_return_sequences,
+                       early_stopping=early_stopping)
+    return [tokenizer.decode(summary) for summary in result]
 
 
 # Text summarization query
 def summarization_query(self, instruction, preprocess=True, label_column=None,
                         drop=None,
-                        epochs=10,
+                        epochs=5,
                         batch_size=32,
-                        learning_rate=1e-4,
+                        learning_rate=3e-5,
                         max_text_length=512,
-                        max_summary_length=150,
+                        gpu=False,
                         test_size=0.2,
                         random_state=49,
-                        gpu=False,
                         generate_plots=True,
                         save_model=False,
                         save_path=os.getcwd()):
@@ -270,7 +268,7 @@ def summarization_query(self, instruction, preprocess=True, label_column=None,
             "Test size must be a float between 0 and 1 (a test size greater than or equal to 1 results in no training "
             "data)")
 
-    if max_text_length < 2 | max_summary_length < 2:
+    if max_text_length < 2:
         raise Exception("Text and summary must be at least of length 2")
 
     if epochs < 1:
@@ -282,12 +280,9 @@ def summarization_query(self, instruction, preprocess=True, label_column=None,
     if max_text_length < 1:
         raise Exception("Max text length must be equal to or greater than 1")
 
-    if max_summary_length < 1:
-        raise Exception("Max summary length must be equal to or greater than 1")
-
     if save_model:
         if not os.path.exists(save_path):
-            raise Exception("Save path does not exists")
+            raise Exception("Save path does not exist")
 
     if test_size == 0:
         testing = False
@@ -295,9 +290,17 @@ def summarization_query(self, instruction, preprocess=True, label_column=None,
         testing = True
 
     if gpu:
-        device = "cuda"
+        if tf.test.gpu_device_name():
+            print('Default GPU Device: {}'.format(tf.test.gpu_device_name()))
+        else:
+            raise Exception("Please install GPU version of Tensorflow")
+
+        device = '/device:GPU:0'
     else:
-        device = "cpu"
+        device = '/device:CPU:0'
+
+    tf.random.set_seed(random_state)
+    np.random.seed(random_state)
 
     data = DataReader(self.dataset)
     data = data.data_generator()
@@ -315,95 +318,103 @@ def summarization_query(self, instruction, preprocess=True, label_column=None,
     else:
         label = label_column
 
-    X, Y, target = get_target_values(data, instruction, label)
-    df = pd.DataFrame({'text': Y, 'ctext': X})
-    logger("->", "Target Column Found: {}".format(target))
-
-    torch.manual_seed(random_state)
-    np.random.seed(random_state)
-
     tokenizer = T5Tokenizer.from_pretrained("t5-small")
-
-    train_size = 1 - test_size
-    train_dataset = df.sample(
-        frac=train_size,
-        random_state=random_state).reset_index(
-        drop=True)
-
+    # Find target columns
+    X, Y, target = get_target_values(data, instruction, label)
+    logger("->", "Target Column Found: {}".format(target))
     logger("Establishing dataset walkers")
-    training_set = CustomDataset(
-        train_dataset, tokenizer, max_text_length, max_summary_length)
 
-    if testing:
-        val_dataset = df.drop(train_dataset.index).reset_index(drop=True)
+    # Clean up text
+    if preprocess:
+        logger("Preprocessing data")
+        X = add_prefix(lemmatize_text(text_clean_up(X.array)),"summarize: ")
+        Y = add_prefix(lemmatize_text(text_clean_up(Y.array)),"summarize: ")
 
-        val_set = CustomDataset(
-            val_dataset,
-            tokenizer,
-            max_text_length,
-            max_summary_length)
-
-        val_params = {
-            'batch_size': batch_size,
-            'shuffle': False,
-            'num_workers': 0
-        }
-        val_loader = DataLoader(val_set, **val_params)
-    else:
-        val_loader = None
-
-    train_params = {
-        'batch_size': batch_size,
-        'shuffle': True,
-        'num_workers': 0
-    }
-
-    training_loader = DataLoader(training_set, **train_params)
-    # used small model
-    model = T5ForConditionalGeneration.from_pretrained("t5-small")
-    model = model.to(device)
-
-    optimizer = torch.optim.Adam(
-        params=model.parameters(), lr=learning_rate)
+    # tokenize text/summaries
+    X = tokenize_for_input_ids(X, tokenizer, max_text_length)
+    Y = tokenize_for_input_ids(Y, tokenizer, max_text_length)
 
     logger('Fine-Tuning the model on your dataset...')
-    total_loss_train = []
-    total_loss_val = []
-    for epoch in range(epochs):
-        loss_train, loss_val = train(
-            epoch, tokenizer, model, device, training_loader, val_loader, optimizer, testing=testing)
-        total_loss_train.append(loss_train)
-        total_loss_val.append(loss_val)
 
-    logger("->", "Final training loss: {}".format(loss_train))
+    # Suppress unnecessary output
+    with NoStdStreams():
+        model = TFT5ForConditionalGeneration.from_pretrained("t5-small", output_loading_info=False)
+
     if testing:
-        logger("->", "Final validation loss: {}".format(loss_val))
+        X_train, X_test, y_train, y_test = train_test_split(
+            X, Y, test_size=test_size, random_state=random_state)
+        test_dataset = tf.data.Dataset.from_tensor_slices((X_test, y_test)).shuffle(10000).batch(batch_size)
     else:
-        logger("->", "Final validation loss: {}".format("0, No validation done"))
+        X_train = X
+        y_train = Y
+    train_dataset = tf.data.Dataset.from_tensor_slices((X_train, y_train)).shuffle(10000).batch(batch_size)
 
-    plots = {}
+    optimizer = tf.keras.optimizers.Adam(learning_rate=learning_rate)
+    loss = tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True)
+
+    total_training_loss = []
+    total_validation_loss = []
+
+    # Training Loop
+    with tf.device(device):
+        for epoch in range(epochs):
+            total_loss = 0
+            total_loss_val = 0
+            for data, truth in train_dataset:
+                with tf.GradientTape() as tape:
+                    out = model(inputs=data, decoder_input_ids=data)
+                    loss_value = loss(truth, out[0])
+                    total_loss += loss_value
+                    grads = tape.gradient(loss_value, model.trainable_weights)
+                    optimizer.apply_gradients(zip(grads, model.trainable_weights))
+
+            total_training_loss.append(total_loss)
+
+            # Validation Loop
+            if testing:
+                for data, truth in test_dataset:
+                    logits = model(inputs=data, decoder_input_ids=data, training=False)
+                    val_loss = loss(truth, logits[0])
+                    total_loss_val += val_loss
+
+                total_validation_loss.append(total_loss_val)
+
+    logger("->", "Final training loss: {}".format(str(total_training_loss[len(total_training_loss) - 1].numpy())))
+
+    if testing:
+        total_loss_val_str = str(total_validation_loss[len(total_validation_loss) - 1].numpy())
+    else:
+        total_loss_val = [0]
+        total_loss_val_str = str("0, No validation done")
+
+    logger("->", "Final validation loss: {}".format(total_loss_val_str))
+
+    if testing:
+        losses = {"Training loss": total_training_loss[len(total_training_loss) - 1].numpy(),
+                  "Validation loss": total_validation_loss[len(total_validation_loss) - 1].numpy()}
+    else:
+        losses = {"Training loss": total_training_loss[len(total_training_loss) - 1].numpy()}
+
+    plots = None
     if generate_plots:
         logger("Generating plots")
-        plots.update({"loss": libra.plotting.nonkeras_generate_plots.plot_loss(total_loss_train, total_loss_val)})
+        plots = {"loss": libra.plotting.nonkeras_generate_plots.plot_loss(total_training_loss, total_validation_loss)}
 
     if save_model:
         logger("Saving model")
-        path = save_path + "DocSummarization.pth"
-        torch.save(model, path)
-        logger("->", "Saved model to disk as DocSummarization.pth")
+        model.save_weights(save_path + "summarization_checkpoint.ckpt")
 
-    logger("Storing information in client object under key 'doc_summarization'")
+    logger("Storing information in client object under key 'summarization'")
 
-    self.models["doc_summarization"] = {
+    self.models["summarization"] = {
         "model": model,
         "max_text_length": max_text_length,
-        "max_sum_length": max_summary_length,
         "plots": plots,
-        'losses': {'training_loss': loss_train,
-                   'val_loss': loss_val}
-    }
+        "tokenizer": tokenizer,
+        'losses': losses}
+
     clearLog()
-    return self.models["doc_summarization"]
+    return self.models["summarization"]
 
 
 # image_caption Generation Prediction
@@ -563,7 +574,7 @@ def image_caption_query(self, instruction, label_column=None,
         train_seqs, padding='post')
 
     vocab_size = top_k + 1
-    num_steps = len(img_name_vector) // batch_size
+    # num_steps = len(img_name_vector) // batch_size
 
     if testing:
         img_name_train, img_name_val, cap_train, cap_val = train_test_split(
@@ -685,14 +696,14 @@ def image_caption_query(self, instruction, label_column=None,
                 batch_loss, t_loss = train_step(img_tensor, target)
                 total_loss += t_loss
 
-            loss_plot_train.append(total_loss.numpy() / num_steps)
+            loss_plot_train.append(total_loss.numpy())
 
             if testing:
                 for (batch, (img_tensor, target)) in enumerate(dataset_val):
                     batch_loss, t_loss = train_step(img_tensor, target)
                     total_loss_val += t_loss
 
-                loss_plot_val.append(total_loss_val.numpy() / num_steps)
+                loss_plot_val.append(total_loss_val.numpy())
 
     dir_name = os.path.dirname(img_name_vector[0])
     files = os.listdir(dir_name)
@@ -706,10 +717,10 @@ def image_caption_query(self, instruction, label_column=None,
         logger("Generating plots")
         plots.update({"loss": libra.plotting.nonkeras_generate_plots.plot_loss(loss_plot_train, loss_plot_val)})
 
-    logger("->", "Final training loss: {}".format(str(total_loss.numpy() / num_steps)))
-    total_loss = total_loss.numpy() / num_steps
+    logger("->", "Final training loss: {}".format(str(total_loss.numpy())))
+    total_loss = total_loss.numpy()
     if testing:
-        total_loss_val = total_loss_val.numpy() / num_steps
+        total_loss_val = total_loss_val.numpy()
         total_loss_val_str = str(total_loss_val)
     else:
         total_loss_val = 0
@@ -734,8 +745,8 @@ def image_caption_query(self, instruction, label_column=None,
         "feature_extraction": image_features_extract_model,
         "plots": plots,
         'losses': {
-            'training_loss': total_loss,
-            'validation_loss': total_loss_val
+            'Training loss': total_loss,
+            'Validation loss': total_loss_val
         }
     }
     clearLog()

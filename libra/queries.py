@@ -25,7 +25,6 @@ import os
 import nltk
 import ssl
 import numpy as np
-from sklearn.exceptions import DataConversionWarning
 
 # suppressing warnings for cleaner dialogue box
 warnings.simplefilter(action='error', category=FutureWarning)
@@ -315,7 +314,7 @@ class client:
         :param callback_mode: The type of callback (str).
         :param maximizer: The accuracy/loss type to optimize (str).
         :param save_model: Save the model (bool).
-        :param save_path: Filepath of where to save the model (str).        
+        :param save_path: Filepath of where to save the model (str).
 
         :return: a model and information to along with it stored in the self.models dictionary.
         '''
@@ -347,6 +346,7 @@ class client:
                                 scatters=[],
                                 generate_plots=True,
                                 drop=None,
+                                clusters=None,
                                 base_clusters=2,
                                 verbose=0,
                                 n_init=10,
@@ -356,7 +356,7 @@ class client:
                                 ):
         '''
         Calls the body of the kmeans_clustering code in the supplementaries.py file. Can be used without any preprocessing and/or parameters.
-        
+
         :param dataset: The dataset being used in the k-means clustering algorithm (str).
         :param scatters: A list of various types of scatter plots.
         :param preprocess: Preprocess the data (bool).
@@ -375,6 +375,7 @@ class client:
         self.models['k_means_clustering'] = k_means_clustering(
             dataset=self.dataset,
             scatters=scatters,
+            clusters=clusters,
             preprocess=preprocess,
             generate_plots=generate_plots,
             drop=drop,
@@ -419,8 +420,8 @@ class client:
         :param gamma: Kernel coefficient (int).
         :param coef0: Significant term in 'poly' and 'sigmoid' kernel functions (float).
         :param max_iter: Maximum number of iterations the function will run (int).
-        
-        
+
+
         :return: a model and information to go along with it stored in the self.models dictionary.
         '''
 
@@ -472,7 +473,7 @@ class client:
         :param leaf_size: Leaf size passed to BallTree or KDTree (int).
         :param p: Power parameter for the Minkowski metric (int).
         :param algorithm: Algorithm used to compute the nearest neighbors (str).
-        
+
 
         :return: a model and information to along with it stored in the self.models dictionary.
         '''
@@ -530,7 +531,7 @@ class client:
         :param min_impurity_decrease: A node will be split if this split induces a decrease of the impurity greater than or equal
          to this value (float).
         :param ccp_alpha: Complexity parameter used for Minimal Cost-Complexity Pruning (float).
-        
+
 
         :return: a model and information to along with it stored in the self.models dictionary.
         '''
@@ -599,7 +600,7 @@ class client:
         :param directory: Path to the directory (str).
         :param verbose: Printing the logging information (int).
         :param test_size: Size of the testing set (float).
-        
+
 
         :return: an updated model and history stored in the models dictionary
         '''
@@ -659,7 +660,7 @@ class client:
         :param epochs: Number of epochs (int).
         :param height: Height of the input image (int).
         :param width: Width of the input image (int).
-        
+
 
         :return: an updated model and history stored in the models dictionary
         '''
@@ -721,7 +722,7 @@ class client:
         :param generate_plots: Generate plots for the model (bool).
         :param save_model: Save the model (bool).
         :param save_path: Filepath of where to save the model (str).
-        
+
 
         :return: an updated model and history stored in the models dictionary
         '''
@@ -744,27 +745,33 @@ class client:
         self.latest_model = 'text_classification'
         clearLog()
 
-    # doc_summarization predict wrapper
-    def get_summary(self, text):
+    # summarization predict wrapper
+    def get_summary(self, text, num_beams=4, no_repeat_ngram_size=2, num_return_sequences=1,
+                    early_stopping=True):
         '''
         Calls the body of the summarizer which is located in the nlp_queries.py file
-        :param text: set of text that you want to summarize.
+        :param text: set of text that you want to summarize (str).
+        :param max_summary_length: Max generated summary length (int).
+        :param early_stopping: Sets early stopping (bool).
+        :param num_return_sequences: Sets the number of likely possibilities to output (int).
+        :param no_repeat_ngram_size: Sets the number of unrepeated consecutive n-grams (int).
+        :param num_beams: Sets number of possibilities to explore in beam search (int).
         :return: a summary of text inputted in the text field.
         '''
         clearLog()
-        return get_summary(self=self, text=text)
+        return get_summary(self=self, text=text, num_beams=num_beams, no_repeat_ngram_size=no_repeat_ngram_size
+                           , num_return_sequences=num_return_sequences, early_stopping=early_stopping)
 
-    # text summarization query
+    # summarization query
     def summarization_query(self, instruction, label_column=None, preprocess=True,
                             drop=None,
-                            epochs=10,
+                            epochs=5,
                             batch_size=32,
-                            learning_rate=1e-4,
+                            learning_rate=3e-5,
                             max_text_length=512,
-                            max_summary_length=150,
                             test_size=0.2,
-                            random_state=49,
                             gpu=False,
+                            random_state=49,
                             generate_plots=True,
                             save_model=False,
                             save_path=os.getcwd()):
@@ -777,33 +784,32 @@ class client:
         :param batch_size: The batch size for the dataset (int).
         :param learning_rate: The learning rate of the model (float).
         :param max_text_length: The maximum length of the string of text (int).
-        :param max_summary_length: The maximum length of the string of text (int).
         :param test_size: Size of the testing set (float).
+        :param gpu: Use gpu for accelerated training (bool).
         :param random_state: Initialize a pseudo-random number generator (int).
         :param generate_plots: Generate plots for the model (bool).
         :param save_model: Save the model (bool).
         :param save_path: Filepath of where to save the model (str).
-        
+
 
         :return: an updated model and history stored in the models dictionary
         '''
 
-        self.models["doc_summarization"] = summarization_query(
+        self.models["summarization"] = summarization_query(
             self=self, instruction=instruction, preprocess=preprocess, label_column=label_column,
             drop=drop,
             epochs=epochs,
             batch_size=batch_size,
             learning_rate=learning_rate,
             max_text_length=max_text_length,
-            max_summary_length=max_summary_length,
             test_size=test_size,
-            random_state=random_state,
             gpu=gpu,
+            random_state=random_state,
             generate_plots=generate_plots,
             save_model=save_model,
             save_path=save_path)
 
-        self.latest_model = 'doc_summarization'
+        self.latest_model = 'summarization'
         clearLog()
 
     # image_caption generator wrapper
@@ -819,7 +825,7 @@ class client:
         return ' '.join(caption[:len(caption) - 1])
 
     # image_caption prediction query
-    def image_caption_query(self, instruction,label_column=None,
+    def image_caption_query(self, instruction, label_column=None,
                             drop=None,
                             epochs=10,
                             preprocess=True,
@@ -848,12 +854,14 @@ class client:
         :param buffer_size: The maximum number of elements to buffer (int).
         :param embedding_dim: The dimension of the word embedding mapping (int).
         :param units: The recurrent units in the decoder (int).
+        :param test_size: test size (int) .
+        :param gpu: Choose to use gpu (bool).
         :param generate_plots: Generate plots for the model (bool).
         :param save_model_decoder: Save the decoder (bool).
         :param save_path_decoder: Filepath of where to save the decoder (str).
         :param save_model_encoder: Save the encoder (bool).
         :param save_path_encoder: Filepath of where to save the encoder (str).
-        
+
 
         :return: an updated model and history stored in the models dictionary
         '''
@@ -998,3 +1006,5 @@ class client:
     def dashboard(self):
         dash = edaDashboard(self.dataset)
         dash.dashboard()    
+
+

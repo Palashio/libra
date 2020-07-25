@@ -1,5 +1,5 @@
 colorama
-transformers==2.11.0
+transformers
 tensorflow==2.2.0
 keras==2.4.3
 numpy
@@ -9,11 +9,10 @@ pprint
 matplotlib
 tabulate
 textblob
-python-Levenshtein
 seaborn
 keras-tuner
+jellyfish
 spacy
-torch
 autocorrect
 pillow
 prince

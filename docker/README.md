@@ -13,6 +13,32 @@ quick links here:
 * [ubuntu](https://docs.docker.com/installation/ubuntulinux/)
 * [OSX](https://docs.docker.com/installation/mac/): [docker toolbox](https://www.docker.com/toolbox)
 
+## Base Images
+
+The "base" Dockerfile encompass the installation of the framework and all of the dependencies needed.
+
+Build Docker Image
+
+    $ docker build -t libra -f Dockerfile .
+
+Run Docker Image
+
+    $ docker docker run -it libra
+    
+To remove all docker images
+    
+    $ docker rm $(docker ps -a -q)
+    $ docker rmi $(docker images -q)
+
+## Mount directory in a Docker container
+
+Allows for the local directory to be synchronized within the container directory. This will bind your system and at the docker container. This is similar to mounting a directory on linux.
+
+The `source` of the mount is the path to the directory on the Docker daemon host.
+
+The `destination` is where the file or directory will be mounted in the container. 
+
+    docker run -it --mount source="$(pwd)",destination=/test_container,type=bind k3_s3
 
 ## Running the container
 
