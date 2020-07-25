@@ -299,3 +299,4 @@ def dimensionality_KPCA(instruction, dataset, target="", y=""):
     return data_modified, accuracy_score(
         clf.predict(X_test), y_test), max(acc), (len(
             dataset.columns) - len(data_modified.columns))
+

@@ -386,10 +386,10 @@ def analyze(client, model=None, save=True, save_model=False):
             modeldict['MSE'] = MSE
             modeldict['MAE'] = MAE
     # classification models
-    elif model in ['svm', 'nearest_neighbor', 'decision_tree', 'classification_ANN', 'text_classification']:
+    elif model in ['svm', 'nearest_neighbor', 'decision_tree', 'classification_ANN', 'text_classification', 'xgboost']:
         logger("->", "Plotting ROC curves and creating confusion matrix...")
         if model in ['svm', 'nearest_neighbor',
-                     'decision_tree', 'text_classification']:
+                     'decision_tree', 'text_classification', 'xgboost']:
             label_source = modeldict['interpreter']
             labels = []
             for num in np.unique(np.concatenate((real, preds))):
@@ -412,7 +412,7 @@ def analyze(client, model=None, save=True, save_model=False):
         logger("Gathering metrics for display: ")
         # get accuracy from modeldict
         if model in ['svm', 'nearest_neighbor',
-                     'decision_tree']:
+                     'decision_tree','xgboost']:
             accuracy = modeldict['accuracy']['accuracy_score']
         else:
             accuracy = modeldict['accuracy']['validation_accuracy']

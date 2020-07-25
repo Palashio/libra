@@ -72,8 +72,33 @@ class TestQueries(unittest.TestCase):
     # Tests whether kmeans_clustering_query works without errors, and creates a key in models dictionary
     @ordered
     def test_kmeans(self):
-        self.newClient.kmeans_clustering_query('predict ocean proximity')
+        self.newClient.kmeans_clustering_query(clusters=4)
         self.assertTrue('k_means_clustering' in self.newClient.models)
+
+
+    # Tests whether xgboost_query works without errors, and creates a key in models dictionary
+    @ordered
+    def test_xgboost(self):
+        self.newClient.xgboost_query('predict ocean proximity')
+        self.assertTrue('xgboost' in self.newClient.models)
+
+    # Tests whether summarization works without errors, and creates a key in models dictionary
+    @ordered
+    def test_summarization(self):
+        x = client("tools/data/nlp_data/miniDocumentSummarization.csv")
+        x.summarization_query("summarize text", epochs=1)
+
+    # Tests whether image captioning works without errors, and creates a key in models dictionary
+    @ordered
+    def test_captioning(self):
+        x = client("tools/data/nlp_data/image-caption.csv")
+        x.image_caption_query("get captions", epochs=1)
+
+    # Tests whether text classification works without errors, and creates a key in models dictionary
+    @ordered
+    def test_text_classification(self):
+        x = client("tools/data/nlp_data/smallSentimentAnalysis.csv")
+        x.text_classification_query("get captions", epochs=1)
 
 
     """
@@ -109,10 +134,10 @@ class TestQueries(unittest.TestCase):
         self.assertTrue('precision_score' in self.newClient.models['classification_ANN']['scores'])
         self.assertTrue('f1_score' in self.newClient.models['classification_ANN']['scores'])
 
-    # Tests analyze() function for sklearn models
+    # Tests analyze() function for classifier models
     @ordered
     def test_analyze_sklearn_classifiers(self):
-        for mod in ['svm', 'nearest_neighbor', 'decision_tree']:
+        for mod in ['svm', 'nearest_neighbor', 'decision_tree','xgboost']:
             self.newClient.analyze(model=mod)
             modeldict = self.newClient.models[mod]
 

@@ -11,6 +11,7 @@ from keras import Model
 from keras.models import Sequential, model_from_json
 from keras.layers import (Dense, Conv2D, Flatten, MaxPooling2D, Dropout, GlobalAveragePooling2D)
 from keras.applications import VGG16, VGG19, ResNet50, ResNet101, ResNet152
+
 import pandas as pd
 import json
 from libra.query.supplementaries import save, generate_id
@@ -544,7 +545,6 @@ def convolutional(instruction=None,
     logger("Creating convolutional neural netwwork dynamically")
 
     # Convolutional Neural Network
-
     # Build model based on custom_arch configuration if given
     if custom_arch:
         with open(custom_arch, "r") as f:
@@ -634,6 +634,7 @@ def convolutional(instruction=None,
         metrics=['accuracy'])
 
     logger("Located image data")
+
     if augmentation:
         train_data = ImageDataGenerator(rescale=1. / 255,
                                         shear_range=0.2,
@@ -661,7 +662,7 @@ def convolutional(instruction=None,
     if epochs < 0:
         raise BaseException("Number of epochs has to be greater than 0.")
     logger('Training image model')
-    history = model.fit(
+    history = model.fit_generator(
         X_train,
         steps_per_epoch=X_train.n //
                         X_train.batch_size,
