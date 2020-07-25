@@ -705,6 +705,8 @@ class client:
                             image_column=None,
                             test_size=0.2,
                             augmentation=True,
+                            custom_arch=None,
+                            pretrained=None,
                             epochs=10,
                             height=None,
                             width=None):
@@ -738,6 +740,8 @@ class client:
             image_column=image_column,
             training_ratio=1 - test_size,
             augmentation=augmentation,
+            custom_arch=custom_arch,
+            pretrained=pretrained,
             epochs=epochs,
             height=height,
             width=width)
