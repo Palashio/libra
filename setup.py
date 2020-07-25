@@ -28,7 +28,6 @@ setuptools.setup(
                       'keras-tuner',
                       'spacy',
                       'jellyfish',
-                      'torch',
                       'autocorrect',
                       'pillow',
                       'prince',
