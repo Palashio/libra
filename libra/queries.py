@@ -118,6 +118,7 @@ class client:
         clearLog()
 
     # recommend items based on search criteria(for recommender systems only)
+
     def recommend(self,search_term):
         if self.latest_model == 'content_recommender':
             model = self.models[self.latest_model]
