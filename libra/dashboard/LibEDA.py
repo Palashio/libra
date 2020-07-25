@@ -57,18 +57,7 @@ class edaDashboardback(object):
             st.write(graph)
 
 
-    def visualize_circle(self, df, x_axis, y_axis, legend, tooltips):
-        if tooltips != []:
-            graph = alt.Chart(df).mark_circle(size = 60).encode(
-                x = x_axis,
-                y = y_axis,
-                color = legend,
-                tooltip = tooltips
-            ).interactive().properties(width = self.width, height = self.height)
-            st.text("")
-            st.text("")
-            st.write(graph)
-        else:
+    def visualize_circle(self, df, x_axis, y_axis, legend):
             graph = alt.Chart(df).mark_circle(size = 60).encode(
             x = x_axis,
             y = y_axis,
@@ -311,8 +300,7 @@ class edaDashboardback(object):
                 x_axis = st.selectbox("Choose A Variable For X-Axis", df.columns, index = len(df.columns)-1)
                 y_axis = st.selectbox("Choose A Variable For Y-Axis", df.columns, index = len(df.columns)-2)
                 legend = st.selectbox("Choose A Variable For The Legend", df.columns, index = len(df.columns)-3)
-                tooltips = st.multiselect("Choose Variable(s) For Tooltips", list(df.columns), default = [list(df.columns)[0]])
-                self.visualize_circle(df, x_axis, y_axis, legend, tooltips)
+                self.visualize_circle(df, x_axis, y_axis, legend)
 
             elif type_of_plot == 'Lineplot':
                 x_axis = st.selectbox("Choose A Variable For X-Axis", df.columns, index = len(df.columns)-1)
