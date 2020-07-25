@@ -997,7 +997,4 @@ class client:
 
     def dashboard(self):
         dash = edaDashboard(self.dataset)
-        val = dash.dashboard()    
-        if val == -1:
-            self.dataset = '~/Downloads/Transformed_Data.csv'
-
+        dash.dashboard()    
