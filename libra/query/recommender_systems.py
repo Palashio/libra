@@ -109,8 +109,10 @@ class ContentBasedRecommender:
 
     data: the dataset to work on
     feature_names = a list of the names of features you would like to use to get recommendations
+    by default this will be all the categorical columns
     n_recommendations: the number of recommendations to return
     indexer = the name of the columns you want to get recommendations from
+    by default this will be the first categorical columns(excluding the id)
 
     Example:
     newClient.content_recommender_query(feature_names=['genre','actors','writer','plot'],indexer='title')
