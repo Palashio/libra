@@ -21,7 +21,7 @@ def get_keras_model_reg(dataset, i, add_layer):
                 input_dim=dataset['train'].shape[1],
                 kernel_initializer='normal',
                 activation='relu'))
-        model.add(Dense(64, activation="relu"))
+    model.add(Dense(64, activation="relu"))
 
     # Adds values depending on what the i value is
     for x in range(i):
@@ -60,7 +60,7 @@ def get_keras_model_class(dataset, i, num_classes, add_layer):
                 input_dim=dataset['train'].shape[1],
                 kernel_initializer='normal',
                 activation='relu'))
-        model.add(Dense(64, activation="relu"))
+    model.add(Dense(64, activation="relu"))
 
     # Adds values depending on what the i value is
     for x in range(i):
