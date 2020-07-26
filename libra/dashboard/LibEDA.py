@@ -36,40 +36,7 @@ class edaDashboardback(object):
         return href
 
     def visualize_bar(self, df, x_axis, y_axis, legend, tooltips):
-        if tooltips != []:  
-            graph = alt.Chart(df).mark_bar().encode(
-                x = x_axis,
-                y = y_axis,
-                color = legend,
-                tooltip = tooltips
-            ).interactive().properties(width = self.width, height = self.height)
-            st.text("")
-            st.text("")
-            st.write(graph)
-        else:
-            graph = alt.Chart(df).mark_bar().encode(
-                x = x_axis,
-                y = y_axis,
-                color = legend
-            ).interactive().properties(width = self.width, height = self.height)
-            st.text("")
-            st.text("")
-            st.write(graph)
-
-
-    def visualize_circle(self, df, x_axis, y_axis, legend, tooltips):
-        if tooltips != []:
-            graph = alt.Chart(df).mark_circle(size = 60).encode(
-                x = x_axis,
-                y = y_axis,
-                color = legend,
-                tooltip = tooltips
-            ).interactive().properties(width = self.width, height = self.height)
-            st.text("")
-            st.text("")
-            st.write(graph)
-        else:
-            graph = alt.Chart(df).mark_circle(size = 60).encode(
+        graph = alt.Chart(df).mark_bar().encode(
             x = x_axis,
             y = y_axis,
             color = legend
@@ -78,19 +45,9 @@ class edaDashboardback(object):
         st.text("")
         st.write(graph)
 
-    def visualize_line(self, df, x_axis, y_axis, legend, tooltips):
-        if tooltips != []:
-            graph = alt.Chart(df).mark_line().encode(
-                x = x_axis,
-                y = y_axis,
-                color = legend,
-                tooltip = tooltips
-            ).interactive().properties(width = self.width, height = self.height)
-            st.text("")
-            st.text("")
-            st.write(graph)
-        else:
-            graph = alt.Chart(df).mark_line().encode(
+
+    def visualize_circle(self, df, x_axis, y_axis, legend):
+        graph = alt.Chart(df).mark_circle(size = 60).encode(
             x = x_axis,
             y = y_axis,
             color = legend
@@ -99,54 +56,41 @@ class edaDashboardback(object):
         st.text("")
         st.write(graph)
 
-    def visualize_area(self, df, x_axis, y_axis, legend, tooltips):
-        if tooltips != []:
-            graph = alt.Chart(df).mark_area().encode(
-                x = x_axis,
-                y = y_axis,
-                color = legend,
-                tooltip = tooltips
-            ).interactive().properties(width = self.width, height = self.height)
-            st.text("")
-            st.text("")
-            st.write(graph)
-        else:
-            graph = alt.Chart(df).mark_area().encode(
-                x = x_axis,
-                y = y_axis,
-                color = legend
-            ).interactive().properties(width = self.width, height = self.height)
-            st.text("")
-            st.text("")
-            st.write(graph)
+    def visualize_line(self, df, x_axis, y_axis, legend):
+        graph = alt.Chart(df).mark_line().encode(
+            x = x_axis,
+            y = y_axis,
+            color = legend
+        ).interactive().properties(width = self.width, height = self.height)
+        st.text("")
+        st.text("")
+        st.write(graph)
+
+    def visualize_area(self, df, x_axis, y_axis, legend):
+        graph = alt.Chart(df).mark_area().encode(
+            x = x_axis,
+            y = y_axis,
+            color = legend
+        ).interactive().properties(width = self.width, height = self.height)
+        st.text("")
+        st.text("")
+        st.write(graph)
 
     def visualize_box(self, df, x_axis, y_axis, legend, tooltips):
-        if tooltips != []:
-            graph = alt.Chart(df).mark_boxplot().encode(
-                x = x_axis,
-                y = y_axis,
-                color = legend,
-                tooltip = tooltips
-            ).interactive().properties(width = self.width, height = self.height)
-            st.text("")
-            st.text("")
-            st.write(graph)
-        else:
-            graph = alt.Chart(df).mark_boxplot().encode(
-                x = x_axis,
-                y = y_axis,
-                color = legend
-            ).interactive().properties(width = self.width, height = self.height)
-            st.text("")
-            st.text("")
-            st.write(graph)
+        graph = alt.Chart(df).mark_boxplot().encode(
+            x = x_axis,
+            y = y_axis,
+            color = legend
+        ).interactive().properties(width = self.width, height = self.height)
+        st.text("")
+        st.text("")
+        st.write(graph)
 
     def visualize_count(self, df, x_axis):
         graph = alt.Chart(df).mark_bar().encode(
             x = x_axis,
             y = 'count('+x_axis+'):Q',
             color = x_axis+':N',
-            #tooltip = tooltips
         ).interactive().properties(width = self.width, height = self.height)
         st.text("")
         st.text("")
@@ -311,8 +255,7 @@ class edaDashboardback(object):
                 x_axis = st.selectbox("Choose A Variable For X-Axis", df.columns, index = len(df.columns)-1)
                 y_axis = st.selectbox("Choose A Variable For Y-Axis", df.columns, index = len(df.columns)-2)
                 legend = st.selectbox("Choose A Variable For The Legend", df.columns, index = len(df.columns)-3)
-                tooltips = st.multiselect("Choose Variable(s) For Tooltips", list(df.columns), default = [list(df.columns)[0]])
-                self.visualize_circle(df, x_axis, y_axis, legend, tooltips)
+                self.visualize_circle(df, x_axis, y_axis, legend)
 
             elif type_of_plot == 'Lineplot':
                 x_axis = st.selectbox("Choose A Variable For X-Axis", df.columns, index = len(df.columns)-1)
@@ -385,11 +328,13 @@ class edaDashboardback(object):
                     st.write("")
                     st.markdown(self.get_csv_download_link(out[0]), unsafe_allow_html=True)
                     st.write("")
-                    st.subheader("Note: Download The Above Dataset, If You Want To Modify The Original Data")
-                    st.write("")
-                    if st.button("Modify Original Data"):
-                        return -1
-
+                '''
+                st.write("")    
+                st.subheader("Note: Download The Dataset After Transforming, If You Want To Modify The Original Data")
+                st.write("")
+                if st.button("Modify Original Data"):
+                    self.dataset = '~/Downloads/Transformed_Data.csv'
+                '''
             elif display == 'PCA':
                 instruction = st.text_input("Enter Your Instruction")
                 ca_thresh = st.text_input("Enter The CA Threshold", "")
@@ -408,11 +353,13 @@ class edaDashboardback(object):
                     st.write("")
                     st.markdown(self.get_csv_download_link(out[0]), unsafe_allow_html=True)
                     st.write("")
-                    st.subheader("Note: Download The Above Dataset, If You Want To Modify The Original Data")
-                    st.write("")
-                    if st.button("Modify Original Data"):
-                        return -1
-
+                '''
+                st.write("")    
+                st.subheader("Note: Download The Dataset After Transforming, If You Want To Modify The Original Data")
+                st.write("")
+                if st.button("Modify Original Data"):
+                    self.dataset = '~/Downloads/Transformed_Data.csv'
+                '''
             elif display == 'ICA':
                 instruction = st.text_input("Enter Your Instruction")
                 target = st.text_input("Enter Your Target", "")
@@ -432,10 +379,13 @@ class edaDashboardback(object):
                     st.write("")
                     st.markdown(self.get_csv_download_link(out[0]), unsafe_allow_html=True)
                     st.write("")
-                    st.subheader("Note: Download The Above Dataset, If You Want To Modify The Original Data")
-                    st.write("")
-                    if st.button("Modify Original Data"):
-                        return -1
+                '''
+                st.write("")    
+                st.subheader("Note: Download The Dataset After Transforming, If You Want To Modify The Original Data")
+                st.write("")
+                if st.button("Modify Original Data"):
+                    self.dataset = '~/Downloads/Transformed_Data.csv'
+                '''
         '''
         elif page == 'Model Creation':
             st.title("Run ML Algorithm On Your Data")
