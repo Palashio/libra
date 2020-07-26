@@ -6,7 +6,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="libra",  # Replace with your own username
-    version="1.0.0",
+    version="1.0.3",
     author="Palash Shah",
     author_email="ps9cmk@virginia.edu",
     description="Fully automated machine learning in one-liners.",
