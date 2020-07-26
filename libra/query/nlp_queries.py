@@ -874,7 +874,7 @@ def generate_text_query(self, prefix=None, tuning=False, file=None,
                       length=maxlength,
                       temperature=0.7,
                       top_p=top_p,
-                      nsamples=5,
+                      nsamples=return_sequences,
                       batch_size=batch_size
                       )
 
