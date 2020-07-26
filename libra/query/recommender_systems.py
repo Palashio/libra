@@ -135,10 +135,26 @@ class ContentBasedRecommender:
     '''
 
 
-    def __init__(self, data,indexer,feature_names,n_recommendations=10):
-        # Initialise default variables
-        self.indexer = indexer
-        self.feature_names = feature_names
+    def __init__(self, data,feature_names=[],indexer='',n_recommendations=10):
+        # If feature names is blank, then it get all categorical objects,
+        # removes the id and used them to recommend items,setting the indexer
+        # as the first element of the feature_names
+        dataReader = DataReader(data)
+        data1 = dataReader.data_generator()
+        self.data1 = data1.copy()
+
+        if feature_names == []:
+            catnames = list(self.data1.select_dtypes('object').columns)
+            for i in catnames:
+                if 'id' in i.lower():
+                    v = catnames.index(i)
+                    del catnames[v]
+            self.feature_names = catnames[1:]
+            self.indexer = catnames[0]
+        else:
+            # Initialise default variables
+            self.indexer = indexer
+            self.feature_names = feature_names
 
         # call the matrix_maker function created above
         self.matrix_similar = matrix_maker(data,self.indexer,self.feature_names)
