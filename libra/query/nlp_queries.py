@@ -9,6 +9,7 @@ from tensorflow.python.keras.callbacks import EarlyStopping
 from tensorflow.python.keras.saving.saved_model.json_utils import Encoder
 from torch.utils.data import DataLoader
 from transformers import T5Tokenizer, T5ForConditionalGeneration, TFGPT2LMHeadModel, GPT2Tokenizer
+import gpt_2_simple as gpt2
 import tensorflow as tf
 
 from libra.data_generation.dataset_labelmatcher import get_similar_column
@@ -744,12 +745,14 @@ def image_caption_query(self, instruction, label_column=None,
     return self.models["image_caption"]
 
 
-def generate_text(text,
+def generate_text(self,text,
                   do_sample=True,
                   maxlength=50,
                   top_k=50,
                   top_p=.94,
                   return_sequences=2,
+                  random_state=0,
+                  gpu=False,
                   test_size=0.2,
                   batch_size=32,
                   save_model=False,
@@ -781,12 +784,135 @@ def generate_text(text,
         if not os.path.exists(save_path):
             raise Exception("Save path does not exists")
 
+    if gpu:
+        if tf.test.gpu_device_name():
+            print('Default GPU Device: {}'.format(tf.test.gpu_device_name()))
+        else:
+            raise Exception("Please install GPU version of Tensorflow")
+
+        device = '/device:GPU:0'
+    else:
+        device = '/device:CPU:0'
+
     tokenizer = GPT2Tokenizer.from_pretrained("gpt2")
     model = TFGPT2LMHeadModel.from_pretrained("gpt2", pad_token_id=tokenizer.eos_token_id)
     input_ids = tokenizer.encode(text, return_tensors='tf')
     logger("Generating Text Now...")
-    tf.random.set_seed(0)
+    tf.random.set_seed(random_state)
     output = model.generate(input_ids, do_sample=do_sample, max_length=maxlength, top_k=top_k, top_p=top_p, num_return_sequences=return_sequences)
 
     for i, sample_output in enumerate(output):
         logger("{}: {}".format(i, tokenizer.decode(sample_output, skip_special_tokens=True)))
+
+
+def generate_text_query(self, prefix=None, tuning=False, file=None,
+                  learning_rate= 1e-4,
+                  maxlength=1023,
+                  top_k=0,
+                  top_p=0.9,
+                  return_sequences=2,
+                  gpu=False,
+                  test_size=0.2,
+                  batch_size=32,
+                  save_model=False,
+                  save_path=os.getcwd()):
+    '''
+    Takes in initial text and generates text with specified number of characters more using Top P sampling
+    :param several parameters to hyperparemeterize with given defaults
+    :return: complete generated text
+    '''
+
+    if test_size < 0:
+        raise Exception("Test size must be a float between 0 and 1")
+
+    if test_size >= 1:
+        raise Exception(
+            "Test size must be a float between 0 and 1 (a test size greater than or equal to 1 results in no training "
+            "data)")
+
+    if return_sequences < 1:
+        raise Exception("return sequences number is less than 1 (need an integer of atleast 1)")
+
+    if batch_size < 1:
+        raise Exception("Batch size must be equal to or greater than 1")
+
+    if maxlength < 1:
+        raise Exception("Max text length must be equal to or greater than 1")
+
+    if save_model:
+        if not os.path.exists(save_path):
+            raise Exception("Save path does not exists")
+
+    if gpu:
+        if tf.test.gpu_device_name():
+            print('Default GPU Device: {}'.format(tf.test.gpu_device_name()))
+        else:
+            raise Exception("Please install GPU version of Tensorflow")
+
+        device = '/device:GPU:0'
+    else:
+        device = '/device:CPU:0'
+
+
+    data = DataReader(self.dataset)
+    data = data.data_generator()
+
+    if tuning and file is not None:
+        fine_tuning(file, save_path, batch_size,learning_rate)
+        logger("Generating text now...")
+        generate_text_from_trained_model(maxlength, batch_size,save_path,prefix,top_k,top_p)
+    elif tuning and file is None:
+        raise Exception("Specify file= to a text file to finetune the model")
+    else:
+        model_name = "774M"
+        gpt2.download_gpt2(model_name=model_name)
+        sess = gpt2.start_tf_sess()
+        gpt2.load_gpt2(sess, model_name=model_name)
+        gpt2.generate(sess,
+                      model_name=model_name,
+                      prefix=prefix,
+                      length=maxlength,
+                      temperature=0.7,
+                      top_p=top_p,
+                      nsamples=5,
+                      batch_size=batch_size
+                      )
+
+
+def fine_tuning(file_name, save_path, batch_size, learning_rate):
+    gpt2.download_gpt2(model_name="124M")
+    sess = gpt2.start_tf_sess()
+    logger("Fine tuning the model now...")
+    gpt2.finetune(sess,
+                  dataset=file_name,
+                  model_name='124M',
+                  steps=1000,
+                  batch_size=batch_size,
+                  learning_rate=learning_rate,
+                  restore_from='fresh',
+                  run_name='run1',
+                  print_every=10,
+                  sample_every=200,
+                  save_every=500,
+                  checkpoint_dir=save_path
+                  )
+    logger("Finetuning complete - updated model saved at " + save_path + "run1")
+
+
+def generate_text_from_trained_model(length, batch_size, save_path, prefix, topk, topp):
+    sess = gpt2.start_tf_sess()
+    gpt2.load_gpt2(sess, run_name='run1')
+    gpt2.generate(sess,
+                  length=length,
+                  temperature=0.7,
+                  batch_size=batch_size,
+                  prefix=prefix,
+                  checkpoint_dir=save_path,
+                  top_k=topk,
+                  top_p=topp,
+                  run_name='run1')
+    logger("Generation Complete")
+
+
+
+generate_text("once upon a time", maxlength=80)
