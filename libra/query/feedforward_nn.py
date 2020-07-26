@@ -98,7 +98,7 @@ def regression_ann(
         callback_mode='min',
         maximizer="val_loss",
         save_model=False,
-        lstm_index=[]):
+        add_layer={}):
     '''
     Body of the regression function used that is called in the neural network query
     if the data is numerical.
@@ -147,9 +147,10 @@ def regression_ann(
         callback_value = [es]
 
     i = 0
-
+    
+    #add_layer format: {<object> : list of indexs}
     # get the first 3 layer model
-    model = get_keras_model_reg(data, i, lstm_index)
+    model = get_keras_model_reg(data, i, add_layer)
 
     logger("Training initial model")
     history = model.fit(
@@ -196,7 +197,7 @@ def regression_ann(
     datax = []
     #while all(x > y for x, y in zip(losses, losses[1:])):
     while (len(losses)<=2 or losses[len(losses)-1] < losses[len(losses)-2]):
-        model = get_keras_model_reg(data, i)
+        model = get_keras_model_reg(data, i, add_layer)
         history = model.fit(
             X_train,
             y_train,
@@ -277,7 +278,7 @@ def classification_ann(instruction,
                        generate_plots=True,
                        maximizer="val_accuracy",
                        save_model=False,
-                       lstm_index=[]):
+                       add_layer={}):
     '''
     Body of the classification function used that is called in the neural network query
     if the data is categorical.
@@ -341,7 +342,7 @@ def classification_ann(instruction,
         callback_value = [es]
 
     i = 0
-    model = get_keras_model_class(data, i, num_classes, lstm_index)
+    model = get_keras_model_class(data, i, num_classes, add_layer)
     logger("Training initial model")
 
     history = model.fit(
@@ -392,7 +393,7 @@ def classification_ann(instruction,
     datax = []
     #while all(x < y for x, y in zip(accuracies, accuracies[1:])):
     while (len(accuracies)<=2 or accuracies[len(accuracies)-1] > accuracies[len(accuracies)-2]):
-        model = get_keras_model_class(data, i, num_classes)
+        model = get_keras_model_class(data, i, num_classes, add_layer)
         history = model.fit(
             X_train,
             y_train,
