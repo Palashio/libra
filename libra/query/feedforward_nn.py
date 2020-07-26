@@ -23,7 +23,8 @@ from libra.preprocessing.data_preprocesser import initial_preprocesser
 from libra.modeling.prediction_model_creation import get_keras_model_reg, get_keras_model_class
 from sklearn.preprocessing import StandardScaler
 import numpy as np
-import Tkinter, tkFileDialog
+from tkinter import filedialog
+from tkinter import *
 
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
