@@ -9,9 +9,9 @@ import os
 
 # Creates a regression neural network
 
-def get_keras_model_reg(dataset, i, lstm_index):
+def get_keras_model_reg(dataset, i, add_layer):
     size_max_network = 10
-    q=[k for k,v in lstm_index.items() if x in v]
+    q=[k for k,v in add_layer.items() if x in v]
 
     # base model
     model = tf.keras.Sequential()
@@ -49,9 +49,9 @@ def get_keras_model_reg(dataset, i, lstm_index):
 # Creates a classification neural network
 
 
-def get_keras_model_class(dataset, i, num_classes, lstm_index):
+def get_keras_model_class(dataset, i, num_classes, add_layer):
     size_max_network = 10
-    q=[k for k,v in lstm_index.items() if x in v]
+    q=[k for k,v in add_layer.items() if x in v]
     # base model
     model = tf.keras.Sequential()
     model.add(
