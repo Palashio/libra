@@ -2,6 +2,7 @@ from libra import client
 
 import unittest
 
+
 def make_orderer():
     order = {}
 
@@ -125,6 +126,12 @@ class TestQueries(unittest.TestCase):
             self.assertTrue('recall_score' in modeldict['scores'])
             self.assertTrue('precision_score' in modeldict['scores'])
             self.assertTrue('f1_score' in modeldict['scores'])
+    @ordered
+    def test_text_classification(self):
+        x = client("tools/data/nlp_data/shakespeare.txt")
+
+
+
 
     # Tests invalid model input
     @ordered
