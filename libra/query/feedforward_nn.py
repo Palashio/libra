@@ -24,6 +24,7 @@ from libra.modeling.prediction_model_creation import get_keras_model_reg, get_ke
 from sklearn.preprocessing import StandardScaler
 import numpy as np
 
+
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
 counter = 0
@@ -75,6 +76,17 @@ def logger(instruction, found=""):
     counter += 1
 
 
+def get_folder_dir(self):
+    dir_path= tkFileDialog.askdirectory()
+    return dir_path 
+
+def get_file():
+    filename = tkFileDialog.askopenfilename()
+    if os.path.isfile(filename):
+        return filename
+    else: print ('No file chosen')
+
+
 def regression_ann(
         instruction,
         callback=False,
@@ -90,7 +102,8 @@ def regression_ann(
         callback_mode='min',
         maximizer="val_loss",
         save_model=False,
-        save_path=os.getcwd()):
+        save_path=os.getcwd(),
+        add_layer={}):
     '''
     Body of the regression function used that is called in the neural network query
     if the data is numerical.
@@ -98,9 +111,11 @@ def regression_ann(
     :return dictionary that holds all the information for the finished model.
     '''
 
+    if dataset is None:
+        dataReader = DataReader(get_file())
+    else:
+        dataReader = DataReader(dataset)
     logger("Reading in dataset")
-
-    dataReader = DataReader(dataset)
     data = dataReader.data_generator()
     # data = pd.read_csv(self.dataset)
 
@@ -137,9 +152,10 @@ def regression_ann(
         callback_value = [es]
 
     i = 0
-
+    
+    #add_layer format: {<object> : list of indexs}
     # get the first 3 layer model
-    model = get_keras_model_reg(data, i)
+    model = get_keras_model_reg(data, i, add_layer)
 
     logger("Training initial model")
     history = model.fit(
@@ -184,9 +200,9 @@ def regression_ann(
         print((" " * 2 * counter) + "| " + ("".join(word.ljust(col_width)
                                                     for word in row)) + " |")
     datax = []
-    # while all(x > y for x, y in zip(losses, losses[1:])):
-    while (len(losses) <= 2 or losses[len(losses) - 1] < losses[len(losses) - 2]):
-        model = get_keras_model_reg(data, i)
+    #while all(x > y for x, y in zip(losses, losses[1:])):
+    while (len(losses)<=2 or losses[len(losses)-1] < losses[len(losses)-2]):
+        model = get_keras_model_reg(data, i, add_layer)
         history = model.fit(
             X_train,
             y_train,
@@ -234,7 +250,7 @@ def regression_ann(
             plots[str(plot_names[x])] = init_plots[x]
 
     if save_model:
-        save(final_model, save_model)
+        save(final_model, save_model, save_path)
     # stores values in the client object models dictionary field
     print("")
     logger("Stored model under 'regression_ANN' key")
@@ -267,16 +283,20 @@ def classification_ann(instruction,
                        generate_plots=True,
                        maximizer="val_accuracy",
                        save_model=False,
-                       save_path=os.getcwd()):
+                       save_path=os.getcwd(),
+                       add_layer={}):
     '''
     Body of the classification function used that is called in the neural network query
     if the data is categorical.
     :param many parameters: used to preprocess, tune, plot generation, and parameterizing the neural network trained.
     :return dictionary that holds all the information for the finished model.
     '''
+    
+    if dataset is None:
+        dataReader = DataReader(get_file())
+    else:
+        dataReader = DataReader(dataset)
     logger("Reading in dataset")
-
-    dataReader = DataReader(dataset)
     data = dataReader.data_generator()
 
     if drop is not None:
@@ -328,7 +348,7 @@ def classification_ann(instruction,
         callback_value = [es]
 
     i = 0
-    model = get_keras_model_class(data, i, num_classes)
+    model = get_keras_model_class(data, i, num_classes, add_layer)
     logger("Training initial model")
 
     history = model.fit(
@@ -377,9 +397,9 @@ def classification_ann(instruction,
         print((" " * 2 * counter) + "| " + ("".join(word.ljust(col_width)
                                                     for word in row)) + " |")
     datax = []
-    # while all(x < y for x, y in zip(accuracies, accuracies[1:])):
-    while (len(accuracies) <= 2 or accuracies[len(accuracies) - 1] > accuracies[len(accuracies) - 2]):
-        model = get_keras_model_class(data, i, num_classes)
+    #while all(x < y for x, y in zip(accuracies, accuracies[1:])):
+    while (len(accuracies)<=2 or accuracies[len(accuracies)-1] > accuracies[len(accuracies)-2]):
+        model = get_keras_model_class(data, i, num_classes, add_layer)
         history = model.fit(
             X_train,
             y_train,
@@ -431,7 +451,7 @@ def classification_ann(instruction,
             models[len(models) - 1], data, y, model, X_test, y_test)
 
     if save_model:
-        save(final_model, save_model)
+        save(final_model, save_model, save_path)
 
     print("")
     logger("Stored model under 'classification_ANN' key")
@@ -458,7 +478,6 @@ def convolutional(instruction=None,
                   read_mode=None,
                   preprocess=True,
                   verbose=0,
-                  data_path=os.getcwd(),
                   new_folders=True,
                   image_column=None,
                   training_ratio=0.8,
@@ -474,7 +493,7 @@ def convolutional(instruction=None,
     :param many parameters: used to preprocess, tune, plot generation, and parameterizing the convolutional neural network trained.
     :return dictionary that holds all the information for the finished model.
     '''
-
+    data_path = get_folder_dir()
     logger("Generating datasets for classes")
 
     if pretrained:
