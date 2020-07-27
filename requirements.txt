@@ -1,5 +1,5 @@
 colorama
-transformers
+transformers==3.0.2
 tensorflow==2.2.0
 keras==2.4.3
 numpy

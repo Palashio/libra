@@ -4,9 +4,9 @@ import pandas as pd
 import os
 
 _dataset_links = {
-    'housing': 'https://download1325.mediafire.com/5sm8nmw2gixg/x8m5sol30wz5kjq/5227_7876_bundle_archive+%282%29.zip',
-    'fake job postings': 'https://download855.mediafire.com/kezk0rq1ogzg/ikvbeoyirm92qpf/533871_976879_bundle_archive.zip',
-    'landslides': 'https://download947.mediafire.com/0mgw8yaubcjg/yd2b09ty4qsk6qb/686_1296_bundle_archive+%281%29.zip'
+    'housing': 'https://download1593.mediafire.com/0llwk1so1nwg/bcy99z7mcdcfjin/24824_33185_bundle_archive.zip',
+    'fake job postings': 'https://download855.mediafire.com/3emjy3dnq71g/1vaj6fxx465ghyy/533871_976879_bundle_archive+%281%29.zip',
+    'landslides': 'https://download947.mediafire.com/p3trn9y69trg/4eto9fdwkj8lay7/686_1296_bundle_archive+%282%29.zip'
 }
 
 

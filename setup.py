@@ -33,7 +33,8 @@ setuptools.setup(
                       'prince',
                       'opencv-python',
                       'nltk',
-                      'xgboost'],
+                      'xgboost',
+                      'download'],
     packages=find_packages(exclude=('tests',)),
     classifiers=[
         "Programming Language :: Python :: 3",
