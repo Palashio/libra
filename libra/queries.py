@@ -25,6 +25,8 @@ import os
 import nltk
 import ssl
 import numpy as np
+from tkinter import filedialog
+from tkinter import *
 
 # suppressing warnings for cleaner dialogue box
 warnings.simplefilter(action='error', category=FutureWarning)
@@ -69,6 +71,18 @@ def logger(instruction, found=""):
             print("\n" + "\n")
 
     counter += 1
+
+
+def get_folder_dir(self):
+    dir_path= filedialog.askdirectory()
+    return dir_path 
+
+def get_file():
+    filename = filedialog.askopenfilename()
+    if os.path.isfile(filename):
+        return filename
+    else: print ('No file chosen')
+
 
 
 class client:
@@ -168,7 +182,8 @@ class client:
                              callback_mode='min',
                              maximizer="val_loss",
                              save_model=False,
-                             save_path=os.getcwd()):
+                             save_path=os.getcwd(),
+                             add_layer={}):
         '''
         Detects to see if it's a regression/classification problem and then calls the correct query.
         :param hyperparameters: all of these are hyperparameters that're passed to the algorithm
@@ -201,7 +216,8 @@ class client:
                     callback_mode=callback_mode,
                     maximizer=maximizer,
                     save_model=save_model,
-                    save_path=save_path)
+                    save_path=save_path,
+                    add_layer=add_layer)
             else:
                 self.regression_query_ann(
                     instruction,
@@ -217,7 +233,8 @@ class client:
                     maximizer=maximizer,
                     drop=drop,
                     save_model=save_model,
-                    save_path=save_path)
+                    save_path=save_path,
+                    add_layer=add_layer)
         clearLog()
 
     # single regression query using a feed-forward neural network
@@ -237,7 +254,8 @@ class client:
             callback_mode='min',
             maximizer="val_loss",
             save_model=True,
-            save_path=os.getcwd()):
+            save_path=os.getcwd(),
+            add_layer={}):
         '''
         Calls the body of the regression_query__ code in the supplementaries.py file. Used for a regression feed forward neural network.
         :param instruction: The objective that you want to model (str).
@@ -274,7 +292,8 @@ class client:
             callback_mode=callback_mode,
             maximizer=maximizer,
             save_model=save_model,
-            save_path=save_path)
+            save_path=save_path,
+            add_layer=add_layer)
 
         self.latest_model = 'regression_ANN'
         clearLog()
@@ -297,7 +316,9 @@ class client:
             generate_plots=True,
             maximizer="val_loss",
             save_model=False,
-            save_path=os.getcwd()):
+            save_path=os.getcwd(),
+            add_layer=add_layer,
+            add_layer={}):
         '''
         Calls the body of the classification code in the supplementaries.py file. Used for a classification feed forward neural network.
         :param instruction: The objective that you want to model (str).
@@ -334,7 +355,8 @@ class client:
             callback_mode=callback_mode,
             maximizer=maximizer,
             save_model=save_model,
-            save_path=save_path)
+            save_path=save_path,
+            add_layer=add_layer)
 
         self.latest_model = 'classification_ANN'
         clearLog()

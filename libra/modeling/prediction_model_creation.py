@@ -11,7 +11,7 @@ import os
 
 def get_keras_model_reg(dataset, i, add_layer):
     size_max_network = 10
-    q=[k for k,v in add_layer.items() if x in v]
+    key=[k for k,v in add_layer.items() if x in v]
 
     # base model
     model = tf.keras.Sequential()
@@ -25,9 +25,9 @@ def get_keras_model_reg(dataset, i, add_layer):
 
     # Adds values depending on what the i value is
     for x in range(i):
-        while len(q)>0:
-            model.add(q.get(0))
-            del q[0]
+        while len(key)>0:
+            model.add(key[0])
+            del key[0]
         if (i < 5):
             model.add(
                 Dense(
@@ -51,7 +51,7 @@ def get_keras_model_reg(dataset, i, add_layer):
 
 def get_keras_model_class(dataset, i, num_classes, add_layer):
     size_max_network = 10
-    q=[k for k,v in add_layer.items() if x in v]
+    key = [k for k,v in add_layer.items() if x in v]
     # base model
     model = tf.keras.Sequential()
     model.add(
@@ -64,9 +64,9 @@ def get_keras_model_class(dataset, i, num_classes, add_layer):
 
     # Adds values depending on what the i value is
     for x in range(i):
-        while len(q)>0:
-            model.add(q.get(0))
-            del q[0]
+        while len(key)>0:
+            model.add(key[0])
+            del key[0]
             
         if (i < 5):
             model.add(
