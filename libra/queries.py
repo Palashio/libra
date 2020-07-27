@@ -317,7 +317,6 @@ class client:
             maximizer="val_loss",
             save_model=False,
             save_path=os.getcwd(),
-            add_layer=add_layer,
             add_layer={}):
         '''
         Calls the body of the classification code in the supplementaries.py file. Used for a classification feed forward neural network.
