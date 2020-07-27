@@ -102,7 +102,7 @@ def regression_ann(
         callback_mode='min',
         maximizer="val_loss",
         save_model=False,
-        save_path=os.getcwd()
+        save_path=os.getcwd(),
         add_layer={}):
     '''
     Body of the regression function used that is called in the neural network query
