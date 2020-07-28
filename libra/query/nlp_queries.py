@@ -745,30 +745,20 @@ def image_caption_query(self, instruction, label_column=None,
     return self.models["image_caption"]
 
 
-def text_generation_query(self,instruction, prefix=None, tuning=False,
-                  learning_rate= 1e-4,
-                  max_length=512,
-                  top_k=50,
-                  top_p=0.9,
-                  return_sequences=2,
-                  gpu=False,
-                  test_size=0.2,
-                  batch_size=32,
-                  save_model=False,
-                  save_path=os.getcwd()):
+def text_generation_query(self, instruction, prefix=None, tuning=False,
+                          max_length=512,
+                          top_k=50,
+                          top_p=0.9,
+                          return_sequences=2,
+                          gpu=False,
+                          batch_size=32,
+                          save_model=False,
+                          save_path=os.getcwd()):
     '''
     Takes in initial text and generates text with specified number of characters more using Top P sampling
     :param several parameters to hyperparemeterize with given defaults
     :return: complete generated text
     '''
-
-    if test_size < 0:
-        raise Exception("Test size must be a float between 0 and 1")
-
-    if test_size >= 1:
-        raise Exception(
-            "Test size must be a float between 0 and 1 (a test size greater than or equal to 1 results in no training "
-            "data)")
 
     if return_sequences < 1:
         raise Exception("return sequences number is less than 1 (need an integer of atleast 1)")
@@ -793,61 +783,72 @@ def text_generation_query(self,instruction, prefix=None, tuning=False,
     else:
         device = '/device:CPU:0'
 
-
-    data = DataReader(self.dataset)
-    data = data.data_generator()
+    sess = gpt2.start_tf_sess()
 
     if tuning:
-        fine_tuning(data, save_path, batch_size,learning_rate)
-        logger("Generating text now...")
-        generate_text_from_trained_model(max_length, batch_size,save_path,prefix,top_k,top_p)
+        logger("Generating text from tuned model now...")
+        gpt2.load_gpt2(sess, run_name='run1')
+        gen_text = gpt2.generate(sess,
+                                 length=max_length,
+                                 temperature=0.7,
+                                 batch_size=batch_size,
+                                 prefix=prefix,
+                                 checkpoint_dir=save_path,
+                                 top_k=top_k,
+                                 top_p=top_p,
+                                 run_name='run1')
+        logger("Text Generation Complete")
+        logger("Storing information in client object under key 'Generated Text'")
+        self.models['Generated Text'] = gen_text
+        return self.models['Generated Text']
     else:
         model_name = "774M"
         gpt2.download_gpt2(model_name=model_name)
-        sess = gpt2.start_tf_sess()
         gpt2.load_gpt2(sess, model_name=model_name)
-        gpt2.generate(sess,
-                      model_name=model_name,
-                      prefix=prefix,
-                      length=max_length,
-                      temperature=0.7,
-                      top_p=top_p,
-                      nsamples=return_sequences,
-                      batch_size=batch_size
-                      )
+        logger("Generating text from pretrained model now")
+        gen_text = gpt2.generate(sess,
+                                 model_name=model_name,
+                                 prefix=prefix,
+                                 length=max_length,
+                                 temperature=0.7,
+                                 top_p=top_p,
+                                 nsamples=return_sequences,
+                                 batch_size=batch_size,
+                                 return_as_list=True
+                                 )
+        logger("Text Generation Complete")
+        logger("Storing information in client object under key 'Generated Text'")
+        self.models['Generated Text'] = gen_text
+        return self.models['Generated Text']
 
 
-def fine_tuning(data, save_path, batch_size, learning_rate):
+def fine_tuning(self,
+                save_path=os.getcwd(),
+                batch_size=32,
+                learning_rate=1e-4,
+                save_every=500,
+                steps=1000):
+    if save_every > steps or steps % save_every != 0:
+        raise Exception(
+            "You must have a save every value that is less than the number of steps (default 1000) and be a factor of steps")
+
+
+    data = DataReader(self.dataset)
+    data = data.data_generator()
     gpt2.download_gpt2(model_name="124M")
     sess = gpt2.start_tf_sess()
     logger("Fine tuning the model now...")
     gpt2.finetune(sess,
                   dataset=data,
                   model_name='124M',
-                  steps=1000,
+                  steps=steps,
                   batch_size=batch_size,
                   learning_rate=learning_rate,
                   restore_from='fresh',
                   run_name='run1',
                   print_every=10,
                   sample_every=200,
-                  save_every=500,
+                  save_every=save_every,
                   checkpoint_dir=save_path
                   )
     logger("Finetuning complete - updated model saved at " + save_path + "run1")
-
-
-def generate_text_from_trained_model(length, batch_size, save_path, prefix, topk, topp):
-    sess = gpt2.start_tf_sess()
-    gpt2.load_gpt2(sess, run_name='run1')
-    gpt2.generate(sess,
-                  length=length,
-                  temperature=0.7,
-                  batch_size=batch_size,
-                  prefix=prefix,
-                  checkpoint_dir=save_path,
-                  top_k=topk,
-                  top_p=topp,
-                  run_name='run1')
-    logger("Generation Complete")
-
