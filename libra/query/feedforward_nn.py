@@ -566,8 +566,8 @@ def convolutional(instruction=None,
         activation="relu"))
     model.add(Dropout(0.25))
     model.add(Dense(
-        units=num_classes,
-        activation="softmax"
+        units=num_classes if num_classes > 2 else 1,
+        activation="softmax" if num_classes > 2 else "sigmoid"
     ))
     model.compile(
         optimizer="adam",
