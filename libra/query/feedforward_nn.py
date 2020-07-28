@@ -7,9 +7,13 @@ from libra.preprocessing.image_preprocesser import (setwise_preprocessing,
                                                     set_distinguisher,
                                                     already_processed)
 from libra.preprocessing.data_reader import DataReader
-from keras.models import Sequential
-from keras.layers import (Dense, Conv2D, Flatten, MaxPooling2D, Dropout)
+from keras import Model
+from keras.models import Sequential, model_from_json
+from keras.layers import (Dense, Conv2D, Flatten, MaxPooling2D, Dropout, GlobalAveragePooling2D)
+from keras.applications import VGG16, VGG19, ResNet50, ResNet101, ResNet152
+
 import pandas as pd
+import json
 from libra.query.supplementaries import save, generate_id
 from keras.preprocessing.image import ImageDataGenerator
 from sklearn.preprocessing import OneHotEncoder
@@ -19,6 +23,7 @@ from libra.preprocessing.data_preprocesser import initial_preprocesser
 from libra.modeling.prediction_model_creation import get_keras_model_reg, get_keras_model_class
 from sklearn.preprocessing import StandardScaler
 import numpy as np
+
 
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
@@ -71,6 +76,17 @@ def logger(instruction, found=""):
     counter += 1
 
 
+def get_folder_dir(self):
+    dir_path= tkFileDialog.askdirectory()
+    return dir_path 
+
+def get_file():
+    filename = tkFileDialog.askopenfilename()
+    if os.path.isfile(filename):
+        return filename
+    else: print ('No file chosen')
+
+
 def regression_ann(
         instruction,
         callback=False,
@@ -86,7 +102,8 @@ def regression_ann(
         callback_mode='min',
         maximizer="val_loss",
         save_model=False,
-        save_path=os.getcwd()):
+        save_path=os.getcwd(),
+        add_layer={}):
     '''
     Body of the regression function used that is called in the neural network query
     if the data is numerical.
@@ -94,9 +111,11 @@ def regression_ann(
     :return dictionary that holds all the information for the finished model.
     '''
 
+    if dataset is None:
+        dataReader = DataReader(get_file())
+    else:
+        dataReader = DataReader(dataset)
     logger("Reading in dataset")
-
-    dataReader = DataReader(dataset)
     data = dataReader.data_generator()
     # data = pd.read_csv(self.dataset)
 
@@ -133,9 +152,10 @@ def regression_ann(
         callback_value = [es]
 
     i = 0
-
+    
+    #add_layer format: {<object> : list of indexs}
     # get the first 3 layer model
-    model = get_keras_model_reg(data, i)
+    model = get_keras_model_reg(data, i, add_layer)
 
     logger("Training initial model")
     history = model.fit(
@@ -182,7 +202,7 @@ def regression_ann(
     datax = []
     #while all(x > y for x, y in zip(losses, losses[1:])):
     while (len(losses)<=2 or losses[len(losses)-1] < losses[len(losses)-2]):
-        model = get_keras_model_reg(data, i)
+        model = get_keras_model_reg(data, i, add_layer)
         history = model.fit(
             X_train,
             y_train,
@@ -230,7 +250,7 @@ def regression_ann(
             plots[str(plot_names[x])] = init_plots[x]
 
     if save_model:
-        save(final_model, save_model)
+        save(final_model, save_model, save_path)
     # stores values in the client object models dictionary field
     print("")
     logger("Stored model under 'regression_ANN' key")
@@ -263,16 +283,20 @@ def classification_ann(instruction,
                        generate_plots=True,
                        maximizer="val_accuracy",
                        save_model=False,
-                       save_path=os.getcwd()):
+                       save_path=os.getcwd(),
+                       add_layer={}):
     '''
     Body of the classification function used that is called in the neural network query
     if the data is categorical.
     :param many parameters: used to preprocess, tune, plot generation, and parameterizing the neural network trained.
     :return dictionary that holds all the information for the finished model.
     '''
+    
+    if dataset is None:
+        dataReader = DataReader(get_file())
+    else:
+        dataReader = DataReader(dataset)
     logger("Reading in dataset")
-
-    dataReader = DataReader(dataset)
     data = dataReader.data_generator()
 
     if drop is not None:
@@ -290,7 +314,7 @@ def classification_ann(instruction,
 
     X_train = data['train']
     X_test = data['test']
-    
+
     if num_classes > 2:
         # ANN needs target one hot encoded for classification
         one_hot_encoder = OneHotEncoder()
@@ -299,8 +323,8 @@ def classification_ann(instruction,
                 np.reshape(
                     y.values,
                     (-1,
-                    1))).toarray(),
-        columns = one_hot_encoder.get_feature_names())
+                     1))).toarray(),
+            columns=one_hot_encoder.get_feature_names())
 
     y_train = y.iloc[:len(X_train)]
     y_test = y.iloc[len(X_train):]
@@ -324,7 +348,7 @@ def classification_ann(instruction,
         callback_value = [es]
 
     i = 0
-    model = get_keras_model_class(data, i, num_classes)
+    model = get_keras_model_class(data, i, num_classes, add_layer)
     logger("Training initial model")
 
     history = model.fit(
@@ -360,7 +384,7 @@ def classification_ann(instruction,
     losses.append(history.history[maximizer]
                   [len(history.history[maximizer]) - 1])
     accuracies.append(history.history['val_accuracy']
-                  [len(history.history['val_accuracy']) - 1])
+                      [len(history.history['val_accuracy']) - 1])
     # keeps running model and fit functions until the validation loss stops
     # decreasing
 
@@ -375,7 +399,7 @@ def classification_ann(instruction,
     datax = []
     #while all(x < y for x, y in zip(accuracies, accuracies[1:])):
     while (len(accuracies)<=2 or accuracies[len(accuracies)-1] > accuracies[len(accuracies)-2]):
-        model = get_keras_model_class(data, i, num_classes)
+        model = get_keras_model_class(data, i, num_classes, add_layer)
         history = model.fit(
             X_train,
             y_train,
@@ -418,7 +442,7 @@ def classification_ann(instruction,
     logger('->', "Training Accuracy: " + str(final_hist.history['accuracy']
                                              [len(final_hist.history['val_accuracy']) - 1]))
     logger('->', "Test Accuracy: " + str(final_hist.history['val_accuracy'][
-        len(final_hist.history['val_accuracy']) - 1]))
+                                             len(final_hist.history['val_accuracy']) - 1]))
 
     # genreates appropriate classification plots by feeding all information
     plots = {}
@@ -427,7 +451,7 @@ def classification_ann(instruction,
             models[len(models) - 1], data, y, model, X_test, y_test)
 
     if save_model:
-        save(final_model, save_model)
+        save(final_model, save_model, save_path)
 
     print("")
     logger("Stored model under 'classification_ANN' key")
@@ -454,11 +478,12 @@ def convolutional(instruction=None,
                   read_mode=None,
                   preprocess=True,
                   verbose=0,
-                  data_path=os.getcwd(),
                   new_folders=True,
                   image_column=None,
                   training_ratio=0.8,
                   augmentation=True,
+                  custom_arch=None,
+                  pretrained=None,
                   epochs=10,
                   height=None,
                   width=None):
@@ -468,10 +493,21 @@ def convolutional(instruction=None,
     :param many parameters: used to preprocess, tune, plot generation, and parameterizing the convolutional neural network trained.
     :return dictionary that holds all the information for the finished model.
     '''
-
+    data_path = get_folder_dir()
     logger("Generating datasets for classes")
 
+    if pretrained:
+        if not height:
+            height = 224
+        if not width:
+            width = 224
+        if height != 224 or width != 224:
+            raise ValueError("For pretrained models, height must be 224 and width must be 224.")
+
     if preprocess:
+        if custom_arch:
+            raise ValueError("If custom_arch is not None, preprocess must be set to false.")
+
         read_mode_info = set_distinguisher(data_path, read_mode)
         read_mode = read_mode_info["read_mode"]
 
@@ -525,54 +561,128 @@ def convolutional(instruction=None,
     elif num_classes == 2:
         loss_func = "binary_crossentropy"
 
-    logger("Creating convolutional neural network dynamically")
+    logger("Creating convolutional neural netwwork dynamically")
+
     # Convolutional Neural Network
-    model = Sequential()
-    # model.add(
-    #     Conv2D(
-    #         64,
-    #         kernel_size=3,
-    #         activation="relu",
-    #         input_shape=input_shape))
-    # model.add(MaxPooling2D(pool_size=(2, 2)))
-    # model.add(Conv2D(64, kernel_size=3, activation="relu"))
-    # model.add(MaxPooling2D(pool_size=(2, 2)))
-    # model.add(Flatten())
-    # model.add(Dense(num_classes, activation="softmax"))
-    # model.compile(
-    #     optimizer="adam",
-    #     loss=loss_func,
-    #     metrics=['accuracy'])
-    model.add(Conv2D(
-        filters=64,
-        kernel_size=5,
-        activation="relu",
-        input_shape=input_shape))
-    model.add(MaxPooling2D(pool_size=(2,2)))
-    model.add(Conv2D(
-        filters=64,
-        kernel_size=3,
-        activation="relu"))
-    model.add(MaxPooling2D(pool_size=(2,2)))
-    model.add(Dropout(0.25))
-    model.add(Conv2D(
-        filters=64,
-        kernel_size=3,
-        activation="relu"))
-    model.add(MaxPooling2D(pool_size=(2,2)))
-    model.add(Flatten())
-    model.add(Dense(
-        units=256,
-        activation="relu"))
-    model.add(Dropout(0.25))
-    model.add(Dense(
-        units=num_classes if num_classes > 2 else 1,
-        activation="softmax" if num_classes > 2 else "sigmoid"
-    ))
+
+    # Build model based on custom_arch configuration if given
+    if custom_arch:
+        with open(custom_arch, "r") as f:
+            custom_arch_dict = json.load(f)
+            custom_arch_json_string = json.dumps(custom_arch_dict)
+            model = model_from_json(custom_arch_json_string)
+
+    # Build an existing state-of-the-art model
+    elif pretrained:
+
+        arch_lower = pretrained.get('arch').lower()
+
+        # If user specifies value of pretrained['weights'] as 'imagenet', weights pretrained on ImageNet will be used
+        if 'weights' in pretrained and pretrained.get('weights') == 'imagenet':
+            # Load ImageNet pretrained weights
+            if arch_lower == "vggnet16":
+                base_model = VGG16(include_top=False, weights='imagenet', input_shape=input_shape)
+                x = Flatten()(base_model.output)
+                x = Dense(4096)(x)
+                x = Dropout(0.5)(x)
+                x = Dense(4096)(x)
+                x = Dropout(0.5)(x)
+                pred = Dense(num_classes, activation='softmax')(x)
+                model = Model(base_model.input, pred)
+            elif arch_lower == "vggnet19":
+                base_model = VGG19(include_top=False, weights='imagenet', input_shape=input_shape)
+                x = Flatten()(base_model.output)
+                x = Dense(4096)(x)
+                x = Dropout(0.5)(x)
+                x = Dense(4096)(x)
+                x = Dropout(0.5)(x)
+                pred = Dense(num_classes, activation='softmax')(x)
+                model = Model(base_model.input, pred)
+            elif arch_lower == "resnet50":
+                base_model = ResNet50(include_top=False, weights='imagenet', input_shape=input_shape)
+                x = Flatten()(base_model.output)
+                x = GlobalAveragePooling2D()(base_model.output)
+                x = Dropout(0.5)(x)
+                pred = Dense(num_classes, activation='softmax')(x)
+                model = Model(base_model.input, pred)
+            elif arch_lower == "resnet101":
+                base_model = ResNet101(include_top=False, weights='imagenet', input_shape=input_shape)
+                x = GlobalAveragePooling2D()(base_model.output)
+                x = Dropout(0.5)(x)
+                pred = Dense(num_classes, activation='softmax')(x)
+                model = Model(base_model.input, pred)
+            elif arch_lower == "resnet152":
+                base_model = ResNet152(include_top=False, weights='imagenet', input_shape=input_shape)
+                x = GlobalAveragePooling2D()(base_model.output)
+                x = Dropout(0.5)(x)
+                pred = Dense(num_classes, activation='softmax')(x)
+                model = Model(base_model.input, pred)
+            else:
+                raise ModuleNotFoundError("arch \'" + pretrained.get('arch') + "\' not supported.")
+
+        else:
+            # Randomly initialized weights
+            if arch_lower == "vggnet16":
+                model = VGG16(include_top=True, weights=None, classes=num_classes)
+            elif arch_lower == "vggnet19":
+                model = VGG19(include_top=True, weights=None, classes=num_classes)
+            elif arch_lower == "resnet50":
+                model = ResNet50(include_top=True, weights=None, classes=num_classes)
+            elif arch_lower == "resnet101":
+                model = ResNet101(include_top=True, weights=None, classes=num_classes)
+            elif arch_lower == "resnet152":
+                model = ResNet152(include_top=True, weights=None, classes=num_classes)
+            else:
+                raise ModuleNotFoundError("arch \'" + pretrained.get('arch') + "\' not supported.")
+    else:
+        model = Sequential()
+        # model.add(
+        #     Conv2D(
+        #         64,
+        #         kernel_size=3,
+        #         activation="relu",
+        #         input_shape=input_shape))
+        # model.add(MaxPooling2D(pool_size=(2, 2)))
+        # model.add(Conv2D(64, kernel_size=3, activation="relu"))
+        # model.add(MaxPooling2D(pool_size=(2, 2)))
+        # model.add(Flatten())
+        # model.add(Dense(num_classes, activation="softmax"))
+        # model.compile(
+        #     optimizer="adam",
+        #     loss=loss_func,
+        #     metrics=['accuracy'])
+        model.add(Conv2D(
+            filters=64,
+            kernel_size=5,
+            activation="relu",
+            input_shape=input_shape))
+        model.add(MaxPooling2D(pool_size=(2, 2)))
+        model.add(Conv2D(
+            filters=64,
+            kernel_size=3,
+            activation="relu"))
+        model.add(MaxPooling2D(pool_size=(2, 2)))
+        model.add(Dropout(0.25))
+        model.add(Conv2D(
+            filters=64,
+            kernel_size=3,
+            activation="relu"))
+        model.add(MaxPooling2D(pool_size=(2, 2)))
+        model.add(Flatten())
+        model.add(Dense(
+            units=256,
+            activation="relu"))
+        model.add(Dropout(0.25))
+        model.add(Dense(
+            units=num_classes if num_classes > 2 else 1,
+            activation="softmax" if num_classes > 2 else "sigmoid"
+        ))
+
     model.compile(
         optimizer="adam",
         loss=loss_func,
         metrics=['accuracy'])
+
     logger("Located image data")
 
     if augmentation:
@@ -599,22 +709,23 @@ def convolutional(instruction=None,
                                            batch_size=(32 if processInfo["test_size"] >= 32 else 1),
                                            class_mode=loss_func[:loss_func.find("_")])
 
-
     if epochs < 0:
         raise BaseException("Number of epochs has to be greater than 0.")
     logger('Training image model')
     history = model.fit_generator(
         X_train,
         steps_per_epoch=X_train.n //
-        X_train.batch_size,
+                        X_train.batch_size,
         validation_data=X_test,
         validation_steps=X_test.n //
-        X_test.batch_size,
+                         X_test.batch_size,
         epochs=epochs,
         verbose=verbose)
 
-    logger('->', 'Final training accuracy: {}'.format(history.history['accuracy'][len(history.history['accuracy']) - 1]))
-    logger('->', 'Final validation accuracy: {}'.format(history.history['val_accuracy'][len(history.history['val_accuracy']) - 1]))
+    logger('->',
+           'Final training accuracy: {}'.format(history.history['accuracy'][len(history.history['accuracy']) - 1]))
+    logger('->', 'Final validation accuracy: {}'.format(
+        history.history['val_accuracy'][len(history.history['val_accuracy']) - 1]))
     # storing values the model dictionary
 
     logger("Stored model under 'convolutional_NN' key")
