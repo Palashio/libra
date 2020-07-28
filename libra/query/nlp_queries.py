@@ -745,7 +745,7 @@ def image_caption_query(self, instruction, label_column=None,
     return self.models["image_caption"]
 
 
-def text_generation_query(self, instruction, prefix=None, tuning=False,
+def generate_text(self, instruction, prefix=None, tuning=False,
                           max_length=512,
                           top_k=50,
                           top_p=0.9,
@@ -822,7 +822,7 @@ def text_generation_query(self, instruction, prefix=None, tuning=False,
         return self.models['Generated Text']
 
 
-def fine_tuning(self,
+def text_generation_query(self,
                 save_path=os.getcwd(),
                 batch_size=32,
                 learning_rate=1e-4,

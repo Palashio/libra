@@ -19,6 +19,7 @@ def make_orderer():
 ordered, compare = make_orderer()
 unittest.defaultTestLoader.sortTestMethodsUsing = compare
 
+
 class TestQueries(unittest.TestCase):
 
     newClient = client('tools/data/structured_data/housing.csv')
@@ -77,6 +78,10 @@ class TestQueries(unittest.TestCase):
         self.newClient.kmeans_clustering_query('predict ocean proximity')
         self.assertTrue('k_means_clustering' in self.newClient.models)
 
+    @ordered
+    def test_text_generation(self):
+        x = client("tools/data/nlp_data/shakespeare.txt")
+        x.
 
     """
     TEST ANALYZE() FUNCTION
@@ -126,9 +131,8 @@ class TestQueries(unittest.TestCase):
             self.assertTrue('recall_score' in modeldict['scores'])
             self.assertTrue('precision_score' in modeldict['scores'])
             self.assertTrue('f1_score' in modeldict['scores'])
-    @ordered
-    def test_text_classification(self):
-        x = client("tools/data/nlp_data/shakespeare.txt")
+
+
 
 
 
