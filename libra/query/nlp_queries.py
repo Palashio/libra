@@ -7,7 +7,7 @@ from keras_preprocessing import sequence
 from sklearn.model_selection import train_test_split
 from tensorflow.python.keras.callbacks import EarlyStopping
 from tensorflow.python.keras.saving.saved_model.json_utils import Encoder
-from transformers import T5Tokenizer, T5ForConditionalGeneration, TFGPT2LMHeadModel, GPT2Tokenizer, FT5ForConditionalGeneration
+from transformers import T5Tokenizer, TFGPT2LMHeadModel, GPT2Tokenizer, TFT5ForConditionalGeneration
 import gpt_2_simple as gpt2
 import tensorflow as tf
 
