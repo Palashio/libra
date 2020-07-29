@@ -81,7 +81,9 @@ class TestQueries(unittest.TestCase):
     @ordered
     def test_text_generation(self):
         x = client("tools/data/nlp_data/shakespeare.txt")
-        x.
+        x.text_generation_query(instruction='tune model on romeo & juliet scene')
+        x.generate_text(instruction="new verse for romeo", tuning=True,prefix="Romeo")
+
 
     """
     TEST ANALYZE() FUNCTION

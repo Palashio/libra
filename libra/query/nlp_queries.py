@@ -752,7 +752,6 @@ def generate_text(self, instruction, prefix=None, tuning=False,
                           return_sequences=2,
                           gpu=False,
                           batch_size=32,
-                          save_model=False,
                           save_path=os.getcwd()):
     '''
     Takes in initial text and generates text with specified number of characters more using Top P sampling
@@ -769,9 +768,8 @@ def generate_text(self, instruction, prefix=None, tuning=False,
     if max_length < 1:
         raise Exception("Max text length must be equal to or greater than 1")
 
-    if save_model:
-        if not os.path.exists(save_path):
-            raise Exception("Save path does not exists")
+    if not os.path.exists(save_path):
+        raise Exception("Save path does not exists")
 
     if gpu:
         if tf.test.gpu_device_name():
@@ -831,7 +829,6 @@ def text_generation_query(self,
     if save_every > steps or steps % save_every != 0:
         raise Exception(
             "You must have a save every value that is less than the number of steps (default 1000) and be a factor of steps")
-
 
     data = DataReader(self.dataset)
     data = data.data_generator()

@@ -1,7 +1,7 @@
 from libra.query.nlp_queries import (image_caption_query,
                                      generate_caption, classify_text,
                                      text_classification_query, get_summary,
-                                     summarization_query)
+                                     summarization_query, generate_text, text_generation_query)
 from libra.query.classification_models import (k_means_clustering,
                                                train_svm, nearest_neighbors,
                                                decision_tree)
@@ -818,7 +818,7 @@ class client:
         return ' '.join(caption[:len(caption) - 1])
 
     # image_caption prediction query
-    def image_caption_query(self, instruction,label_column=None,
+    def image_caption_query(self, instruction, label_column=None,
                             drop=None,
                             epochs=10,
                             preprocess=True,
@@ -877,6 +877,60 @@ class client:
             save_path_encoder=save_path_encoder)
         self.latest_model = 'image_caption'
         clearLog()
+
+    def text_generation_query(self, instruction,
+                              save_path=os.getcwd(),
+                              batch_size=32,
+                              learning_rate=1e-4,
+                              save_every=500,
+                              steps=1000):
+        """
+        :param instruction: objective you want to accomplish
+        :param save_path: Filepath of where to save the generated text (str).
+        :param batch_size: The batch size for the dataset (int).
+        :param learning_rate: the rate at which to learn (float)
+        :param save_every: a factor of steps and how often to save  (int)
+        :param steps: how many steps to be used in training (int)
+        :return: a tuned model
+        """
+
+        text_generation_query(save_path=save_path,
+                              batch_size=batch_size,
+                              learning_rate=learning_rate,
+                              save_every=save_every,
+                              steps=steps)
+
+    def generate_text(self, instruction, prefix=None, tuning=False,
+                      max_length=512,
+                      top_k=50,
+                      top_p=0.9,
+                      return_sequences=2,
+                      gpu=False,
+                      batch_size=32,
+                      save_path=os.getcwd()):
+        """
+        :param instruction: objective you want to accomplish
+        :param prefix: a string that you want the generated text to begin with
+        :param tuning: boolean on whether or not to use pretrained model or a tuned model that you have saved
+        :param max_length: the length of desired text you want (int)
+        :param top_k: number of most frequent words in the vocab to be used in tokenization (int).
+        :param top_p: p value between 0 and 1 (float)
+        :param return_sequences: how many different text sequences you want returned
+        :param gpu: users gpu
+        :param batch_size: The batch size for the dataset (int).
+        :param save_path:  Filepath of where to save the generated text (str).
+        :return: generated text
+        """
+        self.models['text generation'] = generate_text(instruction=instruction,
+                                                       prefix=prefix,
+                                                       tuning=tuning,
+                                                       max_length=max_length,
+                                                       top_k=top_k,
+                                                       top_p=top_p,
+                                                       batch_size=batch_size,
+                                                       save_path=save_path,
+                                                       return_sequences=return_sequences,
+                                                       gpu=gpu)
 
     # shows the names of plots associated with a specific model
     def plot_names(self, model=None):
