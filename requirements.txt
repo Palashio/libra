@@ -22,3 +22,4 @@ download
 altair==4.1.0
 streamlit==0.63.1
 xgboost
+gpt_2_simple
