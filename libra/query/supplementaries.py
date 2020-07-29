@@ -3,14 +3,12 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 from libra.modeling.tuner import (tuneReg,
                                   tuneClass,
                                   tuneCNN)
-import matplotlib.pyplot as plt
 from libra.preprocessing.data_reader import DataReader
 from keras.preprocessing.image import ImageDataGenerator
 from libra.plotting.generate_plots import (generate_regression_plots,
                                            generate_classification_plots)
 
 import uuid
-from PIL import Image
 from colorama import Fore, Style
 
 number = 0
@@ -247,7 +245,7 @@ def tune_helper(
     return models
 
 
-def save(model, save_model, save_path=os.getcwd()):
+def save(model, save_model, save_path):
     '''
     function used to save a model with its .h5 file and .json instance
     :param modeL; the models dictionary used

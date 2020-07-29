@@ -1,5 +1,5 @@
 import string
-import Levenshtein
+import jellyfish
 
 # generates mask for sequence to sequence processinng
 
@@ -21,7 +21,7 @@ def produceMask(instruction_label):
 
 def get_similar_column(instruction, dataset):
     # instruction = produceMask(instruction_label)
-    distances = [Levenshtein.distance(instruction, element) for element in dataset.columns]
+    distances = [jellyfish.levenshtein_distance(instruction, element) for element in dataset.columns]
 
 
     val, idx = min((val, idx) for (idx, val) in enumerate(distances))
@@ -33,7 +33,7 @@ def get_similar_column(instruction, dataset):
 # exact exame to get_similar_column(). Adapted to allow for small changes
 # for model similarity identification
 def get_similar_model(model_requested, model_keys):
-    distances = [Levenshtein.distance(model_requested, element) for element in model_keys]
+    distances = [jellyfish.levenshtein_distance(model_requested, element) for element in model_keys]
 
     val, idx = min((val, idx) for (idx, val) in enumerate(distances))
 

@@ -1,5 +1,7 @@
 .vscode
 .idea
+libra_datasets
+libra/libra_datasets
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

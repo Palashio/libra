@@ -4,7 +4,7 @@ from libra.query.nlp_queries import (image_caption_query,
                                      summarization_query, generate_text, text_generation_query)
 from libra.query.classification_models import (k_means_clustering,
                                                train_svm, nearest_neighbors,
-                                               decision_tree)
+                                               decision_tree, train_xgboost)
 
 from libra.query.supplementaries import tune_helper, get_model_data, get_operators, get_accuracy, get_losses, \
     get_target, get_plots, get_vocab
@@ -16,6 +16,7 @@ from libra.data_generation.grammartree import get_value_instruction
 from libra.data_generation.dataset_labelmatcher import (get_similar_column,
                                                         get_similar_model)
 from libra.plotting.generate_plots import analyze
+from libra.dashboard.auto_eda import edaDashboard
 from colorama import Fore, Style
 import pandas as pd
 from pandas.core.common import SettingWithCopyWarning
@@ -24,7 +25,8 @@ import os
 import nltk
 import ssl
 import numpy as np
-from sklearn.exceptions import DataConversionWarning
+from tkinter import filedialog
+from tkinter import *
 
 # suppressing warnings for cleaner dialogue box
 warnings.simplefilter(action='error', category=FutureWarning)
@@ -69,6 +71,18 @@ def logger(instruction, found=""):
             print("\n" + "\n")
 
     counter += 1
+
+
+def get_folder_dir(self):
+    dir_path= filedialog.askdirectory()
+    return dir_path 
+
+def get_file():
+    filename = filedialog.askopenfilename()
+    if os.path.isfile(filename):
+        return filename
+    else: print ('No file chosen')
+
 
 
 class client:
@@ -168,7 +182,8 @@ class client:
                              callback_mode='min',
                              maximizer="val_loss",
                              save_model=False,
-                             save_path=os.getcwd()):
+                             save_path=os.getcwd(),
+                             add_layer={}):
         '''
         Detects to see if it's a regression/classification problem and then calls the correct query.
         :param hyperparameters: all of these are hyperparameters that're passed to the algorithm
@@ -201,7 +216,8 @@ class client:
                     callback_mode=callback_mode,
                     maximizer=maximizer,
                     save_model=save_model,
-                    save_path=save_path)
+                    save_path=save_path,
+                    add_layer=add_layer)
             else:
                 self.regression_query_ann(
                     instruction,
@@ -217,7 +233,8 @@ class client:
                     maximizer=maximizer,
                     drop=drop,
                     save_model=save_model,
-                    save_path=save_path)
+                    save_path=save_path,
+                    add_layer=add_layer)
         clearLog()
 
     # single regression query using a feed-forward neural network
@@ -237,7 +254,8 @@ class client:
             callback_mode='min',
             maximizer="val_loss",
             save_model=True,
-            save_path=os.getcwd()):
+            save_path=os.getcwd(),
+            add_layer={}):
         '''
         Calls the body of the regression_query__ code in the supplementaries.py file. Used for a regression feed forward neural network.
         :param instruction: The objective that you want to model (str).
@@ -274,7 +292,8 @@ class client:
             callback_mode=callback_mode,
             maximizer=maximizer,
             save_model=save_model,
-            save_path=save_path)
+            save_path=save_path,
+            add_layer=add_layer)
 
         self.latest_model = 'regression_ANN'
         clearLog()
@@ -297,7 +316,8 @@ class client:
             generate_plots=True,
             maximizer="val_loss",
             save_model=False,
-            save_path=os.getcwd()):
+            save_path=os.getcwd(),
+            add_layer={}):
         '''
         Calls the body of the classification code in the supplementaries.py file. Used for a classification feed forward neural network.
         :param instruction: The objective that you want to model (str).
@@ -314,7 +334,7 @@ class client:
         :param callback_mode: The type of callback (str).
         :param maximizer: The accuracy/loss type to optimize (str).
         :param save_model: Save the model (bool).
-        :param save_path: Filepath of where to save the model (str).        
+        :param save_path: Filepath of where to save the model (str).
 
         :return: a model and information to along with it stored in the self.models dictionary.
         '''
@@ -334,7 +354,8 @@ class client:
             callback_mode=callback_mode,
             maximizer=maximizer,
             save_model=save_model,
-            save_path=save_path)
+            save_path=save_path,
+            add_layer=add_layer)
 
         self.latest_model = 'classification_ANN'
         clearLog()
@@ -346,6 +367,7 @@ class client:
                                 scatters=[],
                                 generate_plots=True,
                                 drop=None,
+                                clusters=None,
                                 base_clusters=2,
                                 verbose=0,
                                 n_init=10,
@@ -355,7 +377,7 @@ class client:
                                 ):
         '''
         Calls the body of the kmeans_clustering code in the supplementaries.py file. Can be used without any preprocessing and/or parameters.
-        
+
         :param dataset: The dataset being used in the k-means clustering algorithm (str).
         :param scatters: A list of various types of scatter plots.
         :param preprocess: Preprocess the data (bool).
@@ -374,6 +396,7 @@ class client:
         self.models['k_means_clustering'] = k_means_clustering(
             dataset=self.dataset,
             scatters=scatters,
+            clusters=clusters,
             preprocess=preprocess,
             generate_plots=generate_plots,
             drop=drop,
@@ -418,8 +441,8 @@ class client:
         :param gamma: Kernel coefficient (int).
         :param coef0: Significant term in 'poly' and 'sigmoid' kernel functions (float).
         :param max_iter: Maximum number of iterations the function will run (int).
-        
-        
+
+
         :return: a model and information to go along with it stored in the self.models dictionary.
         '''
 
@@ -471,7 +494,7 @@ class client:
         :param leaf_size: Leaf size passed to BallTree or KDTree (int).
         :param p: Power parameter for the Minkowski metric (int).
         :param algorithm: Algorithm used to compute the nearest neighbors (str).
-        
+
 
         :return: a model and information to along with it stored in the self.models dictionary.
         '''
@@ -529,7 +552,7 @@ class client:
         :param min_impurity_decrease: A node will be split if this split induces a decrease of the impurity greater than or equal
          to this value (float).
         :param ccp_alpha: Complexity parameter used for Minimal Cost-Complexity Pruning (float).
-        
+
 
         :return: a model and information to along with it stored in the self.models dictionary.
         '''
@@ -553,6 +576,68 @@ class client:
 
         self.latest_model = 'decision_tree'
         clearLog()
+
+    # query to create a xgboost model
+
+    def xgboost_query(self,
+                  instruction,
+                  text=[],
+                  preprocess=True,
+                  test_size=0.2,
+                  drop=None,  
+                  random_state=49,     
+                  learning_rate=0.1,
+                  n_estimators=1000,
+                  max_depth=6,
+                  min_child_weight=1,
+                  gamma=0,
+                  subsample=0.8,
+                  colsample_bytree=0.8,
+                  verbosity=0,
+                  objective= 'binary:logistic'):
+        
+        '''
+        Calls the body of the xgboost code in the classification_models.py file. Used to create a xgboost algorithm.
+        :param instruction: The objective that you want to model (str).
+        :param text: A list of columns to perform text embedding on.
+        :param dataset: The dataset being used in the xgboost algorithm (str).
+        :param preprocess: Preprocess the data (bool).
+        :param test_size: Size of the testing set (float).
+        :param drop: A list of the dataset's columns to drop.
+        :param random_seed: Initialize a pseudo-random number generator (int).
+        :param learning_rate:  Boosting learning rate(float).
+        :param n_estimators: Number of gradient boosted trees. Equivalent to number of boosting rounds(in   ).
+        :param max_depth: Maximum tree depth for base learners(int).
+        :param min_child_weight: Minimum sum of instance weight(hessian) needed in a child(int).
+        :param gamma: Minimum loss reduction required to make a further partition on a leaf node of the tree(int).
+        :param subsample: Subsample ratio of the training instance(float).
+        :param colsample_bytree: Subsample ratio of columns when constructing each tree(float).
+        :param objective: Specify the learning task and the corresponding learning objective or a custom 
+        objective function to be used (string or callable).
+        :param scale_pos_weight: Balancing of positive and negative weights(float).
+        :param verbose: Verbosity of printing messages. Valid values are 0 (silent), 1 (warning), 2 (info), 3 (debug).
+
+        :return: a model and information to along with it stored in the self.models dictionary.
+        '''
+        
+        self.models['xgboost'] = train_xgboost(instruction,
+                                       dataset=self.dataset,
+                                       text=[],
+                                       random_state=random_state,
+                                       preprocess=preprocess,
+                                       drop=drop,                 
+                                       learning_rate=learning_rate,
+                                       n_estimators=n_estimators,
+                                       max_depth=max_depth,
+                                       min_child_weight=min_child_weight,
+                                       gamma=gamma,
+                                       subsample=subsample,
+                                       verbosity=verbosity,
+                                       colsample_bytree=colsample_bytree,
+                                       objective=objective)
+
+        self.latest_model = 'xgboost'
+        clearLog() 
 
     # tunes a specific neural network based on the input model_to_tune
 
@@ -598,7 +683,7 @@ class client:
         :param directory: Path to the directory (str).
         :param verbose: Printing the logging information (int).
         :param test_size: Size of the testing set (float).
-        
+
 
         :return: an updated model and history stored in the models dictionary
         '''
@@ -641,6 +726,8 @@ class client:
                             image_column=None,
                             test_size=0.2,
                             augmentation=True,
+                            custom_arch=None,
+                            pretrained=None,
                             epochs=10,
                             height=None,
                             width=None):
@@ -658,7 +745,7 @@ class client:
         :param epochs: Number of epochs (int).
         :param height: Height of the input image (int).
         :param width: Width of the input image (int).
-        
+
 
         :return: an updated model and history stored in the models dictionary
         '''
@@ -674,6 +761,8 @@ class client:
             image_column=image_column,
             training_ratio=1 - test_size,
             augmentation=augmentation,
+            custom_arch=custom_arch,
+            pretrained=pretrained,
             epochs=epochs,
             height=height,
             width=width)
@@ -720,7 +809,7 @@ class client:
         :param generate_plots: Generate plots for the model (bool).
         :param save_model: Save the model (bool).
         :param save_path: Filepath of where to save the model (str).
-        
+
 
         :return: an updated model and history stored in the models dictionary
         '''
@@ -743,27 +832,33 @@ class client:
         self.latest_model = 'text_classification'
         clearLog()
 
-    # doc_summarization predict wrapper
-    def get_summary(self, text):
+    # summarization predict wrapper
+    def get_summary(self, text, num_beams=4, no_repeat_ngram_size=2, num_return_sequences=1,
+                    early_stopping=True):
         '''
         Calls the body of the summarizer which is located in the nlp_queries.py file
-        :param text: set of text that you want to summarize.
+        :param text: set of text that you want to summarize (str).
+        :param max_summary_length: Max generated summary length (int).
+        :param early_stopping: Sets early stopping (bool).
+        :param num_return_sequences: Sets the number of likely possibilities to output (int).
+        :param no_repeat_ngram_size: Sets the number of unrepeated consecutive n-grams (int).
+        :param num_beams: Sets number of possibilities to explore in beam search (int).
         :return: a summary of text inputted in the text field.
         '''
         clearLog()
-        return get_summary(self=self, text=text)
+        return get_summary(self=self, text=text, num_beams=num_beams, no_repeat_ngram_size=no_repeat_ngram_size
+                           , num_return_sequences=num_return_sequences, early_stopping=early_stopping)
 
-    # text summarization query
+    # summarization query
     def summarization_query(self, instruction, label_column=None, preprocess=True,
                             drop=None,
-                            epochs=10,
+                            epochs=5,
                             batch_size=32,
-                            learning_rate=1e-4,
+                            learning_rate=3e-5,
                             max_text_length=512,
-                            max_summary_length=150,
                             test_size=0.2,
-                            random_state=49,
                             gpu=False,
+                            random_state=49,
                             generate_plots=True,
                             save_model=False,
                             save_path=os.getcwd()):
@@ -776,33 +871,32 @@ class client:
         :param batch_size: The batch size for the dataset (int).
         :param learning_rate: The learning rate of the model (float).
         :param max_text_length: The maximum length of the string of text (int).
-        :param max_summary_length: The maximum length of the string of text (int).
         :param test_size: Size of the testing set (float).
+        :param gpu: Use gpu for accelerated training (bool).
         :param random_state: Initialize a pseudo-random number generator (int).
         :param generate_plots: Generate plots for the model (bool).
         :param save_model: Save the model (bool).
         :param save_path: Filepath of where to save the model (str).
-        
+
 
         :return: an updated model and history stored in the models dictionary
         '''
 
-        self.models["doc_summarization"] = summarization_query(
+        self.models["summarization"] = summarization_query(
             self=self, instruction=instruction, preprocess=preprocess, label_column=label_column,
             drop=drop,
             epochs=epochs,
             batch_size=batch_size,
             learning_rate=learning_rate,
             max_text_length=max_text_length,
-            max_summary_length=max_summary_length,
             test_size=test_size,
-            random_state=random_state,
             gpu=gpu,
+            random_state=random_state,
             generate_plots=generate_plots,
             save_model=save_model,
             save_path=save_path)
 
-        self.latest_model = 'doc_summarization'
+        self.latest_model = 'summarization'
         clearLog()
 
     # image_caption generator wrapper
@@ -847,12 +941,14 @@ class client:
         :param buffer_size: The maximum number of elements to buffer (int).
         :param embedding_dim: The dimension of the word embedding mapping (int).
         :param units: The recurrent units in the decoder (int).
+        :param test_size: test size (int) .
+        :param gpu: Choose to use gpu (bool).
         :param generate_plots: Generate plots for the model (bool).
         :param save_model_decoder: Save the decoder (bool).
         :param save_path_decoder: Filepath of where to save the decoder (str).
         :param save_model_encoder: Save the encoder (bool).
         :param save_path_encoder: Filepath of where to save the encoder (str).
-        
+
 
         :return: an updated model and history stored in the models dictionary
         '''
@@ -1047,3 +1143,9 @@ class client:
             model = self.latest_model
         clearLog()
         analyze(self, model, save, save_model)
+
+    def dashboard(self):
+        dash = edaDashboard(self.dataset)
+        dash.dashboard()    
+
+
