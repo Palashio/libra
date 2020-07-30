@@ -54,22 +54,24 @@ class TestQueries(unittest.TestCase):
     
     @ordered
     def test_convolutional_query(self):
-        client_image = client("tools/data/image_data/ocr_dataset_small")
+        client_image = client("tools/data/image_data/character_dataset_mini")
         client_image.convolutional_query("predict character", epochs=2)
         self.assertTrue('convolutional_NN' in client_image.models)
     '''
 
     @ordered
     def test_convolutional_query_customarch(self):
-        client_image_customarch = client("tools/data/image_data/ocr_dataset_small")
+        data_path = "tools/data/image_data/character_dataset_mini_preprocessed"
+        client_image_customarch = client(data_path)
         custom_arch_path = "tools/data/custom_model_config/custom_CNN.json"
-        client_image_customarch.convolutional_query("predict character", custom_arch=custom_arch_path, preprocess=False, epochs=3)
+
+        client_image_customarch.convolutional_query("predict character", data_path = data_path, custom_arch=custom_arch_path, preprocess=False, epochs=3)
         self.assertTrue('convolutional_NN' in client_image_customarch.models)
 
     '''
     @ordered
     def test_convolutional_query_pretrained(self):
-        client_image = client("tools/data/image_data/ocr_dataset_mini")
+        client_image = client("tools/data/image_data/character_dataset_mini")
         client_image.convolutional_query(
             "predict character",
             pretrained={
