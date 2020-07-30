@@ -108,6 +108,7 @@ class TestQueries(unittest.TestCase):
         assert('recommendations' in x.recommend('Coco'))
 
 
+
     """
     TEST ANALYZE() FUNCTION
     
