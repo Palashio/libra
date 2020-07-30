@@ -477,6 +477,7 @@ def classification_ann(instruction,
 def convolutional(instruction=None,
                   read_mode=None,
                   preprocess=True,
+                  data_path=None,
                   verbose=0,
                   new_folders=True,
                   image_column=None,
@@ -493,7 +494,7 @@ def convolutional(instruction=None,
     :param many parameters: used to preprocess, tune, plot generation, and parameterizing the convolutional neural network trained.
     :return dictionary that holds all the information for the finished model.
     '''
-    data_path = get_folder_dir()
+    #data_path = get_folder_dir()
     logger("Generating datasets for classes")
 
     if pretrained:
