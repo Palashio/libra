@@ -502,11 +502,11 @@ def convolutional(instruction=None,
         if not width:
             width = 224
         if height != 224 or width != 224:
-            raise ValueError("For pretrained models, height must be 224 and width must be 224.")
+            raise ValueError("For pretrained models, both 'height' and 'width' must be 224.")
 
     if preprocess:
         if custom_arch:
-            raise ValueError("If custom_arch is not None, preprocess must be set to false.")
+            raise ValueError("If 'custom_arch' is not None, 'preprocess' must be set to false.")
 
         read_mode_info = set_distinguisher(data_path, read_mode)
         read_mode = read_mode_info["read_mode"]

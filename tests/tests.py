@@ -20,6 +20,7 @@ unittest.defaultTestLoader.sortTestMethodsUsing = compare
 class TestQueries(unittest.TestCase):
 
     newClient = client('tools/data/structured_data/housing.csv')
+    newClientImageData = client('tools/data/structured_data/ocr_dataset_mini')
 
     """
     TEST QUERIES
@@ -50,6 +51,16 @@ class TestQueries(unittest.TestCase):
         # see if properly chooses classification with a categorical target column
         self.newClient.neural_network_query('predict ocean proximity', epochs=3)
         self.assertTrue('classification_ANN' in self.newClient.models)
+
+    @ordered
+    def test_convolutional_query(self):
+        client_image = client("tools/data/image_data/ocr_dataset_mini")
+        client_image.convolutional_query("predict character", epochs=3)
+        self.assertTrue('convolutional_NN' in client_image.models)
+
+        client_image_pretrained = client("tools/data/image_data/ocr_dataset_mini")
+        client_image_pretrained.convolutional_query("predict character", pretrained = {'arch':'vggnet16', 'weights':'imagenet'}, epochs = 3)
+        self.assertTrue('convolutional_NN' in client_image_pretrained.models)
 
     # Tests whether decision_tree_query works without errors, and creates a key in models dictionary
     @ordered
@@ -99,6 +110,8 @@ class TestQueries(unittest.TestCase):
     def test_text_classification(self):
         x = client("tools/data/nlp_data/smallSentimentAnalysis.csv")
         x.text_classification_query("get captions", epochs=1)
+
+
 
 
     """
