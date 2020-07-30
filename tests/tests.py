@@ -58,9 +58,17 @@ class TestQueries(unittest.TestCase):
         client_image.convolutional_query("predict character", epochs=3)
         self.assertTrue('convolutional_NN' in client_image.models)
 
-        client_image_pretrained = client("tools/data/image_data/ocr_dataset_mini")
-        client_image_pretrained.convolutional_query("predict character", pretrained = {'arch':'vggnet16', 'weights':'imagenet'}, epochs = 3)
-        self.assertTrue('convolutional_NN' in client_image_pretrained.models)
+    @ordered
+    def test_convolutional_query_pretrained(self):
+        client_image = client("tools/data/image_data/ocr_dataset_mini")
+        client_image.convolutional_query(
+            "predict character",
+            pretrained={
+                'arch': 'vggnet16',
+                'weights': 'imagenet'
+                },
+            epochs=3)
+        self.assertTrue('convolutional_NN' in client_image.models)
 
     # Tests whether decision_tree_query works without errors, and creates a key in models dictionary
     @ordered
