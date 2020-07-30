@@ -708,7 +708,7 @@ def convolutional(instruction=None,
                                            batch_size=(32 if processInfo["test_size"] >= 32 else 1),
                                            class_mode=loss_func[:loss_func.find("_")])
 
-    if epochs < 0:
+    if epochs <= 0:
         raise BaseException("Number of epochs has to be greater than 0.")
     logger('Training image model')
     history = model.fit_generator(
