@@ -20,13 +20,13 @@ unittest.defaultTestLoader.sortTestMethodsUsing = compare
 class TestQueries(unittest.TestCase):
 
     newClient = client('tools/data/structured_data/housing.csv')
-    newClientImageData = client('tools/data/structured_data/ocr_dataset_mini')
-
     """
     TEST QUERIES
     
     Tests some queries in queries.py
     """
+
+    '''
     # Tests whether regression_ann_query works without errors, and creates a key in models dictionary
     @ordered
     def test_regression_ann(self):
@@ -51,7 +51,7 @@ class TestQueries(unittest.TestCase):
         # see if properly chooses classification with a categorical target column
         self.newClient.neural_network_query('predict ocean proximity', epochs=3)
         self.assertTrue('classification_ANN' in self.newClient.models)
-
+    '''
     @ordered
     def test_convolutional_query(self):
         client_image = client("tools/data/image_data/ocr_dataset_small")
@@ -70,7 +70,7 @@ class TestQueries(unittest.TestCase):
                 },
             epochs=2)
         self.assertTrue('convolutional_NN' in client_image.models)
-    '''
+
 
     # Tests whether decision_tree_query works without errors, and creates a key in models dictionary
     @ordered
@@ -178,6 +178,6 @@ class TestQueries(unittest.TestCase):
     def test_invalid_model(self):
         with self.assertRaises(NameError):
             self.newClient.analyze(model='I dont exist')
-
+    '''
 if __name__ == '__main__':
     unittest.main()
