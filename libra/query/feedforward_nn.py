@@ -645,11 +645,17 @@ def convolutional(instruction=None,
                 64,
                 kernel_size=3,
                 activation="relu",
+                padding='same',
                 input_shape=input_shape))
+        model.add(Conv2D(64, kernel_size=3, activation="relu", padding='same'))
         model.add(MaxPooling2D(pool_size=(2, 2)))
-        model.add(Conv2D(64, kernel_size=3, activation="relu"))
+
+        model.add(Conv2D(128, kernel_size=3, activation="relu", padding='same'))
+        model.add(Conv2D(128, kernel_size=3, activation="relu", padding='same'))
         model.add(MaxPooling2D(pool_size=(2, 2)))
+
         model.add(Flatten())
+        model.add(Dense(1024, activation="relu"))
         model.add(Dense(num_classes, activation=output_layer_activation))
 
     model.compile(
