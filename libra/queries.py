@@ -29,6 +29,9 @@ import ssl
 import numpy as np
 from tkinter import filedialog
 from tkinter import *
+from tensorflow.keras.preprocessing.image import img_to_array
+import tensorflow as tf
+from matplotlib import pyplot as plt
 
 # suppressing warnings for cleaner dialogue box
 warnings.simplefilter(action='error', category=FutureWarning)
@@ -752,7 +755,8 @@ class client:
                             pretrained=None,
                             epochs=10,
                             height=None,
-                            width=None):
+                            width=None,
+                            show_feature_map=False):
         '''
         Calls the body of the convolutional neural network query which is located in the feedforward.py file
         :param instruction: The objective that you want to model (str).
@@ -767,6 +771,7 @@ class client:
         :param epochs: Number of epochs (int).
         :param height: Height of the input image (int).
         :param width: Width of the input image (int).
+        :param show_feature_map: Displays feature map graphic (bool).
 
 
         :return: an updated model and history stored in the models dictionary
@@ -788,6 +793,55 @@ class client:
             epochs=epochs,
             height=height,
             width=width)
+
+        if show_feature_map:
+            model = self.models["convolutional_NN"]["model"]
+            X_test = self.models["convolutional_NN"]["data"]["test"]
+
+            # Get first image in test images and format it
+            img = X_test[0][0]
+            img /= 255
+            successive_outputs = [layer.output for layer in model.layers[1:]]
+            visualization_model = tf.keras.models.Model(inputs=model.input, outputs=successive_outputs)
+            successive_feature_maps = visualization_model.predict(img)
+
+            # Add main title to figure
+            firstPlot = True
+
+            # Include names of layers in plot
+            layer_names = [layer.name for layer in model.layers]
+            for layer_name, feature_map in zip(layer_names, successive_feature_maps):
+                if len(feature_map.shape) == 4:
+
+                    # Plot Feature maps for the conv / maxpool layers, not the fully-connected layers
+                    n_features = feature_map.shape[-1]  # number of features in the feature map
+                    height = feature_map.shape[1]       # feature map shape (1, size, size, n_features)
+                    width = feature_map.shape[2]
+                    display_grid = np.zeros((height, width * n_features))
+
+                    # Format features appropriately
+                    for i in range(n_features):
+                        img = feature_map[0, :, :, i]
+                        img -= img.mean()
+                        img /= img.std()
+                        img *= 64
+                        img += 128
+                        img = np.clip(img, 0, 255).astype('uint8')
+
+                        # Tile each filter into a horizontal grid
+                        display_grid[:, i * width: (i + 1) * width] = img
+
+                    # Display the grid
+                    scale = 20. / n_features
+                    plt.figure(figsize=(scale * n_features, scale))
+                    if firstPlot:
+                        plt.title(f'Network Visualization\n\n{layer_name}')
+                        firstPlot = False
+                    else:
+                        plt.title(layer_name)
+                    plt.grid(False)
+                    plt.imshow(display_grid, aspect='auto', cmap='viridis')
+                    plt.show()
 
         self.latest_model = 'convolutional_NN'
         clearLog()
@@ -1115,6 +1169,4 @@ class client:
 
     def dashboard(self):
         dash = edaDashboard(self.dataset)
-        dash.dashboard()    
-
-
+        dash.dashboard()
