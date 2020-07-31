@@ -265,15 +265,15 @@ def tuneClass(
             metrics=[metrics])
         return model
     
+    hypermodel = HyperResNet(input_shape=(128, 128, 3), num_classes=10)
     # tuners, establish the object to look through the tuner search space
-    tuner = RandomSearch(
-        build_model,
+    tuner = Hyperband(
+        hypermodel,
+        max_epochs=max_trials,
         objective='val_accuracy',
-        max_trials=max_trials,
-        executions_per_trial=executions_per_trial,
-        directory=directory,
-        project_name='class_tuned')
-
+        seed=42,
+    )
+    
     # tuner.search_space_summary()
     X_train, X_test, y_train, y_test = train_test_split(
         X, y, test_size=0.2, random_state=49)
@@ -325,13 +325,11 @@ def tuneCNN(
         height, width, 3), num_classes=num_classes)
 
     # # tuners, establish the object to look through the tuner search space
-    tuner = RandomSearch(
+    tuner = Hyperband(
         hypermodel,
-        objective=objective,
-        seed=seed,
-        max_trials=max_trials,
-        executions_per_trial=executions_per_trial,
-        directory=directory,
+        max_epochs=max_trials,
+        objective='val_accuracy',
+        seed=42,
     )
 
 
