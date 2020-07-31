@@ -65,7 +65,7 @@ class TestQueries(unittest.TestCase):
         client_image_customarch = client(data_path)
         custom_arch_path = "tools/data/custom_model_config/custom_CNN.json"
 
-        client_image_customarch.convolutional_query("predict character", data_path = data_path, custom_arch=custom_arch_path, preprocess=False, epochs=3)
+        client_image_customarch.convolutional_query("predict character", data_path = data_path, custom_arch=custom_arch_path, preprocess=False, epochs=2)
         self.assertTrue('convolutional_NN' in client_image_customarch.models)
 
     '''

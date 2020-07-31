@@ -722,6 +722,7 @@ class client:
                             read_mode=None,
                             verbose=0,
                             preprocess=True,
+                            data_path = None,
                             new_folders=True,
                             image_column=None,
                             test_size=0.2,
