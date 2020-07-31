@@ -494,7 +494,9 @@ def convolutional(instruction=None,
     :param many parameters: used to preprocess, tune, plot generation, and parameterizing the convolutional neural network trained.
     :return dictionary that holds all the information for the finished model.
     '''
+    
     #data_path = get_folder_dir()
+
     logger("Generating datasets for classes")
 
     if pretrained:
@@ -569,6 +571,7 @@ def convolutional(instruction=None,
     logger("Creating convolutional neural netwwork dynamically")
 
     # Convolutional Neural Network
+
     # Build model based on custom_arch configuration if given
     if custom_arch:
         with open(custom_arch, "r") as f:
@@ -640,33 +643,48 @@ def convolutional(instruction=None,
                 raise ModuleNotFoundError("arch \'" + pretrained.get('arch') + "\' not supported.")
     else:
         model = Sequential()
-        model.add(Conv2D(64, (3, 3), activation='relu', padding='SAME', input_shape=input_shape))
-        model.add(Conv2D(64, (3, 3), activation='relu', padding='SAME'))
-        model.add(MaxPooling2D(pool_size=(2, 2), strides=(2, 2)))
-
-        model.add(Conv2D(128, (3, 3), activation='relu', padding='SAME'))
-        model.add(Conv2D(128, (3, 3), activation='relu', padding='SAME'))
-        model.add(MaxPooling2D(pool_size=(2, 2), strides=(2, 2)))
-
-        model.add(Conv2D(256, (3, 3), activation='relu', padding='SAME'))
-        model.add(Conv2D(256, (3, 3), activation='relu', padding='SAME'))
-        model.add(Conv2D(256, (3, 3), activation='relu', padding='SAME'))
-        model.add(MaxPooling2D(pool_size=(2, 2), strides=(2, 2)))
-
-        model.add(Conv2D(512, (3, 3), activation='relu', padding='SAME'))
-        model.add(Conv2D(512, (3, 3), activation='relu', padding='SAME'))
-        model.add(Conv2D(512, (3, 3), activation='relu', padding='SAME'))
-        model.add(MaxPooling2D(pool_size=(2, 2), strides=(2, 2)))
-
-        model.add(Conv2D(512, (3, 3), activation='relu', padding='SAME'))
-        model.add(Conv2D(512, (3, 3), activation='relu', padding='SAME'))
-        model.add(Conv2D(512, (3, 3), activation='relu', padding='SAME'))
-        model.add(MaxPooling2D(pool_size=(2, 2), strides=(2, 2)))
-
+        # model.add(
+        #     Conv2D(
+        #         64,
+        #         kernel_size=3,
+        #         activation="relu",
+        #         input_shape=input_shape))
+        # model.add(MaxPooling2D(pool_size=(2, 2)))
+        # model.add(Conv2D(64, kernel_size=3, activation="relu"))
+        # model.add(MaxPooling2D(pool_size=(2, 2)))
+        # model.add(Flatten())
+        # model.add(Dense(num_classes, activation="softmax"))
+        # model.compile(
+        #     optimizer="adam",
+        #     loss=loss_func,
+        #     metrics=['accuracy'])
+        model.add(Conv2D(
+            filters=64,
+            kernel_size=5,
+            activation="relu",
+            input_shape=input_shape))
+        model.add(MaxPooling2D(pool_size=(2, 2)))
+        model.add(Conv2D(
+            filters=64,
+            kernel_size=3,
+            activation="relu"))
+        model.add(MaxPooling2D(pool_size=(2, 2)))
+        model.add(Dropout(0.25))
+        model.add(Conv2D(
+            filters=64,
+            kernel_size=3,
+            activation="relu"))
+        model.add(MaxPooling2D(pool_size=(2, 2)))
         model.add(Flatten())
-        model.add(Dense(4096, activation='relu'))
-        model.add(Dense(4096, activation='relu'))
-        model.add(Dense(num_classes, activation=output_layer_activation))
+        model.add(Dense(
+            units=256,
+            activation="relu"))
+        model.add(Dropout(0.25))
+        model.add(Dense(
+            units=num_classes,
+            activation="softmax"
+        ))
+
 
     model.compile(
         optimizer="adam",
