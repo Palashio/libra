@@ -68,7 +68,7 @@ class TestQueries(unittest.TestCase):
         client_image_customarch.convolutional_query("predict character", data_path = data_path, custom_arch=custom_arch_path, preprocess=False, epochs=2)
         self.assertTrue('convolutional_NN' in client_image_customarch.models)
 
-    '''
+
     @ordered
     def test_convolutional_query_pretrained(self):
         client_image = client("tools/data/image_data/character_dataset_mini")
@@ -80,7 +80,7 @@ class TestQueries(unittest.TestCase):
                 },
             epochs=2)
         self.assertTrue('convolutional_NN' in client_image.models)
-    
+    '''
     
 
     # Tests whether decision_tree_query works without errors, and creates a key in models dictionary
