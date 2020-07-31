@@ -187,6 +187,6 @@ class TestQueries(unittest.TestCase):
     def test_invalid_model(self):
         with self.assertRaises(NameError):
             self.newClient.analyze(model='I dont exist')
-    '''
+    
 if __name__ == '__main__':
     unittest.main()
