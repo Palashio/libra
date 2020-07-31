@@ -16,6 +16,8 @@ from libra.data_generation.grammartree import get_value_instruction
 from libra.data_generation.dataset_labelmatcher import (get_similar_column,
                                                         get_similar_model)
 from libra.plotting.generate_plots import analyze
+from libra.query.recommender_systems import ContentBasedRecommender
+
 from libra.dashboard.auto_eda import edaDashboard
 from colorama import Fore, Style
 import pandas as pd
@@ -27,6 +29,9 @@ import ssl
 import numpy as np
 from tkinter import filedialog
 from tkinter import *
+from tensorflow.keras.preprocessing.image import img_to_array
+import tensorflow as tf
+from matplotlib import pyplot as plt
 
 # suppressing warnings for cleaner dialogue box
 warnings.simplefilter(action='error', category=FutureWarning)
@@ -129,6 +134,15 @@ class client:
         return get_similar_model(model_requested, self.models.keys())
         clearLog()
 
+    # recommend items based on search criteria(for recommender systems only)
+
+    def recommend(self,search_term):
+        if self.latest_model == 'content_recommender':
+            model = self.models[self.latest_model]
+            return model.recommend(search_term)
+        else:
+            pass
+        
     # param modelKey: string representation of the model to make prediction
     # param data: dataframe version of desired prediction set
     def predict(self, data, model=None):
@@ -146,6 +160,7 @@ class client:
             return predictions
         else:
             modeldict = self.models[model]
+
             if modeldict.get('preprocesser'):
                 data = modeldict['preprocesser'].transform(data)
             predictions = modeldict['model'].predict(data)
@@ -557,6 +572,7 @@ class client:
         :return: a model and information to along with it stored in the self.models dictionary.
         '''
 
+
         self.models['decision_tree'] = decision_tree(
             instruction=instruction,
             text=text,
@@ -577,6 +593,15 @@ class client:
         self.latest_model = 'decision_tree'
         clearLog()
 
+    def content_recommender_query(self,feature_names=[],n_recommendations=10,indexer='title'):
+        self.models['content_recommender'] = ContentBasedRecommender(
+            data=self.dataset,
+            feature_names=feature_names,
+            indexer=indexer)
+        
+        self.latest_model = 'content_recommender'
+        clearLog()
+       
     # query to create a xgboost model
 
     def xgboost_query(self,
@@ -730,7 +755,8 @@ class client:
                             pretrained=None,
                             epochs=10,
                             height=None,
-                            width=None):
+                            width=None,
+                            show_feature_map=False):
         '''
         Calls the body of the convolutional neural network query which is located in the feedforward.py file
         :param instruction: The objective that you want to model (str).
@@ -745,6 +771,7 @@ class client:
         :param epochs: Number of epochs (int).
         :param height: Height of the input image (int).
         :param width: Width of the input image (int).
+        :param show_feature_map: Displays feature map graphic (bool).
 
 
         :return: an updated model and history stored in the models dictionary
@@ -766,6 +793,55 @@ class client:
             epochs=epochs,
             height=height,
             width=width)
+
+        if show_feature_map:
+            model = self.models["convolutional_NN"]["model"]
+            X_test = self.models["convolutional_NN"]["data"]["test"]
+
+            # Get first image in test images and format it
+            img = X_test[0][0]
+            img /= 255
+            successive_outputs = [layer.output for layer in model.layers[1:]]
+            visualization_model = tf.keras.models.Model(inputs=model.input, outputs=successive_outputs)
+            successive_feature_maps = visualization_model.predict(img)
+
+            # Add main title to figure
+            firstPlot = True
+
+            # Include names of layers in plot
+            layer_names = [layer.name for layer in model.layers]
+            for layer_name, feature_map in zip(layer_names, successive_feature_maps):
+                if len(feature_map.shape) == 4:
+
+                    # Plot Feature maps for the conv / maxpool layers, not the fully-connected layers
+                    n_features = feature_map.shape[-1]  # number of features in the feature map
+                    height = feature_map.shape[1]       # feature map shape (1, size, size, n_features)
+                    width = feature_map.shape[2]
+                    display_grid = np.zeros((height, width * n_features))
+
+                    # Format features appropriately
+                    for i in range(n_features):
+                        img = feature_map[0, :, :, i]
+                        img -= img.mean()
+                        img /= img.std()
+                        img *= 64
+                        img += 128
+                        img = np.clip(img, 0, 255).astype('uint8')
+
+                        # Tile each filter into a horizontal grid
+                        display_grid[:, i * width: (i + 1) * width] = img
+
+                    # Display the grid
+                    scale = 20. / n_features
+                    plt.figure(figsize=(scale * n_features, scale))
+                    if firstPlot:
+                        plt.title(f'Network Visualization\n\n{layer_name}')
+                        firstPlot = False
+                    else:
+                        plt.title(layer_name)
+                    plt.grid(False)
+                    plt.imshow(display_grid, aspect='auto', cmap='viridis')
+                    plt.show()
 
         self.latest_model = 'convolutional_NN'
         clearLog()
@@ -974,6 +1050,7 @@ class client:
         self.latest_model = 'image_caption'
         clearLog()
 
+
     # shows the names of plots associated with a specific model
     def plot_names(self, model=None):
         '''
@@ -1092,6 +1169,4 @@ class client:
 
     def dashboard(self):
         dash = edaDashboard(self.dataset)
-        dash.dashboard()    
-
-
+        dash.dashboard()

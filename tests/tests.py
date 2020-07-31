@@ -100,6 +100,14 @@ class TestQueries(unittest.TestCase):
         x = client("tools/data/nlp_data/smallSentimentAnalysis.csv")
         x.text_classification_query("get captions", epochs=1)
 
+    # Test whether content based recommender works without error, and creates a key in models dictionary
+    @ordered
+    def test_content_recommender(self):
+        x = client('tools/data/recommender_systems_data/disney_plus_shows.csv')
+        x.content_recommender_query()
+        assert('recommendations' in x.recommend('Coco'))
+
+
 
     """
     TEST ANALYZE() FUNCTION
