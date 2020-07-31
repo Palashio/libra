@@ -51,7 +51,7 @@ class TestQueries(unittest.TestCase):
         # see if properly chooses classification with a categorical target column
         self.newClient.neural_network_query('predict ocean proximity', epochs=3)
         self.assertTrue('classification_ANN' in self.newClient.models)
-    
+    '''
     @ordered
     def test_convolutional_query(self):
         client_image = client("tools/data/image_data/character_dataset_mini")
@@ -80,7 +80,7 @@ class TestQueries(unittest.TestCase):
                 },
             epochs=2)
         self.assertTrue('convolutional_NN' in client_image.models)
-    '''
+
     
 
     # Tests whether decision_tree_query works without errors, and creates a key in models dictionary
