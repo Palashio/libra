@@ -26,7 +26,7 @@ class TestQueries(unittest.TestCase):
     Tests some queries in queries.py
     """
 
-    '''
+
     # Tests whether regression_ann_query works without errors, and creates a key in models dictionary
     @ordered
     def test_regression_ann(self):
@@ -75,7 +75,7 @@ class TestQueries(unittest.TestCase):
         client_image.convolutional_query(
             "predict character",
             pretrained={
-                'arch': 'vggnet16',
+                'arch': 'vggnet19',
                 'weights': 'imagenet'
                 },
             epochs=2)
