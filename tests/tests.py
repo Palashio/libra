@@ -81,8 +81,6 @@ class TestQueries(unittest.TestCase):
             epochs=2)
         self.assertTrue('convolutional_NN' in client_image.models)
 
-    
-
     # Tests whether decision_tree_query works without errors, and creates a key in models dictionary
     @ordered
     def test_decision_tree(self):

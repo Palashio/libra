@@ -694,12 +694,12 @@ def convolutional(instruction=None,
     X_train = train_data.flow_from_directory(data_path + training_path,
                                              target_size=input_single,
                                              color_mode=color_mode,
-                                             batch_size=(32 if processInfo["train_size"] >= 32 else 1),
+                                             batch_size=(16 if processInfo["train_size"] >= 16 else 1),
                                              class_mode=loss_func[:loss_func.find("_")])
     X_test = test_data.flow_from_directory(data_path + testing_path,
                                            target_size=input_single,
                                            color_mode=color_mode,
-                                           batch_size=(32 if processInfo["test_size"] >= 32 else 1),
+                                           batch_size=(16 if processInfo["test_size"] >= 16 else 1),
                                            class_mode=loss_func[:loss_func.find("_")])
 
     if epochs <= 0:
