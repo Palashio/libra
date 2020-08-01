@@ -1,13 +1,16 @@
 import os
+import warnings
 
 import numpy as np
 import tensorflow as tf
+from nltk.corpus import stopwords
 from colorama import Fore, Style
 from keras_preprocessing import sequence
+from pandas.core.common import SettingWithCopyWarning
 from sklearn.model_selection import train_test_split
 from tensorflow.python.keras.callbacks import EarlyStopping
-from transformers import TFT5ForConditionalGeneration, T5Tokenizer
-
+from transformers import TFT5ForConditionalGeneration, T5Tokenizer, \
+    pipeline, AutoTokenizer, TFAutoModel
 import libra.plotting.nonkeras_generate_plots
 from libra.data_generation.dataset_labelmatcher import get_similar_column
 from libra.data_generation.grammartree import get_value_instruction
@@ -23,6 +26,8 @@ from libra.query.supplementaries import save
 counter = 0
 
 currLog = 0
+
+warnings.filterwarnings("ignore")
 
 
 def clearLog():
@@ -234,10 +239,11 @@ def get_summary(self, text, max_summary_length=50, num_beams=4, no_repeat_ngram_
     tokenizer = modelInfo['tokenizer']
     text = [text]
     text = add_prefix(text, "summarize: ")
-    result = model.generate(tf.convert_to_tensor(tokenize_for_input_ids(text, tokenizer, max_length=modelInfo['max_text_length'])),
-                       max_length=max_summary_length, num_beams=num_beams,
-                       no_repeat_ngram_size=no_repeat_ngram_size, num_return_sequences=num_return_sequences,
-                       early_stopping=early_stopping)
+    result = model.generate(
+        tf.convert_to_tensor(tokenize_for_input_ids(text, tokenizer, max_length=modelInfo['max_text_length'])),
+        max_length=max_summary_length, num_beams=num_beams,
+        no_repeat_ngram_size=no_repeat_ngram_size, num_return_sequences=num_return_sequences,
+        early_stopping=early_stopping)
     return [tokenizer.decode(summary) for summary in result]
 
 
@@ -327,8 +333,8 @@ def summarization_query(self, instruction, preprocess=True, label_column=None,
     # Clean up text
     if preprocess:
         logger("Preprocessing data")
-        X = add_prefix(lemmatize_text(text_clean_up(X.array)),"summarize: ")
-        Y = add_prefix(lemmatize_text(text_clean_up(Y.array)),"summarize: ")
+        X = add_prefix(lemmatize_text(text_clean_up(X.array)), "summarize: ")
+        Y = add_prefix(lemmatize_text(text_clean_up(Y.array)), "summarize: ")
 
     # tokenize text/summaries
     X = tokenize_for_input_ids(X, tokenizer, max_text_length)
@@ -751,3 +757,39 @@ def image_caption_query(self, instruction, label_column=None,
     }
     clearLog()
     return self.models["image_caption"]
+
+
+# name entity recognition query
+def get_ner(self, instruction):
+    """
+    function to identify name entities
+    :param instruction: Used to get target column
+    :return: dictionary object with detected name-entities
+    """
+    data = DataReader(self.dataset)
+    data = data.data_generator()
+
+    target = get_similar_column(get_value_instruction(instruction), data)
+    logger("->", "Target Column Found: {}".format(target))
+
+    # Remove stopwords if any from the detection column
+    data['combined_text_for_ner'] = data[target].apply(
+        lambda x: ' '.join([word for word in x.split() if word not in stopwords.words()]))
+
+    logger("Detecting Name Entities from : {} data files".format(data.shape[0]+1))
+
+    # Named entity recognition pipeline, default model selection
+    with NoStdStreams():
+        hugging_face_ner_detector = pipeline('ner', grouped_entities=True, framework='tf')
+        data['ner'] = data['combined_text_for_ner'].apply(lambda x: hugging_face_ner_detector(x))
+    logger("NER detection status complete")
+    logger("Storing information in client object under key 'named_entity_recognition'")
+
+    self.models["named_entity_recognition"] = {
+        "model": hugging_face_ner_detector.model,
+        "tokenizer": hugging_face_ner_detector.tokenizer,
+        'name_entities': data['ner'].to_dict()}
+
+    logger("Output: ", data['ner'].to_dict())
+    clearLog()
+    return self.models["named_entity_recognition"]
