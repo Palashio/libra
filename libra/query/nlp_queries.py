@@ -772,14 +772,11 @@ def get_ner(self, instruction):
     target = get_similar_column(get_value_instruction(instruction), data)
     logger("->", "Target Column Found: {}".format(target))
 
-    # Isolate target column data into one column (seperated by '.') which will be used for detection.
-    data['combined_text_for_ner'] = data[target]  # .apply(lambda row: '.'.join(row.values.astype(str)), axis=1)
-
     # Remove stopwords if any from the detection column
-    data['combined_text_for_ner'] = data['combined_text_for_ner'].apply(
+    data['combined_text_for_ner'] = data[target].apply(
         lambda x: ' '.join([word for word in x.split() if word not in stopwords.words()]))
 
-    logger("Detecting Name Entities from : {} data files".format(data.shape[0]))
+    logger("Detecting Name Entities from : {} data files".format(data.shape[0]+1))
 
     # Named entity recognition pipeline, default model selection
     with NoStdStreams():
