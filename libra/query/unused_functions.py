@@ -92,7 +92,7 @@
 
 
 #def booster(instruction,dataset,y,target="",obj):
-#    #obj=["reg:linear","multi:softmax "]
+#    #obj=["reg:linear","multi:softmax "] 
 #    if target == "":
 #        y=data_y(instruction)
 #

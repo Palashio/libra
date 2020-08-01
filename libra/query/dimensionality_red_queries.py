@@ -19,38 +19,11 @@ import numpy as np
 from colorama import Fore, Style
 # function imports from other files
 
-counter = 0
-
 # allows for all columns to be displayed when printing()
 pd.options.display.width = None
 
 
-def logger(instruction, found=""):
-    global counter
-    if counter == 0:
-        print((" " * 2 * counter) + str(instruction) + str(found))
-    elif instruction == "->":
-        counter = counter - 1
-        print(Fore.BLUE + (" " * 2 * counter) +
-              str(instruction) + str(found) + (Style.RESET_ALL))
-    else:
-        print((" " * 2 * counter) + "|- " + str(instruction) + str(found))
-        if instruction == "done...":
-            print("\n" + "\n")
-
-    counter += 1
-
-
-def printtable(col_name, col_width):
-    global counter
-    for row in col_name:
-        print((" " * 2 * counter) + "| " + ("".join(word.ljust(col_width)
-                                                    for word in row)) + " |")
-
-
 def dimensionality_RF(instruction, dataset, target="", y="", n_features=10):
-
-    global counter
 
     dataReader = DataReader(dataset)
 
@@ -87,7 +60,10 @@ def dimensionality_RF(instruction, dataset, target="", y="", n_features=10):
         feature_model.fit(X_train, y_train)
 
         importances = feature_model.feature_importances_
-        indices = np.argsort(importances)[-x:]
+        #indices = np.argsort(importances)[-x:]
+        # feature importance less than 20% of max value of feature importance
+        # then remove it
+        indices = [i for i,v in enumerate(importances) if v > 0.2*(max(importances))]
         columns.append(X_train.columns[indices])
 
         X_temp_train = X_train[X_train.columns[indices]]
@@ -109,8 +85,6 @@ def dimensionality_RF(instruction, dataset, target="", y="", n_features=10):
 
 
 def dimensionality_PCA(instruction, dataset, ca_threshold=None):
-
-    global counter
 
     pca = PCA(0.92)
 
@@ -141,7 +115,7 @@ def dimensionality_PCA(instruction, dataset, ca_threshold=None):
         clf_mod.predict(X_test_mod), y_test))
 
     for i, j in product(range(3, 10), ["entropy", "gini"]):
-        model = tree.DecisionTreeClassifier(criterion=j, max_depth=i)
+        model = tree.DecisionTreeClassifier(criterion=j, max_depth=i, max_features='auto')
         model = model.fit(X_train_mod, y_train)
         acc.append(accuracy_score(model.predict(X_test_mod), y_test))
     del i, j
@@ -159,8 +133,6 @@ def dimensionality_PCA(instruction, dataset, ca_threshold=None):
 
 
 def dimensionality_ICA(instruction, dataset, target="", y=""):
-
-    global counter
 
     dataReader = DataReader(dataset)
 
@@ -284,7 +256,7 @@ def dimensionality_KPCA(instruction, dataset, target="", y=""):
         clf_mod.predict(X_test_mod), y_test))
 
     for i, j in product(range(3, 10), ["entropy", "gini"]):
-        model = tree.DecisionTreeClassifier(criterion=j, max_depth=i)
+        model = tree.DecisionTreeClassifier(criterion=j, max_depth=i, max_features='auto')
         model = model.fit(X_train_mod, y_train)
         acc.append(accuracy_score(model.predict(X_test_mod), y_test))
     del i, j
