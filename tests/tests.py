@@ -19,7 +19,7 @@ unittest.defaultTestLoader.sortTestMethodsUsing = compare
 
 class TestQueries(unittest.TestCase):
 
-    newClient = client('tools/data/nlp_data/housing.csv')
+    newClient = client('tools/data/structured_data/housing.csv')
 
     """
     TEST QUERIES
@@ -100,12 +100,13 @@ class TestQueries(unittest.TestCase):
         x = client("tools/data/nlp_data/smallSentimentAnalysis.csv")
         x.text_classification_query("get captions", epochs=1)
 
-    # Tests whether name entity recognition query works without errors, and creates a key in models dictionary
+    # Test whether content based recommender works without error, and creates a key in models dictionary
     @ordered
-    def test_get_ner(self):
-        self.newClient.get_ner(['Summary','Text'])
-        self.assertTrue('ner' in self.newClient.models)
-        del self.newClient.models['ner']
+    def test_content_recommender(self):
+        x = client('tools/data/recommender_systems_data/disney_plus_shows.csv')
+        x.content_recommender_query()
+        assert('recommendations' in x.recommend('Coco'))
+
 
 
     """
