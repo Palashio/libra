@@ -106,7 +106,7 @@ class TestQueries(unittest.TestCase):
     @ordered
     def test_get_ner(self):
         x = client("/Users/anasawadalla/PycharmProjects/ner/tools/data/nlp_data/miniDocumentSummarization.csv")
-        x.get_named_entities("get ner from summary")
+        x.get_named_entities("get ner from text")
         self.assertTrue('named_entity_recognition' in x.models)
         del x.models['named_entity_recognition']
 

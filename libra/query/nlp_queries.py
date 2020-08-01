@@ -27,9 +27,7 @@ counter = 0
 
 currLog = 0
 
-warnings.simplefilter(action='error', category=FutureWarning)
-warnings.simplefilter(action="ignore", category=ResourceWarning)
-os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
+warnings.filterwarnings("ignore")
 
 
 def clearLog():
@@ -775,19 +773,17 @@ def get_ner(self, instruction):
     logger("->", "Target Column Found: {}".format(target))
 
     # Isolate target column data into one column (seperated by '.') which will be used for detection.
-    data['combined_text_for_ner'] = data[target]
+    data['combined_text_for_ner'] = data[target]  # .apply(lambda row: '.'.join(row.values.astype(str)), axis=1)
 
-    with NoStdStreams():
-        # Remove stopwords if any from the detection column
-        data['combined_text_for_ner'] = data['combined_text_for_ner'].apply(
-            lambda x: ' '.join([word for word in x.split() if word not in stopwords.words()]))
+    # Remove stopwords if any from the detection column
+    data['combined_text_for_ner'] = data['combined_text_for_ner'].apply(
+        lambda x: ' '.join([word for word in x.split() if word not in stopwords.words()]))
 
     logger("Detecting Name Entities from : {} data files".format(data.shape[0]))
 
     # Named entity recognition pipeline, default model selection
     with NoStdStreams():
-        hugging_face_ner_detector = pipeline('ner', model="m3hrdadfi/albert-fa-base-v2-ner", grouped_entities=True,
-                                             framework='tf')
+        hugging_face_ner_detector = pipeline('ner', grouped_entities=True, framework='tf')
         data['ner'] = data['combined_text_for_ner'].apply(lambda x: hugging_face_ner_detector(x))
     logger("NER detection status complete")
     logger("Storing information in client object under key 'named_entity_recognition'")
