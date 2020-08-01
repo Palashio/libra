@@ -1,11 +1,10 @@
 from libra.query.nlp_queries import (image_caption_query,
                                      generate_caption, classify_text,
                                      text_classification_query, get_summary,
-                                     summarization_query)
+                                     summarization_query,get_ner)
 from libra.query.classification_models import (k_means_clustering,
                                                train_svm, nearest_neighbors,
                                                decision_tree, train_xgboost)
-
 from libra.query.supplementaries import tune_helper, get_model_data, get_operators, get_accuracy, get_losses, \
     get_target, get_plots, get_vocab
 
@@ -17,7 +16,6 @@ from libra.data_generation.dataset_labelmatcher import (get_similar_column,
                                                         get_similar_model)
 from libra.plotting.generate_plots import analyze
 from libra.query.recommender_systems import ContentBasedRecommender
-
 from libra.dashboard.auto_eda import edaDashboard
 from colorama import Fore, Style
 import pandas as pd
@@ -80,7 +78,7 @@ def logger(instruction, found=""):
 
 def get_folder_dir(self):
     dir_path= filedialog.askdirectory()
-    return dir_path 
+    return dir_path
 
 def get_file():
     filename = filedialog.askopenfilename()
@@ -142,7 +140,7 @@ class client:
             return model.recommend(search_term)
         else:
             pass
-        
+
     # param modelKey: string representation of the model to make prediction
     # param data: dataframe version of desired prediction set
     def predict(self, data, model=None):
@@ -598,10 +596,10 @@ class client:
             data=self.dataset,
             feature_names=feature_names,
             indexer=indexer)
-        
+
         self.latest_model = 'content_recommender'
         clearLog()
-       
+
     # query to create a xgboost model
 
     def xgboost_query(self,
@@ -609,8 +607,8 @@ class client:
                   text=[],
                   preprocess=True,
                   test_size=0.2,
-                  drop=None,  
-                  random_state=49,     
+                  drop=None,
+                  random_state=49,
                   learning_rate=0.1,
                   n_estimators=1000,
                   max_depth=6,
@@ -620,7 +618,7 @@ class client:
                   colsample_bytree=0.8,
                   verbosity=0,
                   objective= 'binary:logistic'):
-        
+
         '''
         Calls the body of the xgboost code in the classification_models.py file. Used to create a xgboost algorithm.
         :param instruction: The objective that you want to model (str).
@@ -637,20 +635,20 @@ class client:
         :param gamma: Minimum loss reduction required to make a further partition on a leaf node of the tree(int).
         :param subsample: Subsample ratio of the training instance(float).
         :param colsample_bytree: Subsample ratio of columns when constructing each tree(float).
-        :param objective: Specify the learning task and the corresponding learning objective or a custom 
+        :param objective: Specify the learning task and the corresponding learning objective or a custom
         objective function to be used (string or callable).
         :param scale_pos_weight: Balancing of positive and negative weights(float).
         :param verbose: Verbosity of printing messages. Valid values are 0 (silent), 1 (warning), 2 (info), 3 (debug).
 
         :return: a model and information to along with it stored in the self.models dictionary.
         '''
-        
+
         self.models['xgboost'] = train_xgboost(instruction,
                                        dataset=self.dataset,
                                        text=[],
                                        random_state=random_state,
                                        preprocess=preprocess,
-                                       drop=drop,                 
+                                       drop=drop,
                                        learning_rate=learning_rate,
                                        n_estimators=n_estimators,
                                        max_depth=max_depth,
@@ -662,7 +660,7 @@ class client:
                                        objective=objective)
 
         self.latest_model = 'xgboost'
-        clearLog() 
+        clearLog()
 
     # tunes a specific neural network based on the input model_to_tune
 
@@ -747,6 +745,7 @@ class client:
                             read_mode=None,
                             verbose=0,
                             preprocess=True,
+                            data_path = None,
                             new_folders=True,
                             image_column=None,
                             test_size=0.2,
@@ -1050,6 +1049,16 @@ class client:
         self.latest_model = 'image_caption'
         clearLog()
 
+    # name entity recognition query
+    def get_named_entities(self, instruction):
+        """
+        function to identify name entities
+        :param instruction: Used to get target column
+        :return: dictionary object with detected name-entities
+        """
+        self.models["named_entity_recognition"] = get_ner(self, instruction=instruction)
+        self.latest_model = "named_entity_recognition"
+        clearLog()
 
     # shows the names of plots associated with a specific model
     def plot_names(self, model=None):
