@@ -1,10 +1,12 @@
 import os
+import warnings
 
 import numpy as np
 import tensorflow as tf
 from nltk.corpus import stopwords
 from colorama import Fore, Style
 from keras_preprocessing import sequence
+from pandas.core.common import SettingWithCopyWarning
 from sklearn.model_selection import train_test_split
 from tensorflow.python.keras.callbacks import EarlyStopping
 from transformers import TFT5ForConditionalGeneration, T5Tokenizer, \
@@ -24,6 +26,10 @@ from libra.query.supplementaries import save
 counter = 0
 
 currLog = 0
+
+warnings.simplefilter(action='error', category=FutureWarning)
+warnings.simplefilter(action="ignore", category=ResourceWarning)
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
 
 def clearLog():
@@ -771,18 +777,19 @@ def get_ner(self, instruction):
     # Isolate target column data into one column (seperated by '.') which will be used for detection.
     data['combined_text_for_ner'] = data[target]
 
-    # Remove stopwords if any from the detection column
-    data['combined_text_for_ner'] = data['combined_text_for_ner'].apply(
-        lambda x: ' '.join([word for word in x.split() if word not in stopwords.words()]))
+    with NoStdStreams():
+        # Remove stopwords if any from the detection column
+        data['combined_text_for_ner'] = data['combined_text_for_ner'].apply(
+            lambda x: ' '.join([word for word in x.split() if word not in stopwords.words()]))
 
     logger("Detecting Name Entities from : {} data files".format(data.shape[0]))
 
     # Named entity recognition pipeline, default model selection
     with NoStdStreams():
-        hugging_face_ner_detector = pipeline('ner', model="", grouped_entities=True, framework='tf')
-
-    data['ner'] = data['combined_text_for_ner'].apply(lambda x: hugging_face_ner_detector(x))
-    logger("NER detection status complete :)")
+        hugging_face_ner_detector = pipeline('ner', model="m3hrdadfi/albert-fa-base-v2-ner", grouped_entities=True,
+                                             framework='tf')
+        data['ner'] = data['combined_text_for_ner'].apply(lambda x: hugging_face_ner_detector(x))
+    logger("NER detection status complete")
     logger("Storing information in client object under key 'named_entity_recognition'")
 
     self.models["named_entity_recognition"] = {
@@ -790,6 +797,6 @@ def get_ner(self, instruction):
         "tokenizer": hugging_face_ner_detector.tokenizer,
         'name_entities': data['ner'].to_dict()}
 
-    logger("output: " + data['ner'].to_dict())
+    logger("Output: ", data['ner'].to_dict())
     clearLog()
     return self.models["named_entity_recognition"]
