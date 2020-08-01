@@ -1,9 +1,8 @@
-<div align="center">
-  
+## Ergonomic Machine Learning
+
 
 ![Test Image 1](/tools/data/gh_images/new-logo.png)
 
-## Ergonomic Machine Learning
 
 [![Build Status](https://travis-ci.org/Palashio/libra.svg?branch=master)](https://travis-ci.org/Palashio/libra)
 [![Downloads](https://pepy.tech/badge/libra)](https://pepy.tech/project/libra)
@@ -14,7 +13,6 @@
 Libra automates the end-to-end machine learning process in just one line of code. It is built for both non-technical users and software professionals of all kinds.
 *** 
 
-</div>
 
 Full documentation can be found at [libradocs.github.io](https://libradocs.github.io/)
 ## Installation
