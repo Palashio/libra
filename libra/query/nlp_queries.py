@@ -783,11 +783,6 @@ def get_ner(self,target=None):
     # Named entity recognition pipeline, default model selection
     hugging_face_ner_detector = pipeline('ner',grouped_entities=True, framework = 'tf')
 
-    #Name entity recognition with light weight models
-    #tokenizer = AutoTokenizer.from_pretrained("sshleifer/tiny-dbmdz-bert-large-cased-finetuned-conll03-english")
-    #model = TFAutoModel.from_pretrained("sshleifer/tiny-dbmdz-bert-large-cased-finetuned-conll03-english")
-    #hugging_face_ner_detector = pipeline('ner', model= model, tokenizer=tokenizer, framework ='tf', grouped_entities=True)
-
     data['ner'] = data['combined_text_for_ner'].apply(lambda x: hugging_face_ner_detector(x))
     logger("NER detection status complete :)")
     logger("Storing information in client object under key 'ner'")
