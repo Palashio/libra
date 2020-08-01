@@ -235,10 +235,11 @@ def get_summary(self, text, max_summary_length=50, num_beams=4, no_repeat_ngram_
     tokenizer = modelInfo['tokenizer']
     text = [text]
     text = add_prefix(text, "summarize: ")
-    result = model.generate(tf.convert_to_tensor(tokenize_for_input_ids(text, tokenizer, max_length=modelInfo['max_text_length'])),
-                       max_length=max_summary_length, num_beams=num_beams,
-                       no_repeat_ngram_size=no_repeat_ngram_size, num_return_sequences=num_return_sequences,
-                       early_stopping=early_stopping)
+    result = model.generate(
+        tf.convert_to_tensor(tokenize_for_input_ids(text, tokenizer, max_length=modelInfo['max_text_length'])),
+        max_length=max_summary_length, num_beams=num_beams,
+        no_repeat_ngram_size=no_repeat_ngram_size, num_return_sequences=num_return_sequences,
+        early_stopping=early_stopping)
     return [tokenizer.decode(summary) for summary in result]
 
 
@@ -328,8 +329,8 @@ def summarization_query(self, instruction, preprocess=True, label_column=None,
     # Clean up text
     if preprocess:
         logger("Preprocessing data")
-        X = add_prefix(lemmatize_text(text_clean_up(X.array)),"summarize: ")
-        Y = add_prefix(lemmatize_text(text_clean_up(Y.array)),"summarize: ")
+        X = add_prefix(lemmatize_text(text_clean_up(X.array)), "summarize: ")
+        Y = add_prefix(lemmatize_text(text_clean_up(Y.array)), "summarize: ")
 
     # tokenize text/summaries
     X = tokenize_for_input_ids(X, tokenizer, max_text_length)
@@ -753,8 +754,9 @@ def image_caption_query(self, instruction, label_column=None,
     clearLog()
     return self.models["image_caption"]
 
+
 # name entity recognition query
-def get_ner(self,target=None):
+def get_ner(self, target=None):
     """
     function to identify name entities using huggingface framework
     :param target: list with target column names (if None all columns are used) for detection
@@ -762,13 +764,13 @@ def get_ner(self,target=None):
     """
     data = DataReader(self.dataset)
     data = data.data_generator()
-    if target == None or len(target) == 0:
+    if target is None or len(target) == 0:
         target = list(data.columns.values)
         logger("data ready for processing")
     elif not type(target) is list:
-        raise Exception("kindly pass target as a list")
+        raise Exception("Pass target as a list")
     elif any(item in target for item in list(data.columns.values)):
-        logger("target data ready for processing")
+        logger("Target data ready for processing")
     else:
         raise Exception("kindly pass right column value in target or ignore the target attribute for auto selection")
 
@@ -781,7 +783,7 @@ def get_ner(self,target=None):
     logger("Detecting Name Entities from : {} data files".format(data.shape[0]))
 
     # Named entity recognition pipeline, default model selection
-    hugging_face_ner_detector = pipeline('ner',grouped_entities=True, framework = 'tf')
+    hugging_face_ner_detector = pipeline('ner', grouped_entities=True, framework='tf')
 
     data['ner'] = data['combined_text_for_ner'].apply(lambda x: hugging_face_ner_detector(x))
     logger("NER detection status complete :)")

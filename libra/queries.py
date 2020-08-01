@@ -78,7 +78,7 @@ def logger(instruction, found=""):
 
 def get_folder_dir(self):
     dir_path= filedialog.askdirectory()
-    return dir_path 
+    return dir_path
 
 def get_file():
     filename = filedialog.askopenfilename()
@@ -140,7 +140,7 @@ class client:
             return model.recommend(search_term)
         else:
             pass
-        
+
     # param modelKey: string representation of the model to make prediction
     # param data: dataframe version of desired prediction set
     def predict(self, data, model=None):
@@ -596,10 +596,10 @@ class client:
             data=self.dataset,
             feature_names=feature_names,
             indexer=indexer)
-        
+
         self.latest_model = 'content_recommender'
         clearLog()
-       
+
     # query to create a xgboost model
 
     def xgboost_query(self,
@@ -607,8 +607,8 @@ class client:
                   text=[],
                   preprocess=True,
                   test_size=0.2,
-                  drop=None,  
-                  random_state=49,     
+                  drop=None,
+                  random_state=49,
                   learning_rate=0.1,
                   n_estimators=1000,
                   max_depth=6,
@@ -618,7 +618,7 @@ class client:
                   colsample_bytree=0.8,
                   verbosity=0,
                   objective= 'binary:logistic'):
-        
+
         '''
         Calls the body of the xgboost code in the classification_models.py file. Used to create a xgboost algorithm.
         :param instruction: The objective that you want to model (str).
@@ -635,20 +635,20 @@ class client:
         :param gamma: Minimum loss reduction required to make a further partition on a leaf node of the tree(int).
         :param subsample: Subsample ratio of the training instance(float).
         :param colsample_bytree: Subsample ratio of columns when constructing each tree(float).
-        :param objective: Specify the learning task and the corresponding learning objective or a custom 
+        :param objective: Specify the learning task and the corresponding learning objective or a custom
         objective function to be used (string or callable).
         :param scale_pos_weight: Balancing of positive and negative weights(float).
         :param verbose: Verbosity of printing messages. Valid values are 0 (silent), 1 (warning), 2 (info), 3 (debug).
 
         :return: a model and information to along with it stored in the self.models dictionary.
         '''
-        
+
         self.models['xgboost'] = train_xgboost(instruction,
                                        dataset=self.dataset,
                                        text=[],
                                        random_state=random_state,
                                        preprocess=preprocess,
-                                       drop=drop,                 
+                                       drop=drop,
                                        learning_rate=learning_rate,
                                        n_estimators=n_estimators,
                                        max_depth=max_depth,
@@ -660,7 +660,7 @@ class client:
                                        objective=objective)
 
         self.latest_model = 'xgboost'
-        clearLog() 
+        clearLog()
 
     # tunes a specific neural network based on the input model_to_tune
 
@@ -1049,14 +1049,15 @@ class client:
         clearLog()
 
     # name entity recognition query
-    def get_ner(self, target=None):
+    def get_named_entities(self, target=None):
         """
-        function to identify name entities using huggingface framework
+        function to identify name entities
         :param target: list with target column names (if None all columns are used) for detection
         :return: dictionary object with detected name-entities
         """
-        ner_dict = get_ner(self, target=target)
-        return ner_dict
+        self.models["Named Entities"] = get_ner(self, target=target)
+        self.latest_model = "named_entity_recognition"
+        clearLog()
 
     # shows the names of plots associated with a specific model
     def plot_names(self, model=None):
