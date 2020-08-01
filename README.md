@@ -1,4 +1,4 @@
-## Ergonomic Machine Learning
+# Libra: Ergonomic Machine Learning
 
 
 ![Test Image 1](/tools/data/gh_images/new-logo.png)
