@@ -2,12 +2,13 @@ import os
 
 import numpy as np
 import tensorflow as tf
+from nltk.corpus import stopwords
 from colorama import Fore, Style
 from keras_preprocessing import sequence
 from sklearn.model_selection import train_test_split
 from tensorflow.python.keras.callbacks import EarlyStopping
-from transformers import TFT5ForConditionalGeneration, T5Tokenizer
-
+from transformers import TFT5ForConditionalGeneration, T5Tokenizer, \
+    pipeline, AutoTokenizer, TFAutoModel
 import libra.plotting.nonkeras_generate_plots
 from libra.data_generation.dataset_labelmatcher import get_similar_column
 from libra.data_generation.grammartree import get_value_instruction
@@ -751,3 +752,49 @@ def image_caption_query(self, instruction, label_column=None,
     }
     clearLog()
     return self.models["image_caption"]
+
+# name entity recognition query
+def get_ner(self,target=None):
+    """
+    function to identify name entities using huggingface framework
+    :param target: list with target column names (if None all columns are used) for detection
+    :return: dictionary object with detected name-entities
+    """
+    data = DataReader(self.dataset)
+    data = data.data_generator()
+    if target == None or len(target) == 0:
+        target = list(data.columns.values)
+        logger("data ready for processing")
+    elif not type(target) is list:
+        raise Exception("kindly pass target as a list")
+    elif any(item in target for item in list(data.columns.values)):
+        logger("target data ready for processing")
+    else:
+        raise Exception("kindly pass right column value in target or ignore the target attribute for auto selection")
+
+    # Isolate target column data into one column (seperated by '.') which will be used for detection.
+    data['combined_text_for_ner'] = data[target].apply(lambda row: '.'.join(row.values.astype(str)), axis=1)
+    # Remove stopwords if any from the detection column
+    data['combined_text_for_ner'] = data['combined_text_for_ner'].apply(
+        lambda x: ' '.join([word for word in x.split() if word not in stopwords.words()]))
+    logger("name entities detection in progress........")
+    logger("Detecting Name Entities from : {} data files".format(data.shape[0]))
+
+    # Named entity recognition pipeline, default model selection
+    hugging_face_ner_detector = pipeline('ner',grouped_entities=True, framework = 'tf')
+
+    #Name entity recognition with light weight models
+    #tokenizer = AutoTokenizer.from_pretrained("sshleifer/tiny-dbmdz-bert-large-cased-finetuned-conll03-english")
+    #model = TFAutoModel.from_pretrained("sshleifer/tiny-dbmdz-bert-large-cased-finetuned-conll03-english")
+    #hugging_face_ner_detector = pipeline('ner', model= model, tokenizer=tokenizer, framework ='tf', grouped_entities=True)
+
+    data['ner'] = data['combined_text_for_ner'].apply(lambda x: hugging_face_ner_detector(x))
+    logger("NER detection status complete :)")
+    logger("Storing information in client object under key 'ner'")
+    self.models["ner"] = {
+        "model": hugging_face_ner_detector.model,
+        "tokenizer": hugging_face_ner_detector.tokenizer,
+        'name_entities': data['ner'].to_dict()}
+    logger("returning back a dictionary")
+    clearLog()
+    return data['ner'].to_dict()

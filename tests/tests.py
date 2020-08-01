@@ -107,6 +107,13 @@ class TestQueries(unittest.TestCase):
         x.content_recommender_query()
         assert('recommendations' in x.recommend('Coco'))
 
+    # Tests whether name entity recognition query works without errors, and creates a key in models dictionary
+    @ordered
+    def test_get_ner(self):
+        self.newClient.get_ner()
+        self.assertTrue('ner' in self.newClient.models)
+        del self.newClient.models['ner']
+
 
 
     """

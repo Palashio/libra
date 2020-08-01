@@ -1,11 +1,10 @@
 from libra.query.nlp_queries import (image_caption_query,
                                      generate_caption, classify_text,
                                      text_classification_query, get_summary,
-                                     summarization_query)
+                                     summarization_query,get_ner)
 from libra.query.classification_models import (k_means_clustering,
                                                train_svm, nearest_neighbors,
                                                decision_tree, train_xgboost)
-
 from libra.query.supplementaries import tune_helper, get_model_data, get_operators, get_accuracy, get_losses, \
     get_target, get_plots, get_vocab
 
@@ -17,7 +16,6 @@ from libra.data_generation.dataset_labelmatcher import (get_similar_column,
                                                         get_similar_model)
 from libra.plotting.generate_plots import analyze
 from libra.query.recommender_systems import ContentBasedRecommender
-
 from libra.dashboard.auto_eda import edaDashboard
 from colorama import Fore, Style
 import pandas as pd
@@ -1050,6 +1048,15 @@ class client:
         self.latest_model = 'image_caption'
         clearLog()
 
+    # name entity recognition query
+    def get_ner(self, target=None):
+        """
+        function to identify name entities using huggingface framework
+        :param target: list with target column names (if None all columns are used) for detection
+        :return: dictionary object with detected name-entities
+        """
+        ner_dict = get_ner(self, target=target)
+        return ner_dict
 
     # shows the names of plots associated with a specific model
     def plot_names(self, model=None):
