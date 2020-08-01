@@ -990,7 +990,8 @@ class client:
         :return: a tuned model
         """
 
-        text_generation_query(save_path=save_path,
+        text_generation_query(self=self,
+                              save_path=save_path,
                               batch_size=batch_size,
                               learning_rate=learning_rate,
                               save_every=save_every,
@@ -1017,7 +1018,8 @@ class client:
         :param save_path:  Filepath of where to save the generated text (str).
         :return: generated text
         """
-        self.models['text generation'] = generate_text(instruction=instruction,
+        self.models['text generation'] = generate_text(self=self,
+                                                       instruction=instruction,
                                                        prefix=prefix,
                                                        tuning=tuning,
                                                        max_length=max_length,

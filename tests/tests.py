@@ -81,7 +81,7 @@ class TestQueries(unittest.TestCase):
     def test_text_generation(self):
         x = client("tools/data/nlp_data/shakespeare.txt")
         x.text_generation_query(instruction='tune model on romeo & juliet scene')
-        x.generate_text(instruction="new verse for romeo", tuning=True,prefix="Romeo")
+        x.generate_text(instruction="new verse for romeo", tuning=True, prefix="Romeo")
 
 
     # Tests whether xgboost_query works without errors, and creates a key in models dictionary
