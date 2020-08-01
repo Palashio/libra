@@ -1049,13 +1049,13 @@ class client:
         clearLog()
 
     # name entity recognition query
-    def get_named_entities(self, target=None):
+    def get_named_entities(self, instruction):
         """
         function to identify name entities
-        :param target: list with target column names (if None all columns are used) for detection
+        :param instruction: Used to get target column
         :return: dictionary object with detected name-entities
         """
-        self.models["named_entity_recognition"] = get_ner(self, target=target)
+        self.models["named_entity_recognition"] = get_ner(self, instruction=instruction)
         self.latest_model = "named_entity_recognition"
         clearLog()
 

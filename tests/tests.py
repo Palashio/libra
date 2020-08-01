@@ -105,8 +105,8 @@ class TestQueries(unittest.TestCase):
     # Tests whether name entity recognition query works without errors, and creates a key in models dictionary
     @ordered
     def test_get_ner(self):
-        x = client("tools/data/nlp_data/miniDocumentSummarization.csv")
-        x.get_named_entities()
+        x = client("/Users/anasawadalla/PycharmProjects/ner/tools/data/nlp_data/miniDocumentSummarization.csv")
+        x.get_named_entities("get ner from summary")
         self.assertTrue('named_entity_recognition' in x.models)
         del x.models['named_entity_recognition']
 
