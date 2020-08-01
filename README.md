@@ -3,7 +3,7 @@
 
 ![Test Image 1](/tools/data/gh_images/new-logo.png)
 
-## Fully Automated Machine Learning in One-Liners
+## Ergonomic Machine Learning
 
 [![Build Status](https://travis-ci.org/Palashio/libra.svg?branch=master)](https://travis-ci.org/Palashio/libra)
 [![Downloads](https://pepy.tech/badge/libra)](https://pepy.tech/project/libra)
