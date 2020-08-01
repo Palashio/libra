@@ -756,30 +756,24 @@ def image_caption_query(self, instruction, label_column=None,
 
 
 # name entity recognition query
-def get_ner(self, target=None):
+def get_ner(self, instruction):
     """
-    function to identify name entities using huggingface framework
-    :param target: list with target column names (if None all columns are used) for detection
+    function to identify name entities
+    :param instruction: Used to get target column
     :return: dictionary object with detected name-entities
     """
     data = DataReader(self.dataset)
     data = data.data_generator()
-    if target is None or len(target) == 0:
-        target = list(data.columns.values)
-        logger("data ready for processing")
-    elif not type(target) is list:
-        raise Exception("Pass target as a list")
-    elif any(item in target for item in list(data.columns.values)):
-        logger("Target data ready for processing")
-    else:
-        raise Exception("kindly pass right column value in target or ignore the target attribute for auto selection")
+    
+    target = get_similar_column(get_value_instruction(instruction), data)
+    logger("->", "Target Column Found: {}".format(target))
 
     # Isolate target column data into one column (seperated by '.') which will be used for detection.
     data['combined_text_for_ner'] = data[target].apply(lambda row: '.'.join(row.values.astype(str)), axis=1)
     # Remove stopwords if any from the detection column
     data['combined_text_for_ner'] = data['combined_text_for_ner'].apply(
         lambda x: ' '.join([word for word in x.split() if word not in stopwords.words()]))
-    logger("name entities detection in progress........")
+
     logger("Detecting Name Entities from : {} data files".format(data.shape[0]))
 
     # Named entity recognition pipeline, default model selection
@@ -787,11 +781,13 @@ def get_ner(self, target=None):
 
     data['ner'] = data['combined_text_for_ner'].apply(lambda x: hugging_face_ner_detector(x))
     logger("NER detection status complete :)")
-    logger("Storing information in client object under key 'ner'")
-    self.models["ner"] = {
+    logger("Storing information in client object under key 'named_entity_recognition'")
+
+    self.models["named_entity_recognition"] = {
         "model": hugging_face_ner_detector.model,
         "tokenizer": hugging_face_ner_detector.tokenizer,
         'name_entities': data['ner'].to_dict()}
-    logger("returning back a dictionary")
+
+    logger("output: " + data['ner'].to_dict())
     clearLog()
-    return data['ner'].to_dict()
+    return self.models["named_entity_recognition"]

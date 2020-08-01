@@ -1055,7 +1055,7 @@ class client:
         :param target: list with target column names (if None all columns are used) for detection
         :return: dictionary object with detected name-entities
         """
-        self.models["Named Entities"] = get_ner(self, target=target)
+        self.models["named_entity_recognition"] = get_ner(self, target=target)
         self.latest_model = "named_entity_recognition"
         clearLog()
 
