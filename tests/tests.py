@@ -20,12 +20,13 @@ unittest.defaultTestLoader.sortTestMethodsUsing = compare
 class TestQueries(unittest.TestCase):
 
     newClient = client('tools/data/structured_data/housing.csv')
-
     """
     TEST QUERIES
     
     Tests some queries in queries.py
     """
+
+
     # Tests whether regression_ann_query works without errors, and creates a key in models dictionary
     @ordered
     def test_regression_ann(self):
@@ -50,6 +51,35 @@ class TestQueries(unittest.TestCase):
         # see if properly chooses classification with a categorical target column
         self.newClient.neural_network_query('predict ocean proximity', epochs=3)
         self.assertTrue('classification_ANN' in self.newClient.models)
+    '''
+    @ordered
+    def test_convolutional_query(self):
+        client_image = client("tools/data/image_data/character_dataset_mini")
+        client_image.convolutional_query("predict character", epochs=2)
+        self.assertTrue('convolutional_NN' in client_image.models)
+    '''
+
+    @ordered
+    def test_convolutional_query_customarch(self):
+        data_path = "tools/data/image_data/character_dataset_mini_preprocessed"
+        client_image_customarch = client(data_path)
+        custom_arch_path = "tools/data/custom_model_config/custom_CNN.json"
+
+        client_image_customarch.convolutional_query("predict character", data_path = data_path, custom_arch=custom_arch_path, preprocess=False, epochs=2)
+        self.assertTrue('convolutional_NN' in client_image_customarch.models)
+
+
+    @ordered
+    def test_convolutional_query_pretrained(self):
+        client_image = client("tools/data/image_data/character_dataset_mini")
+        client_image.convolutional_query(
+            "predict character",
+            pretrained={
+                'arch': 'vggnet19',
+                'weights': 'imagenet'
+                },
+            epochs=2)
+        self.assertTrue('convolutional_NN' in client_image.models)
 
     # Tests whether decision_tree_query works without errors, and creates a key in models dictionary
     @ordered
@@ -109,6 +139,8 @@ class TestQueries(unittest.TestCase):
 
 
 
+
+
     """
     TEST ANALYZE() FUNCTION
     
@@ -163,6 +195,6 @@ class TestQueries(unittest.TestCase):
     def test_invalid_model(self):
         with self.assertRaises(NameError):
             self.newClient.analyze(model='I dont exist')
-
+    
 if __name__ == '__main__':
     unittest.main()

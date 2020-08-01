@@ -494,7 +494,9 @@ def convolutional(instruction=None,
     :param many parameters: used to preprocess, tune, plot generation, and parameterizing the convolutional neural network trained.
     :return dictionary that holds all the information for the finished model.
     '''
-    # data_path = get_folder_dir()
+    
+    #data_path = get_folder_dir()
+
     logger("Generating datasets for classes")
 
     if pretrained:
@@ -503,11 +505,11 @@ def convolutional(instruction=None,
         if not width:
             width = 224
         if height != 224 or width != 224:
-            raise ValueError("For pretrained models, height must be 224 and width must be 224.")
+            raise ValueError("For pretrained models, both 'height' and 'width' must be 224.")
 
     if preprocess:
         if custom_arch:
-            raise ValueError("If custom_arch is not None, preprocess must be set to false.")
+            raise ValueError("If 'custom_arch' is not None, 'preprocess' must be set to false.")
 
         read_mode_info = set_distinguisher(data_path, read_mode)
         read_mode = read_mode_info["read_mode"]
@@ -556,11 +558,15 @@ def convolutional(instruction=None,
     input_single = (processInfo["height"], processInfo["width"])
     num_classes = processInfo["num_categories"]
     loss_func = ""
+    output_layer_activation = ""
 
     if num_classes > 2:
         loss_func = "categorical_crossentropy"
+        output_layer_activation = "softmax"
     elif num_classes == 2:
+        num_classes = 1
         loss_func = "binary_crossentropy"
+        output_layer_activation = "sigmoid"
 
     logger("Creating convolutional neural netwwork dynamically")
 
@@ -588,7 +594,7 @@ def convolutional(instruction=None,
                 x = Dropout(0.5)(x)
                 x = Dense(4096)(x)
                 x = Dropout(0.5)(x)
-                pred = Dense(num_classes, activation='softmax')(x)
+                pred = Dense(num_classes, activation=output_layer_activation)(x)
                 model = Model(base_model.input, pred)
             elif arch_lower == "vggnet19":
                 base_model = VGG19(include_top=False, weights='imagenet', input_shape=input_shape)
@@ -597,26 +603,26 @@ def convolutional(instruction=None,
                 x = Dropout(0.5)(x)
                 x = Dense(4096)(x)
                 x = Dropout(0.5)(x)
-                pred = Dense(num_classes, activation='softmax')(x)
+                pred = Dense(num_classes, activation=output_layer_activation)(x)
                 model = Model(base_model.input, pred)
             elif arch_lower == "resnet50":
                 base_model = ResNet50(include_top=False, weights='imagenet', input_shape=input_shape)
                 x = Flatten()(base_model.output)
                 x = GlobalAveragePooling2D()(base_model.output)
                 x = Dropout(0.5)(x)
-                pred = Dense(num_classes, activation='softmax')(x)
+                pred = Dense(num_classes, activation=output_layer_activation)(x)
                 model = Model(base_model.input, pred)
             elif arch_lower == "resnet101":
                 base_model = ResNet101(include_top=False, weights='imagenet', input_shape=input_shape)
                 x = GlobalAveragePooling2D()(base_model.output)
                 x = Dropout(0.5)(x)
-                pred = Dense(num_classes, activation='softmax')(x)
+                pred = Dense(num_classes, activation=output_layer_activation)(x)
                 model = Model(base_model.input, pred)
             elif arch_lower == "resnet152":
                 base_model = ResNet152(include_top=False, weights='imagenet', input_shape=input_shape)
                 x = GlobalAveragePooling2D()(base_model.output)
                 x = Dropout(0.5)(x)
-                pred = Dense(num_classes, activation='softmax')(x)
+                pred = Dense(num_classes, activation=output_layer_activation)(x)
                 model = Model(base_model.input, pred)
             else:
                 raise ModuleNotFoundError("arch \'" + pretrained.get('arch') + "\' not supported.")
@@ -624,9 +630,9 @@ def convolutional(instruction=None,
         else:
             # Randomly initialized weights
             if arch_lower == "vggnet16":
-                model = VGG16(include_top=True, weights=None, classes=num_classes)
+                model = VGG16(include_top=True, weights=None, classes=num_classes, classifier_activation = output_layer_activation)
             elif arch_lower == "vggnet19":
-                model = VGG19(include_top=True, weights=None, classes=num_classes)
+                model = VGG19(include_top=True, weights=None, classes=num_classes, classifier_activation = output_layer_activation)
             elif arch_lower == "resnet50":
                 model = ResNet50(include_top=True, weights=None, classes=num_classes)
             elif arch_lower == "resnet101":
@@ -679,6 +685,7 @@ def convolutional(instruction=None,
             activation="softmax"
         ))
 
+
     model.compile(
         optimizer="adam",
         loss=loss_func,
@@ -702,15 +709,15 @@ def convolutional(instruction=None,
     X_train = train_data.flow_from_directory(data_path + training_path,
                                              target_size=input_single,
                                              color_mode=color_mode,
-                                             batch_size=(32 if processInfo["train_size"] >= 32 else 1),
+                                             batch_size=(16 if processInfo["train_size"] >= 16 else 1),
                                              class_mode=loss_func[:loss_func.find("_")])
     X_test = test_data.flow_from_directory(data_path + testing_path,
                                            target_size=input_single,
                                            color_mode=color_mode,
-                                           batch_size=(32 if processInfo["test_size"] >= 32 else 1),
+                                           batch_size=(16 if processInfo["test_size"] >= 16 else 1),
                                            class_mode=loss_func[:loss_func.find("_")])
 
-    if epochs < 0:
+    if epochs <= 0:
         raise BaseException("Number of epochs has to be greater than 0.")
     logger('Training image model')
     history = model.fit_generator(

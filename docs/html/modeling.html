@@ -152,6 +152,14 @@ new_client.models['regression_ANN'].plots() #access plots</pre>
                         <td>Magnifies dataset to add small variation to images before training in the model.</td>
                     </tr>
                     <tr>
+                        <td>custom_arch=None</td>
+                        <td>File path to a custom Keras model architecture configuration in JSON format. </td>
+                    </tr>
+                    <tr>
+                        <td>pretrained=None</td>
+                        <td>Load a state-of-the-art model architecture through dictionary with keys 'arch' and 'weights'. Current values supported for 'arch' key are 'vggnet16', 'vggnet19', 'resnet50', 'resnet101', 'resnet152'. Possible values for 'weights' key include 'imagenet' and 'random'. </td>
+                    </tr>
+                    <tr>
                         <td>epochs=10</td>
                         <td>Number of epochs for every model attempted.</td>
                     </tr>
