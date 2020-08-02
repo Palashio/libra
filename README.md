@@ -30,6 +30,20 @@ git clone https://github.com/Palashio/libra.git
 cd libra
 pip install .
 ```
+
+Alternatively you can build and use the docker image locally with:
+
+```
+docker build . -f docker/Dockerfile -t libra
+docker run -v /path/to/my/data:/data -it --rm libra
+```
+
+Or if you have [nvidia-docker](https://github.com/NVIDIA/nvidia-docker) installed.
+
+```
+docker build . -f docker/Dockerfile -t libra
+docker run -v /path/to/my/data:/data --gpus all -it --rm libra
+```
 ## Usage: the basics
 
 The core functionality of libra works through the `client` object. A new client object should be created for every dataset that you want to produce results for. All information about the models that're built, the plots that are generated, and the metrics are created will be stored in the object.
