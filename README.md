@@ -34,15 +34,15 @@ pip install .
 Alternatively you can build and use the docker image locally with:
 
 ```
-docker build . -f docker/Dockerfile -t libra
+docker build . -f docker/libra-normal/Dockerfile -t libra
 docker run -v /path/to/my/data:/data -it --rm libra
 ```
 
 Or if you have [nvidia-docker](https://github.com/NVIDIA/nvidia-docker) installed.
 
 ```
-docker build . -f docker/Dockerfile -t libra
-docker run -v /path/to/my/data:/data --gpus all -it --rm libra
+docker build . -f docker/libra-gpu/Dockerfile -t libra-gpu
+docker run -v /path/to/my/data:/data --gpus all -it --rm libra-gpu
 ```
 ## Usage: the basics
 
