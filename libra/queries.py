@@ -1051,7 +1051,7 @@ class client:
         self.latest_model = 'image_caption'
         clearLog()
 
-    def generate_text(self, instruction, prefix=None,
+    def generate_text(self, instruction, file_data = True, prefix=None,
                       max_length=512,
                       top_k=50,
                       top_p=0.9,
@@ -1073,6 +1073,7 @@ class client:
         """
         self.models['text_generation'] = generate_text(self=self,
                                                        instruction=instruction,
+                                                       file_data=file_data,
                                                        prefix=prefix,
                                                        max_length=max_length,
                                                        top_k=top_k,

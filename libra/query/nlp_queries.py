@@ -757,6 +757,7 @@ def image_caption_query(self, instruction, label_column=None,
 
 
 def generate_text(self,instruction, prefix=None,
+                  file_data=True,
                    max_length=512,
                    do_sample=True,
                    top_k=50,
@@ -796,7 +797,13 @@ def generate_text(self,instruction, prefix=None,
 
     tokenizer = GPT2Tokenizer.from_pretrained("gpt2")
     model = TFGPT2LMHeadModel.from_pretrained("gpt2", pad_token_id=tokenizer.eos_token_id)
-    input_ids = tokenizer.encode(prefix, return_tensors='tf')
+    if file_data:
+        data = DataReader(self.dataset)
+        data = data.data_generator()
+        input_ids = tokenizer.encode(data, return_tensors='tf')
+    else:
+        input_ids = tokenizer.encode(prefix, return_tensors='tf')
+
     logger("Generating Text Now")
     tf.random.set_seed(0)
     output = model.generate(input_ids,

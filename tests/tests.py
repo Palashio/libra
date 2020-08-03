@@ -109,8 +109,9 @@ class TestQueries(unittest.TestCase):
 
     @ordered
     def test_text_generation(self):
-        x = client("tools/data/nlp_data")
-        x.generate_text(instruction="new text", prefix="Hello there")
+        x = client("tools/data/nlp_data/shakespeare.txt")
+        x.generate_text(instruction="new text")
+        x.generate_text(instruction="new text", file_data=False, prefix="Hello there")
 
 
     # Tests whether xgboost_query works without errors, and creates a key in models dictionary
