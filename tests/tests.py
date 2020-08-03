@@ -141,7 +141,7 @@ class TestQueries(unittest.TestCase):
 
     @ordered
     def test_text_generation(self):
-        x = client("test/tools/data/nlp_data/shakespeare.txt")
+        x = client("tools/data/nlp_data/shakespeare.txt")
         x.generate_text(instruction="generate text")
         self.assertTrue('text_generation' in x.models)
 
