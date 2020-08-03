@@ -323,8 +323,8 @@ def summarization_query(self, instruction, preprocess=True, label_column=None,
         label = "summary"
     else:
         label = label_column
-
-    tokenizer = T5Tokenizer.from_pretrained("t5-small")
+    with NoStdStreams():
+        tokenizer = T5Tokenizer.from_pretrained("t5-small")
     # Find target columns
     X, Y, target = get_target_values(data, instruction, label)
     logger("->", "Target Column Found: {}".format(target))
@@ -548,8 +548,8 @@ def image_caption_query(self, instruction, label_column=None,
 
         img_name_vector.append(image_path)
         train_captions.append(caption)
-
-    image_model = tf.keras.applications.InceptionV3(include_top=False,
+    with NoStdStreams():
+        image_model = tf.keras.applications.InceptionV3(include_top=False,
                                                     weights='imagenet')
     new_input = image_model.input
     hidden_layer = image_model.layers[-1].output
