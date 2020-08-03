@@ -788,14 +788,16 @@ def generate_text(self, instruction, prefix=None,
     if not os.path.exists(save_path):
         raise Exception("Save path does not exists")
 
-    tokenizer = GPT2Tokenizer.from_pretrained("gpt2")
-    model = TFGPT2LMHeadModel.from_pretrained("gpt2", pad_token_id=tokenizer.eos_token_id)
+    with NoStdStreams():
+        tokenizer = GPT2Tokenizer.from_pretrained("gpt2")
+        model = TFGPT2LMHeadModel.from_pretrained("gpt2", pad_token_id=tokenizer.eos_token_id)
+
     if file_data:
         f = open(self.dataset, "r")
-        input_ids = tokenizer.encode(f.read(), return_tensors='tf', max_length=max_length-1)
+        input_ids = tokenizer.encode(f.read(), return_tensors='tf', max_length=max_length-1, truncation=True)
         f.close()
     else:
-        input_ids = tokenizer.encode(prefix, return_tensors='tf', max_length=max_length-1)
+        input_ids = tokenizer.encode(prefix, return_tensors='tf', max_length=max_length-1, truncation=True)
 
     logger("Generating text now...")
     tf.random.set_seed(0)
