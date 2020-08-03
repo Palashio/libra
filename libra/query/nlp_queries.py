@@ -766,9 +766,7 @@ def generate_text(self, instruction, prefix=None,
                   do_sample=True,
                   top_k=50,
                   top_p=0.9,
-                  return_sequences=2,
-                  batch_size=32,
-                  save_path=os.getcwd()):
+                  return_sequences=2):
     '''
     Takes in initial text and generates text with specified number of characters more using Top P sampling
     :param prefix: initial text to start with
@@ -779,14 +777,8 @@ def generate_text(self, instruction, prefix=None,
     if return_sequences < 1:
         raise Exception("return sequences number is less than 1 (need an integer of atleast 1)")
 
-    if batch_size < 1:
-        raise Exception("Batch size must be equal to or greater than 1")
-
     if max_length < 1:
         raise Exception("Max text length must be equal to or greater than 1")
-
-    if not os.path.exists(save_path):
-        raise Exception("Save path does not exists")
 
     with NoStdStreams():
         tokenizer = GPT2Tokenizer.from_pretrained("gpt2")
@@ -794,10 +786,10 @@ def generate_text(self, instruction, prefix=None,
 
     if file_data:
         f = open(self.dataset, "r")
-        input_ids = tokenizer.encode(f.read(), return_tensors='tf', max_length=max_length-1, truncation=True)
+        input_ids = tokenizer.encode(f.read(), return_tensors='tf', max_length=max_length - 1, truncation=True)
         f.close()
     else:
-        input_ids = tokenizer.encode(prefix, return_tensors='tf', max_length=max_length-1, truncation=True)
+        input_ids = tokenizer.encode(prefix, return_tensors='tf', max_length=max_length - 1, truncation=True)
 
     logger("Generating text now...")
     tf.random.set_seed(0)

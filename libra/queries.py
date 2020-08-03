@@ -1054,9 +1054,7 @@ class client:
                       max_length=512,
                       top_k=50,
                       top_p=0.9,
-                      return_sequences=2,
-                      batch_size=32,
-                      save_path=os.getcwd()):
+                      return_sequences=2):
         """
         :param instruction: objective you want to accomplish
         :param prefix: a string that you want the generated text to begin with
@@ -1064,8 +1062,6 @@ class client:
         :param top_k: number of most frequent words in the vocab to be used in tokenization (int).
         :param top_p: p value between 0 and 1 (float)
         :param return_sequences: how many different text sequences you want returned
-        :param batch_size: The batch size for the dataset (int).
-        :param save_path:  Filepath of where to save the generated text (str).
         :return: generated text
         """
         self.models['text_generation'] = generate_text(self=self,
@@ -1075,9 +1071,10 @@ class client:
                                                        max_length=max_length,
                                                        top_k=top_k,
                                                        top_p=top_p,
-                                                       batch_size=batch_size,
-                                                       save_path=save_path,
                                                        return_sequences=return_sequences)
+
+        self.latest_model = 'text_generation'
+        clearLog()
 
     # name entity recognition query
     def get_named_entities(self, instruction):
