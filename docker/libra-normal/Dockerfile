@@ -16,5 +16,4 @@ EXPOSE 8000
 # CMD python ./libra/queries.py
 
 
-CMD python -c "print('docker image has been build')" 
-
+CMD python -c "print('docker image has been build')"
