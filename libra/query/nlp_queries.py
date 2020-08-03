@@ -760,15 +760,15 @@ def image_caption_query(self, instruction, label_column=None,
     return self.models["image_caption"]
 
 
-def generate_text(self,instruction, prefix=None,
+def generate_text(self, instruction, prefix=None,
                   file_data=True,
-                   max_length=512,
-                   do_sample=True,
-                   top_k=50,
-                   top_p=0.9,
-                   return_sequences=2,
-                   batch_size=32,
-                   save_path=os.getcwd()):
+                  max_length=512,
+                  do_sample=True,
+                  top_k=50,
+                  top_p=0.9,
+                  return_sequences=2,
+                  batch_size=32,
+                  save_path=os.getcwd()):
     '''
     Takes in initial text and generates text with specified number of characters more using Top P sampling
     :param prefix: initial text to start with
@@ -788,28 +788,16 @@ def generate_text(self,instruction, prefix=None,
     if not os.path.exists(save_path):
         raise Exception("Save path does not exists")
 
-    # if gpu:
-    #     if tf.test.gpu_device_name():
-    #         print('Default GPU Device: {}'.format(tf.test.gpu_device_name()))
-    #     else:
-    #         raise Exception("Please install GPU version of Tensorflow")
-    #
-    #     device = '/device:GPU:0'
-    # else:
-    #     device = '/device:CPU:0'
-
     tokenizer = GPT2Tokenizer.from_pretrained("gpt2")
     model = TFGPT2LMHeadModel.from_pretrained("gpt2", pad_token_id=tokenizer.eos_token_id)
     if file_data:
         f = open(self.dataset, "r")
-
-        # data = DataReader(self.dataset)
-        # data = data.data_generator()
-        input_ids = tokenizer.encode(f.read(), return_tensors='tf')
+        input_ids = tokenizer.encode(f.read(), return_tensors='tf', max_length=max_length-1)
+        f.close()
     else:
-        input_ids = tokenizer.encode(prefix, return_tensors='tf')
+        input_ids = tokenizer.encode(prefix, return_tensors='tf', max_length=max_length-1)
 
-    logger("Generating Text Now")
+    logger("Generating text now...")
     tf.random.set_seed(0)
     output = model.generate(input_ids,
                             do_sample=do_sample,
@@ -842,7 +830,7 @@ def get_ner(self, instruction):
     data['combined_text_for_ner'] = data[target].apply(
         lambda x: ' '.join([word for word in x.split() if word not in stopwords.words()]))
 
-    logger("Detecting Name Entities from : {} data files".format(data.shape[0]+1))
+    logger("Detecting Name Entities from : {} data files".format(data.shape[0] + 1))
 
     # Named entity recognition pipeline, default model selection
     with NoStdStreams():

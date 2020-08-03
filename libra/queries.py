@@ -1064,7 +1064,6 @@ class client:
         :param top_k: number of most frequent words in the vocab to be used in tokenization (int).
         :param top_p: p value between 0 and 1 (float)
         :param return_sequences: how many different text sequences you want returned
-        :param gpu: users gpu
         :param batch_size: The batch size for the dataset (int).
         :param save_path:  Filepath of where to save the generated text (str).
         :return: generated text
@@ -1078,8 +1077,7 @@ class client:
                                                        top_p=top_p,
                                                        batch_size=batch_size,
                                                        save_path=save_path,
-                                                       return_sequences=return_sequences
-                                                       )
+                                                       return_sequences=return_sequences)
 
     # name entity recognition query
     def get_named_entities(self, instruction):
