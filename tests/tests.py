@@ -141,9 +141,8 @@ class TestQueries(unittest.TestCase):
 
     @ordered
     def test_text_generation(self):
-        x = client("/Users/anasawadalla/PycharmProjects/test/tools/data/nlp_data/shakespeare.txt")
+        x = client("test/tools/data/nlp_data/shakespeare.txt")
         x.generate_text(instruction="generate text")
-        print(x.models["text_generation"])
         self.assertTrue('text_generation' in x.models)
 
     # Test whether content based recommender works without error, and creates a key in models dictionary

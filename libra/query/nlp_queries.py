@@ -11,7 +11,6 @@ from tensorflow.python.keras.callbacks import EarlyStopping
 from transformers import TFGPT2LMHeadModel, GPT2Tokenizer
 from transformers import TFT5ForConditionalGeneration, T5Tokenizer, \
     pipeline
-
 import libra.plotting.nonkeras_generate_plots
 from libra.data_generation.dataset_labelmatcher import get_similar_column
 from libra.data_generation.grammartree import get_value_instruction
@@ -803,8 +802,8 @@ def generate_text(self, instruction, prefix=None,
         value = "{}: {}".format(i, tokenizer.decode(sample_output, skip_special_tokens=True))
         total_text += value
 
-    self.models['Generated_Text'] = total_text
-    return self.models['Generated_Text']
+    self.models['text_generation'] = {"generated_text": total_text}
+    return self.models['text_generation']
 
 
 # name entity recognition query
