@@ -34,7 +34,6 @@ setuptools.setup(
                       'opencv-python',
                       'nltk',
                       'xgboost',
-                      'gpt_2_simple',
                       'download'],
     packages=find_packages(exclude=('tests',)),
     classifiers=[
