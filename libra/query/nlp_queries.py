@@ -3,17 +3,15 @@ import warnings
 
 import numpy as np
 import tensorflow as tf
-from nltk.corpus import stopwords
 from colorama import Fore, Style
 from keras_preprocessing import sequence
-from pandas.core.common import SettingWithCopyWarning
+from nltk.corpus import stopwords
 from sklearn.model_selection import train_test_split
 from tensorflow.python.keras.callbacks import EarlyStopping
-from tensorflow.python.keras.saving.saved_model.json_utils import Encoder
-from transformers import T5Tokenizer, TFGPT2LMHeadModel, GPT2Tokenizer, TFT5ForConditionalGeneration
-import tensorflow as tf
+from transformers import TFGPT2LMHeadModel, GPT2Tokenizer
 from transformers import TFT5ForConditionalGeneration, T5Tokenizer, \
-    pipeline, AutoTokenizer, TFAutoModel
+    pipeline
+
 import libra.plotting.nonkeras_generate_plots
 from libra.data_generation.dataset_labelmatcher import get_similar_column
 from libra.data_generation.grammartree import get_value_instruction
@@ -769,7 +767,6 @@ def generate_text(self,instruction, prefix=None,
                    top_k=50,
                    top_p=0.9,
                    return_sequences=2,
-                   gpu=False,
                    batch_size=32,
                    save_path=os.getcwd()):
     '''
@@ -791,22 +788,24 @@ def generate_text(self,instruction, prefix=None,
     if not os.path.exists(save_path):
         raise Exception("Save path does not exists")
 
-    if gpu:
-        if tf.test.gpu_device_name():
-            print('Default GPU Device: {}'.format(tf.test.gpu_device_name()))
-        else:
-            raise Exception("Please install GPU version of Tensorflow")
-
-        device = '/device:GPU:0'
-    else:
-        device = '/device:CPU:0'
+    # if gpu:
+    #     if tf.test.gpu_device_name():
+    #         print('Default GPU Device: {}'.format(tf.test.gpu_device_name()))
+    #     else:
+    #         raise Exception("Please install GPU version of Tensorflow")
+    #
+    #     device = '/device:GPU:0'
+    # else:
+    #     device = '/device:CPU:0'
 
     tokenizer = GPT2Tokenizer.from_pretrained("gpt2")
     model = TFGPT2LMHeadModel.from_pretrained("gpt2", pad_token_id=tokenizer.eos_token_id)
     if file_data:
-        data = DataReader(self.dataset)
-        data = data.data_generator()
-        input_ids = tokenizer.encode(data, return_tensors='tf')
+        f = open(self.dataset, "r")
+
+        # data = DataReader(self.dataset)
+        # data = data.data_generator()
+        input_ids = tokenizer.encode(f.read(), return_tensors='tf')
     else:
         input_ids = tokenizer.encode(prefix, return_tensors='tf')
 

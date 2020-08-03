@@ -1,7 +1,7 @@
 from libra.query.nlp_queries import (image_caption_query,
                                      generate_caption, classify_text,
                                      text_classification_query, get_summary,
-                                     summarization_query, generate_text,get_ner)
+                                     summarization_query, generate_text, get_ner)
 
 from libra.query.classification_models import (k_means_clustering,
                                                train_svm, nearest_neighbors,
@@ -78,15 +78,16 @@ def logger(instruction, found=""):
 
 
 def get_folder_dir(self):
-    dir_path= filedialog.askdirectory()
+    dir_path = filedialog.askdirectory()
     return dir_path
+
 
 def get_file():
     filename = filedialog.askopenfilename()
     if os.path.isfile(filename):
         return filename
-    else: print ('No file chosen')
-
+    else:
+        print('No file chosen')
 
 
 class client:
@@ -135,7 +136,7 @@ class client:
 
     # recommend items based on search criteria(for recommender systems only)
 
-    def recommend(self,search_term):
+    def recommend(self, search_term):
         if self.latest_model == 'content_recommender':
             model = self.models[self.latest_model]
             return model.recommend(search_term)
@@ -571,7 +572,6 @@ class client:
         :return: a model and information to along with it stored in the self.models dictionary.
         '''
 
-
         self.models['decision_tree'] = decision_tree(
             instruction=instruction,
             text=text,
@@ -592,7 +592,7 @@ class client:
         self.latest_model = 'decision_tree'
         clearLog()
 
-    def content_recommender_query(self,feature_names=[],n_recommendations=10,indexer='title'):
+    def content_recommender_query(self, feature_names=[], n_recommendations=10, indexer='title'):
         self.models['content_recommender'] = ContentBasedRecommender(
             data=self.dataset,
             feature_names=feature_names,
@@ -604,21 +604,21 @@ class client:
     # query to create a xgboost model
 
     def xgboost_query(self,
-                  instruction,
-                  text=[],
-                  preprocess=True,
-                  test_size=0.2,
-                  drop=None,
-                  random_state=49,
-                  learning_rate=0.1,
-                  n_estimators=1000,
-                  max_depth=6,
-                  min_child_weight=1,
-                  gamma=0,
-                  subsample=0.8,
-                  colsample_bytree=0.8,
-                  verbosity=0,
-                  objective= 'binary:logistic'):
+                      instruction,
+                      text=[],
+                      preprocess=True,
+                      test_size=0.2,
+                      drop=None,
+                      random_state=49,
+                      learning_rate=0.1,
+                      n_estimators=1000,
+                      max_depth=6,
+                      min_child_weight=1,
+                      gamma=0,
+                      subsample=0.8,
+                      colsample_bytree=0.8,
+                      verbosity=0,
+                      objective='binary:logistic'):
 
         '''
         Calls the body of the xgboost code in the classification_models.py file. Used to create a xgboost algorithm.
@@ -645,20 +645,20 @@ class client:
         '''
 
         self.models['xgboost'] = train_xgboost(instruction,
-                                       dataset=self.dataset,
-                                       text=[],
-                                       random_state=random_state,
-                                       preprocess=preprocess,
-                                       drop=drop,
-                                       learning_rate=learning_rate,
-                                       n_estimators=n_estimators,
-                                       max_depth=max_depth,
-                                       min_child_weight=min_child_weight,
-                                       gamma=gamma,
-                                       subsample=subsample,
-                                       verbosity=verbosity,
-                                       colsample_bytree=colsample_bytree,
-                                       objective=objective)
+                                               dataset=self.dataset,
+                                               text=[],
+                                               random_state=random_state,
+                                               preprocess=preprocess,
+                                               drop=drop,
+                                               learning_rate=learning_rate,
+                                               n_estimators=n_estimators,
+                                               max_depth=max_depth,
+                                               min_child_weight=min_child_weight,
+                                               gamma=gamma,
+                                               subsample=subsample,
+                                               verbosity=verbosity,
+                                               colsample_bytree=colsample_bytree,
+                                               objective=objective)
 
         self.latest_model = 'xgboost'
         clearLog()
@@ -746,7 +746,7 @@ class client:
                             read_mode=None,
                             verbose=0,
                             preprocess=True,
-                            data_path = None,
+                            data_path=None,
                             new_folders=True,
                             image_column=None,
                             test_size=0.2,
@@ -815,7 +815,7 @@ class client:
 
                     # Plot Feature maps for the conv / maxpool layers, not the fully-connected layers
                     n_features = feature_map.shape[-1]  # number of features in the feature map
-                    height = feature_map.shape[1]       # feature map shape (1, size, size, n_features)
+                    height = feature_map.shape[1]  # feature map shape (1, size, size, n_features)
                     width = feature_map.shape[2]
                     display_grid = np.zeros((height, width * n_features))
 
@@ -1050,12 +1050,11 @@ class client:
         self.latest_model = 'image_caption'
         clearLog()
 
-    def generate_text(self, instruction, file_data = True, prefix=None,
+    def generate_text(self, instruction, file_data=True, prefix=None,
                       max_length=512,
                       top_k=50,
                       top_p=0.9,
                       return_sequences=2,
-                      gpu=False,
                       batch_size=32,
                       save_path=os.getcwd()):
         """
@@ -1079,8 +1078,8 @@ class client:
                                                        top_p=top_p,
                                                        batch_size=batch_size,
                                                        save_path=save_path,
-                                                       return_sequences=return_sequences,
-                                                       gpu=gpu)
+                                                       return_sequences=return_sequences
+                                                       )
 
     # name entity recognition query
     def get_named_entities(self, instruction):
