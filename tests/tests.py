@@ -19,8 +19,9 @@ def make_orderer():
 ordered, compare = make_orderer()
 unittest.defaultTestLoader.sortTestMethodsUsing = compare
 
+
 class TestQueries(unittest.TestCase):
-    newClient = client('/Users/anasawadalla/PycharmProjects/libra/tools/data/structured_data/housing2.csv')
+    newClient = client('tools/data/structured_data/housing.csv')
     """
     TEST QUERIES
     
@@ -51,6 +52,7 @@ class TestQueries(unittest.TestCase):
         # see if properly chooses classification with a categorical target column
         self.newClient.neural_network_query('predict ocean proximity', epochs=3)
         self.assertTrue('classification_ANN' in self.newClient.models)
+
     '''
     @ordered
     def test_convolutional_query(self):
@@ -65,9 +67,9 @@ class TestQueries(unittest.TestCase):
         client_image_customarch = client(data_path)
         custom_arch_path = "tools/data/custom_model_config/custom_CNN.json"
 
-        client_image_customarch.convolutional_query("predict character", data_path = data_path, custom_arch=custom_arch_path, preprocess=False, epochs=2)
+        client_image_customarch.convolutional_query("predict character", data_path=data_path,
+                                                    custom_arch=custom_arch_path, preprocess=False, epochs=2)
         self.assertTrue('convolutional_NN' in client_image_customarch.models)
-
 
     @ordered
     def test_convolutional_query_pretrained(self):
@@ -77,7 +79,7 @@ class TestQueries(unittest.TestCase):
             pretrained={
                 'arch': 'vggnet19',
                 'weights': 'imagenet'
-                },
+            },
             epochs=2)
         self.assertTrue('convolutional_NN' in client_image.models)
 
@@ -104,8 +106,6 @@ class TestQueries(unittest.TestCase):
     def test_kmeans(self):
         self.newClient.kmeans_clustering_query(clusters=4)
         self.assertTrue('k_means_clustering' in self.newClient.models)
-
-
 
     # Tests whether xgboost_query works without errors, and creates a key in models dictionary
     @ordered
@@ -151,8 +151,6 @@ class TestQueries(unittest.TestCase):
         x = client('tools/data/recommender_systems_data/disney_plus_shows.csv')
         x.content_recommender_query()
         assert ('recommendations' in x.recommend('Coco'))
-
-
 
     """
     TEST ANALYZE() FUNCTION
@@ -204,16 +202,12 @@ class TestQueries(unittest.TestCase):
             self.assertTrue('precision_score' in modeldict['scores'])
             self.assertTrue('f1_score' in modeldict['scores'])
 
-
-
-
-
-
     # Tests invalid model input
     @ordered
     def test_invalid_model(self):
         with self.assertRaises(NameError):
             self.newClient.analyze(model='I dont exist')
+
 
 if __name__ == '__main__':
     unittest.main()
