@@ -78,7 +78,7 @@ def logger(instruction, found=""):
 
 def get_folder_dir(self):
     dir_path= tkFileDialog.askdirectory()
-    return dir_path 
+    return dir_path
 
 def get_file():
     filename = tkFileDialog.askopenfilename()
@@ -152,7 +152,7 @@ def regression_ann(
         callback_value = [es]
 
     i = 0
-    
+
     #add_layer format: {<object> : list of indexs}
     # get the first 3 layer model
     model = get_keras_model_reg(data, i, add_layer)
@@ -291,7 +291,7 @@ def classification_ann(instruction,
     :param many parameters: used to preprocess, tune, plot generation, and parameterizing the neural network trained.
     :return dictionary that holds all the information for the finished model.
     '''
-    
+
     if dataset is None:
         dataReader = DataReader(get_file())
     else:
@@ -315,7 +315,10 @@ def classification_ann(instruction,
     X_train = data['train']
     X_test = data['test']
 
-    if num_classes > 2:
+    if num_classes < 2:
+        raise Exception("Number of classes must be greater than or equal to 2")
+
+    if num_classes >= 2:
         # ANN needs target one hot encoded for classification
         one_hot_encoder = OneHotEncoder()
         y = pd.DataFrame(
@@ -494,7 +497,7 @@ def convolutional(instruction=None,
     :param many parameters: used to preprocess, tune, plot generation, and parameterizing the convolutional neural network trained.
     :return dictionary that holds all the information for the finished model.
     '''
-    
+
     #data_path = get_folder_dir()
 
     logger("Generating datasets for classes")
