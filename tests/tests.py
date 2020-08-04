@@ -19,7 +19,6 @@ def make_orderer():
 ordered, compare = make_orderer()
 unittest.defaultTestLoader.sortTestMethodsUsing = compare
 
-
 class TestQueries(unittest.TestCase):
     newClient = client('tools/data/structured_data/housing.csv')
     """
@@ -106,6 +105,8 @@ class TestQueries(unittest.TestCase):
         self.newClient.kmeans_clustering_query(clusters=4)
         self.assertTrue('k_means_clustering' in self.newClient.models)
 
+
+
     # Tests whether xgboost_query works without errors, and creates a key in models dictionary
     @ordered
     def test_xgboost(self):
@@ -137,6 +138,12 @@ class TestQueries(unittest.TestCase):
         x.get_named_entities("get ner from text")
         self.assertTrue('named_entity_recognition' in x.models)
         del x.models['named_entity_recognition']
+
+    @ordered
+    def test_text_generation(self):
+        x = client("tools/data/nlp_data/shakespeare.txt")
+        x.generate_text(instruction="generate text")
+        self.assertTrue('text_generation' in x.models)
 
     # Test whether content based recommender works without error, and creates a key in models dictionary
     @ordered
@@ -196,6 +203,11 @@ class TestQueries(unittest.TestCase):
             self.assertTrue('recall_score' in modeldict['scores'])
             self.assertTrue('precision_score' in modeldict['scores'])
             self.assertTrue('f1_score' in modeldict['scores'])
+
+
+
+
+
 
     # Tests invalid model input
     @ordered

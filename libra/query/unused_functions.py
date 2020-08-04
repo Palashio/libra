@@ -664,4 +664,113 @@ def insert_layer_atindex(model, layer_regex, insert_layer_factory,
 
 def insert_layer(model,layer_name,layer_index):
     model = insert_layer_atindex(model, '.*activation.*', tf.keras.layers.Dropout(rate = ))
+    
 """
+
+
+
+# def generate_text(self, instruction, prefix=None, tuning=False,
+#                   max_length=512,
+#                   top_k=50,
+#                   top_p=0.9,
+#                   return_sequences=2,
+#                   gpu=False,
+#                   batch_size=32,
+#                   save_path=os.getcwd()):
+#     '''
+#     Takes in initial text and generates text with specified number of characters more using Top P sampling
+#     :param several parameters to hyperparemeterize with given defaults
+#     :return: complete generated text
+#     '''
+#
+#     if return_sequences < 1:
+#         raise Exception("return sequences number is less than 1 (need an integer of atleast 1)")
+#
+#     if batch_size < 1:
+#         raise Exception("Batch size must be equal to or greater than 1")
+#
+#     if max_length < 1:
+#         raise Exception("Max text length must be equal to or greater than 1")
+#
+#     if not os.path.exists(save_path):
+#         raise Exception("Save path does not exists")
+#
+#     if gpu:
+#         if tf.test.gpu_device_name():
+#             print('Default GPU Device: {}'.format(tf.test.gpu_device_name()))
+#         else:
+#             raise Exception("Please install GPU version of Tensorflow")
+#
+#         device = '/device:GPU:0'
+#     else:
+#         device = '/device:CPU:0'
+#
+#     sess = gpt2.start_tf_sess()
+#
+#     if tuning:
+#         logger("Generating text from tuned model now...")
+#         gpt2.load_gpt2(sess, run_name='run1')
+#         gen_text = gpt2.generate(sess,
+#                                  length=max_length,
+#                                  temperature=0.7,
+#                                  batch_size=batch_size,
+#                                  prefix=prefix,
+#                                  checkpoint_dir=save_path,
+#                                  top_k=top_k,
+#                                  top_p=top_p,
+#                                  run_name='run1')
+#         logger("Text Generation Complete")
+#         logger("Storing information in client object under key 'Generated Text'")
+#         self.models['Generated Text'] = gen_text
+#         return self.models['Generated Text']
+#     else:
+#         model_name = "774M"
+#         gpt2.download_gpt2(model_name=model_name)
+#         gpt2.load_gpt2(sess, model_name=model_name)
+#         logger("Generating text from pretrained model now")
+#         gen_text = gpt2.generate(sess,
+#                                  model_name=model_name,
+#                                  prefix=prefix,
+#                                  length=max_length,
+#                                  temperature=0.7,
+#                                  top_p=top_p,
+#                                  nsamples=return_sequences,
+#                                  batch_size=batch_size,
+#                                  return_as_list=True
+#                                  )
+#         logger("Text Generation Complete")
+#         logger("Storing information in client object under key 'Generated Text'")
+#         self.models['Generated Text'] = gen_text
+#         return self.models['Generated Text']
+#
+#
+# def text_generation_query(self,
+#                           save_path=os.getcwd(),
+#                           batch_size=32,
+#                           learning_rate=1e-4,
+#                           save_every=500,
+#                           steps=1000):
+#     if save_every > steps or steps % save_every != 0:
+#         raise Exception(
+#             "You must have a save every value that is less than the number of steps (default 1000) and be a factor of steps")
+#
+#     data = DataReader(self.dataset)
+#     data = data.data_generator()
+#     gpt2.download_gpt2(model_name="124M")
+#     sess = gpt2.start_tf_sess()
+#     logger("Fine tuning the model now...")
+#     gpt2.finetune(sess,
+#                   dataset=data,
+#                   model_name='124M',
+#                   steps=steps,
+#                   batch_size=batch_size,
+#                   learning_rate=learning_rate,
+#                   restore_from='fresh',
+#                   run_name='run1',
+#                   print_every=10,
+#                   sample_every=200,
+#                   save_every=save_every,
+#                   checkpoint_dir=save_path
+#                   )
+#     logger("Finetuning complete - updated model saved at " + save_path + "run1")
+#

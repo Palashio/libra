@@ -3,14 +3,14 @@ import warnings
 
 import numpy as np
 import tensorflow as tf
-from nltk.corpus import stopwords
 from colorama import Fore, Style
 from keras_preprocessing import sequence
-from pandas.core.common import SettingWithCopyWarning
+from nltk.corpus import stopwords
 from sklearn.model_selection import train_test_split
 from tensorflow.python.keras.callbacks import EarlyStopping
+from transformers import TFGPT2LMHeadModel, GPT2Tokenizer
 from transformers import TFT5ForConditionalGeneration, T5Tokenizer, \
-    pipeline, AutoTokenizer, TFAutoModel
+    pipeline
 import libra.plotting.nonkeras_generate_plots
 from libra.data_generation.dataset_labelmatcher import get_similar_column
 from libra.data_generation.grammartree import get_value_instruction
@@ -323,8 +323,8 @@ def summarization_query(self, instruction, preprocess=True, label_column=None,
         label = "summary"
     else:
         label = label_column
-
-    tokenizer = T5Tokenizer.from_pretrained("t5-small")
+    with NoStdStreams():
+        tokenizer = T5Tokenizer.from_pretrained("t5-small")
     # Find target columns
     X, Y, target = get_target_values(data, instruction, label)
     logger("->", "Target Column Found: {}".format(target))
@@ -548,8 +548,8 @@ def image_caption_query(self, instruction, label_column=None,
 
         img_name_vector.append(image_path)
         train_captions.append(caption)
-
-    image_model = tf.keras.applications.InceptionV3(include_top=False,
+    with NoStdStreams():
+        image_model = tf.keras.applications.InceptionV3(include_top=False,
                                                     weights='imagenet')
     new_input = image_model.input
     hidden_layer = image_model.layers[-1].output
@@ -759,6 +759,53 @@ def image_caption_query(self, instruction, label_column=None,
     return self.models["image_caption"]
 
 
+def generate_text(self, instruction, prefix=None,
+                  file_data=True,
+                  max_length=512,
+                  do_sample=True,
+                  top_k=50,
+                  top_p=0.9,
+                  return_sequences=2):
+    '''
+    Takes in initial text and generates text with specified number of characters more using Top P sampling
+    :param prefix: initial text to start with
+    :param several parameters to hyperparemeterize with given defaults
+    :return: complete generated text
+    '''
+
+    if return_sequences < 1:
+        raise Exception("return sequences number is less than 1 (need an integer of atleast 1)")
+
+    if max_length < 1:
+        raise Exception("Max text length must be equal to or greater than 1")
+
+    with NoStdStreams():
+        tokenizer = GPT2Tokenizer.from_pretrained("gpt2")
+        model = TFGPT2LMHeadModel.from_pretrained("gpt2", pad_token_id=tokenizer.eos_token_id)
+
+    if file_data:
+        f = open(self.dataset, "r")
+        input_ids = tokenizer.encode(f.read(), return_tensors='tf', max_length=max_length - 1, truncation=True)
+        f.close()
+    else:
+        input_ids = tokenizer.encode(prefix, return_tensors='tf', max_length=max_length - 1, truncation=True)
+
+    logger("Generating text now...")
+    tf.random.set_seed(0)
+    output = model.generate(input_ids,
+                            do_sample=do_sample,
+                            max_length=max_length,
+                            top_k=top_k, top_p=top_p,
+                            num_return_sequences=return_sequences)
+    total_text = ""
+    for i, sample_output in enumerate(output):
+        value = "{}: {}".format(i, tokenizer.decode(sample_output, skip_special_tokens=True))
+        total_text += value
+
+    self.models['text_generation'] = {"generated_text": total_text}
+    return self.models['text_generation']
+
+
 # name entity recognition query
 def get_ner(self, instruction):
     """
@@ -776,7 +823,7 @@ def get_ner(self, instruction):
     data['combined_text_for_ner'] = data[target].apply(
         lambda x: ' '.join([word for word in x.split() if word not in stopwords.words()]))
 
-    logger("Detecting Name Entities from : {} data files".format(data.shape[0]+1))
+    logger("Detecting Name Entities from : {} data files".format(data.shape[0] + 1))
 
     # Named entity recognition pipeline, default model selection
     with NoStdStreams():
