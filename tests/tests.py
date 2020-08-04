@@ -20,7 +20,7 @@ ordered, compare = make_orderer()
 unittest.defaultTestLoader.sortTestMethodsUsing = compare
 
 class TestQueries(unittest.TestCase):
-    newClient = client('tools/data/structured_data/housing.csv')
+    newClient = client('/Users/anasawadalla/PycharmProjects/libra/tools/data/structured_data/housing2.csv')
     """
     TEST QUERIES
     
