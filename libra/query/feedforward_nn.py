@@ -24,7 +24,6 @@ from libra.modeling.prediction_model_creation import get_keras_model_reg, get_ke
 from sklearn.preprocessing import StandardScaler
 import numpy as np
 
-
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
 counter = 0
@@ -77,14 +76,16 @@ def logger(instruction, found=""):
 
 
 def get_folder_dir(self):
-    dir_path= tkFileDialog.askdirectory()
-    return dir_path 
+    dir_path = tkFileDialog.askdirectory()
+    return dir_path
+
 
 def get_file():
     filename = tkFileDialog.askopenfilename()
     if os.path.isfile(filename):
         return filename
-    else: print ('No file chosen')
+    else:
+        print('No file chosen')
 
 
 def regression_ann(
@@ -152,8 +153,8 @@ def regression_ann(
         callback_value = [es]
 
     i = 0
-    
-    #add_layer format: {<object> : list of indexs}
+
+    # add_layer format: {<object> : list of indexs}
     # get the first 3 layer model
     model = get_keras_model_reg(data, i, add_layer)
 
@@ -200,8 +201,8 @@ def regression_ann(
         print((" " * 2 * counter) + "| " + ("".join(word.ljust(col_width)
                                                     for word in row)) + " |")
     datax = []
-    #while all(x > y for x, y in zip(losses, losses[1:])):
-    while (len(losses)<=2 or losses[len(losses)-1] < losses[len(losses)-2]):
+    # while all(x > y for x, y in zip(losses, losses[1:])):
+    while (len(losses) <= 2 or losses[len(losses) - 1] < losses[len(losses) - 2]):
         model = get_keras_model_reg(data, i, add_layer)
         history = model.fit(
             X_train,
@@ -291,7 +292,7 @@ def classification_ann(instruction,
     :param many parameters: used to preprocess, tune, plot generation, and parameterizing the neural network trained.
     :return dictionary that holds all the information for the finished model.
     '''
-    
+
     if dataset is None:
         dataReader = DataReader(get_file())
     else:
@@ -312,10 +313,13 @@ def classification_ann(instruction,
 
     num_classes = len(np.unique(y))
 
+    if num_classes < 2:
+        raise Exception("Number of classes must be greater than or equal to 2")
+
     X_train = data['train']
     X_test = data['test']
 
-    if num_classes > 2:
+    if num_classes >= 2:
         # ANN needs target one hot encoded for classification
         one_hot_encoder = OneHotEncoder()
         y = pd.DataFrame(
@@ -397,8 +401,8 @@ def classification_ann(instruction,
         print((" " * 2 * counter) + "| " + ("".join(word.ljust(col_width)
                                                     for word in row)) + " |")
     datax = []
-    #while all(x < y for x, y in zip(accuracies, accuracies[1:])):
-    while (len(accuracies)<=2 or accuracies[len(accuracies)-1] > accuracies[len(accuracies)-2]):
+    # while all(x < y for x, y in zip(accuracies, accuracies[1:])):
+    while (len(accuracies) <= 2 or accuracies[len(accuracies) - 1] > accuracies[len(accuracies) - 2]):
         model = get_keras_model_class(data, i, num_classes, add_layer)
         history = model.fit(
             X_train,
@@ -494,8 +498,8 @@ def convolutional(instruction=None,
     :param many parameters: used to preprocess, tune, plot generation, and parameterizing the convolutional neural network trained.
     :return dictionary that holds all the information for the finished model.
     '''
-    
-    #data_path = get_folder_dir()
+
+    # data_path = get_folder_dir()
 
     logger("Generating datasets for classes")
 
@@ -630,9 +634,11 @@ def convolutional(instruction=None,
         else:
             # Randomly initialized weights
             if arch_lower == "vggnet16":
-                model = VGG16(include_top=True, weights=None, classes=num_classes, classifier_activation = output_layer_activation)
+                model = VGG16(include_top=True, weights=None, classes=num_classes,
+                              classifier_activation=output_layer_activation)
             elif arch_lower == "vggnet19":
-                model = VGG19(include_top=True, weights=None, classes=num_classes, classifier_activation = output_layer_activation)
+                model = VGG19(include_top=True, weights=None, classes=num_classes,
+                              classifier_activation=output_layer_activation)
             elif arch_lower == "resnet50":
                 model = ResNet50(include_top=True, weights=None, classes=num_classes)
             elif arch_lower == "resnet101":
@@ -684,7 +690,6 @@ def convolutional(instruction=None,
             units=num_classes,
             activation="softmax"
         ))
-
 
     model.compile(
         optimizer="adam",
@@ -753,4 +758,3 @@ def convolutional(instruction=None,
             'validation_accuracy': history.history['val_accuracy']},
         'num_classes': (2 if num_classes == 1 else num_classes),
         'data_sizes': {'train_size': processInfo['train_size'], 'test_size': processInfo['test_size']}}
-
