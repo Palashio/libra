@@ -3,7 +3,7 @@
 
 <div align="center">
           
-# Libra: Ergonomic Machine Learning
+# Ergonomic Machine Learning
 
 [![Build Status](https://travis-ci.org/Palashio/libra.svg?branch=master)](https://travis-ci.org/Palashio/libra)
 [![Downloads](https://pepy.tech/badge/libra)](https://pepy.tech/project/libra)
