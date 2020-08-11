@@ -83,3 +83,7 @@ newClient.model().keys()
 
 dict_keys(['regression_ANN', svm'])
 ```
+
+## Demos
+
+![alt-text](/tools/data/gh_images/gif.gif)
