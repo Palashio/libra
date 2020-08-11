@@ -1,7 +1,7 @@
-# Libra: Ergonomic Machine Learning
-
 
 ![Test Image 1](/tools/data/gh_images/new-logo.png)
+# Libra: Ergonomic Machine Learning
+
 
 
 [![Build Status](https://travis-ci.org/Palashio/libra.svg?branch=master)](https://travis-ci.org/Palashio/libra)
@@ -14,7 +14,7 @@ Libra automates the end-to-end machine learning process in just one line of code
 *** 
 
 
-Full documentation can be found at [libradocs.github.io](https://libradocs.github.io/)
+Full documentation can be found at [libradocs.github.io](https://libradocs.github.io/). You can also find a list of resources on our [awesome-libra](https://github.com/Palashio/libra) repository. 
 ## Installation
 
 Install latest release version:
