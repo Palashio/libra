@@ -1077,7 +1077,7 @@ class client:
         clearLog()
 
     # name entity recognition query
-    def get_named_entities(self, instruction):
+    def named_entity_query(self, instruction):
         """
         function to identify name entities
         :param instruction: Used to get target column
