@@ -19,7 +19,7 @@ Libra automates the end-to-end machine learning process in just one line of code
 ## Resources
 
  - Full documentation can be found at [libradocs.github.io](https://libradocs.github.io/). 
- - A list of resources can be found on our [awesome-libra](https://github.com/Palashio/libra) repository. 
+ - A list of resources can be found on our [awesome-libra](https://github.com/Palashio/awesome-libra) repository. 
 
 
 
