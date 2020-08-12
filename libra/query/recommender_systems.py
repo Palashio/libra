@@ -49,7 +49,7 @@ def logger(instruction, found=""):
 # Cleaning/ preprocessing function for content based recommender engine
 # basically converts feature values to list and fills in any NaN values
 def preprocess(df,feature_names):
-    for f in feature_names:
+    for f in np.array(feature_names):
         df = df.copy()
         df[f] = df[f].apply(lambda l: [] if pd.isna(l) else [i.strip() for i in l.split(",")])
         df = df.fillna('')
@@ -93,7 +93,7 @@ class ContentBasedRecommender:
         if feature_names == []:
             # Getting defaults if no feature names were passed
             options = ['id','_id','rating','_rating','score','_score']
-            self.feature_names = list(self.df.select_dtypes('object').columns)
+            self.feature_names = np.array(self.df.select_dtypes('object').columns)
             for i in options:
                 if i in self.feature_names:
                     del self.feature_names[self.feature_names.index(i)]
