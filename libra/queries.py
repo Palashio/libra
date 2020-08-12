@@ -623,12 +623,10 @@ class client:
 
         """
 
-        self.models['content_recommender'] = ContentBasedRecommender(
-            dataset=self.dataset,
+        self.models['content_recommender'] = ContentBasedRecommender(dataset=self.dataset,
             feature_names=feature_names,
             indexer=indexer,
             text_feature=text_feature)      
-            indexer=indexer)
         self.latest_model = 'content_recommender'
         clearLog()
 
