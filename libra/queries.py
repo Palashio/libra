@@ -1,11 +1,11 @@
 from libra.query.nlp_queries import (image_caption_query,
                                      generate_caption, classify_text,
                                      text_classification_query, get_summary,
-                                     summarization_query)
+                                     summarization_query, generate_text, get_ner)
+
 from libra.query.classification_models import (k_means_clustering,
                                                train_svm, nearest_neighbors,
                                                decision_tree, train_xgboost)
-
 from libra.query.supplementaries import tune_helper, get_model_data, get_operators, get_accuracy, get_losses, \
     get_target, get_plots, get_vocab
 
@@ -17,7 +17,6 @@ from libra.data_generation.dataset_labelmatcher import (get_similar_column,
                                                         get_similar_model)
 from libra.plotting.generate_plots import analyze
 from libra.query.recommender_systems import ContentBasedRecommender
-
 from libra.dashboard.auto_eda import edaDashboard
 from colorama import Fore, Style
 import pandas as pd
@@ -27,6 +26,11 @@ import os
 import nltk
 import ssl
 import numpy as np
+from tkinter import filedialog
+from tkinter import *
+from tensorflow.keras.preprocessing.image import img_to_array
+import tensorflow as tf
+from matplotlib import pyplot as plt
 
 # suppressing warnings for cleaner dialogue box
 warnings.simplefilter(action='error', category=FutureWarning)
@@ -71,6 +75,19 @@ def logger(instruction, found=""):
             print("\n" + "\n")
 
     counter += 1
+
+
+def get_folder_dir(self):
+    dir_path = filedialog.askdirectory()
+    return dir_path
+
+
+def get_file():
+    filename = filedialog.askopenfilename()
+    if os.path.isfile(filename):
+        return filename
+    else:
+        print('No file chosen')
 
 
 class client:
@@ -119,13 +136,13 @@ class client:
 
     # recommend items based on search criteria(for recommender systems only)
 
-    def recommend(self,search_term):
+    def recommend(self, search_term):
         if self.latest_model == 'content_recommender':
             model = self.models[self.latest_model]
             return model.recommend(search_term)
         else:
             pass
-        
+
     # param modelKey: string representation of the model to make prediction
     # param data: dataframe version of desired prediction set
     def predict(self, data, model=None):
@@ -180,7 +197,8 @@ class client:
                              callback_mode='min',
                              maximizer="val_loss",
                              save_model=False,
-                             save_path=os.getcwd()):
+                             save_path=os.getcwd(),
+                             add_layer={}):
         '''
         Detects to see if it's a regression/classification problem and then calls the correct query.
         :param hyperparameters: all of these are hyperparameters that're passed to the algorithm
@@ -213,7 +231,8 @@ class client:
                     callback_mode=callback_mode,
                     maximizer=maximizer,
                     save_model=save_model,
-                    save_path=save_path)
+                    save_path=save_path,
+                    add_layer=add_layer)
             else:
                 self.regression_query_ann(
                     instruction,
@@ -229,7 +248,8 @@ class client:
                     maximizer=maximizer,
                     drop=drop,
                     save_model=save_model,
-                    save_path=save_path)
+                    save_path=save_path,
+                    add_layer=add_layer)
         clearLog()
 
     # single regression query using a feed-forward neural network
@@ -249,7 +269,8 @@ class client:
             callback_mode='min',
             maximizer="val_loss",
             save_model=True,
-            save_path=os.getcwd()):
+            save_path=os.getcwd(),
+            add_layer={}):
         '''
         Calls the body of the regression_query__ code in the supplementaries.py file. Used for a regression feed forward neural network.
         :param instruction: The objective that you want to model (str).
@@ -286,7 +307,8 @@ class client:
             callback_mode=callback_mode,
             maximizer=maximizer,
             save_model=save_model,
-            save_path=save_path)
+            save_path=save_path,
+            add_layer=add_layer)
 
         self.latest_model = 'regression_ANN'
         clearLog()
@@ -309,7 +331,8 @@ class client:
             generate_plots=True,
             maximizer="val_loss",
             save_model=False,
-            save_path=os.getcwd()):
+            save_path=os.getcwd(),
+            add_layer={}):
         '''
         Calls the body of the classification code in the supplementaries.py file. Used for a classification feed forward neural network.
         :param instruction: The objective that you want to model (str).
@@ -346,7 +369,8 @@ class client:
             callback_mode=callback_mode,
             maximizer=maximizer,
             save_model=save_model,
-            save_path=save_path)
+            save_path=save_path,
+            add_layer=add_layer)
 
         self.latest_model = 'classification_ANN'
         clearLog()
@@ -548,7 +572,6 @@ class client:
         :return: a model and information to along with it stored in the self.models dictionary.
         '''
 
-
         self.models['decision_tree'] = decision_tree(
             instruction=instruction,
             text=text,
@@ -568,7 +591,7 @@ class client:
 
         self.latest_model = 'decision_tree'
         clearLog()
-
+        
     def content_recommender_query(self,feature_names=[],n_recommendations=10,indexer='title',text_feature=''):
         """ Main function for the Content Based Recommender """
         """
@@ -604,30 +627,30 @@ class client:
             dataset=self.dataset,
             feature_names=feature_names,
             indexer=indexer,
-            text_feature=text_feature)
-        
+            text_feature=text_feature)      
+            indexer=indexer)
         self.latest_model = 'content_recommender'
         clearLog()
-       
+
     # query to create a xgboost model
 
     def xgboost_query(self,
-                  instruction,
-                  text=[],
-                  preprocess=True,
-                  test_size=0.2,
-                  drop=None,  
-                  random_state=49,     
-                  learning_rate=0.1,
-                  n_estimators=1000,
-                  max_depth=6,
-                  min_child_weight=1,
-                  gamma=0,
-                  subsample=0.8,
-                  colsample_bytree=0.8,
-                  verbosity=0,
-                  objective= 'binary:logistic'):
-        
+                      instruction,
+                      text=[],
+                      preprocess=True,
+                      test_size=0.2,
+                      drop=None,
+                      random_state=49,
+                      learning_rate=0.1,
+                      n_estimators=1000,
+                      max_depth=6,
+                      min_child_weight=1,
+                      gamma=0,
+                      subsample=0.8,
+                      colsample_bytree=0.8,
+                      verbosity=0,
+                      objective='binary:logistic'):
+
         '''
         Calls the body of the xgboost code in the classification_models.py file. Used to create a xgboost algorithm.
         :param instruction: The objective that you want to model (str).
@@ -644,32 +667,32 @@ class client:
         :param gamma: Minimum loss reduction required to make a further partition on a leaf node of the tree(int).
         :param subsample: Subsample ratio of the training instance(float).
         :param colsample_bytree: Subsample ratio of columns when constructing each tree(float).
-        :param objective: Specify the learning task and the corresponding learning objective or a custom 
+        :param objective: Specify the learning task and the corresponding learning objective or a custom
         objective function to be used (string or callable).
         :param scale_pos_weight: Balancing of positive and negative weights(float).
         :param verbose: Verbosity of printing messages. Valid values are 0 (silent), 1 (warning), 2 (info), 3 (debug).
 
         :return: a model and information to along with it stored in the self.models dictionary.
         '''
-        
+
         self.models['xgboost'] = train_xgboost(instruction,
-                                       dataset=self.dataset,
-                                       text=[],
-                                       random_state=random_state,
-                                       preprocess=preprocess,
-                                       drop=drop,                 
-                                       learning_rate=learning_rate,
-                                       n_estimators=n_estimators,
-                                       max_depth=max_depth,
-                                       min_child_weight=min_child_weight,
-                                       gamma=gamma,
-                                       subsample=subsample,
-                                       verbosity=verbosity,
-                                       colsample_bytree=colsample_bytree,
-                                       objective=objective)
+                                               dataset=self.dataset,
+                                               text=[],
+                                               random_state=random_state,
+                                               preprocess=preprocess,
+                                               drop=drop,
+                                               learning_rate=learning_rate,
+                                               n_estimators=n_estimators,
+                                               max_depth=max_depth,
+                                               min_child_weight=min_child_weight,
+                                               gamma=gamma,
+                                               subsample=subsample,
+                                               verbosity=verbosity,
+                                               colsample_bytree=colsample_bytree,
+                                               objective=objective)
 
         self.latest_model = 'xgboost'
-        clearLog() 
+        clearLog()
 
     # tunes a specific neural network based on the input model_to_tune
 
@@ -754,6 +777,7 @@ class client:
                             read_mode=None,
                             verbose=0,
                             preprocess=True,
+                            data_path=None,
                             new_folders=True,
                             image_column=None,
                             test_size=0.2,
@@ -762,7 +786,8 @@ class client:
                             pretrained=None,
                             epochs=10,
                             height=None,
-                            width=None):
+                            width=None,
+                            show_feature_map=False):
         '''
         Calls the body of the convolutional neural network query which is located in the feedforward.py file
         :param instruction: The objective that you want to model (str).
@@ -777,6 +802,7 @@ class client:
         :param epochs: Number of epochs (int).
         :param height: Height of the input image (int).
         :param width: Width of the input image (int).
+        :param show_feature_map: Displays feature map graphic (bool).
 
 
         :return: an updated model and history stored in the models dictionary
@@ -798,6 +824,55 @@ class client:
             epochs=epochs,
             height=height,
             width=width)
+
+        if show_feature_map:
+            model = self.models["convolutional_NN"]["model"]
+            X_test = self.models["convolutional_NN"]["data"]["test"]
+
+            # Get first image in test images and format it
+            img = X_test[0][0]
+            img /= 255
+            successive_outputs = [layer.output for layer in model.layers[1:]]
+            visualization_model = tf.keras.models.Model(inputs=model.input, outputs=successive_outputs)
+            successive_feature_maps = visualization_model.predict(img)
+
+            # Add main title to figure
+            firstPlot = True
+
+            # Include names of layers in plot
+            layer_names = [layer.name for layer in model.layers]
+            for layer_name, feature_map in zip(layer_names, successive_feature_maps):
+                if len(feature_map.shape) == 4:
+
+                    # Plot Feature maps for the conv / maxpool layers, not the fully-connected layers
+                    n_features = feature_map.shape[-1]  # number of features in the feature map
+                    height = feature_map.shape[1]  # feature map shape (1, size, size, n_features)
+                    width = feature_map.shape[2]
+                    display_grid = np.zeros((height, width * n_features))
+
+                    # Format features appropriately
+                    for i in range(n_features):
+                        img = feature_map[0, :, :, i]
+                        img -= img.mean()
+                        img /= img.std()
+                        img *= 64
+                        img += 128
+                        img = np.clip(img, 0, 255).astype('uint8')
+
+                        # Tile each filter into a horizontal grid
+                        display_grid[:, i * width: (i + 1) * width] = img
+
+                    # Display the grid
+                    scale = 20. / n_features
+                    plt.figure(figsize=(scale * n_features, scale))
+                    if firstPlot:
+                        plt.title(f'Network Visualization\n\n{layer_name}')
+                        firstPlot = False
+                    else:
+                        plt.title(layer_name)
+                    plt.grid(False)
+                    plt.imshow(display_grid, aspect='auto', cmap='viridis')
+                    plt.show()
 
         self.latest_model = 'convolutional_NN'
         clearLog()
@@ -1006,6 +1081,42 @@ class client:
         self.latest_model = 'image_caption'
         clearLog()
 
+    def generate_text(self, instruction, file_data=True, prefix=None,
+                      max_length=512,
+                      top_k=50,
+                      top_p=0.9,
+                      return_sequences=2):
+        """
+        :param instruction: objective you want to accomplish
+        :param prefix: a string that you want the generated text to begin with
+        :param max_length: the length of desired text you want (int)
+        :param top_k: number of most frequent words in the vocab to be used in tokenization (int).
+        :param top_p: p value between 0 and 1 (float)
+        :param return_sequences: how many different text sequences you want returned
+        :return: generated text
+        """
+        self.models['text_generation'] = generate_text(self=self,
+                                                       instruction=instruction,
+                                                       file_data=file_data,
+                                                       prefix=prefix,
+                                                       max_length=max_length,
+                                                       top_k=top_k,
+                                                       top_p=top_p,
+                                                       return_sequences=return_sequences)
+
+        self.latest_model = 'text_generation'
+        clearLog()
+
+    # name entity recognition query
+    def named_entity_query(self, instruction):
+        """
+        function to identify name entities
+        :param instruction: Used to get target column
+        :return: dictionary object with detected name-entities
+        """
+        self.models["named_entity_recognition"] = get_ner(self, instruction=instruction)
+        self.latest_model = "named_entity_recognition"
+        clearLog()
 
     # shows the names of plots associated with a specific model
     def plot_names(self, model=None):
@@ -1125,6 +1236,4 @@ class client:
 
     def dashboard(self):
         dash = edaDashboard(self.dataset)
-        dash.dashboard()    
-
-
+        dash.dashboard()

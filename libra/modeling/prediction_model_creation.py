@@ -9,21 +9,25 @@ import os
 
 # Creates a regression neural network
 
-
-def get_keras_model_reg(dataset, i):
+def get_keras_model_reg(dataset, i, add_layer):
     size_max_network = 10
+    key=[k for k,v in add_layer.items() if x in v]
+
     # base model
     model = tf.keras.Sequential()
     model.add(
-        Dense(
-            dataset['train'].shape[1],
-            input_dim=dataset['train'].shape[1],
-            kernel_initializer='normal',
-            activation='relu'))
+            Dense(
+                dataset['train'].shape[1],
+                input_dim=dataset['train'].shape[1],
+                kernel_initializer='normal',
+                activation='relu'))
     model.add(Dense(64, activation="relu"))
 
     # Adds values depending on what the i value is
     for x in range(i):
+        while len(key)>0:
+            model.add(key[0])
+            del key[0]
         if (i < 5):
             model.add(
                 Dense(
@@ -45,20 +49,25 @@ def get_keras_model_reg(dataset, i):
 # Creates a classification neural network
 
 
-def get_keras_model_class(dataset, i, num_classes):
+def get_keras_model_class(dataset, i, num_classes, add_layer):
     size_max_network = 10
+    key = [k for k,v in add_layer.items() if x in v]
     # base model
     model = tf.keras.Sequential()
     model.add(
-        Dense(
-            dataset['train'].shape[1],
-            input_dim=dataset['train'].shape[1],
-            kernel_initializer='normal',
-            activation='relu'))
+            Dense(
+                dataset['train'].shape[1],
+                input_dim=dataset['train'].shape[1],
+                kernel_initializer='normal',
+                activation='relu'))
     model.add(Dense(64, activation="relu"))
 
     # Adds values depending on what the i value is
     for x in range(i):
+        while len(key)>0:
+            model.add(key[0])
+            del key[0]
+
         if (i < 5):
             model.add(
                 Dense(
@@ -72,18 +81,18 @@ def get_keras_model_class(dataset, i, num_classes):
                     kernel_initializer="normal",
                     activation="relu"))
 
-    if num_classes == 2:
-        model.add(Dense(1, activation="sigmoid"))
-        model.compile(
-            loss='binary_crossentropy',
-            optimizer='adam',
-            metrics=['accuracy'])
-    elif num_classes > 2:
-        model.add(Dense(num_classes, activation="softmax"))
-        model.compile(
-            loss='categorical_crossentropy',
-            optimizer='adam',
-            metrics=['accuracy'])
+    # if num_classes == 2:
+    #     model.add(Dense(1, activation="sigmoid"))
+    #     model.compile(
+    #         loss='binary_crossentropy',
+    #         optimizer='adam',
+    #         metrics=['accuracy'])
+    # elif num_classes > 2:
+    model.add(Dense(num_classes, activation="softmax"))
+    model.compile(
+        loss='categorical_crossentropy',
+        optimizer='adam',
+        metrics=['accuracy'])
 
     return model
 

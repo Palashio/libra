@@ -245,7 +245,7 @@ def tune_helper(
     return models
 
 
-def save(model, save_model, save_path=os.getcwd()):
+def save(model, save_model, save_path):
     '''
     function used to save a model with its .h5 file and .json instance
     :param modeL; the models dictionary used

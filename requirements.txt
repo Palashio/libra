@@ -1,5 +1,5 @@
 colorama
-transformers
+transformers==3.0.2
 tensorflow==2.2.0
 keras==2.4.3
 numpy
@@ -20,6 +20,7 @@ opencv-python
 nltk
 download
 altair==4.1.0
-streamlit==0.63.1
-xgboost
 networkx
+streamlit==0.64.0
+xgboost
+

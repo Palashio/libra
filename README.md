@@ -1,9 +1,9 @@
-<div align="center">
-  
 
 ![Test Image 1](/tools/data/gh_images/new-logo.png)
 
-## Fully Automated Machine Learning in One-Liners
+<div align="center">
+          
+# Ergonomic Machine Learning
 
 [![Build Status](https://travis-ci.org/Palashio/libra.svg?branch=master)](https://travis-ci.org/Palashio/libra)
 [![Downloads](https://pepy.tech/badge/libra)](https://pepy.tech/project/libra)
@@ -12,11 +12,17 @@
 [![Release](https://img.shields.io/badge/Next%20Release-Aug%2012-green)](https://pypi.org/project/libra/)
 
 Libra automates the end-to-end machine learning process in just one line of code. It is built for both non-technical users and software professionals of all kinds.
-*** 
 
 </div>
 
-Full documentation can be found at [libradocs.github.io](https://libradocs.github.io/)
+
+## Resources
+
+ - Full documentation can be found at [libradocs.github.io](https://libradocs.github.io/). 
+ - A list of resources can be found on our [awesome-libra](https://github.com/Palashio/libra) repository. 
+
+
+
 ## Installation
 
 Install latest release version:
@@ -31,6 +37,20 @@ Install directory from github:
 git clone https://github.com/Palashio/libra.git
 cd libra
 pip install .
+```
+
+Alternatively you can build and use the docker image locally with:
+
+```
+docker build . -f docker/libra-normal/Dockerfile -t libra
+docker run -v /path/to/my/data:/data -it --rm libra
+```
+
+Or if you have [nvidia-docker](https://github.com/NVIDIA/nvidia-docker) installed.
+
+```
+docker build . -f docker/libra-gpu/Dockerfile -t libra-gpu
+docker run -v /path/to/my/data:/data --gpus all -it --rm libra-gpu
 ```
 ## Usage: the basics
 
@@ -63,3 +83,7 @@ newClient.model().keys()
 
 dict_keys(['regression_ANN', svm'])
 ```
+
+## Demos
+
+![alt-text](/tools/data/gh_images/gif.gif)

@@ -2,8 +2,7 @@ from textblob import TextBlob
 
 
 def get_value_instruction(sent):
-
-    # Textblob part of speech identification algorithm
+    # Text blob part of speech identification algorithm
     blob = TextBlob(sent)
     blob.parse()
 
@@ -30,11 +29,12 @@ def get_value_instruction(sent):
 
                     # while the word after the adjective is any of these parts
                     # of speech they're added to the instruction final
-                    while("VBN" in tags[q] or "VBG" in tags[q] or "NN" in tags[q] or "NNS" in tags[q] or "RB" in tags[q] or ("NNS" in tags[q] and "IN" in tags[q + 1])):
+                    while ("VBN" in tags[q] or "VBG" in tags[q] or "NN" in tags[q] or "NNS" in tags[q] or "RB" in tags[
+                        q] or ("NNS" in tags[q] and "IN" in tags[q + 1])):
                         decoded += sent.split()[q] + "_"
                         # if an interjection is present then you want to skip
                         # over it
-                        if("IN" in tags[q + 1]):
+                        if ("IN" in tags[q + 1]):
                             decoded += sent.split()[q + 1] + "_"
                             q += 2
                             continue

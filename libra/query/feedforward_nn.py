@@ -75,6 +75,19 @@ def logger(instruction, found=""):
     counter += 1
 
 
+def get_folder_dir(self):
+    dir_path = tkFileDialog.askdirectory()
+    return dir_path
+
+
+def get_file():
+    filename = tkFileDialog.askopenfilename()
+    if os.path.isfile(filename):
+        return filename
+    else:
+        print('No file chosen')
+
+
 def regression_ann(
         instruction,
         callback=False,
@@ -90,7 +103,8 @@ def regression_ann(
         callback_mode='min',
         maximizer="val_loss",
         save_model=False,
-        save_path=os.getcwd()):
+        save_path=os.getcwd(),
+        add_layer={}):
     '''
     Body of the regression function used that is called in the neural network query
     if the data is numerical.
@@ -98,9 +112,11 @@ def regression_ann(
     :return dictionary that holds all the information for the finished model.
     '''
 
+    if dataset is None:
+        dataReader = DataReader(get_file())
+    else:
+        dataReader = DataReader(dataset)
     logger("Reading in dataset")
-
-    dataReader = DataReader(dataset)
     data = dataReader.data_generator()
     # data = pd.read_csv(self.dataset)
 
@@ -138,8 +154,9 @@ def regression_ann(
 
     i = 0
 
+    # add_layer format: {<object> : list of indexs}
     # get the first 3 layer model
-    model = get_keras_model_reg(data, i)
+    model = get_keras_model_reg(data, i, add_layer)
 
     logger("Training initial model")
     history = model.fit(
@@ -186,7 +203,7 @@ def regression_ann(
     datax = []
     # while all(x > y for x, y in zip(losses, losses[1:])):
     while (len(losses) <= 2 or losses[len(losses) - 1] < losses[len(losses) - 2]):
-        model = get_keras_model_reg(data, i)
+        model = get_keras_model_reg(data, i, add_layer)
         history = model.fit(
             X_train,
             y_train,
@@ -234,7 +251,7 @@ def regression_ann(
             plots[str(plot_names[x])] = init_plots[x]
 
     if save_model:
-        save(final_model, save_model)
+        save(final_model, save_model, save_path)
     # stores values in the client object models dictionary field
     print("")
     logger("Stored model under 'regression_ANN' key")
@@ -267,16 +284,20 @@ def classification_ann(instruction,
                        generate_plots=True,
                        maximizer="val_accuracy",
                        save_model=False,
-                       save_path=os.getcwd()):
+                       save_path=os.getcwd(),
+                       add_layer={}):
     '''
     Body of the classification function used that is called in the neural network query
     if the data is categorical.
     :param many parameters: used to preprocess, tune, plot generation, and parameterizing the neural network trained.
     :return dictionary that holds all the information for the finished model.
     '''
-    logger("Reading in dataset")
 
-    dataReader = DataReader(dataset)
+    if dataset is None:
+        dataReader = DataReader(get_file())
+    else:
+        dataReader = DataReader(dataset)
+    logger("Reading in dataset")
     data = dataReader.data_generator()
 
     if drop is not None:
@@ -292,10 +313,13 @@ def classification_ann(instruction,
 
     num_classes = len(np.unique(y))
 
+    if num_classes < 2:
+        raise Exception("Number of classes must be greater than or equal to 2")
+
     X_train = data['train']
     X_test = data['test']
 
-    if num_classes > 2:
+    if num_classes >= 2:
         # ANN needs target one hot encoded for classification
         one_hot_encoder = OneHotEncoder()
         y = pd.DataFrame(
@@ -328,7 +352,7 @@ def classification_ann(instruction,
         callback_value = [es]
 
     i = 0
-    model = get_keras_model_class(data, i, num_classes)
+    model = get_keras_model_class(data, i, num_classes, add_layer)
     logger("Training initial model")
 
     history = model.fit(
@@ -379,7 +403,7 @@ def classification_ann(instruction,
     datax = []
     # while all(x < y for x, y in zip(accuracies, accuracies[1:])):
     while (len(accuracies) <= 2 or accuracies[len(accuracies) - 1] > accuracies[len(accuracies) - 2]):
-        model = get_keras_model_class(data, i, num_classes)
+        model = get_keras_model_class(data, i, num_classes, add_layer)
         history = model.fit(
             X_train,
             y_train,
@@ -431,7 +455,7 @@ def classification_ann(instruction,
             models[len(models) - 1], data, y, model, X_test, y_test)
 
     if save_model:
-        save(final_model, save_model)
+        save(final_model, save_model, save_path)
 
     print("")
     logger("Stored model under 'classification_ANN' key")
@@ -457,8 +481,8 @@ def classification_ann(instruction,
 def convolutional(instruction=None,
                   read_mode=None,
                   preprocess=True,
+                  data_path=None,
                   verbose=0,
-                  data_path=os.getcwd(),
                   new_folders=True,
                   image_column=None,
                   training_ratio=0.8,
@@ -475,6 +499,8 @@ def convolutional(instruction=None,
     :return dictionary that holds all the information for the finished model.
     '''
 
+    # data_path = get_folder_dir()
+
     logger("Generating datasets for classes")
 
     if pretrained:
@@ -483,11 +509,11 @@ def convolutional(instruction=None,
         if not width:
             width = 224
         if height != 224 or width != 224:
-            raise ValueError("For pretrained models, height must be 224 and width must be 224.")
+            raise ValueError("For pretrained models, both 'height' and 'width' must be 224.")
 
     if preprocess:
         if custom_arch:
-            raise ValueError("If custom_arch is not None, preprocess must be set to false.")
+            raise ValueError("If 'custom_arch' is not None, 'preprocess' must be set to false.")
 
         read_mode_info = set_distinguisher(data_path, read_mode)
         read_mode = read_mode_info["read_mode"]
@@ -536,15 +562,20 @@ def convolutional(instruction=None,
     input_single = (processInfo["height"], processInfo["width"])
     num_classes = processInfo["num_categories"]
     loss_func = ""
+    output_layer_activation = ""
 
     if num_classes > 2:
         loss_func = "categorical_crossentropy"
+        output_layer_activation = "softmax"
     elif num_classes == 2:
+        num_classes = 1
         loss_func = "binary_crossentropy"
+        output_layer_activation = "sigmoid"
 
     logger("Creating convolutional neural netwwork dynamically")
 
     # Convolutional Neural Network
+
     # Build model based on custom_arch configuration if given
     if custom_arch:
         with open(custom_arch, "r") as f:
@@ -567,7 +598,7 @@ def convolutional(instruction=None,
                 x = Dropout(0.5)(x)
                 x = Dense(4096)(x)
                 x = Dropout(0.5)(x)
-                pred = Dense(num_classes, activation='softmax')(x)
+                pred = Dense(num_classes, activation=output_layer_activation)(x)
                 model = Model(base_model.input, pred)
             elif arch_lower == "vggnet19":
                 base_model = VGG19(include_top=False, weights='imagenet', input_shape=input_shape)
@@ -576,26 +607,26 @@ def convolutional(instruction=None,
                 x = Dropout(0.5)(x)
                 x = Dense(4096)(x)
                 x = Dropout(0.5)(x)
-                pred = Dense(num_classes, activation='softmax')(x)
+                pred = Dense(num_classes, activation=output_layer_activation)(x)
                 model = Model(base_model.input, pred)
             elif arch_lower == "resnet50":
                 base_model = ResNet50(include_top=False, weights='imagenet', input_shape=input_shape)
                 x = Flatten()(base_model.output)
                 x = GlobalAveragePooling2D()(base_model.output)
                 x = Dropout(0.5)(x)
-                pred = Dense(num_classes, activation='softmax')(x)
+                pred = Dense(num_classes, activation=output_layer_activation)(x)
                 model = Model(base_model.input, pred)
             elif arch_lower == "resnet101":
                 base_model = ResNet101(include_top=False, weights='imagenet', input_shape=input_shape)
                 x = GlobalAveragePooling2D()(base_model.output)
                 x = Dropout(0.5)(x)
-                pred = Dense(num_classes, activation='softmax')(x)
+                pred = Dense(num_classes, activation=output_layer_activation)(x)
                 model = Model(base_model.input, pred)
             elif arch_lower == "resnet152":
                 base_model = ResNet152(include_top=False, weights='imagenet', input_shape=input_shape)
                 x = GlobalAveragePooling2D()(base_model.output)
                 x = Dropout(0.5)(x)
-                pred = Dense(num_classes, activation='softmax')(x)
+                pred = Dense(num_classes, activation=output_layer_activation)(x)
                 model = Model(base_model.input, pred)
             else:
                 raise ModuleNotFoundError("arch \'" + pretrained.get('arch') + "\' not supported.")
@@ -603,9 +634,11 @@ def convolutional(instruction=None,
         else:
             # Randomly initialized weights
             if arch_lower == "vggnet16":
-                model = VGG16(include_top=True, weights=None, classes=num_classes)
+                model = VGG16(include_top=True, weights=None, classes=num_classes,
+                              classifier_activation=output_layer_activation)
             elif arch_lower == "vggnet19":
-                model = VGG19(include_top=True, weights=None, classes=num_classes)
+                model = VGG19(include_top=True, weights=None, classes=num_classes,
+                              classifier_activation=output_layer_activation)
             elif arch_lower == "resnet50":
                 model = ResNet50(include_top=True, weights=None, classes=num_classes)
             elif arch_lower == "resnet101":
@@ -616,17 +649,47 @@ def convolutional(instruction=None,
                 raise ModuleNotFoundError("arch \'" + pretrained.get('arch') + "\' not supported.")
     else:
         model = Sequential()
-        model.add(
-            Conv2D(
-                64,
-                kernel_size=3,
-                activation="relu",
-                input_shape=input_shape))
+        # model.add(
+        #     Conv2D(
+        #         64,
+        #         kernel_size=3,
+        #         activation="relu",
+        #         input_shape=input_shape))
+        # model.add(MaxPooling2D(pool_size=(2, 2)))
+        # model.add(Conv2D(64, kernel_size=3, activation="relu"))
+        # model.add(MaxPooling2D(pool_size=(2, 2)))
+        # model.add(Flatten())
+        # model.add(Dense(num_classes, activation="softmax"))
+        # model.compile(
+        #     optimizer="adam",
+        #     loss=loss_func,
+        #     metrics=['accuracy'])
+        model.add(Conv2D(
+            filters=64,
+            kernel_size=5,
+            activation="relu",
+            input_shape=input_shape))
         model.add(MaxPooling2D(pool_size=(2, 2)))
-        model.add(Conv2D(64, kernel_size=3, activation="relu"))
+        model.add(Conv2D(
+            filters=64,
+            kernel_size=3,
+            activation="relu"))
+        model.add(MaxPooling2D(pool_size=(2, 2)))
+        model.add(Dropout(0.25))
+        model.add(Conv2D(
+            filters=64,
+            kernel_size=3,
+            activation="relu"))
         model.add(MaxPooling2D(pool_size=(2, 2)))
         model.add(Flatten())
-        model.add(Dense(num_classes, activation="softmax"))
+        model.add(Dense(
+            units=256,
+            activation="relu"))
+        model.add(Dropout(0.25))
+        model.add(Dense(
+            units=num_classes,
+            activation="softmax"
+        ))
 
     model.compile(
         optimizer="adam",
@@ -651,15 +714,15 @@ def convolutional(instruction=None,
     X_train = train_data.flow_from_directory(data_path + training_path,
                                              target_size=input_single,
                                              color_mode=color_mode,
-                                             batch_size=(32 if processInfo["train_size"] >= 32 else 1),
+                                             batch_size=(16 if processInfo["train_size"] >= 16 else 1),
                                              class_mode=loss_func[:loss_func.find("_")])
     X_test = test_data.flow_from_directory(data_path + testing_path,
                                            target_size=input_single,
                                            color_mode=color_mode,
-                                           batch_size=(32 if processInfo["test_size"] >= 32 else 1),
+                                           batch_size=(16 if processInfo["test_size"] >= 16 else 1),
                                            class_mode=loss_func[:loss_func.find("_")])
 
-    if epochs < 0:
+    if epochs <= 0:
         raise BaseException("Number of epochs has to be greater than 0.")
     logger('Training image model')
     history = model.fit_generator(
@@ -695,4 +758,3 @@ def convolutional(instruction=None,
             'validation_accuracy': history.history['val_accuracy']},
         'num_classes': (2 if num_classes == 1 else num_classes),
         'data_sizes': {'train_size': processInfo['train_size'], 'test_size': processInfo['test_size']}}
-

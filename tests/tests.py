@@ -2,6 +2,7 @@ from libra import client
 
 import unittest
 
+
 def make_orderer():
     order = {}
 
@@ -14,18 +15,19 @@ def make_orderer():
 
     return ordered, compare
 
+
 ordered, compare = make_orderer()
 unittest.defaultTestLoader.sortTestMethodsUsing = compare
 
+
 class TestQueries(unittest.TestCase):
-
     newClient = client('tools/data/structured_data/housing.csv')
-
     """
     TEST QUERIES
     
     Tests some queries in queries.py
     """
+
     # Tests whether regression_ann_query works without errors, and creates a key in models dictionary
     @ordered
     def test_regression_ann(self):
@@ -51,6 +53,36 @@ class TestQueries(unittest.TestCase):
         self.newClient.neural_network_query('predict ocean proximity', epochs=3)
         self.assertTrue('classification_ANN' in self.newClient.models)
 
+    '''
+    @ordered
+    def test_convolutional_query(self):
+        client_image = client("tools/data/image_data/character_dataset_mini")
+        client_image.convolutional_query("predict character", epochs=2)
+        self.assertTrue('convolutional_NN' in client_image.models)
+    '''
+
+    @ordered
+    def test_convolutional_query_customarch(self):
+        data_path = "tools/data/image_data/character_dataset_mini_preprocessed"
+        client_image_customarch = client(data_path)
+        custom_arch_path = "tools/data/custom_model_config/custom_CNN.json"
+
+        client_image_customarch.convolutional_query("predict character", data_path=data_path,
+                                                    custom_arch=custom_arch_path, preprocess=False, epochs=2)
+        self.assertTrue('convolutional_NN' in client_image_customarch.models)
+
+    @ordered
+    def test_convolutional_query_pretrained(self):
+        client_image = client("tools/data/image_data/character_dataset_mini")
+        client_image.convolutional_query(
+            "predict character",
+            pretrained={
+                'arch': 'vggnet19',
+                'weights': 'imagenet'
+            },
+            epochs=2)
+        self.assertTrue('convolutional_NN' in client_image.models)
+
     # Tests whether decision_tree_query works without errors, and creates a key in models dictionary
     @ordered
     def test_decision_tree(self):
@@ -74,7 +106,6 @@ class TestQueries(unittest.TestCase):
     def test_kmeans(self):
         self.newClient.kmeans_clustering_query(clusters=4)
         self.assertTrue('k_means_clustering' in self.newClient.models)
-
 
     # Tests whether xgboost_query works without errors, and creates a key in models dictionary
     @ordered
@@ -100,6 +131,20 @@ class TestQueries(unittest.TestCase):
         x = client("tools/data/nlp_data/smallSentimentAnalysis.csv")
         x.text_classification_query("get captions", epochs=1)
 
+    # Tests whether name entity recognition query works without errors, and creates a key in models dictionary
+    @ordered
+    def test_get_ner(self):
+        x = client("tools/data/nlp_data/miniDocumentSummarization.csv")
+        x.named_entity_query("get ner from text")
+        self.assertTrue('named_entity_recognition' in x.models)
+        del x.models['named_entity_recognition']
+
+    @ordered
+    def test_text_generation(self):
+        x = client("tools/data/nlp_data/shakespeare.txt")
+        x.generate_text(instruction="generate text")
+        self.assertTrue('text_generation' in x.models)
+
     # Test whether content based recommender works without error, and creates a key in models dictionary
     @ordered
     def test_content_recommender(self):
@@ -108,12 +153,12 @@ class TestQueries(unittest.TestCase):
         assert('recommendations' in x.recommend('Coco'))
 
 
-
     """
     TEST ANALYZE() FUNCTION
     
     Tests all branches of .analyze() function in generate_plots
     """
+
     # Tests analyze() function for k_means_clustering
     @ordered
     def test_analyze_kmeans(self):
@@ -145,7 +190,7 @@ class TestQueries(unittest.TestCase):
     # Tests analyze() function for classifier models
     @ordered
     def test_analyze_sklearn_classifiers(self):
-        for mod in ['svm', 'nearest_neighbor', 'decision_tree','xgboost']:
+        for mod in ['svm', 'nearest_neighbor', 'decision_tree', 'xgboost']:
             self.newClient.analyze(model=mod)
             modeldict = self.newClient.models[mod]
 
@@ -163,6 +208,7 @@ class TestQueries(unittest.TestCase):
     def test_invalid_model(self):
         with self.assertRaises(NameError):
             self.newClient.analyze(model='I dont exist')
+
 
 if __name__ == '__main__':
     unittest.main()

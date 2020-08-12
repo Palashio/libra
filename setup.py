@@ -6,10 +6,10 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="libra",  # Replace with your own username
-    version="1.0.3",
+    version="1.1.1",
     author="Palash Shah",
     author_email="ps9cmk@virginia.edu",
-    description="Fully automated machine learning in one-liners.",
+    description="Ergonomic machine learning",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/Palashio/libra",
@@ -33,7 +33,8 @@ setuptools.setup(
                       'prince',
                       'opencv-python',
                       'nltk',
-                      'xgboost'],
+                      'xgboost',
+                      'download'],
     packages=find_packages(exclude=('tests',)),
     classifiers=[
         "Programming Language :: Python :: 3",
