@@ -569,11 +569,42 @@ class client:
         self.latest_model = 'decision_tree'
         clearLog()
 
-    def content_recommender_query(self,feature_names=[],n_recommendations=10,indexer='title'):
+    def content_recommender_query(self,feature_names=[],n_recommendations=10,indexer='title',text_feature=''):
+        """ Main function for the Content Based Recommender """
+        """
+        Concretely, this returns the top n recommendations for the specified value based on given features.
+        Parameters:
+
+        dataset: dataset name
+        feature_names: a list of features to be used to generate recommendations
+        search_name: the name of the item you are looking to get recommendations from
+        n_recommendations: number of recommendations(default=10)
+        indexer: the name of the feature you want to get recommendations from
+        text_feature: the feature that describes the item your are trying to recommend(description,plot,overview,etc)
+
+        Example:
+
+        For a movie dataset with features incliding genre,actors,writers:
+
+        c.content_recommender_query(feature_names=['genre','actors','writer','director','country'],text_feature='plot')
+        recommendations = c.recommend('Toy Story')
+
+        Returns:
+        a dictionary with the following keys:
+
+        recommendations: the generated recommendations
+        n_recommendations: the number of recommendations made
+        indexer: the indexer used
+        text_feature: the text feature used
+        feature_names: the feature names used
+
+        """
+
         self.models['content_recommender'] = ContentBasedRecommender(
-            data=self.dataset,
+            dataset=self.dataset,
             feature_names=feature_names,
-            indexer=indexer)
+            indexer=indexer,
+            text_feature=text_feature)
         
         self.latest_model = 'content_recommender'
         clearLog()

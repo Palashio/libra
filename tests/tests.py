@@ -104,7 +104,7 @@ class TestQueries(unittest.TestCase):
     @ordered
     def test_content_recommender(self):
         x = client('tools/data/recommender_systems_data/disney_plus_shows.csv')
-        x.content_recommender_query()
+        x.content_recommender_query(feature_names=['genre','actors','writer','director','country'])
         assert('recommendations' in x.recommend('Coco'))
 
 
