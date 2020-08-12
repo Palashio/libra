@@ -87,3 +87,7 @@ dict_keys(['regression_ANN', svm'])
 ## Demos
 
 ![alt-text](/tools/data/gh_images/gif.gif)
+
+## Contact
+
+Shoot me an email at [ps9cmk@virginia.edu](mailto:ps9cmk@virginia.edu) if you'd like to get in touch!
