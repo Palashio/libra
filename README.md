@@ -93,13 +93,13 @@ dict_keys(['regression_ANN', svm'])
 
 ---
  
-Machine Learning in JUST ONE LINE OF CODE | Libra | Dr. Ahmad Bazzi
+### Machine Learning in JUST ONE LINE OF CODE | Libra | Dr. Ahmad Bazzi
 [![IMAGE ALT TEXT HERE](https://img.youtube.com/vi/N_T_ljj5vc4/0.jpg)](https://www.youtube.com/watch?v=N_T_ljj5vc4)
----
 
-Libra - Your Data Talks Meetup  
+
+### Libra - Your Data Talks Meetup  
 [![IMAGE ALT TEXT HERE](https://img.youtube.com/vi/2149kjp97KI/0.jpg)](https://www.youtube.com/watch?v=2149kjp97KI&t=407s)
----
+
 
 ## Asking for help
 Welcome to the Libra community!
