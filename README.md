@@ -4,7 +4,7 @@
        
 # Libra
 
-**An ergonomic machine learning library for non-technical users. Save your time. Blaze through ML.**
+**An ergonomic machine learning library for non-technical users. Save time. Blaze through ML.**
 
 [![Build Status](https://travis-ci.org/Palashio/libra.svg?branch=master)](https://travis-ci.org/Palashio/libra)
 [![Downloads](https://pepy.tech/badge/libra)](https://pepy.tech/project/libra)
