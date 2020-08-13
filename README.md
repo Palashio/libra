@@ -33,13 +33,13 @@
 
 Install latest release version:
 
-```
+```python
 pip install -U libra
-```()
+```
 
 Install directory from github:
 
-```
+```python
 git clone https://github.com/Palashio/libra.git
 cd libra
 pip install .
@@ -47,7 +47,7 @@ pip install .
 
 Alternatively you can build and use the docker image locally with:
 
-```
+```python
 docker build . -f docker/libra-normal/Dockerfile -t libra
 docker run -v /path/to/my/data:/data -it --rm libra
 ```
