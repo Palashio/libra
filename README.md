@@ -1,5 +1,5 @@
 
-![Test Image 1](/tools/data/gh_images/new-logo.png)
+![Test Image 1](/tools/data/gh_images/logo.png)
 
 <div align="center">
           
