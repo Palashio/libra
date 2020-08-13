@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="/tools/data/gh_images/logo.png" alt="drawing" width="150"/>
+<img src="/tools/data/gh_images/logo.png" alt="drawing" width="100"/>
        
 # Libra
 
