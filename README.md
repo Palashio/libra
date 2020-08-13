@@ -18,6 +18,8 @@
 
 </div>
 
+---
+
 ## Trending Contributors
 
 
