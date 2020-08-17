@@ -2,7 +2,6 @@ import json
 import keras
 import numpy as np
 from colorama import Fore, Style
-import pprint
 import pandas as pd
 import tensorflow as tf
 from tabulate import tabulate

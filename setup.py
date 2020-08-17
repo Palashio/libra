@@ -20,7 +20,6 @@ setuptools.setup(
                       'numpy',
                       'pandas',
                       'sklearn',
-                      'pprint',
                       'matplotlib',
                       'tabulate',
                       'textblob',

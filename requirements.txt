@@ -5,7 +5,6 @@ keras==2.4.3
 numpy
 pandas
 sklearn
-pprint
 matplotlib
 tabulate
 textblob
