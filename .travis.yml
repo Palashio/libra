@@ -4,8 +4,9 @@ python:
 
 # command to install dependencies
 install:
-  - pip install -r requirements.txt
+  - pip install flake8 -r requirements.txt
   - pip install libra
 
 script:
+  - flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
   - python -m unittest discover ./tests "tests.py"
