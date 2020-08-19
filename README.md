@@ -112,3 +112,4 @@ If you have any questions, feel free to:
 ## Contact
 
 Shoot me an email at [ps9cmk@virginia.edu](mailto:ps9cmk@virginia.edu) if you'd like to get in touch!
+Follow me on [twitter](https://twitter.com/palashgshah) for updates and my insights about modern AI!
