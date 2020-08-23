@@ -759,12 +759,13 @@ def image_caption_query(self, instruction, label_column=None,
     return self.models["image_caption"]
 
 
-def generate_text(self, instruction, prefix=None,
+def generate_text(self, prefix=None,
                   file_data=True,
                   max_length=512,
                   do_sample=True,
                   top_k=50,
                   top_p=0.9,
+                  temperature=0.3,
                   return_sequences=2):
     '''
     Takes in initial text and generates text with specified number of characters more using Top P sampling
@@ -796,6 +797,7 @@ def generate_text(self, instruction, prefix=None,
                             do_sample=do_sample,
                             max_length=max_length,
                             top_k=top_k, top_p=top_p,
+                            temperature=temperature,
                             num_return_sequences=return_sequences)
     total_text = ""
     for i, sample_output in enumerate(output):
