@@ -1050,27 +1050,29 @@ class client:
         self.latest_model = 'image_caption'
         clearLog()
 
-    def generate_text(self, instruction, file_data=True, prefix=None,
+    def generate_text(self, file_data=True, prefix=None,
                       max_length=512,
                       top_k=50,
                       top_p=0.9,
+                      temperature=0.3,
                       return_sequences=2):
         """
-        :param instruction: objective you want to accomplish
+        :param file_data: using the data passed to the client instance or not (bool).
         :param prefix: a string that you want the generated text to begin with
         :param max_length: the length of desired text you want (int)
         :param top_k: number of most frequent words in the vocab to be used in tokenization (int).
         :param top_p: p value between 0 and 1 (float)
+        :param temperature: temperature to make the next word probability distribution sharper (float).
         :param return_sequences: how many different text sequences you want returned
         :return: generated text
         """
         self.models['text_generation'] = generate_text(self=self,
-                                                       instruction=instruction,
                                                        file_data=file_data,
                                                        prefix=prefix,
                                                        max_length=max_length,
                                                        top_k=top_k,
                                                        top_p=top_p,
+                                                       temperature=temperature,
                                                        return_sequences=return_sequences)
 
         self.latest_model = 'text_generation'
