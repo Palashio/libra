@@ -1,3 +1,4 @@
+from tkinter.filedialog import askdirectory, askopenfilename
 from colorama import Fore, Style
 from tensorflow.keras.callbacks import EarlyStopping
 import os
@@ -76,12 +77,11 @@ def logger(instruction, found=""):
 
 
 def get_folder_dir(self):
-    dir_path = tkFileDialog.askdirectory()
-    return dir_path
+    return askdirectory()
 
 
 def get_file():
-    filename = tkFileDialog.askopenfilename()
+    filename = askopenfilename()
     if os.path.isfile(filename):
         return filename
     else:
