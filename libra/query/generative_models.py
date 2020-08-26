@@ -6,34 +6,34 @@ from libra.preprocessing.image_preprocesser import (setwise_preprocessing,
 from libra.query.supplementaries import generate_id
 from keras import Model
 from keras.models import Sequential
-from keras.layers import (Input, Conv2D, Flatten, Dense, Dropout, LeakyReLU, BatchNormalization, ZeroPadding2D)
+from keras.layers import (Input, Conv2D, Flatten, Dense, Dropout, LeakyReLU, BatchNormalization, ZeroPadding2D, Reshape, UpSampling2D)
 from keras.optimizers import Adam
 
 
 ### Source: https://github.com/mitchelljy/DCGAN-Keras/blob/master/DCGAN.py ###
-def build_discriminator(img_shape, kernel_size=3):
+def build_discriminator(img_shape):
     model = Sequential()
 
-    model.add(Conv2D(32, kernel_size=kernel_size, strides=2, input_shape=img_shape, padding='same'))
+    model.add(Conv2D(32, (3, 3), strides=2, input_shape=img_shape, padding='same'))
     model.add(LeakyReLU(alpha=0.2))
     model.add(Dropout(0.25))
 
-    model.add(Conv2D(64, kernel_size=kernel_size, strides=2, padding='same'))
+    model.add(Conv2D(64, (3, 3), strides=2, padding='same'))
     model.add(ZeroPadding2D(padding=((0, 1), (0, 1))))
     model.add(LeakyReLU(alpha=0.2))
     model.add(Dropout(0.25))
     model.add(BatchNormalization(momentum=0.8))
 
-    model.add(Conv2D(128, kernel_size=kernel_size, strides=2, padding='same'))
+    model.add(Conv2D(128, (3, 3), strides=2, padding='same'))
     model.add(LeakyReLU(alpha=0.2))
     model.add(Dropout(0.25))
     model.add(BatchNormalization(momentum=0.8))
 
-    model.add(Conv2D(256, kernel_size=kernel_size, strides=2, padding='same'))
+    model.add(Conv2D(256, (3, 3), strides=2, padding='same'))
     model.add(LeakyReLU(alpha=0.2))
     model.add(Dropout(0.25))
 
-    model.add(Conv2D(512, kernel_size=kernel_size, strides=2, padding='same'))
+    model.add(Conv2D(512, (3, 3), strides=2, padding='same'))
     model.add(LeakyReLU(alpha=0.2))
     model.add(Dropout(0.25))
 
@@ -42,11 +42,49 @@ def build_discriminator(img_shape, kernel_size=3):
 
     return model
 
-def build_generator():
+### Source: https://github.com/mitchelljy/DCGAN-Keras/blob/master/DCGAN.py ###
+def build_generator(img_shape, starting_filters = 64, upsample_layers = 5, noise_shape=(100,)):
     model = Sequential()
+    model.add(Dense((img_shape[0] // (2 ** upsample_layers)) *
+                    (img_shape[1] // (2 ** upsample_layers)) *
+                    starting_filters,
+                    activation='relu',
+                    input_shape=noise_shape))
+
+    model.add(Reshape((img_shape[0] // (2 ** upsample_layers),
+                       img_shape[1] // (2 ** upsample_layers),
+                       starting_filters)))
+
+    model.add(BatchNormalization(momentum=0.8))
+
+    model.add(UpSampling2D())
+    model.add(Conv2D(1024, (3, 3), padding='same', activation='relu'))
+    model.add(BatchNormalization(momentum=0.8))
+
+    model.add(UpSampling2D())
+    model.add(Conv2D(512, (3, 3), padding='same', activation='relu'))
+    model.add(BatchNormalization(momentum=0.8))
+
+    model.add(UpSampling2D())
+    model.add(Conv2D(256, (3, 3), padding='same', activation='relu'))
+    model.add(BatchNormalization(momentum=0.8))
+
+    model.add(UpSampling2D())
+    model.add(Conv2D(128, (3, 3), padding='same', activation='relu'))
+    model.add(BatchNormalization(momentum=0.8))
+
+    model.add(UpSampling2D())
+    model.add(Conv2D(64, (3, 3), padding='same', activation='relu'))
+    model.add(BatchNormalization(momentum=0.8))
+
+    model.add(Conv2D(64, (3, 3), padding='same', activation='relu'))
+    model.add(BatchNormalization(momentum=0.8))
+
+    model.add(Conv2D(3, (3, 3), padding='same', activation='tanh'))
+
     return model
 
-def train(model, epochs=10):
+def train(model, epochs=10, batch_size=32):
 
 
 def gan(instruction=None,
@@ -56,7 +94,8 @@ def gan(instruction=None,
         epochs=None,
         height=None,
         width=None,
-        num_channels=None):
+        num_channels=None,
+        output_directory):
 
     if preprocess:
         pass
@@ -86,7 +125,7 @@ def gan(instruction=None,
     valid = discriminator(img)
 
     model_combined = Model(inp, valid)
-    train(model_combined, epochs=epochs)
+    train(model_combined, epochs=epochs, output_directory = output_directory)
 
     return {
         'id': generate_id(),
