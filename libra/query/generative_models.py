@@ -1,11 +1,13 @@
 import numpy as np
-from imageio import imwrite
+import os
+import cv2
 
 from libra.preprocessing.image_preprocesser import (setwise_preprocessing,
                                                     csv_preprocessing,
                                                     classwise_preprocessing,
                                                     set_distinguisher,
-                                                    already_processed)
+                                                    already_processed,
+                                                    single_class_preprocessing)
 from libra.query.supplementaries import generate_id
 from keras import Model
 from keras.models import Sequential
@@ -87,6 +89,7 @@ def build_generator(img_shape, starting_filters = 64, upsample_layers = 5, noise
 
     return model
 
+### train the GAN model ###
 def train(combined_model, discriminator, x_train=None, epochs=10, batch_size=32):
 
     #Normalize input from -1 to 1
@@ -94,7 +97,7 @@ def train(combined_model, discriminator, x_train=None, epochs=10, batch_size=32)
 
     for epoch in epochs:
 
-        #Train generator model
+        #Train generator model to generate real-looking images that the discriminator classifies as real
         noise = np.random.normal(0, 1, (batch_size, 100))
         loss_generator = combined_model.train_on_batch(noise, np.ones(batch_size))
 
@@ -112,28 +115,35 @@ def train(combined_model, discriminator, x_train=None, epochs=10, batch_size=32)
 
         print(f"Epoch {epoch}: [Discriminator loss: {loss_discriminator[0]} | Discriminator Accuracy: {100 * loss_discriminator[1]}] [Generator loss: {loss_generator}]")
 
+### Use generator model to generate images (after training) ###
 def generate_images(generator, num_images=10, output_path=None):
     noise = np.random.normal(0, 1, (num_images, 100))
     gen_images = generator.predict(noise)
 
     for i in range(num_images):
-        imwrite(output_path + f"generated_image_{i}.png", gen_images[i])
+        cv2.imwrite(output_path + f"generated_image_{i}.png", gen_images[i])
 
 def gan(instruction=None,
         num_images=None,
-        read_mode=None,
+        preprocess=True,
+        data_path=None,
         verbose=None,
-        preprocess=None,
         epochs=None,
         height=None,
         width=None,
         num_channels=None,
         output_path=None):
 
-    #TODO: figure out preprocessing
-    if preprocess:
-        pass
+    training_path = ""
 
+    if preprocess:
+        processInfo = single_class_preprocessing(data_path=data_path)
+        training_path = "/proc_training_set"
+
+    train_images = []
+    for file in os.listdir(data_path + training_path):
+        if os.isfile(file):
+            train_images.append(cv2.imread(file))
 
     ### Build generator model and discriminator model
     optimizer = Adam(0.0002, 0.5)
@@ -160,7 +170,6 @@ def gan(instruction=None,
 
     model_combined = Model(inp, valid)
 
-    # TODO: get train_images
     train(model_combined, x_train=train_images, epochs=epochs, batch_size=32, verbose= verbose)
     generate_images(generator, num_images = num_images, output_path=output_path)
 

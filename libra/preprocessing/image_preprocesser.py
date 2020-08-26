@@ -229,6 +229,37 @@ def csv_preprocessing(csv_file,
             "test_size": data_size[1],
             "gray_scale": not any(is_rgb)}
 
+# preprocesses images when given a single folder of images
+def single_class_preprocessing(data_path, height=None, width=None):
+
+    info = process_single_folder(data_path)
+    image_heights = info[0]
+    image_widths = info[1]
+
+    create_folder(data_path, "proc_training_set")
+
+    median_height, median_width = calculate_medians(image_heights, image_widths)
+    if height is None:
+        height = median_height
+    if width is None:
+        width = median_width
+
+    is_rgb = []
+
+    for file in os.listdir(data_path):
+        if not os.isfile(file):
+            continue
+        img = cv2.imread(os.path.join(data_path, file))
+        resized_info = process_color_channel(img, height, width)
+        resized_img = resized_info[0]
+        is_rgb.append(resized_info[1])
+
+        cv2.imwrite(data_path + "/proc_training_set", resized_img)
+
+    return {"height": height,
+            "width": width,
+            "grayscale": not any(is_rgb)}
+
 
 # preprocesses images when given a folder containing class folders
 def classwise_preprocessing(data_path, training_ratio, height, width):
@@ -286,6 +317,21 @@ def classwise_preprocessing(data_path, training_ratio, height, width):
             "train_size": data_size[0],
             "test_size": data_size[1],
             "gray_scale": not any(is_rgb)}
+
+# processes a single folder containing all images
+def process_single_folder(data_path):
+    heights = []
+    widths = []
+    for file in os.listdir(data_path):
+        if not os.isfile(file):
+            continue
+        img = cv2.imread(os.path.join(data_path, file))
+        height = img.shape[0]
+        width = img.shape[1]
+        heights.append(height)
+        widths.append(width)
+
+    return [heights, widths]
 
 
 # process a class folder by getting return a list of all the heights and widths
