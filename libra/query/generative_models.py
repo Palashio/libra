@@ -95,6 +95,10 @@ def train(combined_model, discriminator, x_train=None, epochs=10, batch_size=32)
     #Normalize input from -1 to 1
     x_train = (x_train.astype(np.float32) - 127.5) / 127.5
 
+    loss_discriminator_history = []
+    acc_discriminator_history = []
+    loss_generator_history = []
+
     for epoch in epochs:
 
         #Train generator model to generate real-looking images that the discriminator classifies as real
@@ -104,16 +108,23 @@ def train(combined_model, discriminator, x_train=None, epochs=10, batch_size=32)
         #First half of the batch: Generate fake images and train discriminator on them
         noise = np.random.normal(0, 1, (batch_size//2, 100))
         fake_images = combined_model.predict(noise)
-        loss_discriminator_fake = discriminator.train_on_batch(fake_images, np.zeros(batch_size//2))
+        loss_discriminator_fake, acc_discriminator_fake = discriminator.train_on_batch(fake_images, np.zeros(batch_size//2))
 
         #Second half of the batch: Select real images from the training set uniformly at random and train discriminator on them
         idx = np.random.randint(0, len(x_train), batch_size//2)
         real_images = x_train[idx]
-        loss_discriminator_real = discriminator.train_on_batch(real_images, np.ones(batch_size//2))
+        loss_discriminator_real, acc_discriminator_real = discriminator.train_on_batch(real_images, np.ones(batch_size//2))
 
         loss_discriminator = 0.5 * np.add(loss_discriminator_fake, loss_discriminator_real)
+        acc_discriminator =  0.5 * np.add(acc_discriminator_fake, acc_discriminator_real)
 
-        print(f"Epoch {epoch}: [Discriminator loss: {loss_discriminator[0]} | Discriminator Accuracy: {100 * loss_discriminator[1]}] [Generator loss: {loss_generator}]")
+        loss_discriminator_history.append(loss_discriminator)
+        acc_discriminator_history.append(acc_discriminator)
+        loss_generator_history.append(loss_generator)
+
+        print(f"Epoch {epoch}: [Discriminator loss: {loss_discriminator} | Discriminators Accuracy: {100 * acc_discriminator}] [Generator loss: {loss_generator}]")
+
+    return loss_discriminator_history, acc_discriminator_history, loss_generator_history
 
 ### Use generator model to generate images (after training) ###
 def generate_images(generator, num_images=10, output_path=None):
@@ -170,22 +181,21 @@ def gan(instruction=None,
 
     model_combined = Model(inp, valid)
 
-    train(model_combined, x_train=train_images, epochs=epochs, batch_size=32, verbose= verbose)
+    loss_discriminator_history, accuracy_discriminator_history, loss_generator_history = train(model_combined, x_train=train_images, epochs=epochs, batch_size=32, verbose= verbose)
     generate_images(generator, num_images = num_images, output_path=output_path)
 
     return {
         'id': generate_id(),
-        'data_type': read_mode,
-         #'data': {'train': X_train, 'test': X_test},
+         'data': {'train': train_images},
         'shape': (height, width, num_channels),
-        "model": model_combined
+        "model": model_combined,
+        'losses': {
+            'loss_discriminator_history': loss_discriminator_history,
+            'loss_generator_history': loss_generator_history
+            },
 
-        #'losses': {
-        #    'training_loss': history.history['loss'],
-        #    'val_loss': history.history['val_loss']},
-
-        #'accuracy': {
-        #    'training_accuracy': history.history['accuracy'],
-        #    'validation_accuracy': history.history['val_accuracy']},
-        #'data_sizes': {'train_size': processInfo['train_size'], 'test_size': processInfo['test_size']
-        # }}
+        'accuracy': {
+            'accuracy_discriminator': accuracy_discriminator_history
+            }
+        #'data_sizes': {'train_size': processInfo['train_size'], 'test_size': processInfo['test_size']}
+    }
