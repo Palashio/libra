@@ -15,6 +15,8 @@ from libra.query.feedforward_nn import (regression_ann,
 from libra.data_generation.grammartree import get_value_instruction
 from libra.data_generation.dataset_labelmatcher import (get_similar_column,
                                                         get_similar_model)
+from libra.query.generative_models import gan
+
 from libra.plotting.generate_plots import analyze
 from libra.query.recommender_systems import ContentBasedRecommender
 from libra.dashboard.auto_eda import edaDashboard
@@ -845,6 +847,24 @@ class client:
 
         self.latest_model = 'convolutional_NN'
         clearLog()
+
+    def gan_query(self,
+                       instruction=None,
+                       read_mode=None,
+                       verbose=0,
+                       preprocess=True,
+                       epochs=10,
+                       height=None,
+                       width=None
+                       ):
+        self.models["GAN"] = gan(instruction=instruction,
+                                 read_mode=read_mode,
+                                 verbose=verbose,
+                                 preprocess=preprocess,
+                                 epochs=epochs,
+                                 height=height,
+                                 width=width)
+
 
     # sentiment analysis prediction wrapper
 
