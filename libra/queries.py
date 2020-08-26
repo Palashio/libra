@@ -849,21 +849,28 @@ class client:
         clearLog()
 
     def gan_query(self,
-                       instruction=None,
-                       read_mode=None,
-                       verbose=0,
-                       preprocess=True,
-                       epochs=10,
-                       height=None,
-                       width=None
+                  instruction=None,
+                  num_images=None,
+                  read_mode=None,
+                  verbose=0,
+                  preprocess=True,
+                  epochs=10,
+                  height=None,
+                  width=None,
+                  num_channels=3,
+                  output_path=None,
                        ):
         self.models["GAN"] = gan(instruction=instruction,
+                                 num_images=num_images,
                                  read_mode=read_mode,
                                  verbose=verbose,
                                  preprocess=preprocess,
                                  epochs=epochs,
                                  height=height,
-                                 width=width)
+                                 width=width,
+                                 num_channels=num_channels,
+                                 output_path=output_path
+                                 )
 
 
     # sentiment analysis prediction wrapper
