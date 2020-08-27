@@ -83,6 +83,13 @@ class TestQueries(unittest.TestCase):
             epochs=2)
         self.assertTrue('convolutional_NN' in client_image.models)
 
+    # Tests whether gan_query works without errors, and creates a key in models dictionary
+    @ordered
+    def test_gan_query(self):
+        client_image = client("tools/data/image_data/dogs")
+        client_image.gan_query("generate dog images")
+        self.assertTrue('GAN' in client_image.models)
+
     # Tests whether decision_tree_query works without errors, and creates a key in models dictionary
     @ordered
     def test_decision_tree(self):

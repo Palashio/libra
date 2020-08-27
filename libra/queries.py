@@ -863,7 +863,7 @@ class client:
         self.models["GAN"] = gan(instruction=instruction,
                                  num_images=num_images,
                                  preprocess=preprocess,
-                                 data_path=data_path,
+                                 data_path=self.dataset,
                                  verbose=verbose,
                                  epochs=epochs,
                                  height=height,
