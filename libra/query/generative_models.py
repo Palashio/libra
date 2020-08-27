@@ -46,7 +46,10 @@ def build_discriminator(img_shape):
     model.add(Flatten())
     model.add(Dense(1, activation='sigmoid'))
 
-    return model
+    img = Input(shape=img_shape)
+    validity = model(img)
+
+    return Model(img, validity)
 
 ### Source: https://github.com/mitchelljy/DCGAN-Keras/blob/master/DCGAN.py ###
 def build_generator(img_shape, starting_filters = 64, upsample_layers = 5, noise_shape=(100,)):
@@ -88,7 +91,10 @@ def build_generator(img_shape, starting_filters = 64, upsample_layers = 5, noise
 
     model.add(Conv2D(3, (3, 3), padding='same', activation='tanh'))
 
-    return model
+    noise = Input(shape=noise_shape)
+    img = model(noise)
+
+    return Model(noise, img)
 
 ### train the GAN model ###
 def train(combined_model, discriminator, x_train=None, epochs=10, batch_size=32):
