@@ -181,8 +181,8 @@ def gan(instruction=None,
 
     model_combined = Model(inp, valid)
 
-    loss_discriminator_history, accuracy_discriminator_history, loss_generator_history = train(model_combined, x_train=train_images, epochs=epochs, batch_size=32, verbose= verbose)
-    generate_images(generator, num_images = num_images, output_path=output_path)
+    loss_discriminator_history, acc_discriminator_history, loss_generator_history = train(model_combined, x_train=train_images, epochs=epochs, batch_size=32, verbose= verbose)
+    generate_images(generator, num_images=num_images, output_path=output_path)
 
     return {
         'id': generate_id(),
@@ -195,7 +195,7 @@ def gan(instruction=None,
             },
 
         'accuracy': {
-            'accuracy_discriminator': accuracy_discriminator_history
+            'acc_discriminator': acc_discriminator_history
             }
         #'data_sizes': {'train_size': processInfo['train_size'], 'test_size': processInfo['test_size']}
     }
