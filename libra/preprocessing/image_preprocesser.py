@@ -247,7 +247,7 @@ def single_class_preprocessing(data_path, height=None, width=None):
     is_rgb = []
 
     for file in os.listdir(data_path):
-        if not os.path.isfile(file):
+        if not os.path.isfile(os.path.join(data_path, file)):
             continue
         img = cv2.imread(data_path + "/" + file)
         resized_info = process_color_channel(img, height, width)
@@ -323,7 +323,7 @@ def process_single_folder(data_path):
     heights = []
     widths = []
     for file in os.listdir(data_path):
-        if not os.path.isfile(file):
+        if not os.path.isfile(os.path.join(data_path, file)):
             continue
         img = cv2.imread(data_path + "/" + file)
         height = img.shape[0]
