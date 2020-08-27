@@ -133,7 +133,7 @@ def generate_images(generator, num_images=10, output_path=None):
     gen_images = generator.predict(noise)
 
     for i in range(num_images):
-        cv2.imwrite(output_path + f"generated_image_{i}.png", gen_images[i])
+        cv2.imwrite(output_path + f"generated_image_{i}", gen_images[i])
 
 def gan(instruction=None,
         num_images=None,

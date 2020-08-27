@@ -246,6 +246,7 @@ def single_class_preprocessing(data_path, height=None, width=None):
 
     is_rgb = []
 
+    counter = 0
     for file in os.listdir(data_path):
         if not os.path.isfile(os.path.join(data_path, file)):
             continue
@@ -254,7 +255,8 @@ def single_class_preprocessing(data_path, height=None, width=None):
         resized_img = resized_info[0]
         is_rgb.append(resized_info[1])
 
-        cv2.imwrite(data_path + "/proc_training_set", resized_img)
+        cv2.imwrite(data_path + "/proc_training_set/proc_image_" + str(counter), resized_img)
+        counter += 1
 
     return {"height": height,
             "width": width,
