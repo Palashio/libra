@@ -9,6 +9,7 @@ from libra.preprocessing.image_preprocesser import (setwise_preprocessing,
                                                     already_processed,
                                                     single_class_preprocessing)
 from libra.query.supplementaries import generate_id
+from libra.query.feedforward_nn import logger
 from keras import Model
 from keras.models import Sequential
 from keras.layers import (Input, Conv2D, Flatten, Dense, Dropout, LeakyReLU, BatchNormalization, ZeroPadding2D, Reshape, UpSampling2D)
@@ -147,6 +148,7 @@ def gan(instruction=None,
 
     training_path = ""
 
+    logger("Preprocessing images")
     if preprocess:
         processInfo = single_class_preprocessing(data_path=data_path)
         training_path = "/proc_training_set"
@@ -155,6 +157,9 @@ def gan(instruction=None,
     for file in os.listdir(data_path + training_path):
         if os.isfile(file):
             train_images.append(cv2.imread(file))
+
+
+    logger("Building generator model and discriminator model")
 
     ### Build generator model and discriminator model
     optimizer = Adam(0.0002, 0.5)
@@ -181,7 +186,10 @@ def gan(instruction=None,
 
     model_combined = Model(inp, valid)
 
+    logger("Training Generative Adversarial Network")
     loss_discriminator_history, acc_discriminator_history, loss_generator_history = train(model_combined, x_train=train_images, epochs=epochs, batch_size=32, verbose= verbose)
+
+    logger("Generating output images")
     generate_images(generator, num_images=num_images, output_path=output_path)
 
     return {
