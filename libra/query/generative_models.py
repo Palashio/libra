@@ -155,7 +155,7 @@ def gan(instruction=None,
 
     train_images = []
     for file in os.listdir(data_path + training_path):
-        if os.isfile(file):
+        if os.path.isfile(file):
             train_images.append(cv2.imread(file))
 
 
