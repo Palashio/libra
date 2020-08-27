@@ -9,7 +9,7 @@ from libra.preprocessing.image_preprocesser import (setwise_preprocessing,
                                                     already_processed,
                                                     single_class_preprocessing)
 from libra.query.supplementaries import generate_id
-from libra.query.feedforward_nn import logger
+from libra.query.feedforward_nn import logger, clearLog
 from keras import Model
 from keras.models import Sequential
 from keras.layers import (Input, Conv2D, Flatten, Dense, Dropout, LeakyReLU, BatchNormalization, ZeroPadding2D, Reshape, UpSampling2D)
@@ -191,6 +191,7 @@ def gan(instruction=None,
 
     logger("Generating output images")
     generate_images(generator, num_images=num_images, output_path=output_path)
+    clearLog()
 
     return {
         'id': generate_id(),

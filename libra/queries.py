@@ -871,6 +871,8 @@ class client:
                                  num_channels=num_channels,
                                  output_path=output_path
                                  )
+        self.latest_model = 'GAN'
+        clearLog()
 
 
     # sentiment analysis prediction wrapper
