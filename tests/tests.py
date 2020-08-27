@@ -59,7 +59,7 @@ class TestQueries(unittest.TestCase):
         client_image = client("tools/data/image_data/character_dataset_mini")
         client_image.convolutional_query("predict character", epochs=2)
         self.assertTrue('convolutional_NN' in client_image.models)
-    '''
+    
 
     @ordered
     def test_convolutional_query_customarch(self):
@@ -82,6 +82,7 @@ class TestQueries(unittest.TestCase):
             },
             epochs=2)
         self.assertTrue('convolutional_NN' in client_image.models)
+    '''
 
     # Tests whether gan_query works without errors, and creates a key in models dictionary
     @ordered
@@ -90,6 +91,7 @@ class TestQueries(unittest.TestCase):
         client_image.gan_query("generate dog images")
         self.assertTrue('GAN' in client_image.models)
 
+    '''
     # Tests whether decision_tree_query works without errors, and creates a key in models dictionary
     @ordered
     def test_decision_tree(self):
@@ -158,6 +160,7 @@ class TestQueries(unittest.TestCase):
         x = client('tools/data/recommender_systems_data/disney_plus_shows.csv')
         x.content_recommender_query()
         assert ('recommendations' in x.recommend('Coco'))
+    '''
 
     """
     TEST ANALYZE() FUNCTION

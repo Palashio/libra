@@ -133,7 +133,7 @@ def generate_images(generator, num_images=10, output_path=None):
     gen_images = generator.predict(noise)
 
     for i in range(num_images):
-        cv2.imwrite(output_path + f"generated_image_{i}", gen_images[i])
+        cv2.imwrite(output_path + f"/generated_images/generated_image_{i}.jpg", gen_images[i])
 
 def gan(instruction=None,
         num_images=None,
@@ -190,7 +190,8 @@ def gan(instruction=None,
     loss_discriminator_history, acc_discriminator_history, loss_generator_history = train(model_combined, x_train=train_images, epochs=epochs, batch_size=32, verbose= verbose)
 
     logger("Generating output images")
-    generate_images(generator, num_images=num_images, output_path=output_path)
+
+    generate_images(generator, num_images=num_images, output_path=data_path)
     clearLog()
 
     return {
