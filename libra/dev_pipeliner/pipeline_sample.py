@@ -12,6 +12,11 @@ init_params = {
     'path_to_set': './data/housing.csv',
 }
 
+
+def mypreprocessor():
+    return
+
+
 reg_pipeline = [initializer,
                 mypreprocessor,
                 instruction_identifier,
@@ -20,10 +25,4 @@ reg_pipeline = [initializer,
                 plotter]
 
 
-
-
 [func(init_params) for func in reg_pipeline]
-
-
-def mypreprocessor():
-    return
