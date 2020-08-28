@@ -9,10 +9,7 @@ Original file is located at
 Here's another great example of how to use Libra. Let's assume we want to analyze some data and classify wheat types. First, we call libra.
 """
 
-!pip install libra
-
-
-from libra import client
+from libra import client  # pip install libra
 
 """Now, we'll be uploading our dataset. Since Colab resets storage, you'll have to upload it again through https://drive.google.com/file/d/15jM8aW9sw18efiQj39BFEbZn6TAAKEVf/view?usp=sharing
 
