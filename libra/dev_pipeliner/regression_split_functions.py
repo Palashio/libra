@@ -21,6 +21,7 @@ from libra.data_generation.dataset_labelmatcher import get_similar_column, get_s
 from keras.callbacks import EarlyStopping
 from matplotlib import pyplot
 from libra.data_generation.grammartree import get_value_instruction
+from libra.plotting.generate_plots import generate_regression_plots
 from libra.preprocessing.data_preprocesser import structured_preprocesser
 from libra.modeling.prediction_model_creation import get_keras_model_reg
 from libra.modeling.prediction_model_creation import get_keras_model_class
@@ -118,7 +119,7 @@ def modeler(params):
 
 
 def plotter(params):
-    init_plots, plot_names = generateRegressionPlots(
+    init_plots, plot_names = generate_regression_plots(
         params['models'][len(params['models']) - 1], params['data'], params['y'])
     plots = {str(plot_names[x]):init_plots[x] for x in range(len(plot_names))}
     params['plots'] = plots
