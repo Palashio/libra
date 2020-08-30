@@ -197,6 +197,8 @@ def gan(instruction=None,
     valid = discriminator(img)
 
     model_combined = Model(inp, valid)
+    model_combined.compile(loss='binary_crossentropy',
+                           optimizer=optimizer)
 
     logger("Training Generative Adversarial Network")
     loss_discriminator_history, acc_discriminator_history, loss_generator_history = train(model_combined, discriminator, x_train=train_images, epochs=epochs, batch_size=32, verbose=verbose)
