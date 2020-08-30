@@ -46,10 +46,12 @@ def build_discriminator(img_shape):
     model.add(Flatten())
     model.add(Dense(1, activation='sigmoid'))
 
-    img = Input(shape=img_shape)
-    validity = model(img)
+    #img = Input(shape=img_shape)
+    #validity = model(img)
 
-    return Model(img, validity)
+    #return Model(img, validity)
+
+    return model
 
 ### Source: https://github.com/mitchelljy/DCGAN-Keras/blob/master/DCGAN.py ###
 def build_generator(img_shape, starting_filters = 64, upsample_layers = 5, noise_shape=(100,)):
@@ -91,10 +93,12 @@ def build_generator(img_shape, starting_filters = 64, upsample_layers = 5, noise
 
     model.add(Conv2D(img_shape[2], (3, 3), padding='same', activation='tanh'))
 
-    noise = Input(shape=noise_shape)
-    img = model(noise)
+    #noise = Input(shape=noise_shape)
+    #img = model(noise)
 
-    return Model(noise, img)
+    #return Model(noise, img)
+
+    return model
 
 ### train the GAN model ###
 def train(combined_model, discriminator, x_train=None, epochs=10, batch_size=32, verbose=1):
@@ -190,14 +194,16 @@ def gan(instruction=None,
     )
 
     ### Combine the generator and discriminators into one model ###
+
     inp = Input(shape=100)
-    img = generator(inp)
+    model_combined = Sequential()
+    model_combined.add(generator)
 
     # Freeze discriminator's weights
     discriminator.trainable = False
-    valid = discriminator(img)
 
-    model_combined = Model(inp, valid)
+    model_combined.add(discriminator)
+
     model_combined.compile(loss='binary_crossentropy',
                            optimizer=optimizer)
 
@@ -220,7 +226,6 @@ def gan(instruction=None,
             },
 
         'accuracy': {
-            'acc_discriminator': acc_discriminator_history
+            'acc_discriminator_history': acc_discriminator_history
             }
-        #'data_sizes': {'train_size': processInfo['train_size'], 'test_size': processInfo['test_size']}
     }
