@@ -43,7 +43,7 @@ def build_discriminator(img_shape):
     model.add(LeakyReLU(alpha=0.2))
     model.add(Dropout(0.25))
 
-    model.add(Flatten())
+    #model.add(Flatten())
     model.add(Dense(1, activation='sigmoid'))
 
     img = Input(shape=img_shape)
