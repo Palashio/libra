@@ -106,7 +106,7 @@ def train(combined_model, discriminator, x_train=None, epochs=10, batch_size=32,
     acc_discriminator_history = []
     loss_generator_history = []
 
-    for epoch in epochs:
+    for epoch in range(epochs):
 
         #Train generator model to generate real-looking images that the discriminator classifies as real
         noise = np.random.normal(0, 1, (batch_size, 100))
@@ -130,7 +130,7 @@ def train(combined_model, discriminator, x_train=None, epochs=10, batch_size=32,
         loss_generator_history.append(loss_generator)
 
         if verbose == 1:
-            logger(f"Epoch {epoch}: [Discriminator loss: {loss_discriminator} | Discriminators Accuracy: {100 * acc_discriminator}] [Generator loss: {loss_generator}]")
+            logger(f"Epoch {(epoch+1)}: [Discriminator loss: {loss_discriminator} | Discriminators Accuracy: {100 * acc_discriminator}] [Generator loss: {loss_generator}]")
 
     return loss_discriminator_history, acc_discriminator_history, loss_generator_history
 
