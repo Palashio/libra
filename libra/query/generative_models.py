@@ -43,7 +43,7 @@ def build_discriminator(img_shape):
     model.add(LeakyReLU(alpha=0.2))
     model.add(Dropout(0.25))
 
-    #model.add(Flatten())
+    model.add(Flatten())
     model.add(Dense(1, activation='sigmoid'))
 
     img = Input(shape=img_shape)
@@ -165,8 +165,9 @@ def gan(instruction=None,
 
     train_images = []
     for file in os.listdir(data_path + training_path):
-        if os.path.isfile(os.path.join(data_path, training_path, file)):
-            train_images.append(cv2.imread(file))
+        abs_path = os.path.join(data_path, training_path, file)
+        if os.path.isfile(abs_path):
+            train_images.append(cv2.imread(abs_path))
 
     train_images = np.array(train_images)
 
