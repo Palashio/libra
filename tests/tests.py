@@ -27,7 +27,7 @@ class TestQueries(unittest.TestCase):
     
     Tests some queries in queries.py
     """
-
+    '''
     # Tests whether regression_ann_query works without errors, and creates a key in models dictionary
     @ordered
     def test_regression_ann(self):
@@ -53,7 +53,7 @@ class TestQueries(unittest.TestCase):
         self.newClient.neural_network_query('predict ocean proximity', epochs=3)
         self.assertTrue('classification_ANN' in self.newClient.models)
 
-    '''
+    
     @ordered
     def test_convolutional_query(self):
         client_image = client("tools/data/image_data/character_dataset_mini")
@@ -168,6 +168,7 @@ class TestQueries(unittest.TestCase):
     Tests all branches of .analyze() function in generate_plots
     """
 
+    '''
     # Tests analyze() function for k_means_clustering
     @ordered
     def test_analyze_kmeans(self):
@@ -217,7 +218,7 @@ class TestQueries(unittest.TestCase):
     def test_invalid_model(self):
         with self.assertRaises(NameError):
             self.newClient.analyze(model='I dont exist')
-
+    '''
 
 if __name__ == '__main__':
     unittest.main()

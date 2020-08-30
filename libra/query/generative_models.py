@@ -35,15 +35,15 @@ def build_discriminator(img_shape):
     model.add(Dropout(0.25))
     model.add(BatchNormalization(momentum=0.8))
 
-    model.add(Conv2D(256, (3, 3), strides=2, padding='same'))
+    model.add(Conv2D(256, (3, 3), strides=1, padding='same'))
     model.add(LeakyReLU(alpha=0.2))
     model.add(Dropout(0.25))
 
-    model.add(Conv2D(512, (3, 3), strides=2, padding='same'))
+    model.add(Conv2D(512, (3, 3), strides=1, padding='same'))
     model.add(LeakyReLU(alpha=0.2))
     model.add(Dropout(0.25))
 
-    #model.add(Flatten())
+    model.add(Flatten())
     model.add(Dense(1, activation='sigmoid'))
 
     img = Input(shape=img_shape)
@@ -86,10 +86,10 @@ def build_generator(img_shape, starting_filters = 64, upsample_layers = 5, noise
     model.add(Conv2D(64, (3, 3), padding='same', activation='relu'))
     model.add(BatchNormalization(momentum=0.8))
 
-    model.add(Conv2D(64, (3, 3), padding='same', activation='relu'))
+    model.add(Conv2D(32, (3, 3), padding='same', activation='relu'))
     model.add(BatchNormalization(momentum=0.8))
 
-    model.add(Conv2D(3, (3, 3), padding='same', activation='tanh'))
+    model.add(Conv2D(img_shape[2], (3, 3), padding='same', activation='tanh'))
 
     noise = Input(shape=noise_shape)
     img = model(noise)
