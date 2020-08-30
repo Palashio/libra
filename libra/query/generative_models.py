@@ -103,7 +103,7 @@ def build_generator(img_shape, starting_filters = 64, upsample_layers = 5, noise
     return model
 
 ### train the GAN model ###
-def train(combined_model, discriminator, x_train=None, epochs=10, batch_size=32, verbose=1):
+def train(combined_model, generator, discriminator, x_train=None, epochs=10, batch_size=32, verbose=1):
 
     #Normalize input from -1 to 1
     x_train = (x_train.astype(np.float32) - 127.5) / 127.5
@@ -120,7 +120,7 @@ def train(combined_model, discriminator, x_train=None, epochs=10, batch_size=32,
 
         #First half of the batch: Generate fake images and train discriminator on them
         noise = np.random.normal(0, 1, (batch_size//2, 100))
-        fake_images = combined_model.predict(noise)
+        fake_images = generator.predict(noise)
         loss_discriminator_fake, acc_discriminator_fake = discriminator.train_on_batch(fake_images, np.zeros(batch_size//2))
 
         #Second half of the batch: Select real images from the training set uniformly at random and train discriminator on them
@@ -129,7 +129,7 @@ def train(combined_model, discriminator, x_train=None, epochs=10, batch_size=32,
         loss_discriminator_real, acc_discriminator_real = discriminator.train_on_batch(real_images, np.ones(batch_size//2))
 
         loss_discriminator = 0.5 * np.add(loss_discriminator_fake, loss_discriminator_real)
-        acc_discriminator =  0.5 * np.add(acc_discriminator_fake, acc_discriminator_real)
+        acc_discriminator = 0.5 * np.add(acc_discriminator_fake, acc_discriminator_real)
 
         loss_discriminator_history.append(loss_discriminator)
         acc_discriminator_history.append(acc_discriminator)
@@ -210,7 +210,7 @@ def gan(instruction=None,
                            optimizer=optimizer)
 
     logger("Training Generative Adversarial Network")
-    loss_discriminator_history, acc_discriminator_history, loss_generator_history = train(model_combined, discriminator, x_train=train_images, epochs=epochs, batch_size=32, verbose=verbose)
+    loss_discriminator_history, acc_discriminator_history, loss_generator_history = train(model_combined, generator, discriminator, x_train=train_images, epochs=epochs, batch_size=32, verbose=verbose)
 
     logger("Generating output images")
 
