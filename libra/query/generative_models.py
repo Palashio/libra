@@ -129,7 +129,7 @@ def train(combined_model, discriminator, x_train=None, epochs=10, batch_size=32,
         acc_discriminator_history.append(acc_discriminator)
         loss_generator_history.append(loss_generator)
 
-        if verbose==1:
+        if verbose == 1:
             logger(f"Epoch {epoch}: [Discriminator loss: {loss_discriminator} | Discriminators Accuracy: {100 * acc_discriminator}] [Generator loss: {loss_generator}]")
 
     return loss_discriminator_history, acc_discriminator_history, loss_generator_history
@@ -197,7 +197,7 @@ def gan(instruction=None,
     model_combined = Model(inp, valid)
 
     logger("Training Generative Adversarial Network")
-    loss_discriminator_history, acc_discriminator_history, loss_generator_history = train(model_combined, x_train=train_images, epochs=epochs, batch_size=32, verbose=verbose)
+    loss_discriminator_history, acc_discriminator_history, loss_generator_history = train(model_combined, discriminator, x_train=train_images, epochs=epochs, batch_size=32, verbose=verbose)
 
     logger("Generating output images")
 
