@@ -168,6 +168,8 @@ def gan(instruction=None,
         if os.path.isfile(os.path.join(data_path, training_path, file)):
             train_images.append(cv2.imread(file))
 
+    train_images = np.array(train_images)
+
     logger("Building generator model and discriminator model")
 
     ### Build generator model and discriminator model
