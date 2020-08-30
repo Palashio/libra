@@ -88,7 +88,7 @@ class TestQueries(unittest.TestCase):
     @ordered
     def test_gan_query(self):
         client_image = client("tools/data/image_data/dogs")
-        client_image.gan_query("generate dog images", verbose=1)
+        client_image.gan_query("generate dog images", height=224, width=224, verbose=1)
         self.assertTrue('GAN' in client_image.models)
 
     '''
