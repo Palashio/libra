@@ -857,7 +857,6 @@ class client:
                   epochs=10,
                   height=None,
                   width=None,
-                  num_channels=3,
                   output_path=None,
                        ):
         self.models["GAN"] = gan(instruction=instruction,
@@ -868,7 +867,6 @@ class client:
                                  epochs=epochs,
                                  height=height,
                                  width=width,
-                                 num_channels=num_channels,
                                  output_path=output_path
                                  )
         self.latest_model = 'GAN'

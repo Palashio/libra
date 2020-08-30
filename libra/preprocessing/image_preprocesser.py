@@ -260,7 +260,7 @@ def single_class_preprocessing(data_path, height=None, width=None):
 
     return {"height": height,
             "width": width,
-            "grayscale": not any(is_rgb)}
+            "gray_scale": not any(is_rgb)}
 
 
 # preprocesses images when given a folder containing class folders

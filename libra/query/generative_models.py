@@ -149,34 +149,37 @@ def gan(instruction=None,
         epochs=None,
         height=None,
         width=None,
-        num_channels=None,
         output_path=None):
 
     training_path = ""
 
     logger("Preprocessing images")
+
+    num_channels = 3
+
     if preprocess:
-        processInfo = single_class_preprocessing(data_path=data_path)
+        processInfo = single_class_preprocessing(data_path=data_path, height=height, width=width)
         training_path = "/proc_training_set"
+        num_channels = 1 if processInfo["gray_scale"] else 3
 
     train_images = []
     for file in os.listdir(data_path + training_path):
         if os.path.isfile(os.path.join(data_path, training_path, file)):
             train_images.append(cv2.imread(file))
 
-
     logger("Building generator model and discriminator model")
 
     ### Build generator model and discriminator model
     optimizer = Adam(0.0002, 0.5)
-    discriminator = build_discriminator((height, width, num_channels))
+
+    img_shape = (processInfo["height"], processInfo["width"], num_channels)
+    discriminator = build_discriminator(img_shape)
     discriminator.compile(
         loss='binary_crossentropy',
         optimizer=optimizer,
         metrics=['accuracy'])
 
-
-    generator = build_generator()
+    generator = build_generator(img_shape)
     generator.compile(
         loss='binary_crossentropy',
         optimizer=optimizer
