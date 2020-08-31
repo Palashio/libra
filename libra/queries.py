@@ -850,7 +850,7 @@ class client:
 
     def gan_query(self,
                   instruction=None,
-                  num_images=None,
+                  num_images=3,
                   preprocess=True,
                   data_path=None,
                   verbose=0,

@@ -141,7 +141,7 @@ def train(combined_model, generator, discriminator, x_train=None, epochs=10, bat
     return loss_discriminator_history, acc_discriminator_history, loss_generator_history
 
 ### Use generator model to generate images (after training) ###
-def generate_images(generator, num_images=10, output_path=None):
+def generate_images(generator, num_images=3, output_path=None):
     noise = np.random.normal(0, 1, (num_images, 100))
     gen_images = generator.predict(noise)
 
