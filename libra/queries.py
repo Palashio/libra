@@ -857,8 +857,7 @@ class client:
                   epochs=10,
                   height=None,
                   width=None,
-                  output_path=None,
-                       ):
+                  output_path=None):
         self.models["GAN"] = gan(instruction=instruction,
                                  num_images=num_images,
                                  preprocess=preprocess,
