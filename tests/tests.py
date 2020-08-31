@@ -27,7 +27,7 @@ class TestQueries(unittest.TestCase):
     
     Tests some queries in queries.py
     """
-
+    '''
     # Tests whether regression_ann_query works without errors, and creates a key in models dictionary
     @ordered
     def test_regression_ann(self):
@@ -52,7 +52,7 @@ class TestQueries(unittest.TestCase):
         # see if properly chooses classification with a categorical target column
         self.newClient.neural_network_query('predict ocean proximity', epochs=3)
         self.assertTrue('classification_ANN' in self.newClient.models)
-
+    '''
     '''
     @ordered
     def test_convolutional_query(self):
@@ -60,7 +60,7 @@ class TestQueries(unittest.TestCase):
         client_image.convolutional_query("predict character", epochs=2)
         self.assertTrue('convolutional_NN' in client_image.models)
     '''
-
+    '''
     # Tests whether convolutional_query works without errors when custom_arch is passed in, and creates a key in models dictionary
     @ordered
     def test_convolutional_query_customarch(self):
@@ -84,14 +84,14 @@ class TestQueries(unittest.TestCase):
             },
             epochs=2)
         self.assertTrue('convolutional_NN' in client_image.models)
-
+    '''
     # Tests whether gan_query works without errors, and creates a key in models dictionary
     @ordered
     def test_gan_query(self):
         client_image = client("tools/data/image_data/dogs")
         client_image.gan_query("generate dog images", height=224, width=224, verbose=1, epochs=2)
         self.assertTrue('GAN' in client_image.models)
-
+    '''
     # Tests whether decision_tree_query works without errors, and creates a key in models dictionary
     @ordered
     def test_decision_tree(self):
@@ -160,13 +160,13 @@ class TestQueries(unittest.TestCase):
         x = client('tools/data/recommender_systems_data/disney_plus_shows.csv')
         x.content_recommender_query()
         assert ('recommendations' in x.recommend('Coco'))
-
+    '''
     """
     TEST ANALYZE() FUNCTION
     
     Tests all branches of .analyze() function in generate_plots
     """
-
+    '''
     # Tests analyze() function for k_means_clustering
     @ordered
     def test_analyze_kmeans(self):
@@ -216,6 +216,6 @@ class TestQueries(unittest.TestCase):
     def test_invalid_model(self):
         with self.assertRaises(NameError):
             self.newClient.analyze(model='I dont exist')
-
+    '''
 if __name__ == '__main__':
     unittest.main()

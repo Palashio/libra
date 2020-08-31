@@ -158,7 +158,7 @@ def gan(instruction=None,
         height=None,
         width=None,
         output_path=None):
-    K.clear_session()
+    #K.clear_session()
 
     training_path = ""
 
