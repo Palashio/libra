@@ -166,11 +166,12 @@ def gan(instruction=None,
 
     if preprocess:
         processInfo = single_class_preprocessing(data_path=data_path, height=height, width=width)
-        training_path = "/proc_training_set"
+        training_path = "proc_training_set"
         num_channels = 1 if processInfo["gray_scale"] else 3
 
     train_images = []
-    for file in os.listdir(data_path + training_path):
+    for file in os.listdir(data_path + "/" + training_path):
+        logger("check")
         abs_path = os.path.join(data_path, training_path, file)
         if os.path.isfile(abs_path):
             train_images.append(cv2.imread(abs_path))
