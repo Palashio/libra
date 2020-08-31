@@ -1,6 +1,7 @@
 import numpy as np
 import os
 import cv2
+import keras.backend as K
 
 from libra.preprocessing.image_preprocesser import (setwise_preprocessing,
                                                     csv_preprocessing,
@@ -157,6 +158,7 @@ def gan(instruction=None,
         height=None,
         width=None,
         output_path=None):
+    K.clear_session()
 
     training_path = ""
 
