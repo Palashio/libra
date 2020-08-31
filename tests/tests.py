@@ -72,7 +72,7 @@ class TestQueries(unittest.TestCase):
                                                     custom_arch=custom_arch_path, preprocess=False, epochs=2)
         self.assertTrue('convolutional_NN' in client_image_customarch.models)
     '''
-    
+
     # Tests whether convolutional_query works without errors when pretrained model is requested, and creates a key in models dictionary
     @ordered
     def test_convolutional_query_pretrained(self):
