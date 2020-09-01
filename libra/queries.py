@@ -15,7 +15,7 @@ from libra.query.feedforward_nn import (regression_ann,
 from libra.data_generation.grammartree import get_value_instruction
 from libra.data_generation.dataset_labelmatcher import (get_similar_column,
                                                         get_similar_model)
-from libra.query.generative_models import gan
+from libra.query.generative_models import dcgan
 
 from libra.plotting.generate_plots import analyze
 from libra.query.recommender_systems import ContentBasedRecommender
@@ -850,6 +850,7 @@ class client:
 
     def gan_query(self,
                   instruction=None,
+                  type='dcgan',
                   num_images=3,
                   preprocess=True,
                   data_path=None,
@@ -858,7 +859,8 @@ class client:
                   height=None,
                   width=None,
                   output_path=None):
-        self.models["GAN"] = gan(instruction=instruction,
+        if type == 'dcgan':
+            self.models["DCGAN"] = dcgan(instruction=instruction,
                                  num_images=num_images,
                                  preprocess=preprocess,
                                  data_path=self.dataset,
@@ -868,7 +870,7 @@ class client:
                                  width=width,
                                  output_path=output_path
                                  )
-        self.latest_model = 'GAN'
+        self.latest_model = 'DCGAN'
         clearLog()
 
 

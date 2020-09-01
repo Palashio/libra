@@ -147,7 +147,8 @@ def generate_images(generator, num_images=3, output_path=None):
     for i in range(num_images):
         cv2.imwrite(output_path + f"/generated_images/generated_image_{i}.jpg", gen_images[i])
 
-def gan(instruction=None,
+### Deep Convolutional Generative Adversarial Network ###
+def dcgan(instruction=None,
         num_images=None,
         preprocess=True,
         data_path=None,

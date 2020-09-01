@@ -89,8 +89,8 @@ class TestQueries(unittest.TestCase):
     @ordered
     def test_gan_query(self):
         x = client("tools/data/image_data/character_dataset_mini/a_lower")
-        x.gan_query("generate images", height=224, width=224, verbose=1, epochs=2)
-        self.assertTrue('GAN' in x.models)
+        x.gan_query("generate images", type='dcgan', height=224, width=224, verbose=1, epochs=2)
+        self.assertTrue('DCGAN' in x.models)
 
     # Tests whether decision_tree_query works without errors, and creates a key in models dictionary
     @ordered
