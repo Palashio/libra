@@ -870,9 +870,8 @@ class client:
                                  width=width,
                                  output_path=output_path
                                  )
-        self.latest_model = 'DCGAN'
-        clearLog()
-
+            self.latest_model = 'DCGAN'
+            clearLog()
 
     # sentiment analysis prediction wrapper
 
