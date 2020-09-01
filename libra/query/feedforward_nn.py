@@ -257,6 +257,9 @@ def regression_ann(
     print("")
     logger("Stored model under 'regression_ANN' key")
     clearLog()
+
+    K.clear_session()
+
     return {
         'id': generate_id(),
         'model': final_model,
@@ -461,6 +464,9 @@ def classification_ann(instruction,
     print("")
     logger("Stored model under 'classification_ANN' key")
     clearLog()
+
+    K.clear_session()
+
     # stores the values and plots into the object dictionary
     return {
         'id': generate_id(),
