@@ -93,8 +93,6 @@ def build_generator(img_shape, starting_filters = 64, upsample_layers = 5, noise
     model.add(BatchNormalization(momentum=0.8))
 
     model.add(Conv2D(img_shape[2], (3, 3), padding='same', activation='tanh', name='ll'))
-    logger("Generator output shape: " + str(model.get_layer(name='ll').output_shape))
-    logger("img_shape " + str(img_shape))
 
     #noise = Input(shape=noise_shape)
     #img = model(noise)
@@ -218,6 +216,8 @@ def gan(instruction=None,
 
     generate_images(generator, num_images=num_images, output_path=data_path)
     clearLog()
+
+    K.clear_session()
 
     return {
         'id': generate_id(),

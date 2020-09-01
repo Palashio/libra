@@ -7,6 +7,7 @@ from libra.preprocessing.image_preprocesser import (setwise_preprocessing,
                                                     set_distinguisher,
                                                     already_processed)
 from libra.preprocessing.data_reader import DataReader
+import keras.backend as K
 from keras import Model
 from keras.models import Sequential, model_from_json
 from keras.layers import (Dense, Conv2D, Flatten, MaxPooling2D, Dropout, GlobalAveragePooling2D)
@@ -743,6 +744,9 @@ def convolutional(instruction=None,
 
     logger("Stored model under 'convolutional_NN' key")
     clearLog()
+
+    K.clear_session()
+
     return {
         'id': generate_id(),
         'data_type': read_mode,
