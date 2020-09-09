@@ -11,7 +11,7 @@
 [![Slack](https://img.shields.io/badge/slack-chat-green.svg?logo=slack)](https://join.slack.com/t/the-libra-team/shared_invite/zt-ek6bpd47-hdIxXlRAenKfy5JNWe8bgw)
 
 [![PyPi](https://img.shields.io/badge/pypi%20package-1.0.0-blue)](https://pypi.org/project/libra/)
-[![Release](https://img.shields.io/badge/Next%20Release-Aug%2012-green)](https://pypi.org/project/libra/)
+[![Release](https://img.shields.io/badge/Next%20Release-Sep%2012-green)](https://pypi.org/project/libra/)
 [![Website shields.io](https://img.shields.io/website-up-down-blue-red/http/shields.io.svg)](https://libradocs.github.io//)
 [![Issues](https://img.shields.io/github/issues/Palashio/libra)]()
 
