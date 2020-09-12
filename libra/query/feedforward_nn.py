@@ -11,7 +11,7 @@ import keras.backend as K
 from keras import Model
 from keras.models import Sequential, model_from_json
 from keras.layers import (Dense, Conv2D, Flatten, MaxPooling2D, Dropout, GlobalAveragePooling2D)
-from keras.applications import VGG16, VGG19, ResNet50, ResNet101, ResNet152, MobileNet, MobileNetV2, DenseNet121, DenseNet169, DenseNet201, Xception, 
+from keras.applications import VGG16, VGG19, ResNet50, ResNet101, ResNet152, MobileNet, MobileNetV2, DenseNet121, DenseNet169, DenseNet201
 
 import pandas as pd
 import json
