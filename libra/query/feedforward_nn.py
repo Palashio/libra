@@ -11,7 +11,7 @@ import keras.backend as K
 from keras import Model
 from keras.models import Sequential, model_from_json
 from keras.layers import (Dense, Conv2D, Flatten, MaxPooling2D, Dropout, GlobalAveragePooling2D)
-from keras.applications import VGG16, VGG19, ResNet50, ResNet101, ResNet152
+from keras.applications import VGG16, VGG19, ResNet50, ResNet101, ResNet152, MobileNet, MobileNetV2, DenseNet121, DenseNet169, DenseNet201, Xception, 
 
 import pandas as pd
 import json
@@ -484,6 +484,12 @@ def classification_ann(instruction,
             'training_accuracy': final_hist.history['accuracy'],
             'validation_accuracy': final_hist.history['val_accuracy']}}
 
+def fine_tuned_model(base_model):
+    x = GlobalAveragePooling2D()(base_model.output)
+    x = Flatten()(x)
+    x = Dense(100, activation="relu")(x)
+    x = Dropout(0.5)(x)
+    return x
 
 def convolutional(instruction=None,
                   read_mode=None,
@@ -579,7 +585,7 @@ def convolutional(instruction=None,
         loss_func = "binary_crossentropy"
         output_layer_activation = "sigmoid"
 
-    logger("Creating convolutional neural netwwork dynamically")
+    logger("Creating convolutional neural network dynamically")
 
     # Convolutional Neural Network
 
@@ -635,6 +641,31 @@ def convolutional(instruction=None,
                 x = Dropout(0.5)(x)
                 pred = Dense(num_classes, activation=output_layer_activation)(x)
                 model = Model(base_model.input, pred)
+            elif arch_lower == "mobilenet":
+                base_model = MobileNet(include_top=False, weights='imagenet', input_shape=input_shape)
+                x = fine_tuned_model(base_model)
+                pred = Dense(num_classes, activation=output_layer_activation)(x)
+                model = Model(base_model.input, pred)
+            elif arch_lower == "mobilenetv2":
+                base_model = MobileNetV2(include_top=False, weights='imagenet', input_shape=input_shape)
+                x = fine_tuned_model(base_model)
+                pred = Dense(num_classes, activation=output_layer_activation)(x)
+                model = Model(base_model.input, pred)
+            elif arch_lower == "densenet121":
+                base_model = DenseNet121(include_top=False, weights='imagenet', input_shape=input_shape)
+                x = fine_tuned_model(base_model)
+                pred = Dense(num_classes, activation=output_layer_activation)(x)
+                model = Model(base_model.input, pred)
+            elif arch_lower == "densenet169":
+                base_model = DenseNet169(include_top=False, weights='imagenet', input_shape=input_shape)
+                x = fine_tuned_model(base_model)
+                pred = Dense(num_classes, activation=output_layer_activation)(x)
+                model = Model(base_model.input, pred)
+            elif arch_lower == "densenet201":
+                base_model = DenseNet201(include_top=False, weights='imagenet', input_shape=input_shape)
+                x = fine_tuned_model(base_model)
+                pred = Dense(num_classes, activation=output_layer_activation)(x)
+                model = Model(base_model.input, pred)
             else:
                 raise ModuleNotFoundError("arch \'" + pretrained.get('arch') + "\' not supported.")
 
@@ -652,6 +683,16 @@ def convolutional(instruction=None,
                 model = ResNet101(include_top=True, weights=None, classes=num_classes)
             elif arch_lower == "resnet152":
                 model = ResNet152(include_top=True, weights=None, classes=num_classes)
+            elif arch_lower == "mobilenet":
+                model = MobileNet(include_top=True, weights=None, classes=num_classes)
+            elif arch_lower == "mobilenetv2":
+                model = MobileNetV2(include_top=True, weights=None, classes=num_classes)
+            elif arch_lower == "densenet121":
+                model = DenseNet121(include_top=True, weights=None, classes=num_classes)
+            elif arch_lower == "densenet169":
+                model = DenseNet169(include_top=True, weights=None, classes=num_classes)
+            elif arch_lower == "densenet201":
+                model = DenseNet201(include_top=True, weights=None, classes=num_classes)
             else:
                 raise ModuleNotFoundError("arch \'" + pretrained.get('arch') + "\' not supported.")
     else:
