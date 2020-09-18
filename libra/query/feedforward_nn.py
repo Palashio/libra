@@ -11,7 +11,7 @@ import keras.backend as K
 from keras import Model
 from keras.models import Sequential, model_from_json
 from keras.layers import (Dense, Conv2D, Flatten, MaxPooling2D, Dropout, GlobalAveragePooling2D)
-from keras.applications import VGG16, VGG19, ResNet50, ResNet101, ResNet152, MobileNet, MobileNetV2, DenseNet121, DenseNet169, DenseNet201, Xception, 
+from keras.applications import VGG16, VGG19, ResNet50, ResNet101, ResNet152, MobileNet, MobileNetV2, DenseNet121, DenseNet169, DenseNet201
 
 import pandas as pd
 import json
@@ -325,14 +325,14 @@ def classification_ann(instruction,
 
     if num_classes >= 2:
         # ANN needs target one hot encoded for classification
-        one_hot_encoder = OneHotEncoder()
+        one_hotencoder = OneHotEncoder()
         y = pd.DataFrame(
-            one_hot_encoder.fit_transform(
+            one_hotencoder.fit_transform(
                 np.reshape(
                     y.values,
                     (-1,
                      1))).toarray(),
-            columns=one_hot_encoder.get_feature_names())
+            columns=one_hotencoder.get_feature_names())
 
     y_train = y.iloc[:len(X_train)]
     y_test = y.iloc[len(X_train):]
@@ -475,7 +475,7 @@ def classification_ann(instruction,
         "plots": plots,
         "target": remove,
         "preprocesser": full_pipeline,
-        "interpreter": one_hot_encoder,
+        "interpreter": one_hotencoder,
         'test_data': {'X': X_test, 'y': y_test},
         'losses': {
             'training_loss': final_hist.history['loss'],

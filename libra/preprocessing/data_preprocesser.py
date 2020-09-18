@@ -133,7 +133,7 @@ def structured_preprocesser(data, ca_threshold, text):
                               accept_sparse=True)),
                          ('embedder',
                           FunctionTransformer(
-                              text_embedder,
+                              textembedder,
                               accept_sparse=True))]),
                     text[x]))
 
@@ -146,14 +146,14 @@ def structured_preprocesser(data, ca_threshold, text):
         if too_many_values(combined[categorical_columns], ca_threshold):
             cat_pipeline = Pipeline([
                 ('imputer', SimpleImputer(strategy="constant", fill_value="")),
-                ('one_hot_encoder', OneHotEncoder(handle_unknown='ignore')),
+                ('one_hotencoder', OneHotEncoder(handle_unknown='ignore')),
                 ('transformer', FunctionTransformer(lambda x: x.toarray(), accept_sparse=True)),
                 ('ca', CA(n_components=-1))
             ])
         else:
             cat_pipeline = Pipeline([
                 ('imputer', SimpleImputer(strategy="constant", fill_value="")),
-                ('one_hot_encoder', OneHotEncoder(handle_unknown='ignore'))
+                ('one_hotencoder', OneHotEncoder(handle_unknown='ignore'))
             ])
 
         full_pipeline.transformers.append(
@@ -230,7 +230,7 @@ def text_preprocessing(data, text_cols):
     data['test'] = combined.iloc[len(data['train']):]
 
 
-def text_embedder(text):
+def textembedder(text):
 
     total = list()
     for i in text:
@@ -253,7 +253,7 @@ def generate_column_labels(full_pipeline, numeric_cols, text_cols):
         else:
             try:
                 encoded_cols = full_pipeline.named_transformers_[
-                    'cat']['one_hot_encoder'].get_feature_names()
+                    'cat']['one_hotencoder'].get_feature_names()
                 cols = [*list(numeric_cols), *encoded_cols, *text_cols]
 
             except Exception as error:
@@ -281,7 +281,7 @@ def clustering_preprocessor(data):
     # pipeline for categorical columns
     cat_pipeline = Pipeline([
         ('imputer', SimpleImputer(strategy="constant", fill_value="")),
-        ('one_hot_encoder', OneHotEncoder()),
+        ('one_hotencoder', OneHotEncoder()),
     ])
 
     # combine the two pipelines

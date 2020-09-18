@@ -357,7 +357,7 @@ history = model.fit_generator(
 #     #    best_hps : best Hyperprameters obtained after tuning, stored as map
 #     #    history : history of the data executed from the given model
 #     """
-#     return tuner,best_model.best_estimator_.get_params()['C'], history
+#     return tuner,best_model.bestestimator_.get_params()['C'], history
 #
 
 # def tuneClass(
@@ -431,7 +431,7 @@ history = model.fit_generator(
 # #     #    best_hps : best Hyperprameters obtained after tuning, stored as array
 # #     #    history : history of the data executed from the given model
 # #     """
-# #     return tuner,best_model.best_estimator_.get_params()['C'], history
+# #     return tuner,best_model.bestestimator_.get_params()['C'], history
 # #     #return models[0], hyp, history
 # #
 # # """"""
@@ -767,7 +767,7 @@ def insert_layer(model,layer_name,layer_index):
 #                   learning_rate=learning_rate,
 #                   restore_from='fresh',
 #                   run_name='run1',
-#                   print_every=10,
+#                   printevery=10,
 #                   sample_every=200,
 #                   save_every=save_every,
 #                   checkpoint_dir=save_path
