@@ -1,6 +1,6 @@
 colorama
 transformers==3.0.2
-tensorflow==2.2.0
+tensorflow
 keras==2.4.3
 numpy
 pandas
