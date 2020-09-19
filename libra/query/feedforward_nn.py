@@ -1,6 +1,7 @@
 from colorama import Fore, Style
 from tensorflow.keras.callbacks import EarlyStopping
 import os
+import tensorflowjs as tfjs
 from libra.preprocessing.image_preprocesser import (setwise_preprocessing,
                                                     csv_preprocessing,
                                                     classwise_preprocessing,
@@ -504,7 +505,8 @@ def convolutional(instruction=None,
                   pretrained=None,
                   epochs=10,
                   height=None,
-                  width=None):
+                  width=None,
+                  save_as_tfjs=False):
     '''
     Body of the convolutional function used that is called in the neural network query
     if the data is presented in images.
@@ -790,8 +792,13 @@ def convolutional(instruction=None,
     # storing values the model dictionary
 
     logger("Stored model under 'convolutional_NN' key")
-    clearLog()
+    
+    if save_as_tfjs:
+        tfjs.converters.save_keras_model(model, "tfjsmodel")
+        logger("Saved tfjs model under 'tfjsmodel' directory")
 
+    clearLog()
+    
     K.clear_session()
 
     return {

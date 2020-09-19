@@ -758,7 +758,8 @@ class client:
                             epochs=10,
                             height=None,
                             width=None,
-                            show_feature_map=False):
+                            show_feature_map=False,
+                            save_as_tfjs=False):
         '''
         Calls the body of the convolutional neural network query which is located in the feedforward.py file
         :param instruction: The objective that you want to model (str).
@@ -794,7 +795,8 @@ class client:
             pretrained=pretrained,
             epochs=epochs,
             height=height,
-            width=width)
+            width=width,
+            save_as_tfjs=False)
 
         if show_feature_map:
             model = self.models["convolutional_NN"]["model"]

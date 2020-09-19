@@ -10,6 +10,7 @@ tabulate
 textblob
 seaborn
 keras-tuner
+tensorflowjs
 jellyfish
 spacy
 autocorrect
