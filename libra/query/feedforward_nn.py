@@ -507,8 +507,8 @@ def convolutional(instruction=None,
                   epochs=10,
                   height=None,
                   width=None,
-                  save_as_tfjs=False,
-                  save_as_tflite=False):
+                  save_as_tfjs=None,
+                  save_as_tflite=None):
     '''
     Body of the convolutional function used that is called in the neural network query
     if the data is presented in images.
