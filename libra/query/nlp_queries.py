@@ -207,8 +207,7 @@ def text_classification_query(self, instruction, drop=None,
         # generates appropriate classification plots by feeding all
         # information
         logger("Generating plots")
-        plots = generate_classification_plots(
-            history, X, Y, model, X_test, y_test)
+        plots = generate_classification_plots(history)
 
     if save_model:
         save(model, save_model, save_path=save_path)

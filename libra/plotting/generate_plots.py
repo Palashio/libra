@@ -140,7 +140,7 @@ def generate_regression_plots(history, data, label):
     return plots, plot_names
 
 
-def generate_classification_plots(history, data, label, model, X_test, y_test):
+def generate_classification_plots(history):
     '''
     plotting function that generates classification plots
 

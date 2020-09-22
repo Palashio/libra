@@ -458,7 +458,7 @@ def classification_ann(instruction,
     plots = {}
     if generate_plots:
         plots = generate_classification_plots(
-            models[len(models) - 1], data, y, model, X_test, y_test)
+            models[len(models) - 1])
 
     if save_model:
         save(final_model, save_model, save_path)
@@ -508,7 +508,8 @@ def convolutional(instruction=None,
                   height=None,
                   width=None,
                   save_as_tfjs=None,
-                  save_as_tflite=None):
+                  save_as_tflite=None,
+                  generate_plots=True):
     '''
     Body of the convolutional function used that is called in the neural network query
     if the data is presented in images.
@@ -787,6 +788,26 @@ def convolutional(instruction=None,
         epochs=epochs,
         verbose=verbose)
 
+    models = []
+    losses = []
+    accuracies = []
+    model_data = []
+
+    model_data.append(model)
+    models.append(history)
+
+    losses.append(history.history["val_loss"]
+                      [len(history.history["val_loss"]) - 1])
+    accuracies.append(history.history['val_accuracy']
+                      [len(history.history['val_accuracy']) - 1])
+    
+    # final_model = model_data[accuracies.index(max(accuracies))]
+    # final_hist = models[accuracies.index(max(accuracies))]
+
+    plots = {}
+    if generate_plots:
+        plots = generate_classification_plots(models[len(models) - 1])
+
     logger('->',
            'Final training accuracy: {}'.format(history.history['accuracy'][len(history.history['accuracy']) - 1]))
     logger('->', 'Final validation accuracy: {}'.format(
@@ -816,6 +837,7 @@ def convolutional(instruction=None,
         'data': {'train': X_train, 'test': X_test},
         'shape': input_shape,
         "model": model,
+        "plots": plots,
         'losses': {
             'training_loss': history.history['loss'],
             'val_loss': history.history['val_loss']},
