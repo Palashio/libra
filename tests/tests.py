@@ -34,7 +34,7 @@ class TestQueries(unittest.TestCase):
         self.newClient.regression_query_ann('predict median house value', epochs=3)
         self.assertTrue('regression_ANN' in self.newClient.models)
         del self.newClient.models['regression_ANN']
-    
+
     # Tests dashboard
     @ordered
     def test_dashboard(self):
@@ -144,7 +144,7 @@ class TestQueries(unittest.TestCase):
     # Tests whether text classification works without errors, and creates a key in models dictionary
     @ordered
     def test_text_classification(self):
-        x = client("tools/data/nlp_data/smallSentimentAnalysis.csv")
+        x = client("/Users/anasawadalla/PycharmProjects/libra/tools/data/nlp_data/smallSentimentAnalysis.csv")
         x.text_classification_query("get captions", epochs=1)
 
     # Tests whether name entity recognition query works without errors, and creates a key in models dictionary
