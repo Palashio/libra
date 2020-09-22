@@ -38,7 +38,7 @@ class TestQueries(unittest.TestCase):
     # Tests dashboard
     @ordered
     def test_dashboard(self):
-        self.newClients.dashboard()
+        self.newClient.dashboard()
 
     # Tests whether classification_ann_query works without errors, and creates a key in models dictionary
     @ordered
