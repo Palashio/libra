@@ -177,8 +177,7 @@ def tune_helper(
         logger("->", 'Best Hyperparameters Found: {}'.format(returned_pms.values))
         if generate_plots:
             logger("Generating updated plots")
-            plots = generate_classification_plots(
-                    history, data, target_column, returned_model, X_test, y_test)
+            plots = generate_classification_plots(history)
 
 
         logger("Re-stored model under 'classification_ANN' key")
