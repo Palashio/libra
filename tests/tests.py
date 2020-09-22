@@ -144,7 +144,7 @@ class TestQueries(unittest.TestCase):
     # Tests whether text classification works without errors, and creates a key in models dictionary
     @ordered
     def test_text_classification(self):
-        x = client("/Users/anasawadalla/PycharmProjects/libra/tools/data/nlp_data/smallSentimentAnalysis.csv")
+        x = client("tools/data/nlp_data/smallSentimentAnalysis.csv")
         x.text_classification_query("get captions", epochs=1)
 
     # Tests whether name entity recognition query works without errors, and creates a key in models dictionary

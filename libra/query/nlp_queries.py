@@ -90,7 +90,7 @@ def text_classification_query(self, instruction, drop=None,
                               test_size=0.2,
                               random_state=49,
                               learning_rate=1e-2,
-                              epochs=20,
+                              epochs=5,
                               monitor="val_loss",
                               batch_size=32,
                               max_text_length=20,
@@ -113,6 +113,9 @@ def text_classification_query(self, instruction, drop=None,
 
     if epochs < 1:
         raise Exception("Epoch number is less than 1 (model will not be trained)")
+
+    if max_text_length <= 1:
+        raise Exception("Max text length should be larger than 1")
 
     if batch_size < 1:
         raise Exception("Batch size must be equal to or greater than 1")
