@@ -1,6 +1,8 @@
 from colorama import Fore, Style
 from tensorflow.keras.callbacks import EarlyStopping
 import os
+import tensorflow as tf
+import tensorflowjs as tfjs
 from libra.preprocessing.image_preprocesser import (setwise_preprocessing,
                                                     csv_preprocessing,
                                                     classwise_preprocessing,
@@ -325,14 +327,14 @@ def classification_ann(instruction,
 
     if num_classes >= 2:
         # ANN needs target one hot encoded for classification
-        one_hot_encoder = OneHotEncoder()
+        one_hotencoder = OneHotEncoder()
         y = pd.DataFrame(
-            one_hot_encoder.fit_transform(
+            one_hotencoder.fit_transform(
                 np.reshape(
                     y.values,
                     (-1,
                      1))).toarray(),
-            columns=one_hot_encoder.get_feature_names())
+            columns=one_hotencoder.get_feature_names())
 
     y_train = y.iloc[:len(X_train)]
     y_test = y.iloc[len(X_train):]
@@ -475,7 +477,7 @@ def classification_ann(instruction,
         "plots": plots,
         "target": remove,
         "preprocesser": full_pipeline,
-        "interpreter": one_hot_encoder,
+        "interpreter": one_hotencoder,
         'test_data': {'X': X_test, 'y': y_test},
         'losses': {
             'training_loss': final_hist.history['loss'],
@@ -504,7 +506,9 @@ def convolutional(instruction=None,
                   pretrained=None,
                   epochs=10,
                   height=None,
-                  width=None):
+                  width=None,
+                  save_as_tfjs=None,
+                  save_as_tflite=None):
     '''
     Body of the convolutional function used that is called in the neural network query
     if the data is presented in images.
@@ -790,6 +794,17 @@ def convolutional(instruction=None,
     # storing values the model dictionary
 
     logger("Stored model under 'convolutional_NN' key")
+    
+    if save_as_tfjs:
+        tfjs.converters.save_keras_model(model, "tfjsmodel")
+        logger("Saved tfjs model under 'tfjsmodel' directory")
+
+    if save_as_tflite:
+        converter = tf.lite.TFLiteConverter.from_keras_model(model)
+        tflite_model = converter.convert()
+        open ("model.tflite" , "wb") .write(tflite_model)
+        logger("Saved tflite model as 'model.tflite' ")
+
     clearLog()
 
     K.clear_session()

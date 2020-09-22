@@ -1285,10 +1285,10 @@ None
 Executes code to tokenize & normalize text, autocorrects spelling, and lemmatizes all columns comprised of textual data
 
 
-### text_embedder ###
+### textembedder ###
 
 ``` python
-libra.text_embedder(text)
+libra.textembedder(text)
 ```
 
 Embeds data in text column by summing all of the numerical vector representations of textual contents in column into suitable scalar format
