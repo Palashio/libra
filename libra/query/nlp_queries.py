@@ -90,11 +90,10 @@ def text_classification_query(self, instruction, drop=None,
                               test_size=0.2,
                               random_state=49,
                               learning_rate=1e-2,
-                              epochs=20,
+                              epochs=5,
                               monitor="val_loss",
                               batch_size=32,
-                              max_text_length=200,
-                              max_features=20000,
+                              max_text_length=20,
                               generate_plots=True,
                               save_model=False,
                               save_path=os.getcwd()):
@@ -115,11 +114,11 @@ def text_classification_query(self, instruction, drop=None,
     if epochs < 1:
         raise Exception("Epoch number is less than 1 (model will not be trained)")
 
+    if max_text_length <= 1:
+        raise Exception("Max text length should be larger than 1")
+
     if batch_size < 1:
         raise Exception("Batch size must be equal to or greater than 1")
-
-    if max_text_length < 1:
-        raise Exception("Max text length must be equal to or greater than 1")
 
     if save_model:
         if not os.path.exists(save_path):
@@ -158,8 +157,7 @@ def text_classification_query(self, instruction, drop=None,
         X = encode_text(X, X)
 
     X = np.array(X)
-
-    model = get_keras_text_class(max_features, len(classes), learning_rate)
+    model = get_keras_text_class(len(vocab), len(classes), learning_rate)
     logger("Building Keras LSTM model dynamically")
 
     X_train, X_test, y_train, y_test = train_test_split(
@@ -185,9 +183,10 @@ def text_classification_query(self, instruction, drop=None,
         verbose=0,
         patience=5)
 
+
     history = model.fit(X_train, y_train, validation_data=(X_test, y_test),
-                        batch_size=batch_size,
-                        epochs=epochs, callbacks=[es], verbose=0)
+                            batch_size=batch_size,
+                            epochs=epochs, callbacks=[es], verbose=0)
 
     logger("->", "Final training loss: {}".format(history.history["loss"][len(history.history["loss"]) - 1]))
     if testing:
@@ -223,7 +222,7 @@ def text_classification_query(self, instruction, drop=None,
                                           "target": Y,
                                           "vocabulary": vocab,
                                           "interpreter": label_mappings,
-                                          "max_text_length": max_text_length,
+                                          # "max_text_length": max_text_length,
                                           'test_data': {'X': X_test, 'y': y_test},
                                           'losses': losses,
                                           'accuracy': accuracy}
@@ -550,7 +549,7 @@ def image_caption_query(self, instruction, label_column=None,
         train_captions.append(caption)
     with NoStdStreams():
         image_model = tf.keras.applications.InceptionV3(include_top=False,
-                                                    weights='imagenet')
+                                                        weights='imagenet')
     new_input = image_model.input
     hidden_layer = image_model.layers[-1].output
     logger("Extracting features from model")

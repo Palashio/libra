@@ -5,5 +5,5 @@ class edaDashboard(object):
         self.path_to_data = path_to_data
 
     def dashboard(self):
-        os.system("streamlit run LibEDA.py "+self.path_to_data)
+        os.system("streamlit run /libra/dashboard/LibEDA.py "+self.path_to_data)
 

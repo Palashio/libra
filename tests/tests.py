@@ -35,6 +35,11 @@ class TestQueries(unittest.TestCase):
         self.assertTrue('regression_ANN' in self.newClient.models)
         del self.newClient.models['regression_ANN']
 
+    # Tests dashboard
+    @ordered
+    def test_dashboard(self):
+        self.newClient.dashboard()
+
     # Tests whether classification_ann_query works without errors, and creates a key in models dictionary
     @ordered
     def test_classification_ann(self):

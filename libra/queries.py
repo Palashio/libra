@@ -895,11 +895,10 @@ class client:
                                   test_size=0.2,
                                   random_state=49,
                                   learning_rate=1e-2,
-                                  epochs=20,
+                                  epochs=5,
                                   monitor="val_loss",
                                   batch_size=32,
-                                  max_text_length=200,
-                                  max_features=20000,
+                                  max_text_length=20,
                                   generate_plots=True,
                                   save_model=False,
                                   save_path=os.getcwd()):
@@ -932,7 +931,6 @@ class client:
             epochs=epochs,
             batch_size=batch_size,
             max_text_length=max_text_length,
-            max_features=max_features,
             generate_plots=generate_plots,
             save_model=save_model,
             save_path=save_path)
