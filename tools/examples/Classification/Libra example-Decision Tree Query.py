@@ -7,9 +7,7 @@ Original file is located at
     https://colab.research.google.com/drive/1mLgo2BMORoe_OzvxdRvoWfG787YWD9Fu
 """
 
-!pip install libra
-
-from libra import client
+from libra import client  # pip install libra
 
 """Here's the link for the used dataset: 
 https://archive.ics.uci.edu/ml/machine-learning-databases/00529/

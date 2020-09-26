@@ -22,7 +22,7 @@ Most of the transactions were Non-Fraudulent (99.83 Percent) of the time, while 
 # Installing Libra
 """
 
-pip install -U libra
+# pip install -U libra
 
 """# Importing client from libra
 Everything is built around the client object. You can call different queries on it and everything will be stored under the models field of the object.
