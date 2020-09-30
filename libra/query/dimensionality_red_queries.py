@@ -4,7 +4,7 @@ from itertools import product, permutations
 from libra.preprocessing.data_reader import DataReader
 import os
 from sklearn.ensemble import RandomForestRegressor
-from libra.preprocessing.data_preprocesser import structured_preprocesser, initial_preprocesser, clustering_preprocessor
+from libra.preprocessing.data_preprocessor import structured_preprocessor, initial_preprocessor, clustering_preprocessor
 from libra.data_generation.grammartree import get_value_instruction
 from libra.data_generation.dataset_labelmatcher import get_similar_column
 
@@ -58,7 +58,7 @@ def dimensionality_RF(instruction, dataset, target="", y="", n_features=10):
         data = dataReader.data_generator()
         data.fillna(0, inplace=True)
         remove = get_similar_column(get_value_instruction(instruction), data)
-        data, y, target, full_pipeline = initial_preprocesser(
+        data, y, target, full_pipeline = initial_preprocessor(
             data, instruction, True, 0.2, [], 0.2, random_state=49)
 
         le = preprocessing.LabelEncoder()
@@ -117,7 +117,7 @@ def dimensionality_PCA(instruction, dataset, ca_threshold=None):
     dataReader = DataReader(dataset)
     dataset = dataReader.data_generator()
 
-    data, y, target, full_pipeline = initial_preprocesser(
+    data, y, target, full_pipeline = initial_preprocessor(
         dataset, instruction, True, 0.2, [], 0.2, random_state=49)
 
 
@@ -169,7 +169,7 @@ def dimensionality_ICA(instruction, dataset, target="", y=""):
         data.fillna(0, inplace=True)
         remove = get_similar_column(get_value_instruction(instruction), data)
 
-        data, y, target, full_pipeline = initial_preprocesser(
+        data, y, target, full_pipeline = initial_preprocessor(
             data, instruction, True, 0.2, [], 0.2, random_state=49)
 
         X_train = data['train']
@@ -260,7 +260,7 @@ def dimensionality_KPCA(instruction, dataset, target="", y=""):
     dataReader = DataReader(dataset)
     dataset = dataReader.data_generator()
 
-    data, y, target, full_pipeline = initial_preprocesser(
+    data, y, target, full_pipeline = initial_preprocessor(
         dataset, instruction, True, 0.2, [], 0.2, random_state=49)
 
 

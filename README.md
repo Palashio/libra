@@ -73,7 +73,7 @@ newClient.info()
 will return a dictionary of all the information that was generated: 
 
 ```python
-dict_keys(['id', 'model', 'num_classes', 'plots', 'target', 'preprocesser', 
+dict_keys(['id', 'model', 'num_classes', 'plots', 'target', 'preprocessor', 
           'interpreter', 'test_data', 'losses', 'accuracy'])
 ```
 

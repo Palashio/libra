@@ -2,7 +2,7 @@ import pandas as pd
 from libra.preprocessing.data_reader import DataReader
 from sklearn import svm, tree
 from sklearn.metrics import accuracy_score
-from libra.preprocessing.data_preprocesser import initial_preprocesser, clustering_preprocessor
+from libra.preprocessing.data_preprocessor import initial_preprocessor, clustering_preprocessor
 from sklearn.cluster import KMeans
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.model_selection import cross_val_score
@@ -209,7 +209,7 @@ def k_means_clustering(dataset=None,
     return {
         'id': generate_id(),
         "model": (modelStorage[len(modelStorage) - 1] if clusters is None else kmeans),
-        "preprocesser": full_pipeline,
+        "preprocessor": full_pipeline,
         "plots": plots}
 
 
@@ -242,7 +242,7 @@ def train_svm(instruction,
         data.drop(drop, axis=1, inplace=True)
 
     logger("Preprocessing data")
-    data, y, target, full_pipeline = initial_preprocesser(
+    data, y, target, full_pipeline = initial_preprocessor(
         data, instruction, preprocess, ca_threshold, text, test_size=test_size, random_state=random_state)
     logger("->", "Target column found: {}".format(target))
 
@@ -292,7 +292,7 @@ def train_svm(instruction,
                 y_train),
             'accuracy_score': score},
         "target": target,
-        "preprocesser": full_pipeline,
+        "preprocessor": full_pipeline,
         "interpreter": label_mappings,
         'test_data': {
             'X': X_test,
@@ -327,7 +327,7 @@ def nearest_neighbors(instruction=None,
     if drop is not None:
         data.drop(drop, axis=1, inplace=True)
     logger("Preprocessing data")
-    data, y, remove, full_pipeline = initial_preprocesser(
+    data, y, remove, full_pipeline = initial_preprocessor(
         data, instruction, preprocess, ca_threshold, text, test_size=test_size, random_state=random_state)
     logger("->", "Target column found: {}".format(remove))
     X_train = data['train']
@@ -377,7 +377,7 @@ def nearest_neighbors(instruction=None,
                                                             X_train,
                                                             y_train,
                                                             cv=3)},
-            "preprocesser": full_pipeline,
+            "preprocessor": full_pipeline,
             "interpreter": label_mappings,
             'test_data': {'X': X_test,
                           'y': y_test},
@@ -414,7 +414,7 @@ def decision_tree(instruction,
     if drop is not None:
         data.drop(drop, axis=1, inplace=True)
 
-    data, y, remove, full_pipeline = initial_preprocesser(
+    data, y, remove, full_pipeline = initial_preprocessor(
         data, instruction, preprocess, ca_threshold, text)
     logger("->", "Target column found: {}".format(remove))
 
@@ -470,7 +470,7 @@ def decision_tree(instruction,
             y_train,
             cv=3), 'accuracy_score': score},
         "accuracy_score": score,
-        "preprocesser": full_pipeline,
+        "preprocessor": full_pipeline,
         "interpreter": label_mappings,
         'test_data': {'X': X_test, 'y': y_test}}
 
@@ -507,7 +507,7 @@ def train_xgboost(instruction,
         data.drop(drop, axis=1, inplace=True)
 
     logger("Preprocessing data")
-    data, y, target, full_pipeline = initial_preprocesser(
+    data, y, target, full_pipeline = initial_preprocessor(
         data, instruction, preprocess, ca_threshold, text, test_size=test_size, random_state=random_state)
     logger("->", "Target column found: {}".format(target))
 
@@ -566,6 +566,6 @@ def train_xgboost(instruction,
             y_train,), 
             'accuracy_score': score},
         "accuracy_score": score,
-        "preprocesser": full_pipeline,
+        "preprocessor": full_pipeline,
         "interpreter": label_mappings,
         'test_data': {'X': X_test, 'y': y_test}}

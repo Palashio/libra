@@ -1,6 +1,6 @@
 from regression_split_functions import (
     initializer,
-    preprocesser,
+    preprocessor,
     instruction_identifier,
     set_splitter,
     modeler,
