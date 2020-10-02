@@ -88,7 +88,7 @@ dict_keys(['regression_ANN', svm'])
 
 ## Tutorials
 
- - Full documentation can be found at [libradocs.github.io](https://libradocs.github.io/). 
+ - Full documentation can be found at [libradocs.org](https://libradocs.org/). 
  - A list of resources can be found on our [awesome-libra](https://github.com/Palashio/awesome-libra) repository. 
 
 ---
@@ -98,7 +98,7 @@ dict_keys(['regression_ANN', svm'])
 Welcome to the Libra community!
 
 If you have any questions, feel free to:
-1. [read the docs](https://libradocs.github.io/).
+1. [read the docs](https://libradocs.org/).
 2. [Search through the issues](https://github.com/Palashio/libra/issues?q=is%3Aissue+is%3Aclosed).
 3. [Ask on stackoverflow](https://stackoverflow.com/questions/ask?guided=false) with the tag libra.
 4. [Join our slack](https://join.slack.com/t/the-libra-team/shared_invite/zt-ek6bpd47-hdIxXlRAenKfy5JNWe8bgw).
