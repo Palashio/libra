@@ -25,6 +25,7 @@ from libra.plotting.generate_plots import (generate_regression_plots,
 from libra.preprocessing.data_preprocesser import initial_preprocesser
 from libra.modeling.prediction_model_creation import get_keras_model_reg, get_keras_model_class
 from sklearn.preprocessing import StandardScaler
+from sklearn.metrics import classification_report
 import numpy as np
 
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
@@ -744,6 +745,11 @@ def convolutional(instruction=None,
             activation="softmax"
         ))
 
+
+    for layer in base_model.layers:
+        layer.trainable = False
+
+
     model.compile(
         optimizer="adam",
         loss=loss_func,
@@ -778,6 +784,9 @@ def convolutional(instruction=None,
     if epochs <= 0:
         raise BaseException("Number of epochs has to be greater than 0.")
     logger('Training image model')
+
+    # model.summary()
+
     history = model.fit_generator(
         X_train,
         steps_per_epoch=X_train.n //
@@ -800,9 +809,40 @@ def convolutional(instruction=None,
                       [len(history.history["val_loss"]) - 1])
     accuracies.append(history.history['val_accuracy']
                       [len(history.history['val_accuracy']) - 1])
+
+    ######### CLASSIFICATION REPORT #########################
+
+    # predIdxs = model.predict(X_test, batch_size=X_test.batch_size)
+    # print("PREDIX before argmax: {}".format(predIdxs))
+
+    # predIdxs = np.argmax(predIdxs, axis=1)
+
+    # # print("CLASS MODE : {}".format(X_test.class_mode))
+
+    # print("PREDIX after argmax: {}".format(predIdxs))
+
+    # # print("TEST LIST : {}".format(test_list))
+
+    # import math
+    # number_of_examples = len(X_test.filenames)
+    # number_of_generator_calls = math.ceil(number_of_examples / (1.0 * X_test.batch_size)) 
+
+    # test_labels = []
+
+    # for i in range(0,int(number_of_generator_calls)):
+    #     test_labels.extend(np.array(X_test[i][1]))
+
+    # test_labels = [int(x) for x in test_labels]
+
+    # print("TEST_LABELS : {}".format(test_labels))
+
+    # print("\n",classification_report(test_labels, predIdxs, target_names=X_test.class_indices.keys()))
+
     
     # final_model = model_data[accuracies.index(max(accuracies))]
     # final_hist = models[accuracies.index(max(accuracies))]
+
+    ####################################################################
 
     plots = {}
     if generate_plots:
