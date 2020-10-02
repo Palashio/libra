@@ -3,7 +3,7 @@ import os
 import cv2
 import keras.backend as K
 
-from libra.preprocessing.image_preprocesser import (setwise_preprocessing,
+from libra.preprocessing.image_preprocessor import (setwise_preprocessing,
                                                     csv_preprocessing,
                                                     classwise_preprocessing,
                                                     set_distinguisher,

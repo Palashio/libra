@@ -18,7 +18,7 @@ from nltk.corpus import stopwords
 from autocorrect import Speller
 
 
-def initial_preprocesser(
+def initial_preprocessor(
         data,
         instruction,
         preprocess,
@@ -64,7 +64,7 @@ def initial_preprocesser(
     # preprocess the dataset
     full_pipeline = None
     if preprocess:
-        data, full_pipeline = structured_preprocesser(data, ca_threshold, text)
+        data, full_pipeline = structured_preprocessor(data, ca_threshold, text)
     else:
         data.fillna(0, inplace=True)
 
@@ -73,7 +73,7 @@ def initial_preprocesser(
     return data, y, target, full_pipeline
 
 
-def structured_preprocesser(data, ca_threshold, text):
+def structured_preprocessor(data, ca_threshold, text):
 
     # Preprocessing for datetime columns
     process_dates(data)

@@ -163,8 +163,8 @@ class client:
         else:
             modeldict = self.models[model]
 
-            if modeldict.get('preprocesser'):
-                data = modeldict['preprocesser'].transform(data)
+            if modeldict.get('preprocessor'):
+                data = modeldict['preprocessor'].transform(data)
             predictions = modeldict['model'].predict(data)
         clearLog()
         return self.interpret(model, predictions)

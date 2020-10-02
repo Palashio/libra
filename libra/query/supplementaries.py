@@ -102,7 +102,7 @@ def tune_helper(
         data = dataReader.data_generator()
         target = models['regression_ANN']['target']
         target_column = data[models['regression_ANN']['target']]
-        data = models['regression_ANN']['preprocesser'].transform(
+        data = models['regression_ANN']['preprocessor'].transform(
             data.drop(target, axis=1))
         returned_model, returned_pms, history, X_test, y_test = tuneReg(
             data.values,
@@ -134,7 +134,7 @@ def tune_helper(
             'model': returned_model,
             'target': target,
             "plots": plots,
-            'preprocesser': models['regression_ANN']['preprocesser'],
+            'preprocessor': models['regression_ANN']['preprocessor'],
             'interpreter': models['regression_ANN']['interpreter'],
             'test_data': {'X' : X_test, 'y' : y_test},
             'hyperparameters': returned_pms.values,
@@ -152,7 +152,7 @@ def tune_helper(
         data = dataReader.data_generator()
         target = models['classification_ANN']['target']
         target_column = data[models['classification_ANN']['target']]
-        data = models['classification_ANN']['preprocesser'].transform(
+        data = models['classification_ANN']['preprocessor'].transform(
             data.drop(target, axis=1))
         returned_model, returned_pms, history, X_test, y_test = tuneClass(
             data,
@@ -186,7 +186,7 @@ def tune_helper(
             'model': returned_model,
             'hyperparameters': returned_pms.values,
             'plots': plots,
-            'preprocesser': models['classification_ANN']['preprocesser'],
+            'preprocessor': models['classification_ANN']['preprocessor'],
             'interpreter': models['classification_ANN']['interpreter'],
             'test_data': {'X' : X_test, 'y': y_test},
             'target': target,

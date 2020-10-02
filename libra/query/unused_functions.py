@@ -529,7 +529,7 @@ history = model.fit_generator(
 #     le = preprocessing.LabelEncoder()
 #     y = le.fit_transform(y)
 #
-#     data = structured_preprocesser(data)
+#     data = structured_preprocessor(data)
 #
 #     perms = []
 #     overall_storage = []

@@ -3,7 +3,7 @@ from tensorflow.keras.callbacks import EarlyStopping
 import os
 import tensorflow as tf
 import tensorflowjs as tfjs
-from libra.preprocessing.image_preprocesser import (setwise_preprocessing,
+from libra.preprocessing.image_preprocessor import (setwise_preprocessing,
                                                     csv_preprocessing,
                                                     classwise_preprocessing,
                                                     set_distinguisher,
@@ -22,7 +22,7 @@ from keras.preprocessing.image import ImageDataGenerator
 from sklearn.preprocessing import OneHotEncoder
 from libra.plotting.generate_plots import (generate_regression_plots,
                                            generate_classification_plots)
-from libra.preprocessing.data_preprocesser import initial_preprocesser
+from libra.preprocessing.data_preprocessor import initial_preprocessor
 from libra.modeling.prediction_model_creation import get_keras_model_reg, get_keras_model_class
 from sklearn.preprocessing import StandardScaler
 from sklearn.metrics import classification_report
@@ -126,7 +126,7 @@ def regression_ann(
 
     if drop is not None:
         data.drop(drop, axis=1, inplace=True)
-    data, y, target, full_pipeline = initial_preprocesser(
+    data, y, target, full_pipeline = initial_preprocessor(
         data, instruction, preprocess, ca_threshold, text, test_size=test_size, random_state=random_state)
     logger("->", "Target column found: {}".format(target))
 
@@ -269,7 +269,7 @@ def regression_ann(
         "target": target,
         "num_classes": 1,
         "plots": plots,
-        "preprocesser": full_pipeline,
+        "preprocessor": full_pipeline,
         "interpreter": target_scaler,
         'test_data': {'X': X_test, 'y': y_test},
         'losses': {
@@ -310,7 +310,7 @@ def classification_ann(instruction,
     if drop is not None:
         data.drop(drop, axis=1, inplace=True)
 
-    data, y, remove, full_pipeline = initial_preprocesser(
+    data, y, remove, full_pipeline = initial_preprocessor(
         data, instruction, preprocess, ca_threshold, text, test_size=test_size, random_state=random_state)
     logger("->", "Target column found: {}".format(remove))
 
@@ -477,7 +477,7 @@ def classification_ann(instruction,
         'num_classes': num_classes,
         "plots": plots,
         "target": remove,
-        "preprocesser": full_pipeline,
+        "preprocessor": full_pipeline,
         "interpreter": one_hotencoder,
         'test_data': {'X': X_test, 'y': y_test},
         'losses': {

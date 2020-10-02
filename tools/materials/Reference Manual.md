@@ -17,7 +17,7 @@ Table of Contents
    * [mypreprocessor](#mypreprocessor)
 * [regression_split_functions.py](#regression_split_functions)
    * [initializer](#initializer)
-   * [preprocesser](#preprocesser)
+   * [preprocessor](#preprocessor)
    * [instruction_identifier](#instruction_identifier)
    * [set_splitter](#set_splitter)
    * [modeler](#modeler)
@@ -55,9 +55,9 @@ Table of Contents
   * [tokenize_text](#tokenize_text)
   * [text_clean_up](#text_clean_up)
   * [fix_slang](#fix_slang)
-* [data_preprocesser.py](#data_preprocesser)
-  * [initial_preprocesser](#initial_preprocesser)
-  * [structured_preprocesser](#structured_preprocesser)  
+* [data_preprocessor.py](#data_preprocessor)
+  * [initial_preprocessor](#initial_preprocessor)
+  * [structured_preprocessor](#structured_preprocessor)  
   * [process_dates](#process_dates)
   * [generate_column_labels](#generate_column_labels)
   * [clustering_preprocessing](#clustering_preprocessing)
@@ -93,7 +93,7 @@ Table of Contents
     * [call](#call-RNN_Decoder)
     * [reset_state](#reset_state)
   * [generate_caption_helper](#generate_caption_helper)
-* [image_preprocesser.py](#image_preprocesser)
+* [image_preprocessor.py](#image_preprocessor)
   * [setwise_preprocessing](#setwise_preprocessing)
   * [pathwise_preprocessing](#pathwise_preprocessing)
   * [classwise_preprocessing](#classwise_preprocessing)
@@ -306,10 +306,10 @@ params: `{}`
 
 Retrieves dictionary of parameters revised after reading in data, removing data of any incomplete observations, and initializing the data parameter with inputted set of data
    
-### preprocesser ###
+### preprocessor ###
    
 ``` python
-libra.preprocesser(params)
+libra.preprocessor(params)
 ```
 
 Implements preprocessing code defined in structured_preprocessor method to data earlier initialized in data pipeline parameters dictionary for regression based tasks
@@ -326,7 +326,7 @@ Dictionary of parameters for regression task data pipeline
 
 None
 
-Executes structured_preprocesser method which preprocesses data by categorizing/labelling/transforming data into format computable for regression model
+Executes structured_preprocessor method which preprocesses data by categorizing/labelling/transforming data into format computable for regression model
 
 ### instruction_identifier ###
 
@@ -1121,12 +1121,12 @@ libra.fix_slang(text)
 
 ***
 
-## data_preprocesser ##
+## data_preprocessor ##
 
-### initial_preprocesser ###
+### initial_preprocessor ###
 
 ``` python
-libra.initial_preprocesser(data, instruction, preprocess, ca_threshold)
+libra.initial_preprocessor(data, instruction, preprocess, ca_threshold)
 ```
 
 Checks data instantiated in libra instance and applies initial data preprocessing techniques
@@ -1175,10 +1175,10 @@ full_pipeline: `obj`
 
 Retrieves object containing all of the properties (imputer, one hot encoder, etc.) from the preprocessing pipeline
 
-### structured_preprocesser ###
+### structured_preprocessor ###
 
 ``` python
-libra.structured_preprocesser(data, ca_threshold)
+libra.structured_preprocessor(data, ca_threshold)
 ```
 
 Applies well known preprocessing techniques on structured data instantiated in libra instance for non-clustering modelling/analysis methods
@@ -1523,7 +1523,7 @@ libra.generate_caption_helper(image, decoder, encoder, tokenizer, image_features
 
 ***
 
-## image_preprocesser ##
+## image_preprocessor ##
 
 ### setwise_preprocessing ###
 

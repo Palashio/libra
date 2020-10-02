@@ -21,7 +21,7 @@ from libra.data_generation.dataset_labelmatcher import get_similar_column, get_s
 from keras.callbacks import EarlyStopping
 from matplotlib import pyplot
 from libra.data_generation.grammartree import get_value_instruction
-from libra.preprocessing.data_preprocesser import structured_preprocesser
+from libra.preprocessing.data_preprocessor import structured_preprocessor
 from libra.modeling.prediction_model_creation import get_keras_model_reg
 from libra.modeling.prediction_model_creation import get_keras_model_class
 from keras.utils import to_categorical
@@ -47,8 +47,8 @@ def initializer(params):
     return params
 
 
-def preprocesser(params):
-    data = structured_preprocesser(params['data'])
+def preprocessor(params):
+    data = structured_preprocessor(params['data'])
     params['data'] = data
 
 
