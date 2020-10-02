@@ -14,6 +14,7 @@ from keras import Model
 from keras.models import Sequential, model_from_json
 from keras.layers import (Dense, Conv2D, Flatten, MaxPooling2D, Dropout, GlobalAveragePooling2D)
 from keras.applications import VGG16, VGG19, ResNet50, ResNet101, ResNet152, MobileNet, MobileNetV2, DenseNet121, DenseNet169, DenseNet201
+from keras.optimizers import Adam
 
 import pandas as pd
 import json
@@ -502,6 +503,7 @@ def convolutional(instruction=None,
                   new_folders=True,
                   image_column=None,
                   training_ratio=0.8,
+                  fine_tune=False,
                   augmentation=True,
                   custom_arch=None,
                   pretrained=None,
@@ -521,6 +523,8 @@ def convolutional(instruction=None,
     # data_path = get_folder_dir()
 
     logger("Generating datasets for classes")
+
+    LR = 0.001
 
     if pretrained:
         if not height:
@@ -701,6 +705,7 @@ def convolutional(instruction=None,
                 model = DenseNet201(include_top=True, weights=None, classes=num_classes)
             else:
                 raise ModuleNotFoundError("arch \'" + pretrained.get('arch') + "\' not supported.")
+
     else:
         model = Sequential()
         # model.add(
@@ -745,13 +750,14 @@ def convolutional(instruction=None,
             activation="softmax"
         ))
 
-
+    
     for layer in base_model.layers:
         layer.trainable = False
 
+    opt = Adam(learning_rate=LR)
 
     model.compile(
-        optimizer="adam",
+        optimizer=opt,
         loss=loss_func,
         metrics=['accuracy'])
 
@@ -783,6 +789,7 @@ def convolutional(instruction=None,
 
     if epochs <= 0:
         raise BaseException("Number of epochs has to be greater than 0.")
+
     logger('Training image model')
 
     # model.summary()
@@ -797,6 +804,33 @@ def convolutional(instruction=None,
         epochs=epochs,
         verbose=verbose)
 
+    if fine_tune:
+
+        for layer in base_model.layers:
+            layer.trainable = True
+
+        opt = Adam(learning_rate=LR/10)
+
+        model.compile(
+            optimizer=opt,
+            loss=loss_func,
+            metrics=['accuracy'])
+
+        print("\n\n\n")
+        logger('Training fine tuned model')
+
+        history = model.fit_generator(
+                                        X_train,
+                                        steps_per_epoch=X_train.n //
+                                                        X_train.batch_size,
+                                        validation_data=X_test,
+                                        validation_steps=X_test.n //
+                                                        X_test.batch_size,
+                                        epochs=epochs+5,
+                                        verbose=verbose
+                                    )
+
+
     models = []
     losses = []
     accuracies = []
@@ -810,39 +844,9 @@ def convolutional(instruction=None,
     accuracies.append(history.history['val_accuracy']
                       [len(history.history['val_accuracy']) - 1])
 
-    ######### CLASSIFICATION REPORT #########################
-
-    # predIdxs = model.predict(X_test, batch_size=X_test.batch_size)
-    # print("PREDIX before argmax: {}".format(predIdxs))
-
-    # predIdxs = np.argmax(predIdxs, axis=1)
-
-    # # print("CLASS MODE : {}".format(X_test.class_mode))
-
-    # print("PREDIX after argmax: {}".format(predIdxs))
-
-    # # print("TEST LIST : {}".format(test_list))
-
-    # import math
-    # number_of_examples = len(X_test.filenames)
-    # number_of_generator_calls = math.ceil(number_of_examples / (1.0 * X_test.batch_size)) 
-
-    # test_labels = []
-
-    # for i in range(0,int(number_of_generator_calls)):
-    #     test_labels.extend(np.array(X_test[i][1]))
-
-    # test_labels = [int(x) for x in test_labels]
-
-    # print("TEST_LABELS : {}".format(test_labels))
-
-    # print("\n",classification_report(test_labels, predIdxs, target_names=X_test.class_indices.keys()))
-
     
     # final_model = model_data[accuracies.index(max(accuracies))]
     # final_hist = models[accuracies.index(max(accuracies))]
-
-    ####################################################################
 
     plots = {}
     if generate_plots:
@@ -853,6 +857,30 @@ def convolutional(instruction=None,
     logger('->', 'Final validation accuracy: {}'.format(
         history.history['val_accuracy'][len(history.history['val_accuracy']) - 1]))
     # storing values the model dictionary
+
+    if output_layer_activation == "sigmoid":
+        data = modeldict['data']['test']
+
+        number_of_examples = len(data.filenames)
+        number_of_generator_calls = math.ceil(number_of_examples / (1.0 * data.batch_size)) 
+
+        test_labels = []
+
+        for i in range(0,int(number_of_generator_calls)):
+            test_labels.extend(np.array(data[i][1]))
+
+        real = [int(x) for x in test_labels]
+
+        preds = modeldict['model'].predict(data)
+        ans = []
+        for i in range(len(preds)):
+            ans.append(int(round(preds[i][0])))
+
+    elif output_layer_activation == "softmax":
+        print("TEST")
+
+    else:
+        print("TEST")
 
     logger("Stored model under 'convolutional_NN' key")
     
@@ -876,6 +904,7 @@ def convolutional(instruction=None,
         'data_path': data_path,
         'data': {'train': X_train, 'test': X_test},
         'shape': input_shape,
+        'res': {'real': real, 'pred': ans},
         "model": model,
         "plots": plots,
         'losses': {

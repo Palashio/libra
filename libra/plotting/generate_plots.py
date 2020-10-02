@@ -1,5 +1,6 @@
 import seaborn as sns
 import warnings
+import math
 from sklearn.metrics import roc_curve, auc
 from sklearn.preprocessing import LabelBinarizer
 from numpy import interp
@@ -7,7 +8,7 @@ import pandas as pd
 import sklearn
 import matplotlib.pyplot as plt
 from sklearn.metrics import confusion_matrix, plot_confusion_matrix, recall_score, precision_score, f1_score, \
-    ConfusionMatrixDisplay
+    ConfusionMatrixDisplay, classification_report
 import numpy as np
 from sklearn.exceptions import DataConversionWarning
 
@@ -435,6 +436,22 @@ def analyze(client, model=None, save=True, save_model=False):
             modeldict['scores']['recall_score'] = recall
             modeldict['scores']['precision_score'] = precision
             modeldict['scores']['f1_score'] = f1
+
+    elif model == 'convolutional_NN':
+        
+
+        print(classification_report(real, ans, target_names=data.class_indices.keys()))
+        accuracy = modeldict['accuracy']['validation_accuracy']
+        # recall = recall_score(real, preds, average='micro')
+        # precision = precision_score(real, preds, average='micro')
+        # f1 = f1_score(real, preds, average='micro')
+
+        logger("->",
+               ("Accuracy on test set: {}".format(str((accuracy[-1] if isinstance(accuracy, list) else accuracy)))))
+        # logger("->", ("Recall on test set: {}".format(str(recall))))
+        # logger("->", ("Precision on test set: {}".format(str(precision))))
+        # logger("->", ("F1 Score on test set: {}".format(str(f1))))
+
 
     else:
         print("further analysis is not supported for {}".format(model))
