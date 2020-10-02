@@ -1,6 +1,7 @@
 from colorama import Fore, Style
 from tensorflow.keras.callbacks import EarlyStopping
 import os
+import math
 import tensorflow as tf
 import tensorflowjs as tfjs
 from libra.preprocessing.image_preprocessor import (setwise_preprocessing,
@@ -858,29 +859,34 @@ def convolutional(instruction=None,
         history.history['val_accuracy'][len(history.history['val_accuracy']) - 1]))
     # storing values the model dictionary
 
+    number_of_examples = len(X_test.filenames)
+    number_of_generator_calls = math.ceil(number_of_examples / (1.0 * X_test.batch_size)) 
+
+    test_labels = []
+
+    for i in range(0,int(number_of_generator_calls)):
+        test_labels.extend(np.array(X_test[i][1]))
+
+    predIdx = model.predict(X_test)
+
     if output_layer_activation == "sigmoid":
-        data = modeldict['data']['test']
-
-        number_of_examples = len(data.filenames)
-        number_of_generator_calls = math.ceil(number_of_examples / (1.0 * data.batch_size)) 
-
-        test_labels = []
-
-        for i in range(0,int(number_of_generator_calls)):
-            test_labels.extend(np.array(data[i][1]))
-
         real = [int(x) for x in test_labels]
-
-        preds = modeldict['model'].predict(data)
         ans = []
-        for i in range(len(preds)):
-            ans.append(int(round(preds[i][0])))
+        for i in range(len(predIdx)):
+            ans.append(int(round(predIdx[i][0])))
 
     elif output_layer_activation == "softmax":
-        print("TEST")
+        real = []
+        for ans in test_labels:
+            real.append(ans.argmax())
+        ans = []
+        for r in predIdx:
+            ans.append(r.argmax())
+
+        
 
     else:
-        print("TEST")
+        print("NOT THE CASE")
 
     logger("Stored model under 'convolutional_NN' key")
     
@@ -904,7 +910,7 @@ def convolutional(instruction=None,
         'data_path': data_path,
         'data': {'train': X_train, 'test': X_test},
         'shape': input_shape,
-        'res': {'real': real, 'pred': ans},
+        'res': {'real': real, 'ans': ans},
         "model": model,
         "plots": plots,
         'losses': {

@@ -438,7 +438,9 @@ def analyze(client, model=None, save=True, save_model=False):
             modeldict['scores']['f1_score'] = f1
 
     elif model == 'convolutional_NN':
-        
+        data = modeldict['data']['test']
+        real = modeldict['res']['real']
+        ans = modeldict['res']['ans']
 
         print(classification_report(real, ans, target_names=data.class_indices.keys()))
         accuracy = modeldict['accuracy']['validation_accuracy']
