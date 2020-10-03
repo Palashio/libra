@@ -753,8 +753,9 @@ def convolutional(instruction=None,
         ))
 
     
-    for layer in base_model.layers:
-        layer.trainable = False
+    if pretrained and 'weights' in pretrained and pretrained.get('weights') == 'imagenet':
+        for layer in base_model.layers:
+            layer.trainable = False
 
     opt = Adam(learning_rate=LR)
 
