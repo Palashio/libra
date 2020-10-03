@@ -23,7 +23,8 @@ from libra.query.supplementaries import save, generate_id
 from keras.preprocessing.image import ImageDataGenerator
 from sklearn.preprocessing import OneHotEncoder
 from libra.plotting.generate_plots import (generate_regression_plots,
-                                           generate_classification_plots)
+                                           generate_classification_plots,
+                                           generate_fine_tuned_classification_plots)
 from libra.preprocessing.data_preprocessor import initial_preprocessor
 from libra.modeling.prediction_model_creation import get_keras_model_reg, get_keras_model_class
 from sklearn.preprocessing import StandardScaler
@@ -526,7 +527,7 @@ def convolutional(instruction=None,
     logger("Generating datasets for classes")
 
     LR = 0.001
-
+    plots = {}
     if pretrained:
         if not height:
             height = 224
@@ -791,6 +792,7 @@ def convolutional(instruction=None,
     if epochs <= 0:
         raise BaseException("Number of epochs has to be greater than 0.")
 
+    print("\n")
     logger('Training image model')
 
     # model.summary()
@@ -807,6 +809,11 @@ def convolutional(instruction=None,
 
     if fine_tune:
 
+        logger('->',
+           'Training accuracy: {}'.format(history.history['accuracy'][len(history.history['accuracy']) - 1]))
+        logger('->', 'Validation accuracy: {}'.format(
+            history.history['val_accuracy'][len(history.history['val_accuracy']) - 1]))
+
         for layer in base_model.layers:
             layer.trainable = True
 
@@ -817,19 +824,38 @@ def convolutional(instruction=None,
             loss=loss_func,
             metrics=['accuracy'])
 
-        print("\n\n\n")
+        print("\n\n")
         logger('Training fine tuned model')
 
-        history = model.fit_generator(
+        fine_tuning_epoch = epochs+10
+        history_fine = model.fit_generator(
                                         X_train,
                                         steps_per_epoch=X_train.n //
                                                         X_train.batch_size,
                                         validation_data=X_test,
                                         validation_steps=X_test.n //
                                                         X_test.batch_size,
-                                        epochs=epochs+5,
+                                        epochs=fine_tuning_epoch,
+                                        initial_epoch=history.epoch[-1],
                                         verbose=verbose
                                     )
+        #frozen model acc and loss history 
+        acc = history.history['accuracy']
+        val_acc = history.history['val_accuracy']
+
+        loss = history.history['loss']
+        val_loss = history.history['val_loss']
+
+        #fine tuned model acc and loss history
+        acc += history_fine.history['accuracy']
+        val_acc += history_fine.history['val_accuracy']
+
+        loss += history_fine.history['loss']
+        val_loss += history_fine.history['val_loss']
+
+        if generate_plots:
+            plots = generate_fine_tuned_classification_plots(acc,val_acc,loss,val_loss,epochs)
+
 
 
     models = []
@@ -849,10 +875,10 @@ def convolutional(instruction=None,
     # final_model = model_data[accuracies.index(max(accuracies))]
     # final_hist = models[accuracies.index(max(accuracies))]
 
-    plots = {}
-    if generate_plots:
+    if generate_plots and not fine_tune:
         plots = generate_classification_plots(models[len(models) - 1])
 
+    print("\n")
     logger('->',
            'Final training accuracy: {}'.format(history.history['accuracy'][len(history.history['accuracy']) - 1]))
     logger('->', 'Final validation accuracy: {}'.format(
@@ -911,8 +937,8 @@ def convolutional(instruction=None,
         'data': {'train': X_train, 'test': X_test},
         'shape': input_shape,
         'res': {'real': real, 'ans': ans},
-        "model": model,
-        "plots": plots,
+        'model': model,
+        'plots': plots,
         'losses': {
             'training_loss': history.history['loss'],
             'val_loss': history.history['val_loss']},

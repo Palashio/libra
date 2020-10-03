@@ -163,6 +163,51 @@ def generate_classification_plots(history):
 
     return return_plots
 
+def generate_fine_tuned_classification_plots(acc,val_acc,loss,val_loss,fine_tuning_epoch):
+    '''
+    plotting function that generates classification plots for fine tuned models
+    :return the names and actual classification plots
+    '''
+
+    plots = []
+    plot_names = []
+
+    img_acc = plt.figure()
+    plt.figure(figsize=(8, 8))
+    plt.subplot(2, 1, 1)
+    plt.plot(acc, label='Training Accuracy')
+    plt.plot(val_acc, label='Validation Accuracy')
+    plt.ylim([0, 1.0])
+    plt.plot([fine_tuning_epoch-1,fine_tuning_epoch-1],
+            plt.ylim(), label='Start Fine Tuning')
+    plt.legend(loc='lower right')
+    plt.title('Training and Validation Accuracy')
+
+    img_loss = plt.figure()
+    plt.figure(figsize=(8, 8))
+    plt.subplot(2, 1, 2)
+    plt.plot(loss, label='Training Loss')
+    plt.plot(val_loss, label='Validation Loss')
+    plt.ylim([0, 1.0])
+    plt.plot([fine_tuning_epoch-1,fine_tuning_epoch-1],
+            plt.ylim(), label='Start Fine Tuning')
+    plt.legend(loc='upper right')
+    plt.title('Training and Validation Loss')
+    plt.xlabel('epoch')
+    # plt.show()
+
+    # generating plots for accuracy
+    plots.append(img_acc)
+    plot_names.append('accuracyvsval_accuracy')
+    # generating plots for loss
+    plots.append(img_loss)
+    plot_names.append('lossvsval_los')
+
+    # dynamic way to return all possible plots in case it expands together
+    return_plots = {str(plot_names[x]):plots[x] for x in range(len(plots))}
+
+    return return_plots
+
 
 # function to return both val and accuracy plots on one pane
 
@@ -438,21 +483,42 @@ def analyze(client, model=None, save=True, save_model=False):
             modeldict['scores']['f1_score'] = f1
 
     elif model == 'convolutional_NN':
+
+        logger("Making predictions for test data")
+
         data = modeldict['data']['test']
         real = modeldict['res']['real']
         ans = modeldict['res']['ans']
+        labels = []
+        for k,v in data.class_indices.items():
+            labels.append(k)
+        
+        # create roc plots
+        # roc = plot_mc_roc(data, ans)
 
-        print(classification_report(real, ans, target_names=data.class_indices.keys()))
+        # create confusion matrices
+        cm = confusion_matrix(real, ans)
+        cm = ConfusionMatrixDisplay(
+            confusion_matrix=cm,
+            display_labels=labels).plot()
+        cm = cm.figure_
+
+        logger("Gathering metrics for display: ")
+
+        print(classification_report(real, ans, target_names=labels))
         accuracy = modeldict['accuracy']['validation_accuracy']
-        # recall = recall_score(real, preds, average='micro')
-        # precision = precision_score(real, preds, average='micro')
-        # f1 = f1_score(real, preds, average='micro')
 
         logger("->",
                ("Accuracy on test set: {}".format(str((accuracy[-1] if isinstance(accuracy, list) else accuracy)))))
-        # logger("->", ("Recall on test set: {}".format(str(recall))))
-        # logger("->", ("Precision on test set: {}".format(str(precision))))
-        # logger("->", ("F1 Score on test set: {}".format(str(f1))))
+
+        logger("->", "Creating confusion matrix...")
+
+        # if save:
+        #     if 'plots' not in modeldict:
+        #         modeldict['plots'] = {}
+        #     # modeldict['plots']['roc_curve'] = roc
+        #     modeldict['plots']['confusion_matrix'] = cm
+        #     modeldict['plots']['classification_report'] = classification_report(real, ans, target_names=labels)
 
 
     else:
