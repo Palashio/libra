@@ -3,7 +3,6 @@ from tensorflow.keras.callbacks import EarlyStopping
 import os
 import math
 import tensorflow as tf
-import tensorflowjs as tfjs
 from libra.preprocessing.image_preprocessor import (setwise_preprocessing,
                                                     csv_preprocessing,
                                                     classwise_preprocessing,
@@ -512,7 +511,6 @@ def convolutional(instruction=None,
                   epochs=10,
                   height=None,
                   width=None,
-                  save_as_tfjs=None,
                   save_as_tflite=None,
                   generate_plots=True):
     '''
@@ -916,10 +914,6 @@ def convolutional(instruction=None,
         print("NOT THE CASE")
 
     logger("Stored model under 'convolutional_NN' key")
-    
-    if save_as_tfjs:
-        tfjs.converters.save_keras_model(model, "tfjsmodel")
-        logger("Saved tfjs model under 'tfjsmodel' directory")
 
     if save_as_tflite:
         converter = tf.lite.TFLiteConverter.from_keras_model(model)

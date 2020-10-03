@@ -760,7 +760,6 @@ class client:
                             height=None,
                             width=None,
                             show_feature_map=False,
-                            save_as_tfjs=None,
                             save_as_tflite=None,
                             generate_plots=None):
         '''
@@ -800,7 +799,6 @@ class client:
             epochs=epochs,
             height=height,
             width=width,
-            save_as_tfjs=save_as_tfjs,
             save_as_tflite=save_as_tflite,
             generate_plots=generate_plots)
 
