@@ -1,6 +1,7 @@
 from colorama import Fore, Style
 from tensorflow.keras.callbacks import EarlyStopping
 import os
+import math
 import tensorflow as tf
 import tensorflowjs as tfjs
 from libra.preprocessing.image_preprocessor import (setwise_preprocessing,
@@ -14,6 +15,7 @@ from keras import Model
 from keras.models import Sequential, model_from_json
 from keras.layers import (Dense, Conv2D, Flatten, MaxPooling2D, Dropout, GlobalAveragePooling2D)
 from keras.applications import VGG16, VGG19, ResNet50, ResNet101, ResNet152, MobileNet, MobileNetV2, DenseNet121, DenseNet169, DenseNet201
+from keras.optimizers import Adam
 
 import pandas as pd
 import json
@@ -21,10 +23,12 @@ from libra.query.supplementaries import save, generate_id
 from keras.preprocessing.image import ImageDataGenerator
 from sklearn.preprocessing import OneHotEncoder
 from libra.plotting.generate_plots import (generate_regression_plots,
-                                           generate_classification_plots)
+                                           generate_classification_plots,
+                                           generate_fine_tuned_classification_plots)
 from libra.preprocessing.data_preprocessor import initial_preprocessor
 from libra.modeling.prediction_model_creation import get_keras_model_reg, get_keras_model_class
 from sklearn.preprocessing import StandardScaler
+from sklearn.metrics import classification_report
 import numpy as np
 
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
@@ -501,6 +505,7 @@ def convolutional(instruction=None,
                   new_folders=True,
                   image_column=None,
                   training_ratio=0.8,
+                  fine_tune=False,
                   augmentation=True,
                   custom_arch=None,
                   pretrained=None,
@@ -521,6 +526,8 @@ def convolutional(instruction=None,
 
     logger("Generating datasets for classes")
 
+    LR = 0.001
+    plots = {}
     if pretrained:
         if not height:
             height = 224
@@ -700,6 +707,7 @@ def convolutional(instruction=None,
                 model = DenseNet201(include_top=True, weights=None, classes=num_classes)
             else:
                 raise ModuleNotFoundError("arch \'" + pretrained.get('arch') + "\' not supported.")
+
     else:
         model = Sequential()
         # model.add(
@@ -744,8 +752,15 @@ def convolutional(instruction=None,
             activation="softmax"
         ))
 
+    
+    if pretrained and 'weights' in pretrained and pretrained.get('weights') == 'imagenet':
+        for layer in base_model.layers:
+            layer.trainable = False
+
+    opt = Adam(learning_rate=LR)
+
     model.compile(
-        optimizer="adam",
+        optimizer=opt,
         loss=loss_func,
         metrics=['accuracy'])
 
@@ -777,7 +792,12 @@ def convolutional(instruction=None,
 
     if epochs <= 0:
         raise BaseException("Number of epochs has to be greater than 0.")
+
+    print("\n")
     logger('Training image model')
+
+    # model.summary()
+
     history = model.fit_generator(
         X_train,
         steps_per_epoch=X_train.n //
@@ -787,6 +807,57 @@ def convolutional(instruction=None,
                          X_test.batch_size,
         epochs=epochs,
         verbose=verbose)
+
+    if fine_tune:
+
+        logger('->',
+           'Training accuracy: {}'.format(history.history['accuracy'][len(history.history['accuracy']) - 1]))
+        logger('->', 'Validation accuracy: {}'.format(
+            history.history['val_accuracy'][len(history.history['val_accuracy']) - 1]))
+
+        for layer in base_model.layers:
+            layer.trainable = True
+
+        opt = Adam(learning_rate=LR/10)
+
+        model.compile(
+            optimizer=opt,
+            loss=loss_func,
+            metrics=['accuracy'])
+
+        print("\n\n")
+        logger('Training fine tuned model')
+
+        fine_tuning_epoch = epochs+10
+        history_fine = model.fit_generator(
+                                        X_train,
+                                        steps_per_epoch=X_train.n //
+                                                        X_train.batch_size,
+                                        validation_data=X_test,
+                                        validation_steps=X_test.n //
+                                                        X_test.batch_size,
+                                        epochs=fine_tuning_epoch,
+                                        initial_epoch=history.epoch[-1],
+                                        verbose=verbose
+                                    )
+        #frozen model acc and loss history 
+        acc = history.history['accuracy']
+        val_acc = history.history['val_accuracy']
+
+        loss = history.history['loss']
+        val_loss = history.history['val_loss']
+
+        #fine tuned model acc and loss history
+        acc += history_fine.history['accuracy']
+        val_acc += history_fine.history['val_accuracy']
+
+        loss += history_fine.history['loss']
+        val_loss += history_fine.history['val_loss']
+
+        if generate_plots:
+            plots = generate_fine_tuned_classification_plots(acc,val_acc,loss,val_loss,epochs)
+
+
 
     models = []
     losses = []
@@ -800,24 +871,54 @@ def convolutional(instruction=None,
                       [len(history.history["val_loss"]) - 1])
     accuracies.append(history.history['val_accuracy']
                       [len(history.history['val_accuracy']) - 1])
+
     
     # final_model = model_data[accuracies.index(max(accuracies))]
     # final_hist = models[accuracies.index(max(accuracies))]
 
-    plots = {}
-    if generate_plots:
+    if generate_plots and not fine_tune:
         plots = generate_classification_plots(models[len(models) - 1])
 
+    print("\n")
     logger('->',
            'Final training accuracy: {}'.format(history.history['accuracy'][len(history.history['accuracy']) - 1]))
     logger('->', 'Final validation accuracy: {}'.format(
         history.history['val_accuracy'][len(history.history['val_accuracy']) - 1]))
     # storing values the model dictionary
 
+    number_of_examples = len(X_test.filenames)
+    number_of_generator_calls = math.ceil(number_of_examples / (1.0 * X_test.batch_size)) 
+
+    test_labels = []
+
+    for i in range(0,int(number_of_generator_calls)):
+        test_labels.extend(np.array(X_test[i][1]))
+
+    predIdx = model.predict(X_test)
+
+    if output_layer_activation == "sigmoid":
+        real = [int(x) for x in test_labels]
+        ans = []
+        for i in range(len(predIdx)):
+            ans.append(int(round(predIdx[i][0])))
+
+    elif output_layer_activation == "softmax":
+        real = []
+        for ans in test_labels:
+            real.append(ans.argmax())
+        ans = []
+        for r in predIdx:
+            ans.append(r.argmax())
+
+        
+
+    else:
+        print("NOT THE CASE")
+
     logger("Stored model under 'convolutional_NN' key")
-    
-    if save_as_tfjs:
-        tfjs.converters.save_keras_model(model, "tfjsmodel")
+
+    if save_as_tfjs:	
+        tfjs.converters.save_keras_model(model, "tfjsmodel")	
         logger("Saved tfjs model under 'tfjsmodel' directory")
 
     if save_as_tflite:
@@ -836,8 +937,9 @@ def convolutional(instruction=None,
         'data_path': data_path,
         'data': {'train': X_train, 'test': X_test},
         'shape': input_shape,
-        "model": model,
-        "plots": plots,
+        'res': {'real': real, 'ans': ans},
+        'model': model,
+        'plots': plots,
         'losses': {
             'training_loss': history.history['loss'],
             'val_loss': history.history['val_loss']},
