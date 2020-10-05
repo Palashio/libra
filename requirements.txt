@@ -21,4 +21,4 @@ download
 altair==4.1.0
 streamlit==0.64.0
 xgboost
-tensorflow_gpu==2.3.0
+tensorflow_gpu==2.3.1
