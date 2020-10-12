@@ -889,4 +889,6 @@ def question_answering(self, instruction, use_bert_squad=True, path_to_model=Non
 
     model.fit_retriever(dataset)
 
-    return self.models['qa'] = model
+    self.models['qa'] = model
+
+    return self.models['qa']
