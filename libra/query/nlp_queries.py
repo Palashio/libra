@@ -15,6 +15,7 @@ from tensorflow.python.keras.callbacks import EarlyStopping
 from transformers import TFGPT2LMHeadModel, GPT2Tokenizer
 from transformers import TFT5ForConditionalGeneration, T5Tokenizer, \
     pipeline
+import pandas as pd
 import libra.plotting.nonkeras_generate_plots
 from libra.data_generation.dataset_labelmatcher import get_similar_column
 from libra.data_generation.grammartree import get_value_instruction
@@ -874,8 +875,9 @@ def get_ner(self, instruction):
     return self.models["named_entity_recognition"]
 
 
-def question_answering(self, data, instruction, use_pretrained=True, path_to_model=None):
-    if use_pretrained == False:
+def question_answering(self, instruction, use_bert_squad=True, path_to_model=None):
+    # checks if user already has pretrained model
+    if use_bert_squad == False:
         download_model(model='bert-squad_1.1', dir='./')
         model = QAPipeline(reader='bert_qa.joblib')
     else:
