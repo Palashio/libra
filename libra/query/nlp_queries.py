@@ -883,9 +883,10 @@ def question_answering(self, instruction, use_bert_squad=True, path_to_model=Non
     else:
         model = QAPipeline(reader=path_to_model)
 
-    dataset = pd.read_csv(data, converters={'paragraphs': literal_eval})
+    dataset = pd.read_csv(self.dataset, converters={
+                          'paragraphs': literal_eval})
     dataset = filter_paragraphs(dataset)
 
     model.fit_retriever(dataset)
 
-    self.models['qa'] = model
+    return self.models['qa'] = model
