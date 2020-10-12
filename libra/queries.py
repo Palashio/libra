@@ -1126,6 +1126,13 @@ class client:
 
     # question answering query
     def question_answering_query(self, instruction, download_model=True, model_path=None):
+        """
+        function to train question answering model
+        :param instruction: Task identification
+        :param download_model: whether model will be downloaded
+        :param model_path: path to model (if applicable)
+        :return: dictionary object with detected name-entities
+        """
         self.models["qa"] = question_answering(
             self, instruction=instruction)
         self.latest_model = "qa"
