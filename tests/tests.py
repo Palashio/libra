@@ -161,6 +161,14 @@ class TestQueries(unittest.TestCase):
         x.generate_text()
         self.assertTrue('text_generation' in x.models)
 
+    # Tests whether Q&A query works without error, and creates a key in models dictionary
+    @ordered
+    def test_qa(self):
+        x = client("tools/data/nlp_data/qa-ds.csv")
+        x.question_answering_query("develop question answering model")
+        self.assertTrue('qa' in x.models)
+        del x.models['qa']
+
     # Test whether content based recommender works without error, and creates a key in models dictionary
     @ordered
     def test_content_recommender(self):
