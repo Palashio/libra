@@ -3,7 +3,11 @@ import warnings
 
 import numpy as np
 import tensorflow as tf
+from ast import literal_eval
 from colorama import Fore, Style
+from cdqa.utils.filters import filter_paragraphs
+from cdqa.utils.download import download_model, download_bnpp_data
+from cdqa.pipeline.cdqa_sklearn import QAPipeline
 from keras_preprocessing import sequence
 from nltk.corpus import stopwords
 from sklearn.model_selection import train_test_split
@@ -22,6 +26,7 @@ from libra.preprocessing.data_reader import DataReader
 from libra.preprocessing.image_caption_helpers import load_image, map_func, CNN_Encoder, RNN_Decoder, get_path_column, \
     generate_caption_helper
 from libra.query.supplementaries import save
+
 
 counter = 0
 
@@ -112,7 +117,8 @@ def text_classification_query(self, instruction, drop=None,
             "data)")
 
     if epochs < 1:
-        raise Exception("Epoch number is less than 1 (model will not be trained)")
+        raise Exception(
+            "Epoch number is less than 1 (model will not be trained)")
 
     if max_text_length <= 1:
         raise Exception("Max text length should be larger than 1")
@@ -183,18 +189,19 @@ def text_classification_query(self, instruction, drop=None,
         verbose=0,
         patience=5)
 
-
     history = model.fit(X_train, y_train, validation_data=(X_test, y_test),
-                            batch_size=batch_size,
-                            epochs=epochs, callbacks=[es], verbose=0)
+                        batch_size=batch_size,
+                        epochs=epochs, callbacks=[es], verbose=0)
 
-    logger("->", "Final training loss: {}".format(history.history["loss"][len(history.history["loss"]) - 1]))
+    logger("->", "Final training loss: {}".format(
+        history.history["loss"][len(history.history["loss"]) - 1]))
     if testing:
         logger("->",
                "Final validation loss: {}".format(history.history["val_loss"][len(history.history["val_loss"]) - 1]))
         logger("->", "Final validation accuracy: {}".format(
             history.history["val_accuracy"][len(history.history["val_accuracy"]) - 1]))
-        losses = {'training_loss': history.history['loss'], 'val_loss': history.history['val_loss']}
+        losses = {
+            'training_loss': history.history['loss'], 'val_loss': history.history['val_loss']}
         accuracy = {'training_accuracy': history.history['accuracy'],
                     'validation_accuracy': history.history['val_accuracy']}
     else:
@@ -238,7 +245,8 @@ def get_summary(self, text, max_summary_length=50, num_beams=4, no_repeat_ngram_
     text = [text]
     text = add_prefix(text, "summarize: ")
     result = model.generate(
-        tf.convert_to_tensor(tokenize_for_input_ids(text, tokenizer, max_length=modelInfo['max_text_length'])),
+        tf.convert_to_tensor(tokenize_for_input_ids(
+            text, tokenizer, max_length=modelInfo['max_text_length'])),
         max_length=max_summary_length, num_beams=num_beams,
         no_repeat_ngram_size=no_repeat_ngram_size, num_return_sequences=num_return_sequences,
         early_stopping=early_stopping)
@@ -276,7 +284,8 @@ def summarization_query(self, instruction, preprocess=True, label_column=None,
         raise Exception("Text and summary must be at least of length 2")
 
     if epochs < 1:
-        raise Exception("Epoch number is less than 1 (model will not be trained)")
+        raise Exception(
+            "Epoch number is less than 1 (model will not be trained)")
 
     if batch_size < 1:
         raise Exception("Batch size must be equal to or greater than 1")
@@ -342,16 +351,19 @@ def summarization_query(self, instruction, preprocess=True, label_column=None,
 
     # Suppress unnecessary output
     with NoStdStreams():
-        model = TFT5ForConditionalGeneration.from_pretrained("t5-small", output_loading_info=False)
+        model = TFT5ForConditionalGeneration.from_pretrained(
+            "t5-small", output_loading_info=False)
 
     if testing:
         X_train, X_test, y_train, y_test = train_test_split(
             X, Y, test_size=test_size, random_state=random_state)
-        test_dataset = tf.data.Dataset.from_tensor_slices((X_test, y_test)).shuffle(10000).batch(batch_size)
+        test_dataset = tf.data.Dataset.from_tensor_slices(
+            (X_test, y_test)).shuffle(10000).batch(batch_size)
     else:
         X_train = X
         y_train = Y
-    train_dataset = tf.data.Dataset.from_tensor_slices((X_train, y_train)).shuffle(10000).batch(batch_size)
+    train_dataset = tf.data.Dataset.from_tensor_slices(
+        (X_train, y_train)).shuffle(10000).batch(batch_size)
 
     optimizer = tf.keras.optimizers.Adam(learning_rate=learning_rate)
     loss = tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True)
@@ -370,23 +382,27 @@ def summarization_query(self, instruction, preprocess=True, label_column=None,
                     loss_value = loss(truth, out[0])
                     total_loss += loss_value
                     grads = tape.gradient(loss_value, model.trainable_weights)
-                    optimizer.apply_gradients(zip(grads, model.trainable_weights))
+                    optimizer.apply_gradients(
+                        zip(grads, model.trainable_weights))
 
             total_training_loss.append(total_loss)
 
             # Validation Loop
             if testing:
                 for data, truth in test_dataset:
-                    logits = model(inputs=data, decoder_input_ids=data, training=False)
+                    logits = model(
+                        inputs=data, decoder_input_ids=data, training=False)
                     val_loss = loss(truth, logits[0])
                     total_loss_val += val_loss
 
                 total_validation_loss.append(total_loss_val)
 
-    logger("->", "Final training loss: {}".format(str(total_training_loss[len(total_training_loss) - 1].numpy())))
+    logger("->", "Final training loss: {}".format(
+        str(total_training_loss[len(total_training_loss) - 1].numpy())))
 
     if testing:
-        total_loss_val_str = str(total_validation_loss[len(total_validation_loss) - 1].numpy())
+        total_loss_val_str = str(
+            total_validation_loss[len(total_validation_loss) - 1].numpy())
     else:
         total_loss_val = [0]
         total_loss_val_str = str("0, No validation done")
@@ -397,12 +413,14 @@ def summarization_query(self, instruction, preprocess=True, label_column=None,
         losses = {"Training loss": total_training_loss[len(total_training_loss) - 1].numpy(),
                   "Validation loss": total_validation_loss[len(total_validation_loss) - 1].numpy()}
     else:
-        losses = {"Training loss": total_training_loss[len(total_training_loss) - 1].numpy()}
+        losses = {"Training loss": total_training_loss[len(
+            total_training_loss) - 1].numpy()}
 
     plots = None
     if generate_plots:
         logger("Generating plots")
-        plots = {"loss": libra.plotting.nonkeras_generate_plots.plot_loss(total_training_loss, total_validation_loss)}
+        plots = {"loss": libra.plotting.nonkeras_generate_plots.plot_loss(
+            total_training_loss, total_validation_loss)}
 
     if save_model:
         logger("Saving model")
@@ -482,13 +500,15 @@ def image_caption_query(self, instruction, label_column=None,
         raise Exception("Buffer size must be equal to or greater than 1")
 
     if embedding_dim < 1:
-        raise Exception("Embedding dimension must be equal to or greater than 1")
+        raise Exception(
+            "Embedding dimension must be equal to or greater than 1")
 
     if units < 1:
         raise Exception("Units must be equal to or greater than 1")
 
     if epochs < 1:
-        raise Exception("Epoch number is less than 1 (model will not be trained)")
+        raise Exception(
+            "Epoch number is less than 1 (model will not be trained)")
 
     if save_model_decoder:
         if not os.path.exists(save_path_decoder):
@@ -591,7 +611,7 @@ def image_caption_query(self, instruction, label_column=None,
 
     dataset = dataset.map(lambda item1, item2: tf.numpy_function(
         map_func, [item1, item2], [tf.float32, tf.int32]),
-                          num_parallel_calls=tf.data.experimental.AUTOTUNE)
+        num_parallel_calls=tf.data.experimental.AUTOTUNE)
 
     # Shuffle and batch
     logger("Shuffling dataset")
@@ -599,11 +619,12 @@ def image_caption_query(self, instruction, label_column=None,
     dataset = dataset.prefetch(buffer_size=tf.data.experimental.AUTOTUNE)
 
     if testing:
-        dataset_val = tf.data.Dataset.from_tensor_slices((img_name_val, cap_val))
+        dataset_val = tf.data.Dataset.from_tensor_slices(
+            (img_name_val, cap_val))
 
         dataset_val = dataset_val.map(lambda item1, item2: tf.numpy_function(
             map_func, [item1, item2], [tf.float32, tf.int32]),
-                                      num_parallel_calls=tf.data.experimental.AUTOTUNE)
+            num_parallel_calls=tf.data.experimental.AUTOTUNE)
 
         # Shuffle and batch
         dataset_val = dataset_val.shuffle(buffer_size).batch(batch_size)
@@ -644,7 +665,8 @@ def image_caption_query(self, instruction, label_column=None,
 
                 for i in range(1, target.shape[1]):
                     # passing the features through the decoder
-                    predictions, hidden, _ = decoder(dec_input, features, hidden)
+                    predictions, hidden, _ = decoder(
+                        dec_input, features, hidden)
 
                     loss += loss_function(target[:, i], predictions)
 
@@ -678,7 +700,8 @@ def image_caption_query(self, instruction, label_column=None,
 
                 for i in range(1, target.shape[1]):
                     # passing the features through the decoder
-                    predictions, hidden, _ = decoder(dec_input, features, hidden)
+                    predictions, hidden, _ = decoder(
+                        dec_input, features, hidden)
 
                     loss += loss_function(target[:, i], predictions)
 
@@ -719,7 +742,8 @@ def image_caption_query(self, instruction, label_column=None,
     plots = {}
     if generate_plots:
         logger("Generating plots")
-        plots.update({"loss": libra.plotting.nonkeras_generate_plots.plot_loss(loss_plot_train, loss_plot_val)})
+        plots.update({"loss": libra.plotting.nonkeras_generate_plots.plot_loss(
+            loss_plot_train, loss_plot_val)})
 
     logger("->", "Final training loss: {}".format(str(total_loss.numpy())))
     total_loss = total_loss.numpy()
@@ -773,21 +797,25 @@ def generate_text(self, prefix=None,
     '''
 
     if return_sequences < 1:
-        raise Exception("return sequences number is less than 1 (need an integer of atleast 1)")
+        raise Exception(
+            "return sequences number is less than 1 (need an integer of atleast 1)")
 
     if max_length < 1:
         raise Exception("Max text length must be equal to or greater than 1")
 
     with NoStdStreams():
         tokenizer = GPT2Tokenizer.from_pretrained("gpt2")
-        model = TFGPT2LMHeadModel.from_pretrained("gpt2", pad_token_id=tokenizer.eos_token_id)
+        model = TFGPT2LMHeadModel.from_pretrained(
+            "gpt2", pad_token_id=tokenizer.eos_token_id)
 
     if file_data:
         f = open(self.dataset, "r")
-        input_ids = tokenizer.encode(f.read(), return_tensors='tf', max_length=max_length - 1, truncation=True)
+        input_ids = tokenizer.encode(
+            f.read(), return_tensors='tf', max_length=max_length - 1, truncation=True)
         f.close()
     else:
-        input_ids = tokenizer.encode(prefix, return_tensors='tf', max_length=max_length - 1, truncation=True)
+        input_ids = tokenizer.encode(
+            prefix, return_tensors='tf', max_length=max_length - 1, truncation=True)
 
     logger("Generating text now...")
     tf.random.set_seed(0)
@@ -799,7 +827,8 @@ def generate_text(self, prefix=None,
                             num_return_sequences=return_sequences)
     total_text = ""
     for i, sample_output in enumerate(output):
-        value = "{}: {}".format(i, tokenizer.decode(sample_output, skip_special_tokens=True))
+        value = "{}: {}".format(i, tokenizer.decode(
+            sample_output, skip_special_tokens=True))
         total_text += value
 
     self.models['text_generation'] = {"generated_text": total_text}
@@ -823,12 +852,15 @@ def get_ner(self, instruction):
     data['combined_text_for_ner'] = data[target].apply(
         lambda x: ' '.join([word for word in x.split() if word not in stopwords.words()]))
 
-    logger("Detecting Name Entities from : {} data files".format(data.shape[0] + 1))
+    logger("Detecting Name Entities from : {} data files".format(
+        data.shape[0] + 1))
 
     # Named entity recognition pipeline, default model selection
     with NoStdStreams():
-        hugging_face_ner_detector = pipeline('ner', grouped_entities=True, framework='tf')
-        data['ner'] = data['combined_text_for_ner'].apply(lambda x: hugging_face_ner_detector(x))
+        hugging_face_ner_detector = pipeline(
+            'ner', grouped_entities=True, framework='tf')
+        data['ner'] = data['combined_text_for_ner'].apply(
+            lambda x: hugging_face_ner_detector(x))
     logger("NER detection status complete")
     logger("Storing information in client object under key 'named_entity_recognition'")
 
@@ -840,3 +872,7 @@ def get_ner(self, instruction):
     logger("Output: ", data['ner'].to_dict())
     clearLog()
     return self.models["named_entity_recognition"]
+
+
+def question_answering(self, data, instruction, use_pretrained=True, path_to_model=None):
+    pass
