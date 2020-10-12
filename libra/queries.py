@@ -1124,10 +1124,15 @@ class client:
         self.latest_model = "named_entity_recognition"
         clearLog()
 
+    # question answering query
     def question_answering_query(self, instruction, download_model=True, model_path=None):
-        pass
+        self.models["qa"] = question_answering(
+            self, instruction=instruction)
+        self.latest_model = "qa"
+        clearLog()
 
     # shows the names of plots associated with a specific model
+
     def plot_names(self, model=None):
         '''
         Function to get names of plots given the name of the model you want
