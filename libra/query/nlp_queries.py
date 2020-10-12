@@ -875,4 +875,15 @@ def get_ner(self, instruction):
 
 
 def question_answering(self, data, instruction, use_pretrained=True, path_to_model=None):
-    pass
+    if use_pretrained == False:
+        download_model(model='bert-squad_1.1', dir='./')
+        model = QAPipeline(reader='bert_qa.joblib')
+    else:
+        model = QAPipeline(reader=path_to_model)
+
+    dataset = pd.read_csv(data, converters={'paragraphs': literal_eval})
+    dataset = filter_paragraphs(dataset)
+
+    model.fit_retriever(dataset)
+
+    self.models['qa'] = model
