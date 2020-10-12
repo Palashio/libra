@@ -1124,6 +1124,9 @@ class client:
         self.latest_model = "named_entity_recognition"
         clearLog()
 
+    def question_answering_query(self, instruction, download_model=True, model_path=None):
+        pass
+
     # shows the names of plots associated with a specific model
     def plot_names(self, model=None):
         '''
