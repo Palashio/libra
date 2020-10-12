@@ -1,7 +1,7 @@
 from libra.query.nlp_queries import (image_caption_query,
                                      generate_caption, classify_text,
                                      text_classification_query, get_summary,
-                                     summarization_query, generate_text, get_ner)
+                                     summarization_query, generate_text, get_ner, question_answering)
 
 from libra.query.classification_models import (k_means_clustering,
                                                train_svm, nearest_neighbors,
@@ -621,7 +621,6 @@ class client:
                       colsample_bytree=0.8,
                       verbosity=0,
                       objective='binary:logistic'):
-
         '''
         Calls the body of the xgboost code in the classification_models.py file. Used to create a xgboost algorithm.
         :param instruction: The objective that you want to model (str).
@@ -812,7 +811,8 @@ class client:
             img = X_test[0][0]
             img /= 255
             successive_outputs = [layer.output for layer in model.layers[1:]]
-            visualization_model = tf.keras.models.Model(inputs=model.input, outputs=successive_outputs)
+            visualization_model = tf.keras.models.Model(
+                inputs=model.input, outputs=successive_outputs)
             successive_feature_maps = visualization_model.predict(img)
 
             # Add main title to figure
@@ -824,8 +824,10 @@ class client:
                 if len(feature_map.shape) == 4:
 
                     # Plot Feature maps for the conv / maxpool layers, not the fully-connected layers
-                    n_features = feature_map.shape[-1]  # number of features in the feature map
-                    height = feature_map.shape[1]  # feature map shape (1, size, size, n_features)
+                    # number of features in the feature map
+                    n_features = feature_map.shape[-1]
+                    # feature map shape (1, size, size, n_features)
+                    height = feature_map.shape[1]
                     width = feature_map.shape[2]
                     display_grid = np.zeros((height, width * n_features))
 
@@ -869,15 +871,15 @@ class client:
                   output_path=None):
         if type == 'dcgan':
             self.models["DCGAN"] = dcgan(instruction=instruction,
-                                 num_images=num_images,
-                                 preprocess=preprocess,
-                                 data_path=self.dataset,
-                                 verbose=verbose,
-                                 epochs=epochs,
-                                 height=height,
-                                 width=width,
-                                 output_path=output_path
-                                 )
+                                         num_images=num_images,
+                                         preprocess=preprocess,
+                                         data_path=self.dataset,
+                                         verbose=verbose,
+                                         epochs=epochs,
+                                         height=height,
+                                         width=width,
+                                         output_path=output_path
+                                         )
             self.latest_model = 'DCGAN'
             clearLog()
 
@@ -955,8 +957,7 @@ class client:
         :return: a summary of text inputted in the text field.
         '''
         clearLog()
-        return get_summary(self=self, text=text, num_beams=num_beams, no_repeat_ngram_size=no_repeat_ngram_size
-                           , num_return_sequences=num_return_sequences, early_stopping=early_stopping)
+        return get_summary(self=self, text=text, num_beams=num_beams, no_repeat_ngram_size=no_repeat_ngram_size, num_return_sequences=num_return_sequences, early_stopping=early_stopping)
 
     # summarization query
     def summarization_query(self, instruction, label_column=None, preprocess=True,
@@ -1118,7 +1119,8 @@ class client:
         :param instruction: Used to get target column
         :return: dictionary object with detected name-entities
         """
-        self.models["named_entity_recognition"] = get_ner(self, instruction=instruction)
+        self.models["named_entity_recognition"] = get_ner(
+            self, instruction=instruction)
         self.latest_model = "named_entity_recognition"
         clearLog()
 
