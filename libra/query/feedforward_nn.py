@@ -710,21 +710,7 @@ def convolutional(instruction=None,
 
     else:
         model = Sequential()
-        # model.add(
-        #     Conv2D(
-        #         64,
-        #         kernel_size=3,
-        #         activation="relu",
-        #         input_shape=input_shape))
-        # model.add(MaxPooling2D(pool_size=(2, 2)))
-        # model.add(Conv2D(64, kernel_size=3, activation="relu"))
-        # model.add(MaxPooling2D(pool_size=(2, 2)))
-        # model.add(Flatten())
-        # model.add(Dense(num_classes, activation="softmax"))
-        # model.compile(
-        #     optimizer="adam",
-        #     loss=loss_func,
-        #     metrics=['accuracy'])
+
         model.add(Conv2D(
             filters=64,
             kernel_size=5,
