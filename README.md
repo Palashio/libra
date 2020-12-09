@@ -20,10 +20,6 @@
 
 ---
 
-## Trending Contributors
-
-[![](https://sourcerer.io/fame/anas-awadalla/Palashio/libra/images/0)](https://sourcerer.io/fame/anas-awadalla/Palashio/libra/links/0)[![](https://sourcerer.io/fame/anas-awadalla/Palashio/libra/images/1)](https://sourcerer.io/fame/anas-awadalla/Palashio/libra/links/1)[![](https://sourcerer.io/fame/anas-awadalla/Palashio/libra/images/2)](https://sourcerer.io/fame/anas-awadalla/Palashio/libra/links/2)[![](https://sourcerer.io/fame/anas-awadalla/Palashio/libra/images/3)](https://sourcerer.io/fame/anas-awadalla/Palashio/libra/links/3)[![](https://sourcerer.io/fame/anas-awadalla/Palashio/libra/images/4)](https://sourcerer.io/fame/anas-awadalla/Palashio/libra/links/4)[![](https://sourcerer.io/fame/anas-awadalla/Palashio/libra/images/5)](https://sourcerer.io/fame/anas-awadalla/Palashio/libra/links/5)[![](https://sourcerer.io/fame/anas-awadalla/Palashio/libra/images/6)](https://sourcerer.io/fame/anas-awadalla/Palashio/libra/links/6)[![](https://sourcerer.io/fame/anas-awadalla/Palashio/libra/images/7)](https://sourcerer.io/fame/anas-awadalla/Palashio/libra/links/7)
-
 
 ## Installation
 
