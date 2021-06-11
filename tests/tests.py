@@ -130,43 +130,43 @@ class TestQueries(unittest.TestCase):
         self.assertTrue('xgboost' in self.newClient.models)
 
     # Tests whether summarization works without errors, and creates a key in models dictionary
-    @ordered
-    def test_summarization(self):
-        x = client("tools/data/nlp_data/miniDocumentSummarization.csv")
-        x.summarization_query("summarize text", epochs=1)
+#     @ordered
+#     def test_summarization(self):
+#         x = client("tools/data/nlp_data/miniDocumentSummarization.csv")
+#         x.summarization_query("summarize text", epochs=1)
 
-    # Tests whether image captioning works without errors, and creates a key in models dictionary
-    @ordered
-    def test_captioning(self):
-        x = client("tools/data/nlp_data/image-caption.csv")
-        x.image_caption_query("get captions", epochs=1)
+#     # Tests whether image captioning works without errors, and creates a key in models dictionary
+#     @ordered
+#     def test_captioning(self):
+#         x = client("tools/data/nlp_data/image-caption.csv")
+#         x.image_caption_query("get captions", epochs=1)
 
-    # Tests whether text classification works without errors, and creates a key in models dictionary
-    @ordered
-    def test_text_classification(self):
-        x = client("tools/data/nlp_data/smallSentimentAnalysis.csv")
-        x.text_classification_query("get captions", epochs=1)
+#     # Tests whether text classification works without errors, and creates a key in models dictionary
+#     @ordered
+#     def test_text_classification(self):
+#         x = client("tools/data/nlp_data/smallSentimentAnalysis.csv")
+#         x.text_classification_query("get captions", epochs=1)
 
-    # Tests whether name entity recognition query works without errors, and creates a key in models dictionary
-    @ordered
-    def test_get_ner(self):
-        x = client("tools/data/nlp_data/miniDocumentSummarization.csv")
-        x.named_entity_query("get ner from text")
-        self.assertTrue('named_entity_recognition' in x.models)
-        del x.models['named_entity_recognition']
+#     # Tests whether name entity recognition query works without errors, and creates a key in models dictionary
+#     @ordered
+#     def test_get_ner(self):
+#         x = client("tools/data/nlp_data/miniDocumentSummarization.csv")
+#         x.named_entity_query("get ner from text")
+#         self.assertTrue('named_entity_recognition' in x.models)
+#         del x.models['named_entity_recognition']
 
-    @ordered
-    def test_text_generation(self):
-        x = client("tools/data/nlp_data/shakespeare.txt")
-        x.generate_text()
-        self.assertTrue('text_generation' in x.models)
+#     @ordered
+#     def test_text_generation(self):
+#         x = client("tools/data/nlp_data/shakespeare.txt")
+#         x.generate_text()
+#         self.assertTrue('text_generation' in x.models)
 
-    # Test whether content based recommender works without error, and creates a key in models dictionary
-    @ordered
-    def test_content_recommender(self):
-        x = client('tools/data/recommender_systems_data/disney_plus_shows.csv')
-        x.content_recommender_query()
-        assert ('recommendations' in x.recommend('Coco'))
+#     # Test whether content based recommender works without error, and creates a key in models dictionary
+#     @ordered
+#     def test_content_recommender(self):
+#         x = client('tools/data/recommender_systems_data/disney_plus_shows.csv')
+#         x.content_recommender_query()
+#         assert ('recommendations' in x.recommend('Coco'))
 
     """
     TEST ANALYZE() FUNCTION
