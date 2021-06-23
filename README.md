@@ -18,6 +18,7 @@
 
 </div>
 
+Check out our newer machine learning tool [Nylon](https://github.com/Palashio/nylon)!
 
 ## Installation
 
