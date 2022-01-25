@@ -15,7 +15,6 @@
 [![Website shields.io](https://img.shields.io/website-up-down-blue-red/http/shields.io.svg)](https://libradocs.github.io//)
 [![Issues](https://img.shields.io/github/issues/Palashio/libra)]()
 
-
 </div>
 
 Check out our newer machine learning tool [Nylon](https://github.com/Palashio/nylon)!
