@@ -19,6 +19,6 @@ opencv-python
 nltk
 download
 altair==4.1.0
-streamlit==0.64.0
+streamlit==1.11.1
 xgboost
 tensorflow-gpu==2.5.2
