@@ -1,0 +1,4 @@
+This is a sample text file created by hello.py
+It contains multiple lines of text.
+Each line demonstrates different aspects of file I/O.
+Python makes file operations very easy!
